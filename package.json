@@ -36,7 +36,7 @@
     "eslint": "^9.5.0",
     "markdown-it-anchor": "^9.0.1",
     "netlify-cli": "^17.33.3",
-    "playwright-chromium": "^1.44.1"
+    "playwright-chromium": "^1.45.1"
   },
   "dependencies": {
     "@sanity/client": "^6.20.1",
