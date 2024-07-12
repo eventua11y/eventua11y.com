@@ -238,7 +238,7 @@ layout: layouts/base.liquid
                             <p>{{ event.title }} is expected to include one or more accessibility-themed sessions but the full schedule has not yet been announced. Details will be published here closer to the date of the event.</p>
                           {% else %}  
                             <!-- List of child events -->
-                            <ul role="list" class="flow">
+                            <ul role="list" class="flow" aria-label="Accessibility highlights">
                               {% for child in event.children %}
                                 <li
                                   class="event__child flow-s"
