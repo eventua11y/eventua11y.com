@@ -90,7 +90,9 @@
     {% endif %}
 
         <div class="events events--list flow">
+          <ul role="list" class="flow">
           {% for event in todaysEvents %}
+            <li>
             <article
               class="event event--{{ event.type }} content"
               itemprop="event"
@@ -312,7 +314,9 @@
             <!-- End .event__children -->
             </article>
             <!-- End .event -->
+            </li>
           {% endfor %}
+          </ul>
         <!-- End events -->
         </div>
         <!-- End events -->

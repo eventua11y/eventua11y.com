@@ -21,10 +21,12 @@ layout: layouts/base.liquid
         <section id="{{ month.month | downcase }}" class="month">
           <div class="container readable flow">
             {% assign currentYear = 'now' | date: "%Y" %}
-            <h2 class="month__heading">{{ month.month }}{% if month.year != currentYear %}
+            <h2 id="{{ month.month | downcase }}_heading" class="month__heading">{{ month.month }}{% if month.year != currentYear %}
                 {{ month.year }}{% endif %}
             </h2>
+            <ul role="list" class="flow" aria-labelledby="{{ month.month | downcase }}_heading">
             {% for event in month.events %}
+              <li>
               {%- if event.type == "theme" %}
                 <article
                   class="event event--theme content"
@@ -294,8 +296,10 @@ layout: layouts/base.liquid
                 </article>
                 <!-- End .event -->
               {% endif %}
+              </li>
             {% endfor %}
           {% comment %} end event loop {% endcomment %}
+          </ul>
           </div>
         <!-- End event .readable .container -->
         </section>
