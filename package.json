@@ -39,7 +39,7 @@
     "playwright-chromium": "^1.46.0"
   },
   "dependencies": {
-    "@sanity/client": "^6.21.1",
+    "@sanity/client": "^6.21.2",
     "@sanity/image-url": "^1.0.2",
     "dotenv": "^16.3.1"
   }
