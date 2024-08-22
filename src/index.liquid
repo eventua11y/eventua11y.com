@@ -120,6 +120,7 @@ layout: layouts/base.liquid
                   itemtype="https://schema.org/Event"
                   data-event-type="normal"
                   data-event-attendancemode="{{ event.attendanceMode }}"
+                  {% if event.isFree %}data-event-isfree="{{ event.isFree }}"{% endif %}
                   {% if event.callForSpeakers %}
                     {% if event.callForSpeakersClosingDate == empty %}
                       data-event-cfs
@@ -372,7 +373,7 @@ layout: layouts/base.liquid
                   {% if showCallForSpeakersBadge or showFreeBadge %}
                     <div class="event__badges">
                       {% if showFreeBadge %}
-                        <sl-badge variant="neutral" pill itemprop="isAccessibleForFree" content="true">Free Event</sl-badge>
+                        <sl-badge variant="neutral" pill itemprop="isAccessibleForFree" content="true">Free of charge</sl-badge>
                       {% endif %}
                       {% if showCallForSpeakersBadge %}
                         <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
@@ -437,6 +438,23 @@ layout: layouts/base.liquid
       <label for="filter-attendance-in-person">In person</label>
     </div>
 
+  </fieldset>
+
+  <!-- Filter by free or not -->
+  <fieldset class="checkbox-group filter flow flow-tight">
+  
+    <legend class="text-muted">Ticket cost</legend>
+  
+    <div class="checkbox">
+      <input type="checkbox" x-model="$store.filters.isFree" @change="$store.filters.filterEvents()" value="true" id="filter-free" class="filter-option">
+      <label for="filter-free">Free of charge</label>
+    </div>
+  
+    <div class="checkbox">
+      <input type="checkbox" x-model="$store.filters.isPaid" @change="$store.filters.filterEvents()" value="false" id="filter-paid" class="filter-option">
+      <label for="filter-paid">Paid</label>
+    </div>
+  
   </fieldset>
 
   <div class="checkbox">
