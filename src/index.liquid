@@ -364,19 +364,24 @@ layout: layouts/base.liquid
                     <!-- End .event__children -->
                   {% endif %}
                   {% assign currentDate = 'now' | date: '%Y-%m-%dT%H:%M:%S%z' %}
-                  <div class="event__badges">
-                    {% if event.isFree %}
-                    <sl-badge variant="neutral" pill>Free Event</sl-badge>
-                    {% endif %}
-                    {% if event.callForSpeakers %}
-                      {% if event.callForSpeakersClosingDate == null or event.callForSpeakersClosingDate >= currentDate %}
-                          <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
-                          {% if event.callForSpeakersClosingDate != null %}
-                            <small class="text-muted">Closes: {{ event.callForSpeakersClosingDate | localizeDate: "MMMM D" }}</small>
-                          {% endif %}
+                  {% assign hasCallForSpeakers = event.callForSpeakers %}
+                  {% assign callForSpeakersClosingDateValid = event.callForSpeakersClosingDate == null or event.callForSpeakersClosingDate >= currentDate %}
+                  {% assign showCallForSpeakersBadge = hasCallForSpeakers and callForSpeakersClosingDateValid %}
+                  {% assign showFreeBadge = event.isFree %}
+                  
+                  {% if showCallForSpeakersBadge or showFreeBadge %}
+                    <div class="event__badges">
+                      {% if showFreeBadge %}
+                        <sl-badge variant="neutral" pill>Free Event</sl-badge>
                       {% endif %}
-                    {% endif %}
-                  </div>
+                      {% if showCallForSpeakersBadge %}
+                        <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
+                        {% if event.callForSpeakersClosingDate != null %}
+                          <small class="text-muted">Closes: {{ event.callForSpeakersClosingDate | localizeDate: "MMMM D" }}</small>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  {% endif %}
                 </article>
                 <!-- End .event -->
               {% endif %}
