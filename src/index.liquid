@@ -364,16 +364,19 @@ layout: layouts/base.liquid
                     <!-- End .event__children -->
                   {% endif %}
                   {% assign currentDate = 'now' | date: '%Y-%m-%dT%H:%M:%S%z' %}
-                  {% if event.callForSpeakers %}
-                    {% if event.callForSpeakersClosingDate == null or event.callForSpeakersClosingDate >= currentDate %}
-                      <div class="event__badges">
-                        <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
-                        {% if event.callForSpeakersClosingDate != null %}
-                          <small class="text-muted">Closes: {{ event.callForSpeakersClosingDate | localizeDate: "MMMM D" }}</small>
-                        {% endif %}
-                      </div>
+                  <div class="event__badges">
+                    {% if event.isFree %}
+                    <sl-badge variant="neutral" pill>Free Event</sl-badge>
                     {% endif %}
-                  {% endif %}
+                    {% if event.callForSpeakers %}
+                      {% if event.callForSpeakersClosingDate == null or event.callForSpeakersClosingDate >= currentDate %}
+                          <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
+                          {% if event.callForSpeakersClosingDate != null %}
+                            <small class="text-muted">Closes: {{ event.callForSpeakersClosingDate | localizeDate: "MMMM D" }}</small>
+                          {% endif %}
+                      {% endif %}
+                    {% endif %}
+                  </div>
                 </article>
                 <!-- End .event -->
               {% endif %}
