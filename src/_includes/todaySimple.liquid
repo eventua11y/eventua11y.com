@@ -312,6 +312,16 @@
                 </details>
               {% endif %}
             <!-- End .event__children -->
+            {% assign currentDate = 'now' | date: '%Y-%m-%dT%H:%M:%S%z' %}
+            {% assign showFreeBadge = event.isFree %}
+            
+            {% if showFreeBadge %}
+              <div class="event__badges">
+                {% if showFreeBadge %}
+                  <sl-badge variant="neutral" pill itemprop="isAccessibleForFree" content="true">Free Event</sl-badge>
+                {% endif %}
+              </div>
+            {% endif %}
             </article>
             <!-- End .event -->
             </li>
