@@ -372,7 +372,7 @@ layout: layouts/base.liquid
                   {% if showCallForSpeakersBadge or showFreeBadge %}
                     <div class="event__badges">
                       {% if showFreeBadge %}
-                        <sl-badge variant="neutral" pill>Free Event</sl-badge>
+                        <sl-badge variant="neutral" pill itemprop="isAccessibleForFree" content="true">Free Event</sl-badge>
                       {% endif %}
                       {% if showCallForSpeakersBadge %}
                         <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
