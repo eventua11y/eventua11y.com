@@ -33,7 +33,7 @@
     "@playwright/test": "^1.46.0",
     "@types/node": "^22.1.0",
     "dayjs": "^1.11.12",
-    "eslint": "^9.7.0",
+    "eslint": "^9.9.1",
     "markdown-it-anchor": "^9.0.1",
     "netlify-cli": "^17.33.4",
     "playwright-chromium": "^1.46.0"
