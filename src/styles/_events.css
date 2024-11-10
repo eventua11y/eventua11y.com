@@ -40,5 +40,13 @@
 }
 
 .event__description {
-  /* Add the remaining styles here */
+  order: 4;
+}
+
+.event__children {
+  order: 5;
+}
+
+.event__badges {
+  order: 6;
 }
