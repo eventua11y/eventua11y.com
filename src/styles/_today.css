@@ -4,13 +4,12 @@
   border-radius: var(--border-radius) var(--border-radius) 0 0;
   color: var(--color-body-text);
   padding: var(--space-s-l) 0;
-  .event {
-    &--theme {
-      background-color: transparent;
-      color: var(--color-body);
-      padding: 0;
-    }
-  }
+}
+
+#today .event--theme {
+  background-color: transparent;
+  color: var(--color-body);
+  padding: 0;
 }
 
 #today-heading {

@@ -1,0 +1,35 @@
+@import url("_reset.css");
+@import url("_variables.css");
+@import url("_shoelace.css");
+@import url("_color.css");
+@import url("_typo.css");
+@import url("_buttons.css");
+@import url("_disclosure.css");
+@import url("_utilities.css");
+@import url("_masthead.css");
+@import url("_nav.css");
+@import url("_events.css");
+@import url("_today.css");
+@import url("_filters.css");
+@import url("_forms.css");
+@import url("_footer.css");
+
+.container {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 0 var(--space-xs-m);
+}
+
+.container.readable {
+  max-width: 55rem;
+}
+
+body {
+  background-color: var(--color-white);
+  line-height: 1.5;
+  margin: 0;
+}
+
+main {
+  background-color: #FFF;
+}

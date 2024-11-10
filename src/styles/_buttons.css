@@ -1,4 +1,3 @@
-// Base button styles
 .btn {
   background-color: rgba(0,0,0,0.05);
   border-radius: 1000px;
@@ -9,25 +8,22 @@
   user-select: none;
   vertical-align: middle;
   white-space: nowrap;
-  appearance: none; // Corrects inability to style clickable `input` types in iOS
+  appearance: none; /* Corrects inability to style clickable `input` types in iOS */
   text-decoration: none;
-
-  &:hover, &:active, &:focus {
-    background-color: rgba(0,0,0,0.1);
-  }
-
-  &:disabled,
-  &.disabled,
-  &[aria-disabled="true"] {
-    cursor: default;
-  }
 }
 
-// TODO: Primary Button
+.btn:hover,
+.btn:active,
+.btn:focus {
+  background-color: rgba(0,0,0,0.1);
+}
 
-// TODO: Secondary Button
+.btn:disabled,
+.btn.disabled,
+.btn[aria-disabled="true"] {
+  cursor: default;
+}
 
-// Full-width button expands to the full width of its parent container
 .btn--block {
   display: block;
   width: 100%;

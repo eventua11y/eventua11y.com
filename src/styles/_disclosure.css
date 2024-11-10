@@ -1,0 +1,32 @@
+details {
+  border-top: 1px solid rgba(0,0,0,.08);
+  padding: var(--space-xs) 0;
+  --flow-space: var(--space-3xs-2xs);
+}
+
+details:last-child {
+  padding-bottom: 0;
+}
+
+details > summary {
+  font-size: var(--step--1);
+  list-style: none;
+  user-select: none;
+}
+
+details > summary .icon {
+  margin-right: 0.25em;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary:hover {
+  color: var(--color-purple-muted);
+  cursor: pointer;
+}
+
+details[open] .icon {
+  transform: rotate(90deg);
+}

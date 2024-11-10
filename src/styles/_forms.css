@@ -1,10 +1,11 @@
 .checkbox {
   align-items: center;
   display: flex;
-  label {
-    margin-left: var(--space-2xs);
-    user-select: none;
-  }
+}
+
+.checkbox label {
+  margin-left: var(--space-2xs);
+  user-select: none;
 }
 
 [type="checkbox"] {
@@ -20,7 +21,8 @@
 fieldset {
   border-color: rgba(0, 0, 0, 0.08);
   border-radius: var(--space-2xs);
-  legend {
-    font-size: var(--step--1);
-  }
+}
+
+fieldset legend {
+  font-size: var(--step--1);
 }

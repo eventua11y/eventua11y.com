@@ -1,0 +1,44 @@
+.event {
+  background-color: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.event__title {
+  font-size: var(--step-2);
+  margin-bottom: .4rem;
+  order: 3;
+}
+
+.event__dates {
+  font-size: var(--step--1);
+}
+
+.event__delivery {
+  display: flex;
+  font-size: var(--step--1);
+  gap: .5em;
+  margin-bottom: 0.5em;
+  order: 3;
+}
+
+.event__online {
+  white-space: nowrap;
+}
+
+.event__dateStart {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.event__dateEnd {
+  white-space: nowrap;
+}
+
+.event__description {
+  /* Add the remaining styles here */
+}
