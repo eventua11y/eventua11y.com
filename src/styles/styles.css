@@ -5,7 +5,6 @@
 @import url("_typo.css");
 @import url("_buttons.css");
 @import url("_disclosure.css");
-@import url("_utilities.css");
 @import url("_masthead.css");
 @import url("_nav.css");
 @import url("_events.css");
@@ -13,6 +12,7 @@
 @import url("_filters.css");
 @import url("_forms.css");
 @import url("_footer.css");
+@import url("_utilities.css");
 
 .container {
   margin: 0 auto;

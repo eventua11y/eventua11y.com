@@ -1,38 +1,15 @@
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.flow > *:not(legend) + * {
-  margin-block-start: var(--flow-space, 1em);
-}
-
-.flow-tight {
-  --flow-space: var(--space-3xs-2xs);
-}
-
-.flow-s {
-  --flow-space: var(--space-3xs);
-}
+@import url('utils/_a11y.css');
+/* @import url('utils/_border.css'); */
+/* @import url('utils/_color.css'); */
+@import url('utils/_display.css');
+@import url('utils/_flow.css');
+/* @import url('utils/_margin.css'); */
+@import url('utils/_padding.css');
+/* @import url('utils/_text.css'); */
+/* @import url('utils/_order.css'); */
 
 .content {
   display: flex;
   flex-direction: column;
   padding: var(--space-xs-m);
-}
-
-.py-0 {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.d-flex {
-  display: flex;
 }
