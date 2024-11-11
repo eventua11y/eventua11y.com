@@ -1,0 +1,160 @@
+.mt-s {
+    margin-top: var(--space-s);
+}
+
+.mt-m {
+    margin-top: var(--space-m);
+}
+
+.mt-l {
+    margin-top: var(--space-l);
+}
+
+.mt-xl {
+    margin-top: var(--space-xl);
+}
+
+.mt-2xl {
+    margin-top: var(--space-2xl);
+}
+
+.mt-3xl {
+    margin-top: var(--space-3xl);
+}
+
+.mb-s {
+    margin-bottom: var(--space-s);
+}
+
+.mb-m {
+    margin-bottom: var(--space-m);
+}
+
+.mb-l {
+    margin-bottom: var(--space-l);
+}
+
+.mb-xl {
+    margin-bottom: var(--space-xl);
+}
+
+.mb-2xl {
+    margin-bottom: var(--space-2xl);
+}
+
+.mb-3xl {
+    margin-bottom: var(--space-3xl);
+}
+
+.mr-s {
+    margin-right: var(--space-s);
+}
+
+.mr-m {
+    margin-right: var(--space-m);
+}
+
+.mr-l {
+    margin-right: var(--space-l);
+}
+
+.mr-xl {
+    margin-right: var(--space-xl);
+}
+
+.mr-2xl {
+    margin-right: var(--space-2xl);
+}
+
+.mr-3xl {
+    margin-right: var(--space-3xl);
+}
+
+.ml-s {
+    margin-left: var(--space-s);
+}
+
+.ml-m {
+    margin-left: var(--space-m);
+}
+
+.ml-l {
+    margin-left: var(--space-l);
+}
+
+.ml-xl {
+    margin-left: var(--space-xl);
+}
+
+.ml-2xl {
+    margin-left: var(--space-2xl);
+}
+
+.ml-3xl {
+    margin-left: var(--space-3xl);
+}
+
+.mx-s {
+    margin-left: var(--space-s);
+    margin-right: var(--space-s);
+}
+
+.mx-m {
+    margin-left: var(--space-m);
+    margin-right: var(--space-m);
+}
+
+.mx-l {
+    margin-left: var(--space-l);
+    margin-right: var(--space-l);
+}
+
+.mx-xl {
+    margin-left: var(--space-xl);
+    margin-right: var(--space-xl);
+}
+
+.mx-2xl {
+    margin-left: var(--space-2xl);
+    margin-right: var(--space-2xl);
+}
+
+.mx-3xl {
+    margin-left: var(--space-3xl);
+    margin-right: var(--space-3xl);
+}
+
+.my-s {
+    margin-top: var(--space-s);
+    margin-bottom: var(--space-s);
+}
+
+.my-m {
+    margin-top: var(--space-m);
+    margin-bottom: var(--space-m);
+}
+
+.my-l {
+    margin-top: var(--space-l);
+    margin-bottom: var(--space-l);
+}
+
+.my-xl {
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.my-2xl {
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.my-3xl {
+    margin-top: var(--space-3xl);
+    margin-bottom: var(--space-3xl);
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
