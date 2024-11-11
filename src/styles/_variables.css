@@ -33,6 +33,6 @@
   --space-2xl-3xl: clamp(4.5rem, calc(3.46rem + 5.22vw), 7.5rem);
 
   /* Custom pairs */
-  --space-s-l: clamp(1.13rem, calc(0.65rem + 2.39vw), 2.50rem);
+  --space-s-l: clamp(1.13rem, calc(0.65rem + 2.39vw), 2.5rem);
   --space-xs-m: clamp(0.88rem, calc(0.43rem + 1.3vw), 1.88rem);
 }

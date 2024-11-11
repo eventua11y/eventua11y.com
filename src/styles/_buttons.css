@@ -1,5 +1,5 @@
 .btn {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 1000px;
   color: inherit;
   cursor: pointer;
@@ -15,12 +15,12 @@
 .btn:hover,
 .btn:active,
 .btn:focus {
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .btn:disabled,
 .btn.disabled,
-.btn[aria-disabled="true"] {
+.btn[aria-disabled='true'] {
   cursor: default;
 }
 

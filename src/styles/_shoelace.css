@@ -11,7 +11,7 @@
   --sl-color-primary-900: var(--color-purple-900);
 }
 
-sl-badge[variant="success"]::part(base) {
+sl-badge[variant='success']::part(base) {
   background-color: var(--sl-color-success-700);
 }
 
@@ -19,6 +19,6 @@ sl-badge[variant="success"]::part(base) {
   font-size: var(--step-1);
 }
 
-sl-checkbox[size="medium"]::part(label) {
+sl-checkbox[size='medium']::part(label) {
   font-size: var(--step--1);
 }

@@ -1,5 +1,4 @@
 :root {
-
   /* Colors */
   --color-primary: var(--color-purple-500);
   --color-secondary: var(--color-cyan);
@@ -13,7 +12,7 @@
   --body-color-fg: var(--color-fg);
   --color-link: var(--color-purple-600);
   --color-link-hover: var(--color-primary);
-  
+
   /* Masthead */
   --masthead-color-bg: var(--color-primary);
   --masthead-color-fg: var(--color-white);
@@ -37,5 +36,4 @@
   .sl-theme-light {
     /* your custom styles here */
   }
-
 }
