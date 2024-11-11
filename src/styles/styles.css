@@ -51,7 +51,3 @@ main {
   flex-direction: column;
   padding: var(--space-xs-m);
 }
-
-#past {
-  margin-top: var(--space-s-l);
-}
