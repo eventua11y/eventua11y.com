@@ -33,3 +33,25 @@ body {
 main {
   background-color: #FFF;
 }
+
+*:focus {
+  outline-offset: 0.1em;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.no-js {
+  display: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-xs-m);
+}
+
+#past {
+  margin-top: var(--space-s-l);
+}
