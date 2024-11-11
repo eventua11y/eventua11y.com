@@ -43,6 +43,8 @@ if (window.location.pathname === "/") {
       cfsClosed: false,
       attendanceOnline: false,
       attendanceOffline: false,
+      isFree: false,
+      isPaid: false,
       themes: true,
     };
 
@@ -89,12 +91,13 @@ if (window.location.pathname === "/") {
         const eventType = event.getAttribute("data-event-type");
         const eventAttendanceMode = event.getAttribute("data-event-attendancemode");
         const eventCfsStatus = event.getAttribute("data-event-cfs") !== null;
+        const eventIsFree = event.getAttribute("data-event-isfree") !== null;
 
         // If the 'themes' filter is false and the event type is 'theme', hide the event
         // If the 'themes' filter is true and the event type is 'theme', show the event
         if (eventType === "theme") {
           event.hidden = !Alpine.store("filters").themes;
-        } else {
+                } else {
           // Check if the event matches the attendance mode filter
           const matchesAttendanceMode =
             (!Alpine.store("filters").attendanceOnline &&
@@ -105,16 +108,20 @@ if (window.location.pathname === "/") {
             (Alpine.store("filters").attendanceOffline &&
               (eventAttendanceMode === "offline" ||
                 eventAttendanceMode === "mixed"));
-
+        
           // Check if the event matches the cfs filter
           const matchesCfs =
             (!Alpine.store("filters").cfsOpen &&
               !Alpine.store("filters").cfsClosed) ||
             (Alpine.store("filters").cfsOpen && eventCfsStatus) ||
             (Alpine.store("filters").cfsClosed && !eventCfsStatus);
-
+        
+          // Check if the event matches the isFree filter
+          const matchesIsFree =
+            !Alpine.store("filters").isFree || event.isFree;
+        
           // If the event matches all filter criteria, show the event; otherwise, hide it
-          event.hidden = !(matchesAttendanceMode && matchesCfs);
+          event.hidden = !(matchesAttendanceMode && matchesCfs && matchesIsFree);
         }
 
         // After filtering the events, check each month section
