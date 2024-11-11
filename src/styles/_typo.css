@@ -70,7 +70,3 @@ body {
 hgroup :is(h1,h2,h3,h4,h5,h6) {
     margin-bottom: 0;
 }
-
-.text-muted {
-    opacity: 0.7;
-}

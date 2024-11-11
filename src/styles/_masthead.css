@@ -2,13 +2,12 @@
   background-color: var(--color-primary);
   color: var(--color-white);
   padding: var(--space-s-m) var(--space-m-l);
-}
-
-.masthead .inner {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  margin: 0 auto;
+  .inner {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+  }
 }
 
 @media screen and (max-width: 580px) {
