@@ -1,4 +1,8 @@
 /* Single utility classes */
+.mt-0 {
+  margin-top: 0;
+}
+
 .mt-s {
   margin-top: var(--space-s);
 }
@@ -21,6 +25,10 @@
 
 .mt-3xl {
   margin-top: var(--space-3xl);
+}
+
+.mb-0 {
+  margin-bottom: 0;
 }
 
 .mb-s {
@@ -47,6 +55,10 @@
   margin-bottom: var(--space-3xl);
 }
 
+.mr-0 {
+  margin-right: 0;
+}
+
 .mr-s {
   margin-right: var(--space-s);
 }
@@ -71,6 +83,10 @@
   margin-right: var(--space-3xl);
 }
 
+.ml-0 {
+  margin-left: 0;
+}
+
 .ml-s {
   margin-left: var(--space-s);
 }
@@ -93,6 +109,11 @@
 
 .ml-3xl {
   margin-left: var(--space-3xl);
+}
+
+.mx-0 {
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .mx-s {
@@ -123,6 +144,11 @@
 .mx-3xl {
   margin-left: var(--space-3xl);
   margin-right: var(--space-3xl);
+}
+
+.my-0 {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .my-s {
