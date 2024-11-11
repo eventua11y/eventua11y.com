@@ -41,4 +41,9 @@
   .social a:focus {
     background: var(--color-primary);
   }
+
+  .text-muted {
+    color: var(--footer-color-fg-muted);
+  }
+  
 }

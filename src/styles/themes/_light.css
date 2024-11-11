@@ -5,6 +5,7 @@
   --color-bg: var(--color-white);
   --color-bg-muted: var(--color-grey-50);
   --color-fg: var(--color-grey-700);
+  --color-fg-muted: var(--color-grey-500);
   --color-border: var(--color-grey-200);
 
   /* Body */
@@ -26,6 +27,7 @@
   --footer-color-muted-fg: var(--color-grey-400);
   --footer-color-link: var(--color-primary);
   --footer-color-link-hover: var(--color-secondary);
+  --footer-color-fg-muted: var(--color-grey-400);
 
   /* Page header */
   --page-header-color-bg: var(--color-primary);
