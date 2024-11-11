@@ -26,28 +26,28 @@ Netlify edge functions pull events from Sanity and apply localisation to the dat
 
 1. Clone this repository by entering this command into your command line application.
 
-    ```sh
-    git clone https://github.com/eventua11y/eventua11y.git
-    ```
+   ```sh
+   git clone https://github.com/eventua11y/eventua11y.git
+   ```
 
 1. Navigate into the project's root directory:
 
-    ```sh
-    cd eventua11y
-    ```
+   ```sh
+   cd eventua11y
+   ```
 
 1. Install the project's Node.js modules. A list of these modules should be displayed after they are downloaded and installed.
 
-    ```sh
-    npm install
-    ```
+   ```sh
+   npm install
+   ```
 
 ## Running the website locally
 
 1. In the project's root directory, enter the following command into your command line application to run a local copy of the website that you can interact with to preview your changes.
 
-    ```sh
-    npm run start
-    ```
+   ```sh
+   npm run start
+   ```
 
 1. Open [http://localhost:8080/](http://localhost:8080) in your browser to see the website. This will refresh automatically whenever you save changes to the code.

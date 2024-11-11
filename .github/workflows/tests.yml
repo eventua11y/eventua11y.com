@@ -1,4 +1,4 @@
-name: "E2E Tests"
+name: 'E2E Tests'
 
 on: [pull_request]
 
@@ -6,7 +6,6 @@ env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
 
 jobs:
-
   tests_e2e_netlify_prepare:
     name: Wait for deployment on Netlify
     runs-on: ubuntu-latest
@@ -15,7 +14,7 @@ jobs:
         uses: jakepartusch/wait-for-netlify-action@v1.4
         id: wait-for-netflify-preview
         with:
-          site_name: "eventua11y"
+          site_name: 'eventua11y'
           max_timeout: 60
 
   tests_e2e_netlify:
@@ -35,5 +34,5 @@ jobs:
       - name: npx playwright test
         run: npx playwright test
         env:
-          PLAYWRIGHT_TEST_BASE_URL: "https://deploy-preview-${{env.GITHUB_PR_NUMBER}}--eventua11y.netlify.app/"
+          PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{env.GITHUB_PR_NUMBER}}--eventua11y.netlify.app/'
           DEBUG: pw:api

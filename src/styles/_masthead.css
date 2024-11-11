@@ -1,0 +1,25 @@
+.masthead {
+  background-color: var(--masthead-color-bg);
+  color: var(--masthead-color-fg);
+  padding: var(--space-s-m) var(--space-m-l);
+  .inner {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+  }
+}
+
+@media screen and (max-width: 580px) {
+  .masthead .inner {
+    flex-direction: column;
+  }
+
+  .masthead .inner .logo {
+    margin-bottom: var(--space-s);
+  }
+}
+
+.masthead .logo {
+  max-width: 12rem;
+}

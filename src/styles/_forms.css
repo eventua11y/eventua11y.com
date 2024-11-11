@@ -7,7 +7,7 @@
   }
 }
 
-[type="checkbox"] {
+[type='checkbox'] {
   width: 16px;
   height: 16px;
 }
@@ -18,7 +18,8 @@
 }
 
 fieldset {
-  border-color: rgba(0, 0, 0, 0.08);
+  border-width: 1px;
+  border-color: var(--color-border);
   border-radius: var(--space-2xs);
   legend {
     font-size: var(--step--1);

@@ -16,7 +16,7 @@ layout: layouts/base.liquid
       <p>There are no past events.</p>
     {% endif %}
 
-    <div class="events events--list">
+    <div class="events events--list mt-m-l">
       {% for month in groupedEvents %}
         <section id="{{ month.month | downcase }}" class="month">
           <div class="container readable flow">
@@ -29,7 +29,7 @@ layout: layouts/base.liquid
               <li>
               {%- if event.type == "theme" %}
                 <article
-                  class="event event--theme content"
+                  class="event event--theme"
                   itemprop="event"
                   itemscope
                   itemtype="https://schema.org/Event"

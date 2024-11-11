@@ -1,5 +1,5 @@
-import { createClient } from "https://esm.sh/@sanity/client";
-import getEnvar from "./envar.js";
+import { createClient } from 'https://esm.sh/@sanity/client';
+import getEnvar from './envar.js';
 
 const envar = getEnvar();
 
@@ -13,15 +13,20 @@ const sanityClient = createClient({
 async function getEvents() {
   try {
     // Fetch all events from Sanity
-    const events = await sanityClient.fetch('*[_type == "event" && !(_id in path("drafts.**"))]');
+    const events = await sanityClient.fetch(
+      '*[_type == "event" && !(_id in path("drafts.**"))]'
+    );
     // Add children to those events, if they exist
-    const eventsWithChildren = events.map(async event => {
+    const eventsWithChildren = events.map(async (event) => {
       // Find children of this event, sorted by dateStart in ascending order
-      const children = await sanityClient.fetch('*[_type == "event" && parent._ref == $eventId] | order(dateStart asc)', { eventId: event._id });
+      const children = await sanityClient.fetch(
+        '*[_type == "event" && parent._ref == $eventId] | order(dateStart asc)',
+        { eventId: event._id }
+      );
       // Return the event with its children, if it has any
       return {
         ...event,
-        ...(children.length > 0 && { children })
+        ...(children.length > 0 && { children }),
       };
     });
     // Wait for all events to be processed and return the events with their children
@@ -29,10 +34,10 @@ async function getEvents() {
     // Throw an error if we fail to fetch events
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to fetch events");
+    throw new Error('Failed to fetch events');
   }
 }
 
-export default function() {
+export default function () {
   return getEvents();
 }

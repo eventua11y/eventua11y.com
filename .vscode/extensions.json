@@ -1,11 +1,11 @@
 {
-    "recommendations": [
-        "ms-playwright.playwright",
-        "github.vscode-github-actions",
-        "github.vscode-pull-request-github",
-        "sissel.shopify-liquid",
-        "ecmel.vscode-html-css",
-        "christian-kohler.npm-intellisense",
-        "dbaeumer.vscode-eslint"
-    ]
+  "recommendations": [
+    "ms-playwright.playwright",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "sissel.shopify-liquid",
+    "ecmel.vscode-html-css",
+    "christian-kohler.npm-intellisense",
+    "dbaeumer.vscode-eslint"
+  ]
 }

@@ -1,6 +1,6 @@
 name: Accessibility Problem
 description: Report something that makes it difficult for you to use Eventua11y.
-labels: ["accessibility", "bug"]
+labels: ['accessibility', 'bug']
 assignees:
   - mattobee
 body:
