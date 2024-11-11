@@ -4,9 +4,10 @@
   "description": "A curated list of digital accessibility events",
   "main": "index.js",
   "scripts": {
-    "build": "npx @11ty/eleventy",
+    "build": "npm run format && npx @11ty/eleventy",
     "start": "npx @11ty/eleventy --serve --port=8081 --quiet",
     "test": "npx playwright test",
+    "format": "npx prettier --write .",
     "debug": "DEBUG=Eleventy* npx @11ty/eleventy",
     "debugstart": "DEBUG=Eleventy* npx @11ty/eleventy --serve --port=8081",
     "benchmark": "DEBUG=Eleventy:Benchmark* npx @11ty/eleventy"
@@ -36,7 +37,8 @@
     "eslint": "^9.7.0",
     "markdown-it-anchor": "^9.0.1",
     "netlify-cli": "^17.33.4",
-    "playwright-chromium": "^1.46.0"
+    "playwright-chromium": "^1.46.0",
+    "prettier": "3.3.3"
   },
   "dependencies": {
     "@sanity/client": "^6.21.2",
