@@ -3,7 +3,7 @@ const dayjs = require('dayjs');
 const filters = require('./src/_11ty/filters');
 const { EleventyEdgePlugin } = require('@11ty/eleventy');
 
-console.log('hello from .eleventy.js', process.env);
+// console.log('hello from .eleventy.js', process.env);
 
 module.exports = (eleventyConfig) => {
   // Copy files
