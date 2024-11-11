@@ -1,9 +1,3 @@
-/* $lh-default: 1.5;
-
-// Base body size
-// $body-font-size: 16px !default;
-$body-line-height: $lh-default !default; */
-
 h1 {
     font-size: var(--step-5);
     margin-bottom: 2rem;
@@ -45,12 +39,12 @@ a {
 }
 
 a:link, a:visited {
-    color: var(--color-purple-muted);
+    color: var(--color-link);
     text-decoration: underline;
 }
 
 a:hover, a:active, a:focus {
-    color: var(--color-primary);
+    color: var(--color-link-hover);
     text-decoration: underline;
 }
 
@@ -64,7 +58,7 @@ abbr[title] {
 }
 
 body {
-    color: var(--color-body);
+    color: var(--body-color-fg);
 }
 
 hgroup :is(h1,h2,h3,h4,h5,h6) {

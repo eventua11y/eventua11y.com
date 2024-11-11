@@ -1,3 +1,4 @@
+@import url("themes/_light.css");
 @import url("_reset.css");
 @import url("_variables.css");
 @import url("_shoelace.css");
@@ -25,13 +26,13 @@
 }
 
 body {
-  background-color: var(--color-white);
+  background-color: var(--body-color-bg);
   line-height: 1.5;
   margin: 0;
 }
 
 main {
-  background-color: #FFF;
+  background-color: var(--body-color-bg);
 }
 
 *:focus {

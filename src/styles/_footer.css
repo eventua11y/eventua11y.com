@@ -1,7 +1,7 @@
 #global-footer {
-    background: var(--color-black);
+    background: var(--footer-color-bg);
     color: #fff;
-    --hover-color: var(--color-secondary);
+    --hover-color: var(--footer-color-link-hover);
     padding: var(--space-m-l) 0;
     a {
         color: inherit;

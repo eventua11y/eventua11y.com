@@ -18,9 +18,6 @@
   --color-purple-950: #0a040d;
   --color-purple-muted: #623cae;
   --color-purple-light: #a35df4;
-  --color-primary: var(--color-purple);
-  --color-secondary: var(--color-cyan);
-  --color-body: #353839;
 
   --color-grey-10: #f4f5f6;
   --color-grey-50: #f9fafb;
@@ -34,6 +31,4 @@
   --color-grey-800: #1f2937;
   --color-grey-900: #111827;
   --color-grey-950: #030712;
-
-  --color-primary: var(--color-purple-500);
 }

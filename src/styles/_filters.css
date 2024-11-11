@@ -1,6 +1,6 @@
 #filters {
   align-items: center;
-  background-color: #fff;
+  background-color: var(--color-bg);
   position: sticky;
   top: -1px;
   z-index: 1;
