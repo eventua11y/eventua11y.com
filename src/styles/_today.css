@@ -1,7 +1,6 @@
 #today {
   --hover-color: var(--color-secondary);
   background-color: var(--color-bg-muted);
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
   color: var(--body-color-fg);
   padding: var(--space-s-l) 0;
   .event--theme {
