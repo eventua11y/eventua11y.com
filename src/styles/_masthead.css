@@ -1,6 +1,6 @@
 .masthead {
-  background-color: var(--masthead-color-bg);
-  color: var(--masthead-color-fg);
+  background-color: var(--c-masthead-color-bg);
+  color: var(--c-masthead-color-fg);
   padding: var(--space-s-m) var(--space-m-l);
   .inner {
     align-items: center;

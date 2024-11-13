@@ -61,7 +61,7 @@ abbr[title] {
 }
 
 body {
-  color: var(--body-color-fg);
+  color: var(--color-on-background);
 }
 
 hgroup :is(h1, h2, h3, h4, h5, h6) {

@@ -1,38 +1,46 @@
 :root {
+
+  --color-background: var(--p-color-white);
+  --color-on-background: var(--p-color-grey-700);
+  --color-surface: var(--p-color-grey-50);
+  --color-on-surface: var(--p-color-grey-800);
+  --color-primary: var(--p-color-purple-500);
+  --color-on-primary: var(--p-color-white);
+
   /* Colors */
-  --color-primary: var(--color-purple-500);
-  --color-secondary: var(--color-cyan);
-  --color-bg: var(--color-white);
-  --color-bg-muted: var(--color-grey-50);
-  --color-fg: var(--color-grey-700);
-  --color-fg-muted: var(--color-grey-500);
-  --color-border: var(--color-grey-200);
+  --color-primary: var(--p-color-purple-500);
+  --color-secondary: var(--p-color-cyan);
+  --color-bg: var(--p-color-white);
+  --color-bg-muted: var(--p-color-grey-50);
+  --color-fg: var(--p-color-grey-700);
+  --color-fg-muted: var(--p-color-grey-500);
+  --color-border: var(--p-color-grey-200);
 
   /* Body */
   --body-color-bg: var(--color-bg);
   --body-color-fg: var(--color-fg);
-  --color-link: var(--color-purple-600);
+  --color-link: var(--p-color-purple-600);
   --color-link-hover: var(--color-primary);
 
   /* Masthead */
-  --masthead-color-bg: var(--color-primary);
-  --masthead-color-fg: var(--color-white);
-  --nav-active-bg: var(--color-grey-600);
-  --nav-active-fg: var(--color-white);
-  --nav-hover-bg: var(--color-grey-100);
-  --nav-hover-fg: var(--color-grey-600);
+  --c-masthead-color-bg: var(--color-primary);
+  --c-masthead-color-fg: var(--color-on-primary);
+  --c-nav-active-bg: var(--p-color-grey-600);
+  --c-nav-active-fg: var(--p-color-white);
+  --c-nav-hover-bg: var(--p-color-grey-100);
+  --c-nav-hover-fg: var(--p-color-grey-600);
 
   /* Footer */
-  --footer-color-bg: var(--color-grey-950);
-  --footer-color-muted-fg: var(--color-grey-400);
-  --footer-color-link: var(--color-primary);
-  --footer-color-link-hover: var(--color-secondary);
-  --footer-color-fg-muted: var(--color-grey-400);
+  --c-footer-color-bg: var(--p-color-grey-900);
+  --c-footer-color-muted-fg: var(--p-color-grey-400);
+  --c-footer-color-link: var(--color-primary);
+  --c-footer-color-link-hover: var(--color-secondary);
+  --c-footer-color-fg-muted: var(--p-color-grey-400);
 
-  /* Page header */
+  /* Page header
   --page-header-color-bg: var(--color-primary);
   --page-header-color-fg: var(--color-fg);
-  --page-header-accent-color: var(--color-fg);
+  --page-header-accent-color: var(--color-fg); */
 
   /* Shoelace */
   .sl-theme-light {

@@ -27,13 +27,13 @@
 }
 
 body {
-  background-color: var(--body-color-bg);
+  background-color: var(--color-background);
   line-height: 1.5;
   margin: 0;
 }
 
 main {
-  background-color: var(--body-color-bg);
+  background-color: var(--color-background);
 }
 
 *:focus {
