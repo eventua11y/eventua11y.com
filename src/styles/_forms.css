@@ -2,7 +2,7 @@
   align-items: center;
   display: flex;
   label {
-    margin-left: var(--space-2xs);
+    margin-left: var(--p-space-2xs);
     user-select: none;
   }
 }
@@ -19,9 +19,9 @@
 
 fieldset {
   border-width: 1px;
-  border-color: var(--color-border);
-  border-radius: var(--space-2xs);
+  border-color: var(--s-color-border);
+  border-radius: var(--p-space-2xs);
   legend {
-    font-size: var(--step--1);
+    font-size: var(--p-step--1);
   }
 }

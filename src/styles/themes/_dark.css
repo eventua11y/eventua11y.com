@@ -2,27 +2,26 @@
 
 :root {
 
-  --color-background: var(--p-color-black);
-  --color-on-background: var(--p-color-white);
-  --color-surface: var(--p-color-grey-900);
-  --color-on-surface: var(--p-color-white);
-  --color-primary: var(--p-color-purple-500);
-  --color-on-primary: var(--p-color-white);
+  --s-color-background: var(--p-color-black);
+  --s-color-on-background: var(--p-color-white);
+  --s-color-surface: var(--p-color-grey-900);
+  --s-color-on-surface: var(--p-color-white);
+  --s-color-primary: var(--p-color-purple-500);
+  --s-color-on-primary: var(--p-color-white);
 
   /* Colors */
-  --color-primary: var(--p-color-purple-500);
-  --color-secondary: var(--p-color-cyan);
-  --color-bg: var(--p-color-grey-900);
-  --color-bg-muted: var(--p-color-grey-900);
-  --color-fg: var(--p-color-white);
-  --color-fg-muted: var(--p-color-grey-400);
-  --color-border: var(--p-color-grey-800);
+  --s-color-secondary: var(--p-color-cyan);
+  --s-color-bg: var(--p-color-grey-900);
+  --s-color-bg-muted: var(--p-color-grey-900);
+  --s-color-fg: var(--p-color-white);
+  --s-color-fg-muted: var(--p-color-grey-400);
+  --s-color-border: var(--p-color-grey-800);
 
   /* Body */
-  --body-color-bg: var(--color-bg);
-  --body-color-fg: var(--color-fg);
-  --color-link: var(--p-color-purple-200);
-  --color-link-hover: var(--p-color-purple-100);
+  --c-body-color-bg: var(--color-bg);
+  --c-body-color-fg: var(--color-fg);
+  --c-color-link: var(--p-color-purple-200);
+  --c-color-link-hover: var(--p-color-purple-100);
 
   /* Masthead */
   --c-masthead-color-bg: var(--p-color-black);

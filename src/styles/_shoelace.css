@@ -16,9 +16,9 @@ sl-badge[variant='success']::part(base) {
 }
 
 .checkbox--medium {
-  font-size: var(--step-1);
+  font-size: var(--p-step-1);
 }
 
 sl-checkbox[size='medium']::part(label) {
-  font-size: var(--step--1);
+  font-size: var(--p-step--1);
 }

@@ -1,7 +1,7 @@
 .masthead {
   background-color: var(--c-masthead-color-bg);
   color: var(--c-masthead-color-fg);
-  padding: var(--space-s-m) var(--space-m-l);
+  padding: var(--p-space-s-m) var(--p-space-m-l);
   .inner {
     align-items: center;
     display: flex;
@@ -16,7 +16,7 @@
   }
 
   .masthead .inner .logo {
-    margin-bottom: var(--space-s);
+    margin-bottom: var(--p-space-s);
   }
 }
 
