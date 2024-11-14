@@ -23,3 +23,26 @@
 .masthead .logo {
   max-width: 12rem;
 }
+
+.skip {
+  display: inline-block;
+  padding: var(--space-2xs) var(--space-m-l);
+}
+
+.skip:not(:focus):not(:active) {
+  position: absolute;
+  top: -1000px;
+  left: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+.skip:focus {
+  /* background-color: var(--color-fg); */
+  /* box-shadow: none; */
+  display: block;
+  outline-offset: -.2em;
+  text-decoration: none;
+}
