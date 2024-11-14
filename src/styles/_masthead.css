@@ -40,8 +40,6 @@
 }
 
 .skip:focus {
-  /* background-color: var(--color-fg); */
-  /* box-shadow: none; */
   display: block;
   outline-offset: -.2em;
   text-decoration: none;
