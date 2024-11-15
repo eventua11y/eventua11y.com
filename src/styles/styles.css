@@ -1,4 +1,5 @@
 @import url('themes/_light.css');
+@import url('themes/_dark.css');
 @import url('_reset.css');
 @import url('_variables.css');
 @import url('_shoelace.css');
@@ -18,7 +19,7 @@
 .container {
   margin: 0 auto;
   max-width: 1280px;
-  padding: 0 var(--space-xs-m);
+  padding: 0 var(--p-space-xs-m);
 }
 
 .container.readable {
@@ -26,13 +27,13 @@
 }
 
 body {
-  background-color: var(--body-color-bg);
+  background-color: var(--s-color-background);
   line-height: 1.5;
   margin: 0;
 }
 
 main {
-  background-color: var(--body-color-bg);
+  background-color: var(--s-color-background);
 }
 
 *:focus {
@@ -56,5 +57,5 @@ main {
 .content {
   display: flex;
   flex-direction: column;
-  padding: var(--space-xs-m);
+  padding: var(--p-space-xs-m);
 }

@@ -3,7 +3,7 @@
   /* Set border radius based on adding 0.5em to the --space-2xs variable */
   border-radius: 2em;
   font-size: 1rem;
-  padding: var(--space-2xs);
+  padding: var(--p-space-2xs);
 }
 
 .primaryNav__list {
@@ -12,19 +12,19 @@
 }
 
 .primaryNav__list > * + * {
-  margin-left: var(--flow-space, var(--space-2xs));
+  margin-left: var(--flow-space, var(--p-space-2xs));
 }
 
 .primaryNav__link {
   border-radius: 2em;
-  color: var(--color-white);
+  color: var(--p-color-white);
   display: inline-block;
   font-weight: bold;
   padding: 0.4em 0.8em;
 }
 
 .primaryNav__link:link {
-  color: var(--color-white);
+  color: var(--p-color-white);
   text-decoration: none;
 }
 
@@ -32,7 +32,7 @@
 .primaryNav__link:hover,
 .primaryNav__link:active,
 .primaryNav__link:focus {
-  color: var(--color-white);
+  color: var(--p-color-white);
 }
 
 .primaryNav__link:hover {
@@ -40,6 +40,6 @@
 }
 
 .primaryNav__link[aria-current='page'] {
-  background-color: var(--color-white);
-  color: var(--color-primary);
+  background-color: var(--p-color-white);
+  color: var(--s-color-primary);
 }

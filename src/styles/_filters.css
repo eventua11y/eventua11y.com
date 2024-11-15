@@ -1,6 +1,6 @@
 #filters {
   align-items: center;
-  background-color: var(--color-bg);
+  background-color: var(--s-color-surface);
   position: sticky;
   top: -1px;
   z-index: 1;
@@ -11,7 +11,7 @@
   }
   .status {
     align-items: center;
-    margin-right: var(--space-xs-m);
+    margin-right: var(--p-space-xs-m);
     display: flex;
     flex-direction: row;
   }
@@ -21,7 +21,7 @@
     justify-content: space-between;
   }
   #filter-reset {
-    margin-left: var(--space-xs-m);
+    margin-left: var(--p-space-xs-m);
   }
 }
 
