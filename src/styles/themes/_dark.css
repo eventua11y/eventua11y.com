@@ -17,6 +17,9 @@
   --s-color-fg-muted: var(--p-color-grey-400);
   --s-color-border: var(--p-color-grey-800);
 
+  color-scheme: dark;
+  accent-color: var(--s-color-primary);
+
   /* Body */
   --c-body-color-bg: var(--color-bg);
   --c-body-color-fg: var(--color-fg);
