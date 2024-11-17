@@ -21,8 +21,8 @@
   /* Body */
   --body-color-bg: var(--s-color-bg);
   --body-color-fg: var(--s-color-fg);
-  --color-link: var(--p-color-purple-600);
-  --color-link-hover: var(--s-color-primary);
+  --c-color-link: var(--p-color-purple-600);
+  --c-color-link-hover: var(--s-color-primary);
 
   /* Masthead */
   --c-masthead-color-bg: var(--s-color-primary);
@@ -36,7 +36,7 @@
   --c-footer-color-bg: var(--p-color-grey-900);
   --c-footer-color-muted-fg: var(--p-color-grey-400);
   --c-footer-color-link: var(--color-primary);
-  --c-footer-color-link-hover: var(--color-secondary);
+  --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
   /* Page header

@@ -38,7 +38,7 @@
   --c-footer-color-bg: var(--p-color-purple-950);
   --c-footer-color-muted-fg: var(--p-color-grey-400);
   --c-footer-color-link: var(--color-primary);
-  --c-footer-color-link-hover: var(--p-color-purple-100);
+  --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
   /* Page header */

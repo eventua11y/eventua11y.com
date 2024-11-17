@@ -26,7 +26,7 @@
 
 .skip {
   display: inline-block;
-  padding: var(--space-2xs) var(--space-m-l);
+  padding: var(--p-space-2xs) var(--p-space-m-l);
 }
 
 .skip:not(:focus):not(:active) {
