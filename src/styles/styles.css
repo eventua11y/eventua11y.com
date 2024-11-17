@@ -40,12 +40,18 @@ main {
   outline-offset: 0.1em;
 }
 
+/* Completely hides elements with the hidden attribute */
 [hidden] {
   display: none !important;
 }
 
 .no-js {
   display: none;
+}
+
+/* Adds a top margin to elements with an id attribute when scrolled into view */
+[id] {
+	scroll-margin-top: 7rem;
 }
 
 .content {

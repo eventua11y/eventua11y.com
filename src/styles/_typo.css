@@ -38,6 +38,10 @@ a {
   text-decoration: underline;
 }
 
+a:not([class]) {
+	text-underline-offset: 0.25em;
+}
+
 a:link,
 a:visited {
   color: var(--c-color-link);

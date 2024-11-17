@@ -40,6 +40,9 @@
     <script src="/scripts/main.js"></script>
   </head>
   <body x-data class="page--{% if page.fileSlug %}{{ page.fileSlug }}{% else %}home{% endif %} layout--{{ layout }}">
+    <a href="#main" class="skip">
+      <i class="fa-solid fa-down-to-line"></i> Skip to main content
+    </a>
     <header
       id="global-header"
       class="masthead"
@@ -60,7 +63,7 @@
         </nav>
       </div>
     </header>
-    <main>
+    <main id="main">
       {{ content }}
     </main>
 
