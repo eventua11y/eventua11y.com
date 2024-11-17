@@ -1,7 +1,6 @@
 #global-footer {
   background: var(--c-footer-color-bg);
   color: #fff;
-  --hover-color: var(--c-footer-color-link-hover);
   padding: var(--p-space-m-l) 0;
   a {
     color: inherit;
@@ -9,7 +8,7 @@
     &:hover,
     &:active,
     &:focus {
-      color: var(--s-hover-color);
+      color: var(--c-footer-color-link-hover);
     }
   }
   .logo {
