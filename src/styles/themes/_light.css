@@ -19,13 +19,13 @@
   accent-color: var(--s-color-primary);
 
   /* Body */
-  --body-color-bg: var(--color-bg);
-  --body-color-fg: var(--color-fg);
+  --body-color-bg: var(--s-color-bg);
+  --body-color-fg: var(--s-color-fg);
   --color-link: var(--p-color-purple-600);
-  --color-link-hover: var(--color-primary);
+  --color-link-hover: var(--s-color-primary);
 
   /* Masthead */
-  --c-masthead-color-bg: var(--color-primary);
+  --c-masthead-color-bg: var(--s-color-primary);
   --c-masthead-color-fg: var(--color-on-primary);
   --c-nav-active-bg: var(--p-color-grey-600);
   --c-nav-active-fg: var(--p-color-white);
