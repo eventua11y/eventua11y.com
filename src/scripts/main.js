@@ -27,6 +27,91 @@ document.addEventListener('DOMContentLoaded', (event) => {
   noJsElements.forEach((element) => {
     element.classList.remove('no-js');
   });
+
+  // Theme selection functionality
+  const themeSelectorButton = document.getElementById('theme-selector-button');
+  const lightModeItem = document.getElementById('light-mode');
+  const darkModeItem = document.getElementById('dark-mode');
+  const systemDefaultItem = document.getElementById('system-default');
+  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  /**
+   * Applies the selected theme and updates the local storage and button text accordingly.
+   * 
+   * @param {string|null} theme - The selected theme ('light', 'dark', or null for system default).
+   */
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.classList.remove('sl-theme-dark');
+      localStorage.setItem('theme', 'light');
+      themeSelectorButton.textContent = 'Light mode';
+    } else if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('sl-theme-dark');
+      localStorage.setItem('theme', 'dark');
+      themeSelectorButton.textContent = 'Dark mode';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      document.documentElement.classList.remove('sl-theme-dark');
+      localStorage.removeItem('theme');
+      if (prefersDarkScheme) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('sl-theme-dark');
+        themeSelectorButton.textContent = 'Dark mode';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeSelectorButton.textContent = 'Light mode';
+      }
+    }
+  }
+
+  /**
+   * Updates the checked state of the theme selection menu items based on the current theme.
+   * 
+   * @param {string|null} theme - The current theme ('light', 'dark', or null for system default).
+   */
+  function updateSelection(theme) {
+    lightModeItem.checked = theme === 'light';
+    darkModeItem.checked = theme === 'dark';
+    systemDefaultItem.checked = theme === null;
+  }
+
+  const storedTheme = localStorage.getItem('theme');
+  if (storedTheme) {
+    applyTheme(storedTheme);
+    updateSelection(storedTheme);
+  } else {
+    applyTheme(null);
+    updateSelection(null);
+  }
+
+  document.querySelector('sl-menu').addEventListener('sl-select', (event) => {
+    const selectedItem = event.detail.item;
+    const selectedTheme = selectedItem.value;
+    if (selectedTheme === 'light') {
+      applyTheme('light');
+      updateSelection('light');
+    } else if (selectedTheme === 'dark') {
+      applyTheme('dark');
+      updateSelection('dark');
+    } else {
+      applyTheme(null);
+      updateSelection(null);
+    }
+  });
+
+    // Listen for changes to the user's system preference and update the theme accordingly
+    prefersDarkScheme.addEventListener('change', (event) => {
+      if (!localStorage.getItem('theme')) {
+        if (event.matches) {
+          applyTheme('dark');
+        } else {
+          applyTheme('light');
+        }
+      }
+    });
+
 });
 
 if (window.location.pathname === '/') {
