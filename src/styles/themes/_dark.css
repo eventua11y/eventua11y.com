@@ -23,6 +23,7 @@ html[data-theme="dark"] {
   --c-body-color-fg: var(--color-fg);
   --c-color-link: var(--p-color-purple-200);
   --c-color-link-hover: var(--p-color-purple-100);
+  --c-color-focus-ring: var(--p-color-purple-200);
 
   /* Masthead */
   --c-masthead-color-bg: var(--p-color-black);
@@ -46,6 +47,6 @@ html[data-theme="dark"] {
 }
 
 /* Shoelace */
-html[data-theme="dark"] .sl-theme-dark {
-  /* your custom styles here */
+.sl-theme-dark {
+  --sl-focus-ring-color: var(--c-color-focus-ring);
 }

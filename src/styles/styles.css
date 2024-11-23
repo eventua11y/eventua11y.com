@@ -38,6 +38,7 @@ main {
 }
 
 *:focus {
+  outline-color: var(--c-color-focus-ring);
   outline-offset: 0.1em;
 }
 

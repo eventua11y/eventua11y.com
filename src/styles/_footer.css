@@ -41,6 +41,10 @@
     background: var(--s-color-primary);
   }
 
+  *:focus {
+    outline-color: inherit;
+  }
+
   .text-muted {
     color: var(--c-footer-color-fg-muted);
   }
