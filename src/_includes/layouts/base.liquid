@@ -11,6 +11,19 @@
     <meta name="author" content="Matt Obee">
     <meta name="theme-color" content="#650fca" />
     <title>{{ title }}</title>
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (storedTheme) {
+          document.documentElement.setAttribute('data-theme', storedTheme);
+        } else if (prefersDarkScheme) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -57,12 +70,12 @@
               rel="home"></a>
         </div>
         <div class="d-flex items-center gap-s">
-        <nav class="primaryNav">
-          <ul role="list" class="primaryNav__list">
-              <li class="primaryNav__item"><a class="primaryNav__link" href="/past-events" {% if page.url == '/past-events/' %}aria-current="page"{% endif %}>Past events</a></li>
-              <li class="primaryNav__item"><a class="primaryNav__link" href="/" {% if page.url == '/' %}aria-current="page"{% endif %}>Upcoming events</a></li>
-          </ul>
-        </nav>
+          <nav class="primaryNav">
+            <ul role="list" class="primaryNav__list">
+                <li class="primaryNav__item"><a class="primaryNav__link" href="/past-events" {% if page.url == '/past-events/' %}aria-current="page"{% endif %}>Past events</a></li>
+                <li class="primaryNav__item"><a class="primaryNav__link" href="/" {% if page.url == '/' %}aria-current="page"{% endif %}>Upcoming events</a></li>
+            </ul>
+          </nav>
           <sl-dropdown id="theme-selector">
             <sl-button pill slot="trigger" id="theme-selector-button" caret>Theme</sl-button>
             <sl-menu>
