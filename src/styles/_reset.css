@@ -74,3 +74,8 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* Hide custom elements that are not yet registered to prevent FOUCE */
+:not(:defined) {
+  visibility: hidden;
+}
