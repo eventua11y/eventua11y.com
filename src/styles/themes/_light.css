@@ -2,7 +2,7 @@
 
   --s-color-background: var(--p-color-white);
   --s-color-on-background: var(--p-color-grey-700);
-  --s-color-surface: var(--p-color-grey-50);
+  --s-color-surface: var(--p-color-white);
   --s-color-on-surface: var(--p-color-grey-800);
   --s-color-primary: var(--p-color-purple-500);
   --s-color-on-primary: var(--p-color-white);
