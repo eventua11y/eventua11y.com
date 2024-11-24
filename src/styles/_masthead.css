@@ -20,6 +20,11 @@
   }
 }
 
+.masthead__logo a {
+  display: block;
+  text-decoration: none;
+}
+
 .masthead .logo {
   max-width: 12rem;
 }
