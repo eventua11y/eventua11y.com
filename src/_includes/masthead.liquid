@@ -1,0 +1,31 @@
+<header
+    id="global-header"
+    class="masthead"
+    role="banner">
+    <div class="inner">
+        <div class="masthead__logo">
+            <a href="/"><img
+                class="logo"
+                src="/images/eventua11y_logo_wordmark_white.svg"
+                alt="Eventua11y"
+                rel="home"></a>
+        </div>
+        <div class="d-flex items-center gap-xs">
+            <nav class="primaryNav">
+            <ul role="list" class="primaryNav__list">
+                <li class="primaryNav__item"><a class="primaryNav__link" href="/past-events" {% if page.url == '/past-events/' %}aria-current="page"{% endif %}>Past events</a></li>
+                <li class="primaryNav__item"><a class="primaryNav__link" href="/" {% if page.url == '/' %}aria-current="page"{% endif %}>Upcoming events</a></li>
+            </ul>
+            </nav>
+            <sl-dropdown id="theme-selector" placement="bottom-end" distance="3">
+                <sl-button pill slot="trigger" id="theme-selector-button" caret>Theme</sl-button>
+                <sl-menu>
+                    <sl-menu-item type="checkbox" id="light-mode" value="light">Light mode</sl-menu-item>
+                    <sl-menu-item type="checkbox" id="dark-mode" value="dark">Dark mode</sl-menu-item>
+                    <sl-divider></sl-divider>
+                    <sl-menu-item type="checkbox" id="system-default" value="system" checked>System default</sl-menu-item>
+                </sl-menu>
+            </sl-dropdown>
+        </div>
+    </div>
+</header>
