@@ -29,28 +29,35 @@ document.addEventListener('DOMContentLoaded', (event) => {
   });
 
   // Theme selection functionality
-  const themeSelectorButton = document.getElementById('theme-selector-button');
-  const lightModeItem = document.getElementById('light-mode');
-  const darkModeItem = document.getElementById('dark-mode');
-  const systemDefaultItem = document.getElementById('system-default');
-  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
   /**
    * Applies the selected theme and updates the local storage and button text accordingly.
    * 
    * @param {string|null} theme - The selected theme ('light', 'dark', or null for system default).
    */
+
+  const LIGHT_MODE_ICON = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
+  const DARK_MODE_ICON = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
+
   function applyTheme(theme) {
+    const themeSelectorButton = document.getElementById('theme-selector-button');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+    if (!themeSelectorButton) {
+      console.error('Theme selector button not found');
+      return;
+    }
+    
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('sl-theme-dark');
       localStorage.setItem('theme', 'light');
-      themeSelectorButton.innerHTML = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
+      themeSelectorButton.innerHTML = LIGHT_MODE_ICON;
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('sl-theme-dark');
       localStorage.setItem('theme', 'dark');
-      themeSelectorButton.innerHTML = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
+      themeSelectorButton.innerHTML = DARK_MODE_ICON;
     } else {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('sl-theme-dark');
@@ -58,10 +65,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (prefersDarkScheme) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.classList.add('sl-theme-dark');
-        themeSelectorButton.innerHTML = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
+        themeSelectorButton.innerHTML = DARK_MODE_ICON;
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
-        themeSelectorButton.innerHTML = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
+        themeSelectorButton.innerHTML = LIGHT_MODE_ICON;
       }
     }
   }
@@ -72,6 +79,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
    * @param {string|null} theme - The current theme ('light', 'dark', or null for system default).
    */
   function updateSelection(theme) {
+    const lightModeItem = document.getElementById('light-mode');
+    const darkModeItem = document.getElementById('dark-mode');
+    const systemDefaultItem = document.getElementById('system-default');
+
+    if (!lightModeItem || !darkModeItem || !systemDefaultItem) {
+      console.error('Theme selection items not found');
+      return;
+    }
+
     lightModeItem.checked = theme === 'light';
     darkModeItem.checked = theme === 'dark';
     systemDefaultItem.checked = theme === null;
