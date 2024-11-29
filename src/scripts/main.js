@@ -45,12 +45,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('sl-theme-dark');
       localStorage.setItem('theme', 'light');
-      themeSelectorButton.textContent = 'Light mode';
+      themeSelectorButton.innerHTML = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('sl-theme-dark');
       localStorage.setItem('theme', 'dark');
-      themeSelectorButton.textContent = 'Dark mode';
+      themeSelectorButton.innerHTML = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
     } else {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('sl-theme-dark');
@@ -58,10 +58,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (prefersDarkScheme) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.classList.add('sl-theme-dark');
-        themeSelectorButton.textContent = 'Dark mode';
+        themeSelectorButton.innerHTML = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
-        themeSelectorButton.textContent = 'Light mode';
+        themeSelectorButton.innerHTML = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
       }
     }
   }

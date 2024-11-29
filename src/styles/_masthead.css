@@ -1,7 +1,8 @@
 .masthead {
+  --c-focus-ring-color: var(--c-masthead-focus-ring-color);
   background-color: var(--c-masthead-color-bg);
   color: var(--c-masthead-color-fg);
-  padding: var(--p-space-s-m) var(--p-space-m-l);
+  padding: var(--p-space-s-m) var(--p-space-xs-m);
   .inner {
     align-items: center;
     display: flex;
@@ -25,6 +26,13 @@
   text-decoration: none;
 }
 
+.masthead__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-space-xs);
+}
+
 .masthead .logo {
   max-width: 12rem;
 }
@@ -45,7 +53,13 @@
 }
 
 .skip:focus {
+  color: var(--c-masthead-color-fg);
   display: block;
   outline-offset: -.2em;
   text-decoration: none;
+}
+
+/* Ensure Shoelace components inside .masthead use the focus ring color */
+.masthead sl-button::part(base):focus-visible {
+  outline-color: var(--c-focus-ring-color);
 }

@@ -1,9 +1,7 @@
 @import url('themes/_light.css');
 @import url('themes/_dark.css');
-@import url('_shoelace.css');
 @import url('_reset.css');
 @import url('_variables.css');
-@import url('_shoelace.css');
 @import url('_color.css');
 @import url('_typo.css');
 @import url('_buttons.css');
@@ -16,6 +14,7 @@
 @import url('_forms.css');
 @import url('_footer.css');
 @import url('_utilities.css');
+@import url('_shoelace.css');
 
 .container {
   margin: 0 auto;
@@ -37,9 +36,12 @@ main {
   background-color: var(--s-color-background);
 }
 
-*:focus {
-  outline-color: var(--c-color-focus-ring);
-  outline-offset: 0.1em;
+*:focus-visible, .masthead__logo > a:focus-visible {
+  outline-color: var(--c-focus-ring-color);
+  outline-style: solid;
+  outline-offset: var(--c-focus-ring-offset);
+  outline-width: var(--c-focus-ring-width);
+  text-decoration: none !important;
 }
 
 /* Completely hides elements with the hidden attribute */

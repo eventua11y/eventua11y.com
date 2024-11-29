@@ -19,15 +19,16 @@ html[data-theme="dark"] {
   accent-color: var(--s-color-primary);
 
   /* Body */
-  --c-body-color-bg: var(--color-bg);
-  --c-body-color-fg: var(--color-fg);
+  --c-body-color-bg: var(--s-color-bg);
+  --c-body-color-fg: var(--s-color-fg);
   --c-color-link: var(--p-color-purple-200);
   --c-color-link-hover: var(--p-color-purple-100);
-  --c-color-focus-ring: var(--p-color-purple-200);
+  --c-color-focus-ring: var(--p-color-white);
 
   /* Masthead */
   --c-masthead-color-bg: var(--p-color-black);
   --c-masthead-color-fg: var(--p-color-white);
+  --c-masthead-focus-ring-color: var(--p-color-white);
   --c-nav-active-bg: var(--p-color-grey-600);
   --c-nav-active-fg: var(--p-color-white);
   --c-nav-hover-bg: var(--p-color-grey-100);
@@ -48,5 +49,5 @@ html[data-theme="dark"] {
 
 /* Shoelace */
 .sl-theme-dark {
-  --sl-focus-ring-color: var(--c-color-focus-ring);
+  /* --sl-focus-ring-color: var(--c-color-focus-ring); */
 }

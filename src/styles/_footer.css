@@ -1,4 +1,7 @@
 #global-footer {
+
+  --c-color-focus-ring: currentColor;
+
   background: var(--c-footer-color-bg);
   color: #fff;
   padding: var(--p-space-m-l) 0;
@@ -39,10 +42,6 @@
   .social a:active,
   .social a:focus {
     background: var(--s-color-primary);
-  }
-
-  *:focus {
-    outline-color: inherit;
   }
 
   .text-muted {

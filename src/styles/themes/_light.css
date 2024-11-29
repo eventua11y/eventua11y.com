@@ -15,18 +15,33 @@
   --s-color-fg-muted: var(--p-color-grey-500);
   --s-color-border: var(--p-color-grey-200);
 
+  /* Shoelace color tokens */
+  --sl-color-primary-50: var(--sl-color-purple-50);
+  --sl-color-primary-100: var(--sl-color-purple-100);
+  --sl-color-primary-200: var(--sl-color-purple-200);
+  --sl-color-primary-300: var(--sl-color-purple-300);
+  --sl-color-primary-400: var(--sl-color-purple-400);
+  --sl-color-primary-500: var(--sl-color-purple-500);
+  --sl-color-primary-600: var(--sl-color-purple-600);
+  --sl-color-primary-700: var(--sl-color-purple-700);
+  --sl-color-primary-800: var(--sl-color-purple-800);
+  --sl-color-primary-900: var(--sl-color-purple-900);
+  --sl-color-primary-950: var(--sl-color-purple-950);
+
   color-scheme: light;
   accent-color: var(--s-color-primary);
 
   /* Body */
-  --body-color-bg: var(--s-color-bg);
-  --body-color-fg: var(--s-color-fg);
+  --c-body-color-bg: var(--s-color-bg);
+  --c-body-color-fg: var(--s-color-fg);
   --c-color-link: var(--p-color-purple-600);
   --c-color-link-hover: var(--s-color-primary);
+  --c-focus-ring-color: currentColor;
 
   /* Masthead */
   --c-masthead-color-bg: var(--s-color-primary);
   --c-masthead-color-fg: var(--color-on-primary);
+  --c-masthead-focus-ring-color: var(--p-color-white);
   --c-nav-active-bg: var(--p-color-grey-600);
   --c-nav-active-fg: var(--p-color-white);
   --c-nav-hover-bg: var(--p-color-grey-100);
@@ -44,8 +59,4 @@
   --page-header-color-fg: var(--color-fg);
   --page-header-accent-color: var(--color-fg); */
 
-  /* Shoelace */
-  .sl-theme-light {
-    /* your custom styles here */
-  }
 }

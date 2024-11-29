@@ -3,24 +3,27 @@
   /* Set border radius based on adding 0.5em to the --space-2xs variable */
   border-radius: 2em;
   font-size: 1rem;
-  padding: var(--p-space-2xs);
+  padding: var(--p-space-3xs);
 }
 
 .primaryNav__list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
-.primaryNav__list > * + * {
-  margin-left: var(--flow-space, var(--p-space-2xs));
+.primaryNav__list {
+  gap: var(--flow-space, var(--p-space-2xs));
 }
 
 .primaryNav__link {
+  align-items: center;
   border-radius: 2em;
   color: var(--p-color-white);
-  display: inline-block;
+  display: inline-flex;
   font-weight: bold;
-  padding: 0.4em 0.8em;
+  padding: 0 var(--p-space-xs);
+  height: auto;
+  min-height: 2.5rem;
 }
 
 .primaryNav__link:link {
