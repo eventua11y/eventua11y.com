@@ -1,31 +1,33 @@
 #global-footer {
-  background: var(--footer-color-bg);
+
+  --c-color-focus-ring: currentColor;
+
+  background: var(--c-footer-color-bg);
   color: #fff;
-  --hover-color: var(--footer-color-link-hover);
-  padding: var(--space-m-l) 0;
+  padding: var(--p-space-m-l) 0;
   a {
     color: inherit;
     text-decoration: underline;
     &:hover,
     &:active,
     &:focus {
-      color: var(--hover-color);
+      color: var(--c-footer-color-link-hover);
     }
   }
   .logo {
-    margin-bottom: var(--space-m-l);
+    margin-bottom: var(--p-space-m-l);
     max-width: 10rem;
   }
 
   .social {
     display: flex;
-    font-size: var(--step-1);
-    gap: var(--space-3xs-2xs);
-    margin-bottom: var(--space-s-m);
+    font-size: var(--p-step-1);
+    gap: var(--p-space-3xs-2xs);
+    margin-bottom: var(--p-space-s-m);
   }
 
   .social a {
-    color: var(--color-white);
+    color: var(--p-color-white);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -39,11 +41,11 @@
   .social a:hover,
   .social a:active,
   .social a:focus {
-    background: var(--color-primary);
+    background: var(--s-color-primary);
   }
 
   .text-muted {
-    color: var(--footer-color-fg-muted);
+    color: var(--c-footer-color-fg-muted);
   }
   
 }

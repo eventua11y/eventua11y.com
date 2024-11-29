@@ -11,6 +11,19 @@
     <meta name="author" content="Matt Obee">
     <meta name="theme-color" content="#650fca" />
     <title>{{ title }}</title>
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (storedTheme) {
+          document.documentElement.setAttribute('data-theme', storedTheme);
+        } else if (prefersDarkScheme) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -27,6 +40,7 @@
       href="/favicon/favicon-16x16.png">
     <link rel="manifest" href="/favicon/site.webmanifest">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/light.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/dark.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet">
@@ -43,91 +57,14 @@
     <a href="#main" class="skip">
       <i class="fa-solid fa-down-to-line"></i> Skip to main content
     </a>
-    <header
-      id="global-header"
-      class="masthead"
-      role="banner">
-      <div class="inner">
-        <div class="masthead__logo">
-          <a href="/"><img
-              class="logo"
-              src="/images/eventua11y_logo_wordmark_white.svg"
-              alt="Eventua11y"
-              rel="home"></a>
-        </div>
-        <nav class="primaryNav">
-          <ul role="list" class="primaryNav__list">
-              <li class="primaryNav__item"><a class="primaryNav__link" href="/past-events" {% if page.url == '/past-events/' %}aria-current="page"{% endif %}>Past events</a></li>
-              <li class="primaryNav__item"><a class="primaryNav__link" href="/" {% if page.url == '/' %}aria-current="page"{% endif %}>Upcoming events</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+    
+    {% include 'masthead.liquid' %}
+
     <main id="main">
       {{ content }}
     </main>
 
-    <footer id="global-footer" role="contentinfo">
-      <div class="container readable">
-        <ul role="list" class="social flex gap">
-          <li>
-            <a
-              class="button"
-              itemprop="sameAs"
-              rel="me"
-              href="https://github.com/eventua11y"
-              title="GitHub">
-              <i class="fab fa-github"></i>
-            </a>
-          </li>
-          <li>
-            <a
-              class="button"
-              itemprop="sameAs"
-              rel="me"
-              href="https://mastodon.social/@eventua11y"
-              title="Mastodon">
-              <i class="fab fa-mastodon"></i>
-            </a>
-          </li>
-          <li>
-            <a
-              class="button"
-              itemprop="sameAs"
-              rel="me"
-              href="https://bsky.app/profile/eventua11y.com"
-              title="Bluesky">
-              <i class="fab fa-bluesky"></i>
-            </a>
-          </li>
-        </ul>
-        <p class="text-muted">
-          <small>&copy 2022-{% year %}
-            <a href="https://mattobee.com/">Matt Obee</a>
-          </small>
-        </p>
-        <p class="text-muted">
-          <small>This page conforms to
-            <abbr title="Web Content Accessibility Guidelines">WCAG</abbr>
-            2.2 at Level
-            <abbr title="Double-A">AA</abbr>.</small>
-        </p>
-        <p class="text-muted"><small>This page has a <a href="https://www.websitecarbon.com/website/eventua11y-com/">carbon rating of A+</a> and is cleaner than 95% of all web pages globally.</small></p>
-        <p class="text-muted">
-          <small>Powered by
-            <a href="https://www.11ty.dev/">Eleventy</a>,
-            <a href="https://www.sanity.io/">Sanity</a>,  
-            and
-            <a href="https://www.netlify.com/">Netlify</a>. Basic accessibility tests by
-            <a href="https://github.com/pa11y/pa11y">pa11y</a>/<a href="https://github.com/dequelabs/axe-core">axe-core</a>.</small>
-        </p>
-        <p class="text-muted">
-          <small>
-            Privacy-first analytics by
-            <a href="https://usefathom.com/ref/VZYIPT">Fathom</a>.
-          </small>
-        </p>
-      </div>
-    </footer>
+    {% include 'footer.liquid' %}
+    
   </body>
 </html>

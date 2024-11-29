@@ -4,7 +4,7 @@
   color: inherit;
   cursor: pointer;
   display: inline-block;
-  padding: var(--space-3xs) var(--space-xs-s);
+  padding: var(--p-space-3xs) var(--p-space-xs-s);
   user-select: none;
   vertical-align: middle;
   white-space: nowrap;
@@ -31,5 +31,5 @@
 }
 
 .btn--small {
-  font-size: var(--step--1);
+  font-size: var(--p-step--1);
 }

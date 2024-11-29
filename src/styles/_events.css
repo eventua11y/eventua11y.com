@@ -1,7 +1,6 @@
 .event {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
+  border: 1px solid var(--s-color-border);
+  border-radius: var(--s-border-radius);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -9,18 +8,18 @@
 }
 
 .event__title {
-  font-size: var(--step-2);
+  font-size: var(--p-step-2);
   margin-bottom: 0.4rem;
   order: 3;
 }
 
 .event__dates {
-  font-size: var(--step--1);
+  font-size: var(--p-step--1);
 }
 
 .event__delivery {
   display: flex;
-  font-size: var(--step--1);
+  font-size: var(--p-step--1);
   gap: 0.5em;
   margin-bottom: 0.5em;
   order: 3;
@@ -57,22 +56,22 @@
   border-radius: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 var(--space-xs-m);
+  padding: 0 var(--p-space-xs-m);
   .event__title {
-    font-size: var(--step-0);
+    font-size: var(--p-step-0);
     order: 2;
   }
   .event__dates {
     order: 1;
-    font-size: var(--step--1);
+    font-size: var(--p-step--1);
   }
   .event__location {
-    font-size: var(--step--1);
+    font-size: var(--p-step--1);
   }
 }
 
 .month {
-  padding: var(--space-s-l) 0;
+  padding: var(--p-space-s-l) 0;
 }
 
 .month:first-child {
@@ -80,5 +79,5 @@
 }
 
 .month__heading {
-  padding: 0 var(--space-xs-m);
+  padding: 0 var(--p-space-xs-m);
 }

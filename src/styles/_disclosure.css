@@ -1,7 +1,7 @@
 details {
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-xs) 0;
-  --flow-space: var(--space-3xs-2xs);
+  border-top: 1px solid var(--s-color-border);
+  padding: var(--p-space-xs) 0;
+  --flow-space: var(--p-space-3xs-2xs);
 }
 
 details:last-child {
@@ -9,7 +9,7 @@ details:last-child {
 }
 
 details > summary {
-  font-size: var(--step--1);
+  font-size: var(--p-step--1);
   list-style: none;
   user-select: none;
 }
@@ -23,7 +23,7 @@ details > summary::-webkit-details-marker {
 }
 
 details > summary:hover {
-  color: var(--color-link-hover);
+  color: var(--s-color-link-hover);
   cursor: pointer;
 }
 
