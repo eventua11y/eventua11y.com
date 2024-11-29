@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('sl-theme-dark');
       localStorage.removeItem('theme');
-      if (prefersDarkScheme) {
+      if (prefersDarkScheme.matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.classList.add('sl-theme-dark');
         themeSelectorButton.innerHTML = DARK_MODE_ICON;
