@@ -42,9 +42,11 @@
   --c-masthead-color-bg: var(--s-color-primary);
   --c-masthead-color-fg: var(--color-on-primary);
   --c-masthead-focus-ring-color: var(--p-color-white);
-  --c-nav-active-bg: var(--p-color-grey-600);
-  --c-nav-active-fg: var(--p-color-white);
-  --c-nav-hover-bg: var(--p-color-grey-100);
+
+  /* Navigation */
+  --c-nav-active-bg: var(--p-color-white);
+  --c-nav-active-fg: var(--p-color-purple-500);
+  --c-nav-hover-bg: var(--p-color-purple-600);
   --c-nav-hover-fg: var(--p-color-grey-600);
 
   /* Footer */
