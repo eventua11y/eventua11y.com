@@ -38,8 +38,16 @@
   }
 }
 
+#filter-drawer {
+  --c-focus-ring-color: var(--p-color-white);
+}
+
 #filter-drawer .actions {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+#filter-drawer sl-button::part(base):focus-visible {
+  outline-color: var(--c-focus-ring-color);
 }
