@@ -23,10 +23,24 @@ describe('Eventua11y Page Tests', () => {
     await expect(todayHeading).toHaveText('Today');
   });
 
+  test('should display the main content area', async ({ page }) => {
+    const mainContent = page.locator('main');
+    await expect(mainContent).toBeVisible();
+  });
+
   test('should display the footer', async ({ page }) => {
     const footer = page.locator('#global-footer');
     await expect(footer).toBeVisible();
     await expect(footer).toHaveAttribute('role', 'contentinfo');
+  });
+
+  test('should have images with alt attributes', async ({ page }) => {
+    const images = page.locator('img');
+    await expect(images).toHaveCountGreaterThan(0);
+    for (let i = 0; i < await images.count(); i++) {
+      const img = images.nth(i);
+      await expect(img).toHaveAttribute('alt', /.+/);
+    }
   });
 
   test('should have no accessibility violations', async ({ page }) => {
