@@ -3,9 +3,9 @@
 }
 
 .flow-tight {
-  --flow-space: var(--space-3xs-2xs);
+  --flow-space: var(--p-space-3xs-2xs);
 }
 
 .flow-s {
-  --flow-space: var(--space-3xs);
+  --flow-space: var(--p-space-3xs);
 }
