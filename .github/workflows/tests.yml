@@ -41,8 +41,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Allure CLI
-        run: npm install -g allure-commandline --save-dev
+      - name: Install Allure CLI and Allure Playwright
+        run: |
+          npm install -g allure-commandline --save-dev
+          npm install --save-dev allure-playwright
 
       - name: Run tests and generate Allure results
         run: npx playwright test --reporter=line,allure-playwright
