@@ -26,3 +26,9 @@ test('has no accessibility violations', async ({ page }) => {
   const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
   expect(accessibilityScanResults.violations).toEqual([]);
 });
+
+test('has at least one upcoming event', async ({ page }) => {
+  const upcomingEvents = page.locator('.event');
+  const countOfEvents = await upcomingEvents.count();
+  await expect(countOfEvents).toBeGreaterThan(0);
+});
