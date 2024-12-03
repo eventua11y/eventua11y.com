@@ -7,21 +7,24 @@
           aria-live="polite"
           aria-atomic="true"
         >
-          <small
-            x-text="$store.filters.visibleEventCount === $store.filters.totalEventCount ? 'Showing all ' + $store.filters.totalEventCount + ' events' : 'Showing ' + $store.filters.visibleEventCount + ' of ' + $store.filters.totalEventCount + ' events'"
-          ></small>
+          <small>Event count</small>
         </p>
         <sl-button
           id="filter-reset"
           type="primary"
           name="filter-reset"
-          x-show="$store.filters.isChanged()"
-          @click="$store.filters.reset()"
           ><i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters</sl-button
         >
       </div>
       <!-- End status -->
       <div class="filters__controls">
+        <sl-dropdown>
+          <sl-button slot="trigger" caret>Your timezone (GMT)</sl-button>
+          <sl-menu>
+            <sl-menu-item>Your timezone (GMT)</sl-menu-item>
+            <sl-menu-item>Event timezone</sl-menu-item>
+          </sl-menu>
+        </sl-dropdown>
         <sl-button id="open-filter-drawer"
           ><i class="fa-solid fa-filter"></i> Filter</sl-button
         >

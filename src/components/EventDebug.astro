@@ -9,7 +9,7 @@ let { event } = Astro.props;
 
 <style>
     summary {
-        color: rgba(255, 255, 255, .4);
+        color: var(--s-color-fg-muted);;
     }
     summary:hover {
         text-decoration: underline;
@@ -17,7 +17,7 @@ let { event } = Astro.props;
     details {
         border-radius: .5rem;
         border-top: none;
-        background-color: #000;
+        background-color: var(--s-color-bg-muted);
         padding: var(--p-space-2xs);
     }
     pre {
