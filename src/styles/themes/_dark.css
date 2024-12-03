@@ -28,6 +28,7 @@ html[data-theme="dark"] {
   /* Masthead */
   --c-masthead-color-bg: var(--p-color-black);
   --c-masthead-color-fg: var(--p-color-white);
+  --c-masthead-color-border: var(--s-color-border);
   --c-masthead-focus-ring-color: var(--p-color-white);
  
   /* Navigation */

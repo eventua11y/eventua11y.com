@@ -1,6 +1,7 @@
 .masthead {
   --c-focus-ring-color: var(--c-masthead-focus-ring-color);
   background-color: var(--c-masthead-color-bg);
+  border-bottom: 1px solid var(--c-masthead-color-border);
   color: var(--c-masthead-color-fg);
   padding: var(--p-space-s-m) var(--p-space-xs-m);
   .inner {
