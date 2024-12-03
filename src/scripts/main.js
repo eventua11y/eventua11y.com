@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname === '/') {
     // Get references to the necessary DOM elements
     const filterDrawer = document.getElementById('filter-drawer');
@@ -39,9 +39,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const LIGHT_MODE_ICON = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
   const DARK_MODE_ICON = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
 
+  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');  
+
   function applyTheme(theme) {
     const themeSelectorButton = document.getElementById('theme-selector-button');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
     if (!themeSelectorButton) {
       console.error('Theme selector button not found');
@@ -155,9 +156,12 @@ if (window.location.pathname === '/') {
 
     // Persist the state to localStorage whenever it changes
     Alpine.effect(() => {
-      const { initialFilters, totalEventCount, visibleEventCount, ...filters } =
-        Alpine.store('filters');
-      localStorage.setItem('filters', JSON.stringify(filters));
+      const filtersStore = Alpine.store('filters');
+      if (filtersStore) {
+        localStorage.setItem('filters', JSON.stringify(filtersStore));
+      } else {
+        console.error('Filters store is not defined');
+      }
     });
 
     // Count the total number of events on the page
