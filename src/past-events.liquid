@@ -16,18 +16,20 @@ layout: layouts/base.liquid
       <p>There are no past events.</p>
     {% endif %}
 
-    <div class="events events--list">
+    <div class="events events--list mt-m-l">
       {% for month in groupedEvents %}
         <section id="{{ month.month | downcase }}" class="month">
           <div class="container readable flow">
             {% assign currentYear = 'now' | date: "%Y" %}
-            <h2 class="month__heading">{{ month.month }}{% if month.year != currentYear %}
+            <h2 id="{{ month.month | downcase }}_heading" class="month__heading">{{ month.month }}{% if month.year != currentYear %}
                 {{ month.year }}{% endif %}
             </h2>
+            <ul role="list" class="flow" aria-labelledby="{{ month.month | downcase }}_heading">
             {% for event in month.events %}
+              <li>
               {%- if event.type == "theme" %}
                 <article
-                  class="event event--theme content"
+                  class="event event--theme"
                   itemprop="event"
                   itemscope
                   itemtype="https://schema.org/Event"
@@ -179,7 +181,7 @@ layout: layouts/base.liquid
                             <ul role="list" class="flow">
                               {% for child in event.children %}
                                 <li
-                                  class="event__child flow"
+                                  class="event__child flow-s"
                                   itemprop="subEvent"
                                   itemscope
                                   itemtype="https://schema.org/Event">
@@ -291,20 +293,13 @@ layout: layouts/base.liquid
                     {% endif %}
                     <!-- End .event__children -->
                   {% endif %}
-                  {% if event.callForSpeakers %}
-                  <div class="event__badges">
-                    {% if event.callForSpeakers %}<sl-badge
-                      variant="success"
-                      pill
-                      pulse>Call for speakers</sl-badge>
-                    {% endif %}
-                  </div>
-                  {% endif %}
                 </article>
                 <!-- End .event -->
               {% endif %}
+              </li>
             {% endfor %}
           {% comment %} end event loop {% endcomment %}
+          </ul>
           </div>
         <!-- End event .readable .container -->
         </section>

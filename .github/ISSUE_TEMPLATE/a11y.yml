@@ -1,0 +1,26 @@
+name: Accessibility Problem
+description: Report something that makes it difficult for you to use Eventua11y.
+labels: ['accessibility', 'bug']
+assignees:
+  - mattobee
+body:
+  - type: input
+    id: email
+    attributes:
+      label: Email address
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: environment
+    attributes:
+      label: Browser and assistive technology
+      description: What web browser do you use? Do you use any assistive technology, like a screen reader?
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the problem
+      description: What happened and what did you expect to happen? Provide as much information as possible.
+    validations:
+      required: true

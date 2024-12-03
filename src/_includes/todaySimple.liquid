@@ -1,0 +1,332 @@
+
+<section id="today">
+
+  <div class="container readable flow">
+
+    <hgroup
+      id="today-heading"
+      class="content pt-0"
+      role="group"
+      aria-roledescription="Heading group">
+      <h2>Today</h2>
+      <p aria-roledescription="subtitle">
+        {% edge "liquid" %}
+          <time class="text-muted" datetime="{% todayISO %}">{% today %}</time>
+        {% endedge %}
+      </p>
+    </hgroup>
+
+    {% edge "liquid" events %}
+
+      {% assign todaysThemes = events | todaysThemes | sort: "dateStart" %}
+      {% assign todaysEvents = events | todaysEvents | sort: "dateStart" %}
+
+      <!-- if there are no events today -->
+      {% if todaysThemes.length == 0 and todaysEvents.length == 0 %}
+        <p class="content">Take it easy, there are no events today.</p>
+      {% endif %}
+
+      {% if todaysThemes.length > 0 %}
+        <div class="events events--list content py-0 flow">
+          {% for event in todaysThemes %}
+            <article
+              class="event event--theme flow-s"
+              itemprop="event"
+              itemscope
+              itemtype="https://schema.org/Event"
+              data-event-type="theme">
+              <h3 class="event__title" itemprop="name">
+                {% if event.website %}
+                  <a itemprop="url" href="{{ event.website }}">{{ event.title }}</a>
+                {% else %}
+                  {{ event.title }}{% endif %}
+              </h3>
+              <div class="event__dates text-muted">
+                <span class="event__dateStart">
+                  <span class="sr-only">Starts</span>
+                  {% if event.day %}
+                    <time datetime="{{ event.dateStart | isoDate }}" itemprop="startDate">{{ event.dateStart | localizeDate: "MMMM D" }}</time>
+                  {% else %}
+                    <time datetime="{{ event.dateStart | isoDate }}" itemprop="startDate">{{ event.dateStart | localizeDate: "MMMM D h:mm" }}</time>
+                  {% endif %}
+                </span>
+                {% if event.dateEnd %}
+                  <span class="event__dateEnd">
+                    <span class="sr-only">Ends</span>
+                    <i class="fa-solid fa-arrow-right-long"></i>
+                    {% if event.day %}
+                      <time datetime="{{event.dateEnd | isoDate}}" itemprop="endDate">{{ event.dateEnd | localizeDate: "MMMM D" }}</time>
+                    {% else %}
+                      <time datetime="{{event.dateEnd | isoDate}}" itemprop="endDate">{{ event.dateEnd | localizeDate: "MMMM D h:mm A" }}</time>
+                    {% endif %}
+                  </span>
+                {% endif %}
+              </div>
+              <!-- End dates -->
+              <div class="event__delivery">
+                <span class="sr-only">Location:</span>
+                <span class="event__location">
+                  {% if event.location %}
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span
+                      itemprop="location"
+                      itemscope
+                      itemtype="https://schema.org/Place">{{ event.location }}</span>
+                  {% else %}
+                    <i class="fa-solid fa-fw fa-globe"></i>
+                    <span
+                      itemprop="location"
+                      itemscope
+                      itemtype="https://schema.org/Place">International</span>
+                  {% endif %}
+                </span>
+              </div>
+            </article>
+            <!-- End event -->
+          {% endfor %}
+        <!-- End themes -->
+        </div>
+        <!-- End .events -->
+    {% endif %}
+
+    {% if todaysEvents.length > 0 %}
+      <div class="events events--list flow">
+        <ul role="list" class="flow">
+        {% for event in todaysEvents %}
+          <li>
+          <article
+            class="event event--{{ event.type }} content"
+            itemprop="event"
+            itemscope
+            itemtype="https://schema.org/Event"
+            data-event-type="normal"
+            data-event-attendancemode="{{ event.attendanceMode }}"
+            {% if event.callForSpeakers %}data-event-cfs{% endif %}>
+            <h3 class="event__title" itemprop="name">
+              {% if event.website %}
+                <a itemprop="url" href="{{ event.website }}">{{ event.title }}</a>
+              {% else %}
+                {{ event.title }}{% endif %}
+            </h3>
+            <div class="event__dates text-muted">
+              <span class="event__dateStart">
+                <span class="sr-only">Starts</span>
+                {% if event.day %}
+                  <time datetime="{{ event.dateStart | isoDate }}" itemprop="startDate">{{ event.dateStart | localizeDate: "MMMM D" }}</time>
+                {% else %}
+                  <time datetime="{{event.dateStart | isoDate}}" itemprop="startDate">
+                    {{ event.dateStart | localizeDate: "MMMM D h:mm A" }}
+                    <abbr title="{{ event.dateStart | localizeDate: 'z' | expandTimezone }}">
+                      {{ event.dateStart | localizeDate: 'z' }}
+                    </abbr>
+                  </time>
+                {% endif %}
+              </span>
+              {% if event.dateEnd %}
+                <span class="event__dateEnd">
+                  <span class="sr-only">Ends</span>
+                  <i class="fa-solid fa-arrow-right-long"></i>
+                  {% if event.day %}
+                    <time datetime="{{event.dateEnd | isoDate}}" itemprop="endDate">{{ event.dateEnd | localizeDate: "MMMM D" }}</time>
+                  {% else %}
+                    <time datetime="{{event.dateEnd | isoDate}}" itemprop="endDate">
+                      {{ event.dateEnd | localizeDate: "MMMM D h:mm A" }}
+                      <abbr title="{{ event.dateEnd | localizeDate: 'z' | expandTimezone }}">
+                        {{ event.dateEnd | localizeDate: 'z' }}
+                      </abbr>
+                    </time>
+                  {% endif %}
+                </span>
+              {% endif %}
+            </div>
+            <!-- End dates -->
+            <div class="event__delivery">
+              <span class="sr-only">Location:</span>
+              {% if event.attendanceMode == "online" %}
+                <span
+                  class="event__online"
+                  itemprop="eventAttendanceMode"
+                  content="https://schema.org/OnlineEventAttendanceMode">
+                  <i class="fa-solid fa-laptop"></i>
+                  Online</span>
+              {% endif %}
+              {% if event.attendanceMode == "offline" %}
+                <span
+                  class="event__location"
+                  itemprop="eventAttendanceMode"
+                  content="https://schema.org/OfflineEventAttendanceMode">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span
+                    itemprop="location"
+                    itemscope
+                    itemtype="https://schema.org/Place">{{ event.location | | "International" }}</span>
+                </span>
+              {% endif %}
+              {% if event.attendanceMode == "mixed" %}
+                <div itemprop="eventAttendanceMode" content="https://schema.org/MixedEventAttendanceMode">
+                  <span class="event__online">
+                    <i class="fa-solid fa-laptop"></i>
+                    Online</span>
+                  and
+                  <span class="event__location">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span
+                      itemprop="location"
+                      itemscope
+                      itemtype="https://schema.org/Place">{{ event.location | | "International" }}</span>
+                  </span>
+                </div>
+              {% endif %}
+            </div>
+            {% if event.description %}
+              <details class="event__description flow">
+                <summary>
+                  <i class="icon fa-solid fa-caret-right"></i>
+                  Description</summary>
+                <p itemprop="description" class="event__description">
+                  {{ event.description }}
+                </p>
+              </details>
+            {% endif %}
+            {% if event.children %}
+              <details class="event__children flow">
+                <summary>
+                  <i class="icon fa-solid fa-caret-right"></i>
+                  {% assign childCount = event.children | size %}
+                  {% if childCount == 1 %}
+                    {{ childCount }} accessibility highlight
+                  {% else %}
+                    {{ childCount }} accessibility highlights
+                  {% endif %}
+                </summary>
+                <div class="flow">
+                  <!-- List of child events -->
+                  <ul role="list" class="flow">
+                    {% for child in event.children %}
+                      <li
+                        class="event__child flow"
+                        itemprop="subEvent"
+                        itemscope
+                        itemtype="https://schema.org/Event">
+                        <span itemprop="name">
+                          {% if child.website %}
+                            <a href="{{ child.website }}">{{ child.title }}</a>
+                          {% else %}
+                            {{ child.title }}
+                          {% endif %}
+                        </span>
+                        <div class="event__dates text-muted">
+                          {% if child.format %}
+                            {% if child.format == "talk" %}
+                              Talk
+                            {% elsif child.format == "workshop" %}
+                              Workshop
+                            {% elsif child.format == "tutorial" %}
+                              Tutorial
+                            {% elsif child.format == "roundtable" %}
+                              Roundtable
+                            {% elsif child.format == "competition" %}
+                              Competition
+                            {% elsif child.format == "panel" %}
+                              Panel
+                            {% elsif child.format == "interview" %}
+                              Interview
+                            {% elsif child.format == "demo" %}
+                              Demo
+                            {% elsif child.format == "keynote" %}
+                              Keynote
+                            {% elsif child.format == "announcement" %}
+                              Announcement
+                            {% endif %}
+                            ·
+                          {% endif %}
+                          {% if child.scheduled != false %}
+
+                            {% assign parentStartDate = event.dateStart | date: "%Y-%m-%d" %}
+                            {% assign parentEndDate = event.dateEnd | date: "%Y-%m-%d" %}
+                            {% assign childStartDate = child.dateStart | date: "%s" %}
+                            {% assign childEndDate = child.dateEnd | date: "%s" %}
+                            {% assign duration_seconds = childEndDate | minus: childStartDate %}
+                            {% assign duration_minutes = duration_seconds | divided_by: 60 %}
+
+                            {% if parentEndDate == nil or parentStartDate == parentEndDate %}
+                              <span class="event__dateStart">
+                                <time datetime="{{ child.dateStart }}" itemprop="startDate">
+                                  {{ child.dateStart | localizeDate: "h:mm A" }}
+                                  <abbr title="{{ child.dateStart | localizeDate: 'z' | expandTimezone }}">
+                                    {{ child.dateStart | localizeDate: 'z' }}
+                                  </abbr>
+                                </time>
+                              </span>
+                              {% if child.dateEnd %}
+                                <meta itemprop="endDate" content="{{ child.dateEnd }}" />
+                                ·
+                                <span class="event__duration">
+                                  <span class="sr-only">Duration</span>
+                                  <time datetime="PT{{ duration_minutes }}M" itemprop="duration">
+                                    <i class="fa-solid fa-timer"></i>
+                                    {{ duration_minutes }} minutes
+                                  </time>
+                                </span>
+                              {% endif %}
+                            {% else %}
+                              <span class="event__dateStart">
+                                <span class="sr-only">Starts</span>
+                                <time datetime="{{ child.dateStart }}" itemprop="startDate">
+                                  {{ child.dateStart | localizeDate: "MMMM D h:mm A" }}
+                                  <abbr title="{{ child.dateStart | localizeDate: 'z' | expandTimezone }}">
+                                    {{ child.dateStart | localizeDate: 'z' }}
+                                  </abbr>
+                                </time>
+                              </span>
+                              {% if child.dateEnd %}
+                                <meta itemprop="endDate" content="{{ child.dateEnd }}" />
+                                ·
+                                <span class="event__duration">
+                                  <span class="sr-only">Duration</span>
+                                  <time datetime="PT{{ duration_minutes }}M" itemprop="duration">
+                                    <i class="fa-solid fa-timer"></i>
+                                    {{ duration_minutes }} minutes
+                                  </time>
+                                </span>
+                              {% endif %}
+                            {% endif %}
+                          {% else %}
+                            Not yet scheduled
+                          {% endif %}
+                          {% if child.attendanceMode == "online" %}
+                            <meta itemprop="eventAttendanceMode" content="https://schema.org/OnlineEventAttendanceMode" />
+                          {% endif %}
+                          {% if child.attendanceMode == "offline" %}
+                            <meta itemprop="eventAttendanceMode" content="https://schema.org/OfflineEventAttendanceMode" />
+                            <meta itemprop="location" content="{{ child.location }}" />
+                          {% endif %}
+                          {% if child.attendanceMode == "mixed" %}
+                            <meta itemprop="eventAttendanceMode" content="https://schema.org/MixedEventAttendanceMode" />
+                            <meta itemprop="location" content="{{ child.location }}" />
+                          {% endif %}
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </details>
+            {% endif %}
+          <!-- End .event__children -->
+          </article>
+          <!-- End .event -->
+          </li>
+        {% endfor %}
+        </ul>
+      <!-- End events -->
+      </div>
+      <!-- End events -->
+    {% endif %}
+
+    {% endedge %}
+
+  </div>
+<!-- End .container -->
+
+</section>
+<!-- End #today -->

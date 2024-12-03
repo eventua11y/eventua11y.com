@@ -1,0 +1,51 @@
+#global-footer {
+
+  --c-color-focus-ring: currentColor;
+
+  background: var(--c-footer-color-bg);
+  color: #fff;
+  padding: var(--p-space-m-l) 0;
+  a {
+    color: inherit;
+    text-decoration: underline;
+    &:hover,
+    &:active,
+    &:focus {
+      color: var(--c-footer-color-link-hover);
+    }
+  }
+  .logo {
+    margin-bottom: var(--p-space-m-l);
+    max-width: 10rem;
+  }
+
+  .social {
+    display: flex;
+    font-size: var(--p-step-1);
+    gap: var(--p-space-3xs-2xs);
+    margin-bottom: var(--p-space-s-m);
+  }
+
+  .social a {
+    color: var(--p-color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.1s ease-in-out;
+  }
+
+  .social a:hover,
+  .social a:active,
+  .social a:focus {
+    background: var(--s-color-primary);
+  }
+
+  .text-muted {
+    color: var(--c-footer-color-fg-muted);
+  }
+  
+}

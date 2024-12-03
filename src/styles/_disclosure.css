@@ -1,0 +1,32 @@
+details {
+  border-top: 1px solid var(--s-color-border);
+  padding: var(--p-space-xs) 0;
+  --flow-space: var(--p-space-3xs-2xs);
+}
+
+details:last-child {
+  padding-bottom: 0;
+}
+
+details > summary {
+  font-size: var(--p-step--1);
+  list-style: none;
+  user-select: none;
+}
+
+details > summary .icon {
+  margin-right: 0.25em;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary:hover {
+  color: var(--s-color-link-hover);
+  cursor: pointer;
+}
+
+details[open] .icon {
+  transform: rotate(90deg);
+}

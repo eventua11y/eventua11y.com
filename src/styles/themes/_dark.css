@@ -1,0 +1,56 @@
+html[data-theme="dark"] {
+  
+  --s-color-background: var(--p-color-black);
+  --s-color-on-background: var(--p-color-white);
+  --s-color-surface: var(--p-color-grey-900);
+  --s-color-on-surface: var(--p-color-white);
+  --s-color-primary: var(--p-color-purple-500);
+  --s-color-on-primary: var(--p-color-white);
+
+  /* Colors */
+  --s-color-secondary: var(--p-color-cyan);
+  --s-color-bg: var(--p-color-grey-900);
+  --s-color-bg-muted: var(--p-color-grey-900);
+  --s-color-fg: var(--p-color-white);
+  --s-color-fg-muted: var(--p-color-grey-400);
+  --s-color-border: var(--p-color-grey-800);
+
+  color-scheme: dark;
+  accent-color: var(--s-color-primary);
+
+  /* Body */
+  --c-body-color-bg: var(--s-color-bg);
+  --c-body-color-fg: var(--s-color-fg);
+  --c-color-link: var(--p-color-purple-100);
+  --c-color-link-hover: var(--p-color-purple-100);
+  --c-color-focus-ring: var(--p-color-white);
+
+  /* Masthead */
+  --c-masthead-color-bg: var(--p-color-black);
+  --c-masthead-color-fg: var(--p-color-white);
+  --c-masthead-color-border: var(--s-color-border);
+  --c-masthead-focus-ring-color: var(--p-color-white);
+ 
+  /* Navigation */
+  --c-nav-active-bg: var(--p-color-purple-500);
+  --c-nav-active-fg: var(--p-color-white);
+  --c-nav-hover-bg: var(--p-color-grey-900);
+  --c-nav-hover-fg: var(--c-nav-active-fg);
+
+  /* Footer */
+  --c-footer-color-bg: var(--p-color-purple-950);
+  --c-footer-color-muted-fg: var(--p-color-grey-400);
+  --c-footer-color-link: var(--color-primary);
+  --c-footer-color-link-hover: var(--s-color-secondary);
+  --c-footer-color-fg-muted: var(--p-color-grey-400);
+
+  /* Page header */
+  /* --page-header-color-bg: var(--color-primary);
+  --page-header-color-fg: var(--color-fg);
+  --page-header-accent-color: var(--color-fg); */
+}
+
+/* Shoelace */
+.sl-theme-dark {
+  /* --sl-focus-ring-color: var(--c-color-focus-ring); */
+}

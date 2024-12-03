@@ -1,0 +1,35 @@
+.btn {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 1000px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-block;
+  padding: var(--p-space-3xs) var(--p-space-xs-s);
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  appearance: none; /* Corrects inability to style clickable `input` types in iOS */
+  text-decoration: none;
+}
+
+.btn:hover,
+.btn:active,
+.btn:focus {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled,
+.btn.disabled,
+.btn[aria-disabled='true'] {
+  cursor: default;
+}
+
+.btn--block {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.btn--small {
+  font-size: var(--p-step--1);
+}

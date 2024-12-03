@@ -1,0 +1,16 @@
+#today {
+  --hover-color: var(--s-color-secondary);
+  background-color: var(--s-color-bg-muted);
+  color: var(--s-color-on-background);
+  padding: var(--p-space-s-l) 0;
+  .event--theme {
+    background-color: transparent;
+    color: var(--s-color-on-background);
+    padding: 0;
+  }
+}
+
+#today-heading {
+  border-bottom: 1px solid var(--s-color-border);
+  padding-bottom: var(--p-space-s);
+}

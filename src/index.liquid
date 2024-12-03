@@ -5,7 +5,7 @@ layout: layouts/base.liquid
 
 <h1 class="sr-only">Accessibility Events</h1>
 
-{% include "today" %}
+{% include "todaySimple" %}
 
 {% edge "liquid" events %}
   <div id="upcoming">
@@ -25,13 +25,15 @@ layout: layouts/base.liquid
         <section id="{{ month.month | downcase }}" class="month">
           <div class="container readable flow">
             {% assign currentYear = 'now' | date: "%Y" %}
-            <h2 class="month__heading">{{ month.month }}{% if month.year != currentYear %}
+            <h2 id="{{ month.month | downcase }}_heading" class="month__heading">{{ month.month }}{% if month.year != currentYear %}
                 {{ month.year }}{% endif %}
             </h2>
+            <ul role="list" class="flow" aria-labelledby="{{ month.month | downcase }}_heading">
             {% for event in month.events %}
+              <li>
               {%- if event.type == "theme" %}
                 <article
-                  class="event event--theme content"
+                  class="event event--theme"
                   itemprop="event"
                   itemscope
                   itemtype="https://schema.org/Event"
@@ -79,7 +81,7 @@ layout: layouts/base.liquid
                     <span class="sr-only">Location:</span>
                     <span class="event__location">
                       {% if event.location %}
-                        <i class="fa-solid fa-fw fa-location-dot"></i>
+                        <i class="fa-solid fa-location-dot"></i>
                         <span
                           itemprop="location"
                           itemscope
@@ -104,7 +106,14 @@ layout: layouts/base.liquid
                   itemtype="https://schema.org/Event"
                   data-event-type="normal"
                   data-event-attendancemode="{{ event.attendanceMode }}"
-                  {% if event.callForSpeakers %}data-event-cfs{% endif %}>
+                  {% if event.callForSpeakers %}
+                    {% if event.callForSpeakersClosingDate == empty %}
+                      data-event-cfs
+                    {% elsif event.callForSpeakersClosingDate >= currentDate %}
+                      data-event-cfs
+                    {% endif %}
+                  {% endif %}
+                >
                   <h3 class="event__title" itemprop="name">
                     {% if event.website %}
                       <a href="{{ event.website }}">{{ event.title }}</a>
@@ -164,7 +173,7 @@ layout: layouts/base.liquid
                         class="event__location"
                         itemprop="eventAttendanceMode"
                         content="https://schema.org/OfflineEventAttendanceMode">
-                        <i class="fa-solid fa-fw fa-location-dot"></i>
+                        <i class="fa-solid fa-location-dot"></i>
                         <span
                           itemprop="location"
                           itemscope
@@ -174,7 +183,7 @@ layout: layouts/base.liquid
                     {% if event.attendanceMode == "mixed" %}
                       <div itemprop="eventAttendanceMode" content="https://schema.org/MixedEventAttendanceMode">
                         <span class="event__location">
-                          <i class="fa-solid fa-fw fa-location-dot"></i>
+                          <i class="fa-solid fa-location-dot"></i>
                           <span
                             itemprop="location"
                             itemscope
@@ -215,10 +224,10 @@ layout: layouts/base.liquid
                             <p>{{ event.title }} is expected to include one or more accessibility-themed sessions but the full schedule has not yet been announced. Details will be published here closer to the date of the event.</p>
                           {% else %}  
                             <!-- List of child events -->
-                            <ul role="list" class="flow">
+                            <ul role="list" class="flow" aria-label="Accessibility highlights">
                               {% for child in event.children %}
                                 <li
-                                  class="event__child flow"
+                                  class="event__child flow-s"
                                   itemprop="subEvent"
                                   itemscope
                                   itemtype="https://schema.org/Event">
@@ -262,6 +271,8 @@ layout: layouts/base.liquid
                                       {% assign childEndDate = child.dateEnd | date: "%s" %}
                                       {% assign duration_seconds = childEndDate | minus: childStartDate %}
                                       {% assign duration_minutes = duration_seconds | divided_by: 60 %}
+                                      {% assign hours = duration_minutes | divided_by: 60 | floor %}
+                                      {% assign minutes = duration_minutes | modulo: 60 %}
 
                                       {% if parentEndDate == nil or parentStartDate == parentEndDate %}
                                         <span class="event__dateStart">
@@ -300,7 +311,15 @@ layout: layouts/base.liquid
                                             <span class="sr-only">Duration</span>
                                             <time datetime="PT{{ duration_minutes }}M" itemprop="duration">
                                               <i class="fa-solid fa-timer"></i>
-                                              {{ duration_minutes }} minutes
+                                              {% if duration_minutes > 60 %}
+                                                {% if minutes == 0 %}
+                                                  {{ hours }} hours
+                                                {% else %}
+                                                  {{ hours }} hours {{ minutes }} minutes
+                                                {% endif %}
+                                              {% else %}
+                                                {{ duration_minutes }} minutes
+                                              {% endif %}
                                             </time>
                                           </span>
                                         {% endif %}
@@ -330,20 +349,24 @@ layout: layouts/base.liquid
                     {% endif %}
                     <!-- End .event__children -->
                   {% endif %}
+                  {% assign currentDate = 'now' | date: '%Y-%m-%dT%H:%M:%S%z' %}
                   {% if event.callForSpeakers %}
-                  <div class="event__badges">
-                    {% if event.callForSpeakers %}<sl-badge
-                      variant="success"
-                      pill
-                      pulse>Call for speakers</sl-badge>
+                    {% if event.callForSpeakersClosingDate == null or event.callForSpeakersClosingDate >= currentDate %}
+                      <div class="event__badges">
+                        <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
+                        {% if event.callForSpeakersClosingDate != null %}
+                          <small class="text-muted">Closes: {{ event.callForSpeakersClosingDate | localizeDate: "MMMM D" }}</small>
+                        {% endif %}
+                      </div>
                     {% endif %}
-                  </div>
                   {% endif %}
                 </article>
                 <!-- End .event -->
               {% endif %}
+              </li>
             {% endfor %}
           {% comment %} end event loop {% endcomment %}
+          </ul>
           </div>
         <!-- End event .readable .container -->
         </section>
