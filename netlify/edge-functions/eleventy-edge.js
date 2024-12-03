@@ -137,7 +137,7 @@ export default async (request, context) => {
             months[monthIndex].events.push(event);
           }
         });
-        console.log(months);
+        // console.log(months);
         // Return the array of months
         return months;
       });
@@ -156,7 +156,7 @@ export default async (request, context) => {
       });
 
       // Return the user's timezone
-      eleventyConfig.addShortcode('timezone', function (context) {
+      eleventyConfig.addShortcode('timezone', function () {
         return timezone;
       });
 
