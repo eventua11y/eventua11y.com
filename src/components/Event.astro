@@ -7,16 +7,16 @@ import ChildEvent from './ChildEvent.astro';
 import EventDebug from './EventDebug.astro';
 ---
 <article
-  class={`event content event--${event.type}`}
+  class={`event event--${event.type}`}
   itemscope
   itemtype="https://schema.org/Event"
   data-event-type="normal"
 >
   <EventDebug event={event} />
   <h3 class="event__title">
-    {website ? <a href={website} class="event__website" itemprop="url">{title}</a> : title}
+    {website ? <a href={website} itemprop="url">{title}</a> : title}
   </h3>
-  <span class="text-muted text-small"><EventDate event={event} /></span>
+  <EventDate event={event} />
   <EventDelivery attendanceMode={attendanceMode} location={location} />
   {description && event.type !== 'theme' && (
       <details class="event__description flow">
@@ -57,6 +57,9 @@ import EventDebug from './EventDebug.astro';
   {callForSpeakers && (
     <div class="event__badges">
       <sl-badge variant="success" pill pulse>Call for speakers</sl-badge>
+      {event.callForSpeakersClosingDate && (
+        <small class="text-muted">Closes: {event.callForSpeakersClosingDate}</small>
+      )}
     </div>
   )}
 </article>

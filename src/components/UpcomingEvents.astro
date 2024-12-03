@@ -40,9 +40,9 @@ const groupedEvents = futureEvents.reduce((groups, event) => {
 
     // Return a section for each group of events, with a heading and a list of events
     return (
-      <section class="month" key={yearMonth}>
-        <h2 class="month__heading">{`${monthName}${displayYear}`}</h2>
-        <ul role="list" class="flow">
+      <section id={`month-${yearMonth}`} class="month" key={yearMonth}>
+        <h2 id={`month-${yearMonth}-heading`} class="month__heading">{`${monthName}${displayYear}`}</h2>
+        <ul aria-labelledby={`month-${yearMonth}-heading`} role="list" class="flow">
           {groupedEvents[yearMonth].map((event) => (
             event && <li key={event._id}>
               <Event event={event} />
@@ -50,6 +50,7 @@ const groupedEvents = futureEvents.reduce((groups, event) => {
           ))}
         </ul>
       </section>
+      // End .month
     );
   })
 )}

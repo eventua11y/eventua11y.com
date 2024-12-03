@@ -4,19 +4,23 @@ let { event } = Astro.props;
 
 <details class="debug" style="overflow:scroll;">
     <summary>{event.title} ({event._id})</summary>
-    <small>
-        <pre>{JSON.stringify(event, null, 2)}</pre>
-    </small>
+    <pre>{JSON.stringify(event, null, 2)}</pre>
 </details>
 
 <style>
+    summary {
+        color: rgba(255, 255, 255, .4);
+    }
+    summary:hover {
+        text-decoration: underline;
+    }
     details {
         border-radius: .5rem;
         border-top: none;
-        background-color: rgba(0, 0, 0, .03);
-        padding: var(--space-2xs);
+        background-color: #000;
+        padding: var(--p-space-2xs);
     }
     pre {
-        font-size: var(--step--2);
+        font-size: var(--p-step--2);
     }
 </style>
