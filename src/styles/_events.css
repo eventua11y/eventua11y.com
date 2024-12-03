@@ -9,7 +9,7 @@
 
 .event__title {
   font-size: var(--p-step-2);
-  margin-bottom: 0.4rem;
+  margin-bottom: var(--p-space-3xs);
   order: 3;
 }
 
@@ -21,7 +21,7 @@
   display: flex;
   font-size: var(--p-step--1);
   gap: 0.5em;
-  margin-bottom: 0.5em;
+  margin-bottom: var(--p-space-xs);
   order: 3;
 }
 
