@@ -1,26 +1,5 @@
+console.log('Hello from main.js!');
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.pathname === '/') {
-    // Get references to the necessary DOM elements
-    const filterDrawer = document.getElementById('filter-drawer');
-    const filterToolbar = document.querySelector('#filters');
-    const openButton = document.getElementById('open-filter-drawer');
-    const showEventsButton = document.getElementById('show-events');
-
-    // Add an event listener to the open button to show the filter drawer when clicked
-    openButton.addEventListener('click', () => filterDrawer.show());
-
-    // Add an event listener to the show events button to hide the filter drawer when clicked
-    showEventsButton.addEventListener('click', () => filterDrawer.hide());
-
-    // Create an Intersection Observer to toggle the "is-pinned" class on the filter toolbar
-    // when it intersects with the viewport
-    const observer = new IntersectionObserver(
-      ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
-      { threshold: [1] }
-    );
-    // Start observing the filter toolbar
-    observer.observe(filterToolbar);
-  }
 
   // Find all elements with the "no-js" class and remove that class
   const noJsElements = document.querySelectorAll('.no-js');
