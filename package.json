@@ -20,6 +20,14 @@
     "url": "https://github.com/mattobee/eventua11y/issues"
   },
   "homepage": "https://github.com/mattobee/eventua11y#readme",
+  "resolutions": {
+    "astro": "^5.0.2"
+  },
+  "overrides": {
+    "@sanity/astro": {
+      "astro": "^5.0.2"
+    }
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.8.1",
     "@playwright/test": "^1.40.0",
