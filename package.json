@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@astrojs/netlify": "^6.0.0",
+    "@astrojs/vue": "^5.0.1",
     "@sanity/client": "^6.10.0",
     "@sanity/image-url": "^1.0.2",
     "@types/react": "^18.2.45",
@@ -56,6 +57,7 @@
     "dotenv": "^16.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sanity": "^3.23.4"
+    "sanity": "^3.23.4",
+    "vue": "^3.5.13"
   }
 }
