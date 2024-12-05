@@ -16,13 +16,9 @@ export default defineConfig({
     }),
     vue({
       template: {
-        compilerOptions: {
-          isCustomElement: (tag) => tag.startsWith('sl-'),
-        },
-      }
-    },
-  {
-    devtools: true
-  }),
+        compilerOptions: { isCustomElement: (tag) => tag.startsWith('sl-') },
+      },
+      devtools: true,
+    }),
   ],
 });
