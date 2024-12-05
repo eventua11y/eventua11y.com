@@ -1,18 +1,17 @@
 ---
 import DefaultLayout from '../layouts/default.astro';
-import Today from '../components/Today.astro';
-import UpcomingEvents from '../components/UpcomingEvents.astro';
-import FilterBar from '../components/FilterBar.astro';
-import Filters from '../components/Filters.astro';
+import Today from '../components/Today.vue';
+import UpcomingEvents from '../components/UpcomingEvents.vue';
+import FilterBar from '../components/FilterBar.vue';
+import Filters from '../components/Filters.vue';
 
 ---
 <DefaultLayout>
   <Today />
-  <FilterBar />
-  <Filters />
+  <FilterBar client:load />
+  <Filters client:load />
   <div class="container readable">
-    <UpcomingEvents />
+    <UpcomingEvents client:load />
   </div>
   <!-- End container -->
-
 </DefaultLayout>

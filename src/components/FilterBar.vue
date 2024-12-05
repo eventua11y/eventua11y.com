@@ -1,3 +1,4 @@
+<template>
 <div id="filters" class="no-js">
   <div class="container readable">
     <div class="content" data-testid="button-filter">
@@ -10,7 +11,9 @@
           <small>Event count</small>
         </p>
         <sl-button
+          v-if="filtersStore.isChanged()"
           id="filter-reset"
+          @click="resetFilters"
           type="primary"
           name="filter-reset"
           ><i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters</sl-button
@@ -36,3 +39,14 @@
   <!-- End container -->
 </div>
 <!-- end Filter Bar -->
+</template>
+
+<script setup lang="ts">
+import filtersStore from '../store/filtersStore';
+
+// Function to reset filters
+function resetFilters() {
+  filtersStore.resetFilters();
+}
+
+</script>
