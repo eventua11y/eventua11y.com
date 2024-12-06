@@ -1,8 +1,10 @@
 <template>
   <div>
     <!-- If there are no upcoming events -->
-    <p v-if="Object.keys(groupedEvents).length === 0">No upcoming events</p>
-
+    <sl-alert open v-if="Object.keys(groupedEvents).length === 0" class="my-xl">
+      <sl-icon slot="icon" name="info-circle"></sl-icon>
+      For one reason or another, there are no events to display at the moment.
+    </sl-alert>
     <!-- If there are upcoming events -->
     <div v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
