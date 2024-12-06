@@ -5,7 +5,7 @@
     itemtype="https://schema.org/Event"
     data-event-type="normal"
   >
-    <EventDebug :event="event" />
+    <!-- <EventDebug :event="event" /> -->
     <h3 class="event__title">
       <a v-if="event.website" :href="event.website" itemprop="url">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
