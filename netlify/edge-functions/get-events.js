@@ -65,3 +65,5 @@ export default async (request) => {
     headers: { 'Content-Type': 'application/json' },
   });
 };
+
+export const config = { path: "/get-events" };
