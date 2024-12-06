@@ -20,9 +20,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Event from '../components/Event.vue';
 import getEvents from '../getEvents.js';
+import filtersStore from '../store/filtersStore';
 
 const groupedEvents = ref({});
 
@@ -32,12 +33,9 @@ const formatDate = (yearMonth) => {
   return `${date.toLocaleString('default', { month: 'long' })} ${year}`;
 };
 
-onMounted(async () => {
-  const events = await getEvents();
-  const futureEvents = events.future();
-
-  // Group events by month and year
-  const groups = futureEvents.reduce((groups, event) => {
+const filterAndGroupEvents = (events) => {
+  const filteredEvents = filtersStore.filterEvents(events);
+  const groups = filteredEvents.reduce((groups, event) => {
     const date = new Date(event.dateStart);
     const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
@@ -49,9 +47,19 @@ onMounted(async () => {
 
     return groups;
   }, {});
-  console.log("Groups:", groups);
   groupedEvents.value = groups;
+};
+
+onMounted(async () => {
+  const events = await getEvents();
+  filterAndGroupEvents(events.future());
 });
+
+watch(filtersStore.filters, async () => {
+  const events = await getEvents();
+  filterAndGroupEvents(events.future());
+});
+
 </script>
 
 <style scoped>
