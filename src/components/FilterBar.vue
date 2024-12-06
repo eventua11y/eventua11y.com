@@ -1,6 +1,6 @@
 <template>
   <div id="filters" class="no-js">
-    <div class="container readable">
+    <div class="container">
       <div class="content" data-testid="button-filter">
         <div class="status">
           <p class="filters__count text-muted" aria-live="polite" aria-atomic="true">
@@ -15,7 +15,8 @@
             name="filter-reset"><i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters</sl-button>
         </div>
         <!-- End status -->
-        <div class="filters__controls">
+        <div class="filters__controls d-flex gap-xs items-center">
+          <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Awareness days</sl-switch>
           <sl-dropdown>
             <sl-button slot="trigger" caret>Your timezone (GMT)</sl-button>
             <sl-menu>
@@ -50,6 +51,11 @@ function resetFilters() {
 // Function to open the filter drawer
 function openFilterDrawer() {
   uiStore.openFilterDrawer();
+}
+
+// Function to toggle awareness days filter
+function toggleAwarenessDays(event) {
+  filtersStore.filters.showAwarenessDays = event.target.checked;
 }
 
 // Fetch events on component mount
