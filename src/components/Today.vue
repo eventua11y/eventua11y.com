@@ -1,14 +1,14 @@
 <template>
   <section id="today">
     <div class="container flow">
-      <hgroup class="content py-0" role="group" aria-roledescription="Heading group">
+      <hgroup role="group" aria-roledescription="Heading group">
         <h2>Today</h2>
         <p aria-roledescription="subtitle">
           <time class="text-muted" :datetime="today.format('YYYY-MM-DD')">{{ today.format('MMMM D, YYYY') }}</time>
         </p>
       </hgroup>
 
-      <p v-if="todaysEvents.length === 0" class="content">Take it easy, there are no events today.</p>
+      <p v-if="todaysEvents.length === 0">Take it easy, there are no events today.</p>
       <div v-else class="events flow">
         <ul role="list" class="flow">
           <li v-for="event in todaysEvents" :key="event._id">

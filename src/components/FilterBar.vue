@@ -1,8 +1,7 @@
 <template>
-  <div id="filters" class="no-js">
+  <div id="filters" class="py-xs-s">
     <div class="container">
-      <div class="content" data-testid="button-filter">
-        <div class="status">
+        <div class="filters__status">
           <p class="filters__count text-muted" aria-live="polite" aria-atomic="true">
             <small v-if="filtersStore.showingAllEvents">Showing all {{ filtersStore.totalEventCount }} events</small>
             <small v-else>
@@ -18,17 +17,15 @@
           <sl-button id="open-filter-drawer" @click="openFilterDrawer">
             <i class="fa-solid fa-filter"></i> Filter
           </sl-button>
-          <sl-dropdown>
+          <!-- <sl-dropdown>
             <sl-button slot="trigger" caret>Your timezone (GMT)</sl-button>
             <sl-menu>
               <sl-menu-item>Your timezone (GMT)</sl-menu-item>
               <sl-menu-item>Event timezone</sl-menu-item>
             </sl-menu>
-          </sl-dropdown>
+          </sl-dropdown> -->
         </div>
         <!-- End filters__controls -->
-      </div>
-      <!-- End content -->
     </div>
     <!-- End container -->
   </div>
