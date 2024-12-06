@@ -1,4 +1,5 @@
-import { reactive, watch } from 'vue';
+import { reactive, computed, watch } from 'vue';
+import getEvents from '../getEvents.js';
 
 // Define the default filters
 const defaultFilters = {
@@ -21,6 +22,11 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
 // Create a reactive store
 const filtersStore = reactive({
   filters: { ...storedFilters },
+  events: [],
+  async fetchEvents() {
+    const events = await getEvents();
+    this.events = events.future();
+  },
   resetFilters() {
     this.filters = { ...defaultFilters };
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
@@ -52,6 +58,12 @@ const filtersStore = reactive({
       return matchesCfs && matchesAttendance && matchesThemes;
     });
   },
+  filteredEventCount: computed(() => {
+    return filtersStore.filterEvents(filtersStore.events).length;
+  }),
+  totalEventCount: computed(() => {
+    return filtersStore.events.length;
+  }),
 });
 
 // Watch for changes to the filters and save them to local storage

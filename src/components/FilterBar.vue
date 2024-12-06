@@ -8,7 +8,7 @@
           aria-live="polite"
           aria-atomic="true"
         >
-          <small>Event count</small>
+          <small>{{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events</small>
         </p>
         <sl-button
           v-if="filtersStore.isChanged()"
@@ -42,11 +42,18 @@
 </template>
 
 <script setup lang="ts">
+
+import { onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
 
 // Function to reset filters
 function resetFilters() {
   filtersStore.resetFilters();
 }
+
+// Fetch events on component mount
+onMounted(async () => {
+  await filtersStore.fetchEvents();
+});
 
 </script>
