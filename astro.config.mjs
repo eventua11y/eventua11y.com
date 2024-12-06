@@ -9,8 +9,8 @@ export default defineConfig({
   adapter: netlify(),
   integrations: [
     sanity({
-      projectId: '2g5zqxo3',
-      dataset: 'test',
+      projectId: process.env.SANITY_PROJECT,
+      dataset: process.env.SANITY_DATASET,
       // Set useCdn to false if you're building statically.
       useCdn: false,
     }),
