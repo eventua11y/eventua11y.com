@@ -4,9 +4,7 @@
       <div class="content" data-testid="button-filter">
         <div class="status">
           <p class="filters__count text-muted" aria-live="polite" aria-atomic="true">
-            <small v-if="filtersStore.showingAllEvents">
-              Showing all {{ filtersStore.totalEventCount }} events
-            </small>
+            <small v-if="filtersStore.showingAllEvents">Showing all {{ filtersStore.totalEventCount }} events</small>
             <small v-else>
               Showing {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events
             </small>
@@ -17,6 +15,9 @@
         <!-- End status -->
         <div class="filters__controls d-flex gap-xs items-center">
           <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Awareness days</sl-switch>
+          <sl-button id="open-filter-drawer" @click="openFilterDrawer">
+            <i class="fa-solid fa-filter"></i> Filter
+          </sl-button>
           <sl-dropdown>
             <sl-button slot="trigger" caret>Your timezone (GMT)</sl-button>
             <sl-menu>
@@ -24,9 +25,6 @@
               <sl-menu-item>Event timezone</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
-          <sl-button id="open-filter-drawer" @click="openFilterDrawer">
-            <i class="fa-solid fa-filter"></i> Filter
-          </sl-button>
         </div>
         <!-- End filters__controls -->
       </div>
