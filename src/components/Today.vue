@@ -1,6 +1,6 @@
 <template>
   <section id="today">
-    <div class="container readable flow">
+    <div class="container flow">
       <hgroup class="content py-0" role="group" aria-roledescription="Heading group">
         <h2>Today</h2>
         <p aria-roledescription="subtitle">
