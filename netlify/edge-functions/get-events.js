@@ -1,9 +1,15 @@
-import { sanityClient } from "sanity:client";
+import { createClient } from '@sanity/client';
+
+const client = createClient({
+  projectId: process.env.SANITY_PROJECT,
+  dataset: process.env.SANITY_DATASET,
+  useCdn: true, // `false` if you want to ensure fresh data
+});
 
 async function getEvents() {
   try {
     // Fetch all events from Sanity
-    const events = await sanityClient.fetch(
+    const events = await client.fetch(
       '*[_type == "event" && !(_id in path("drafts.**"))]',
     );
 
@@ -11,7 +17,7 @@ async function getEvents() {
     const allEvents = await Promise.all(
       events.map(async (event) => {
         // Find children of this event, sorted by dateStart in ascending order
-        const children = await sanityClient.fetch(
+        const children = await client.fetch(
           '*[_type == "event" && parent._ref == $eventId] | order(dateStart asc)',
           { eventId: event._id },
         );
@@ -53,4 +59,9 @@ async function getEvents() {
   }
 }
 
-export default getEvents;
+export default async (request) => {
+  const events = await getEvents();
+  return new Response(JSON.stringify(events), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
