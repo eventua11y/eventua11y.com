@@ -8,7 +8,12 @@
           aria-live="polite"
           aria-atomic="true"
         >
-          <small>{{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events</small>
+          <small v-if="filtersStore.showingAllEvents">
+            Showing all {{ filtersStore.totalEventCount }} events
+          </small>
+          <small v-else>
+            Showing {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events
+          </small>
         </p>
         <sl-button
           v-if="filtersStore.isChanged()"

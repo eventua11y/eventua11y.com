@@ -70,6 +70,9 @@ const filtersStore = reactive({
   totalEventCount: computed(() => {
     return filtersStore.events.length;
   }),
+  showingAllEvents: computed(() => {
+    return filtersStore.filteredEventCount === filtersStore.totalEventCount;
+  }),
 });
 
 // Watch for changes to the filters and save them to local storage
