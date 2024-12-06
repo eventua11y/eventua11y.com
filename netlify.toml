@@ -1,2 +1,5 @@
 [dev]
   targetPort = 4321
+
+[build]
+  edge_functions = "netlify/edge-functions"
