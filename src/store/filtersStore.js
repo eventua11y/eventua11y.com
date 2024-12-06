@@ -26,9 +26,14 @@ const filtersStore = reactive({
   events: [],
   filteredEvents: [],
   async fetchEvents() {
-    const events = await getEvents();
+    try {
+    const response = await fetch('/.netlify/edge-functions/get-events');
+    const events = await response.json();
     this.events = events.future();
     this.updateFilteredEvents();
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
   },
   resetFilters() {
     this.filters = { ...defaultFilters };
