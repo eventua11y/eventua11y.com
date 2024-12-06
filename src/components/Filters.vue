@@ -26,6 +26,7 @@
           <label for="filter-attendance-offline">Offline</label>
         </div>
       </fieldset>
+      <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Show awareness days</sl-switch>
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer">Show {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events</sl-button>
         <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary" name="filter-reset">
@@ -49,6 +50,11 @@ function closeDrawer() {
 // Function to reset filters and close the drawer
 function resetFilters() {
   filtersStore.resetFilters();
+}
+
+// Function to toggle awareness days filter
+function toggleAwarenessDays(event) {
+  filtersStore.filters.showAwarenessDays = event.target.checked;
 }
 
 </script>

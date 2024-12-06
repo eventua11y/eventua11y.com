@@ -8,6 +8,7 @@ const defaultFilters = {
   attendanceOnline: false,
   attendanceOffline: false,
   themes: true,
+  showAwarenessDays: true, // New filter for awareness days
 };
 
 // Load filters from local storage or use default filters
@@ -41,6 +42,16 @@ const filtersStore = reactive({
   },
   filterEvents(events) {
     return events.filter((event) => {
+      // Always include awareness days if the filter is enabled
+      if (this.filters.showAwarenessDays && event.type === 'theme') {
+        return true;
+      }
+
+      // Exclude awareness days from other filters
+      if (event.type === 'theme') {
+        return false;
+      }
+
       // Call for speakers filter
       const matchesCfs =
         (!this.filters.cfsOpen && !this.filters.cfsClosed) ||
