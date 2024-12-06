@@ -8,7 +8,7 @@ import Filters from '../components/Filters.vue';
 ---
 <DefaultLayout>
   <Today />
-  <FilterBar client:load />
+  <FilterBar client:load v-if="filtersStore.totalEventCount > 0" />
   <Filters client:load />
   <div class="container readable">
     <UpcomingEvents client:load />
