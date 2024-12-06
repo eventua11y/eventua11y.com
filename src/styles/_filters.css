@@ -6,16 +6,22 @@
   position: sticky;
   top: -1px;
   z-index: 1;
-  .content {
+  .container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
+    @media (min-width: 500px) {
+      flex-direction: row;
+    }
   }
-  .status {
+  .filters__status {
     align-items: center;
     margin-right: var(--p-space-xs-m);
     display: flex;
     flex-direction: row;
+  }
+  .filters__controls {
+    justify-content: space-between;
   }
   .filter-option {
     display: flex;

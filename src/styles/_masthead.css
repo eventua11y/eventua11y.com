@@ -9,6 +9,8 @@
     display: flex;
     justify-content: space-between;
     margin: 0 auto;
+    max-width: 1280px;
+    padding: 0 var(--p-space-xs-m);
   }
 }
 
