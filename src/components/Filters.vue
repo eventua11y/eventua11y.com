@@ -26,7 +26,12 @@
           <label for="filter-attendance-offline">Offline</label>
         </div>
       </fieldset>
-      <button @click="applyFilters">Apply Filters</button>
+      <div class="d-flex flex-col items-start gap-xs">
+        <sl-button variant="primary" size="large" @click="closeDrawer">Show {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events</sl-button>
+        <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary" name="filter-reset">
+          <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
+        </sl-button>
+      </div>
     </div>
   </sl-drawer>
 </template>
@@ -36,10 +41,14 @@
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
 
-// Function to apply filters
-function applyFilters() {
-  // Emit an event with the current filters
-  emit('apply-filters', filtersStore.filters);
+// Function to close the drawer
+function closeDrawer() {
+  uiStore.closeFilterDrawer();
+}
+
+// Function to reset filters and close the drawer
+function resetFilters() {
+  filtersStore.resetFilters();
 }
 
 </script>
