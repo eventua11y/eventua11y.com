@@ -23,15 +23,18 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
 const filtersStore = reactive({
   filters: { ...storedFilters },
   events: [],
+  filteredEvents: [],
   async fetchEvents() {
     const events = await getEvents();
     this.events = events.future();
+    this.updateFilteredEvents();
   },
   resetFilters() {
     this.filters = { ...defaultFilters };
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       localStorage.setItem('filters', JSON.stringify(this.filters));
     }
+    this.updateFilteredEvents();
   },
   isChanged() {
     return JSON.stringify(this.filters) !== JSON.stringify(defaultFilters);
@@ -58,8 +61,11 @@ const filtersStore = reactive({
       return matchesCfs && matchesAttendance && matchesThemes;
     });
   },
+  updateFilteredEvents() {
+    this.filteredEvents = this.filterEvents(this.events);
+  },
   filteredEventCount: computed(() => {
-    return filtersStore.filterEvents(filtersStore.events).length;
+    return filtersStore.filteredEvents.length;
   }),
   totalEventCount: computed(() => {
     return filtersStore.events.length;
@@ -72,6 +78,7 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     () => filtersStore.filters,
     (newFilters) => {
       localStorage.setItem('filters', JSON.stringify(newFilters));
+      filtersStore.updateFilteredEvents(); // Trigger re-computation of events
     },
     { deep: true }
   );
