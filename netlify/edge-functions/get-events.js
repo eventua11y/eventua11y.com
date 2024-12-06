@@ -3,7 +3,7 @@ import { createClient } from '@sanity/client';
 const client = createClient({
   projectId: process.env.SANITY_PROJECT,
   dataset: process.env.SANITY_DATASET,
-  useCdn: true, // `false` if you want to ensure fresh data
+  useCdn: process.env.SANITY_CDN, // `false` if you want to ensure fresh data
 });
 
 async function getEvents() {

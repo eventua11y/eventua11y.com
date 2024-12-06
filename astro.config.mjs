@@ -12,7 +12,7 @@ export default defineConfig({
       projectId: process.env.SANITY_PROJECT,
       dataset: process.env.SANITY_DATASET,
       // Set useCdn to false if you're building statically.
-      useCdn: false,
+      useCdn: process.env.SANITY_CDN,
     }),
     vue({
       template: {
