@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 
 // Define the default filters
 const defaultFilters = {
@@ -9,11 +9,23 @@ const defaultFilters = {
   themes: true,
 };
 
+// Load filters from local storage or use default filters
+let storedFilters = { ...defaultFilters };
+if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  const savedFilters = localStorage.getItem('filters');
+  if (savedFilters) {
+    storedFilters = JSON.parse(savedFilters);
+  }
+}
+
 // Create a reactive store
 const filtersStore = reactive({
-  filters: { ...defaultFilters },
+  filters: { ...storedFilters },
   resetFilters() {
     this.filters = { ...defaultFilters };
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('filters', JSON.stringify(this.filters));
+    }
   },
   isChanged() {
     return JSON.stringify(this.filters) !== JSON.stringify(defaultFilters);
@@ -41,5 +53,16 @@ const filtersStore = reactive({
     });
   },
 });
+
+// Watch for changes to the filters and save them to local storage
+if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  watch(
+    () => filtersStore.filters,
+    (newFilters) => {
+      localStorage.setItem('filters', JSON.stringify(newFilters));
+    },
+    { deep: true }
+  );
+}
 
 export default filtersStore;
