@@ -1,5 +1,4 @@
 import { reactive, computed, watch } from 'vue';
-import getEvents from '../getEvents.js';
 
 // Define the default filters
 const defaultFilters = {
@@ -25,12 +24,12 @@ const filtersStore = reactive({
   filters: { ...storedFilters },
   events: [],
   filteredEvents: [],
-  async fetchEvents() {
+    async fetchEvents() {
     try {
-    const response = await fetch('/.netlify/edge-functions/get-events');
-    const events = await response.json();
-    this.events = events.future();
-    this.updateFilteredEvents();
+      const response = await fetch('/get-events');
+      const events = await response.json();
+      this.events = events.future;
+      this.updateFilteredEvents();
     } catch (error) {
       console.error('Error fetching events:', error);
     }
