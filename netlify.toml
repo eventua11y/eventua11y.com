@@ -1,5 +1,15 @@
 [dev]
   targetPort = 4321
 
-[build]
-  edge_functions = "netlify/edge-functions"
+[[edge_functions]]
+  path = "/hello"
+  function = "hello"
+
+[[edge_functions]]
+  path = "/get-events"
+  function = "get-events"
+
+
+[[edge_functions]]
+  path = "/debug"
+  function = "debug"
