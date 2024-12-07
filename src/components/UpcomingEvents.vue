@@ -6,7 +6,7 @@
       For one reason or another, there are no events to display at the moment.
     </sl-alert>
     <!-- If there are upcoming events -->
-    <div v-else>
+    <div id="upcoming-events" v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
         <section :id="'section-' + yearMonth" class="month">
           <h2 :id="'heading-' + yearMonth" class="month__heading">{{ formatDate(yearMonth) }}</h2>

@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+
+
 test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
+  await page.waitForSelector('#upcoming-events');
 });
 
 test('filter button is visible', async ({ page }) => {

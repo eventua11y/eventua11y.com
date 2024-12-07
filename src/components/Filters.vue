@@ -10,7 +10,7 @@
         <div class="checkbox">
           <input type="checkbox" v-model="filtersStore.filters.cfsClosed" id="filter-cfs-closed"
             class="filter-option" />
-          <label for="filter-cfs-closed">Closed</label>
+          <label for="filter-cfs-closed">Not accepting talks</label>
         </div>
       </fieldset>
       <fieldset class="checkbox-group filter flow flow-tight">
@@ -29,7 +29,7 @@
       <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Show awareness days</sl-switch>
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer">Show {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events</sl-button>
-        <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary" name="filter-reset">
+        <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary" name="filter-reset" data-testid="drawer-reset">
           <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
         </sl-button>
       </div>
