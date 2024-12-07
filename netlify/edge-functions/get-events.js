@@ -3,8 +3,9 @@ import { createClient } from 'https://esm.sh/@sanity/client';
 console.log("Envars:", Netlify.env.toObject());
 
 const client = createClient({
-  projectId: '2g5zqxo3',
-  dataset: 'test',
+  projectId: Netlify.env.toObject('SANITY_PROJECT'),
+  dataset: Netlify.env.toObject('SANITY_DATASET'),
+  useCdn: Netlify.env.toObject('SANITY_CDN'),
   apiVersion: '2024-12-07',
 });
 
