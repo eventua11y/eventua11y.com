@@ -41,6 +41,7 @@ export default defineComponent({
     const todaysEvents = ref([]);
 
     onMounted(() => {
+      console.log('Today component mounted with events:', props.events);
       todaysEvents.value = props.events.filter(event => dayjs(event.date).isSame(today, 'day'));
     });
 

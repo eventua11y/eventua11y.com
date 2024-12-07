@@ -51,12 +51,14 @@ const groupEvents = (events) => {
 };
 
 onMounted(() => {
+  console.log('UpcomingEvents component mounted with events:', filtersStore.filteredEvents);
   groupEvents(filtersStore.filteredEvents);
 });
 
 watch(
   () => filtersStore.filteredEvents,
   (newFilteredEvents) => {
+    console.log('UpcomingEvents component updated with new filtered events:', newFilteredEvents);
     groupEvents(newFilteredEvents);
   },
   { deep: true }

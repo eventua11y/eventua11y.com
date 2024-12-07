@@ -27,6 +27,7 @@ const filtersStore = reactive({
   async fetchEvents() {
     if (this.events.length === 0) {
       try {
+        console.log('No local events. Fetching events from edge function...');
         const response = await fetch('/get-events');
         const events = await response.json();
         this.events = events.future;
@@ -80,6 +81,7 @@ const filtersStore = reactive({
   },
   updateFilteredEvents() {
     this.filteredEvents = this.filterEvents(this.events);
+    console.log('Filtered events updated:', this.filteredEvents);
   },
   filteredEventCount: computed(() => {
     return filtersStore.filteredEvents.length;
