@@ -23,18 +23,12 @@
   "resolutions": {
     "astro": "^5.0.2"
   },
-  "overrides": {
-    "@sanity/astro": {
-      "astro": "^5.0.2"
-    }
-  },
   "devDependencies": {
     "@axe-core/playwright": "^4.8.1",
     "@playwright/test": "^1.40.0",
-    "@sanity/astro": "^3.0.0",
     "@types/node": "^20.10.0",
     "@typescript-eslint/parser": "^6.14.0",
-    "astro": "^5.0.2",
+    "astro": "^5.0.3",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-astro": "^0.31.0",
@@ -49,7 +43,7 @@
   "dependencies": {
     "@astrojs/netlify": "^6.0.0",
     "@astrojs/vue": "^5.0.1",
-    "@sanity/client": "^6.10.0",
+    "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.0.2",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
