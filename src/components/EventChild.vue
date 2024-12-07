@@ -23,7 +23,6 @@
 import { defineProps, computed } from 'vue';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
-import EventDebug from './EventDebug.vue';
 
 const props = defineProps({
   event: {
