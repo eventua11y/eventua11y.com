@@ -17,9 +17,9 @@ console.log('Events fetched during SSR:', events.length);
 
 <DefaultLayout>
   <Today events={events} />
-  <FilterBar client:only v-if="events.length > 0" />
+  <FilterBar client:load v-if="events.length > 0" />
   <Filters client:only="vue" />
-  <div class="container readable">
+  <div class="container readable py-l">
     <UpcomingEvents events={events} client:load />
   </div>
   <!-- End container -->

@@ -34,9 +34,11 @@
 
 <script setup lang="ts">
 
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
+
+const filterToolbar = ref(null);
 
 // Function to reset filters
 function resetFilters() {
@@ -53,9 +55,15 @@ function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
 }
 
-// Fetch events on component mount
-// onMounted(async () => {
-//   await filtersStore.fetchEvents();
-// });
+onMounted(() => {
+  // Create an Intersection Observer to toggle the "is-pinned" class on the filter toolbar
+  // when it intersects with the viewport
+  const observer = new IntersectionObserver(
+    ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
+    { threshold: [1] }
+  );
+  // Start observing the filter toolbar
+  observer.observe(filterToolbar.value);
+});
 
 </script>
