@@ -25,6 +25,7 @@
 import { ref, onMounted, watch } from 'vue';
 import Event from '../components/Event.vue';
 import filtersStore from '../store/filtersStore';
+import userStore from '../store/userStore';
 
 const groupedEvents = ref({});
 
@@ -50,7 +51,31 @@ const groupEvents = (events) => {
   groupedEvents.value = groups;
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch user info when the component is mounted, only if not already populated
+  if (!userStore.userInfoFetched) {
+    try {
+      console.log('Fetching user info...');
+      const response = await fetch('/api/get-user-info');
+      const data = await response.json();
+      console.log('User info fetched:', data);
+      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+      console.log('User info set in store:', {
+        timezone: userStore.timezone,
+        locale: userStore.locale,
+        geo: userStore.geo,
+      });
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+    }
+  } else {
+    console.log('User info already set in store:', {
+      timezone: userStore.timezone,
+      locale: userStore.locale,
+      geo: userStore.geo,
+    });
+  }
+
   groupEvents(filtersStore.filteredEvents);
 });
 

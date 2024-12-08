@@ -25,8 +25,16 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { onMounted } from 'vue';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import userStore from '../store/userStore';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(localizedFormat);
 
 const props = defineProps({
   event: {
@@ -37,9 +45,8 @@ const props = defineProps({
 
 // Helper function to format date and time
 function formatDate(date, format) {
-  return dayjs(date).format(format);
+  const userTimezone = userStore.timezone || 'UTC'; // Default to 'UTC' if timezone is not set
+  const userLocale = userStore.locale || 'en'; // Default to 'en' if locale is not set
+  return dayjs(date).tz(userTimezone).locale(userLocale).format(format);
 }
 </script>
-
-<!-- <style scoped>
-</style> -->
