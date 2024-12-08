@@ -34,28 +34,25 @@
 
 <script setup lang="ts">
 
-import { onMounted } from 'vue';
+import { ref } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
 
-// Function to reset filters
+const filters = ref(filtersStore.filters);
+
 function resetFilters() {
   filtersStore.resetFilters();
+  console.log('Filters reset:', filtersStore.filters);
 }
 
-// Function to open the filter drawer
 function openFilterDrawer() {
   uiStore.openFilterDrawer();
 }
 
-// Function to toggle awareness days filter
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
+  filtersStore.updateFilteredEvents();
+  console.log('Toggled awareness days:', filtersStore.filters.showAwarenessDays);
 }
-
-// Fetch events on component mount
-onMounted(async () => {
-  await filtersStore.fetchEvents();
-});
 
 </script>

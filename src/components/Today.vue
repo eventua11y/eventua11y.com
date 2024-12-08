@@ -24,25 +24,20 @@
 import { ref, onMounted, defineComponent } from 'vue';
 import dayjs from 'dayjs';
 import Event from './Event.vue';
+import filtersStore from '../store/filtersStore';
 
 export default defineComponent({
   name: 'Today',
   components: {
     Event,
   },
-  props: {
-    events: {
-      type: Array,
-      required: true,
-    },
-  },
-  setup(props) {
+  setup() {
     const today = dayjs().startOf('day');
     const todaysEvents = ref([]);
 
     onMounted(() => {
-      console.log('Today component mounted with events:', props.events);
-      todaysEvents.value = props.events.filter(event => dayjs(event.date).isSame(today, 'day'));
+      console.log('Today component mounted with events:', filtersStore.filteredEvents.length);
+      todaysEvents.value = filtersStore.filteredEvents.filter(event => dayjs(event.dateStart).isSame(today, 'day'));
     });
 
     return {

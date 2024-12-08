@@ -24,17 +24,20 @@ const filtersStore = reactive({
   filters: { ...storedFilters },
   events: [],
   filteredEvents: [],
+  initializeEvents(events) {
+    console.log('Initializing events in the store:', events.length);
+    this.events = events;
+    this.updateFilteredEvents();
+  },
   async fetchEvents() {
-    if (this.events.length === 0) {
-      try {
-        console.log('No local events. Fetching events from edge function...');
-        const response = await fetch('/get-events');
-        const events = await response.json();
-        this.events = events.future;
-        this.updateFilteredEvents();
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
+    try {
+      console.log('Fetching events from edge function...');
+      const response = await fetch('/get-events');
+      const { future: events } = await response.json();
+      console.log('Events fetched from edge function:', events.length);
+      this.initializeEvents(events);
+    } catch (error) {
+      console.error('Error fetching events:', error);
     }
   },
   resetFilters() {
@@ -81,7 +84,7 @@ const filtersStore = reactive({
   },
   updateFilteredEvents() {
     this.filteredEvents = this.filterEvents(this.events);
-    console.log('Filtered events updated:', this.filteredEvents);
+    console.log('Filtered events updated:', this.filteredEvents.length);
   },
   filteredEventCount: computed(() => {
     return filtersStore.filteredEvents.length;
@@ -93,6 +96,11 @@ const filtersStore = reactive({
     return filtersStore.filteredEventCount === filtersStore.totalEventCount;
   }),
 });
+
+// Fetch events on the client side during hydration
+if (typeof window !== 'undefined') {
+  filtersStore.fetchEvents();
+}
 
 // Watch for changes to the filters and save them to local storage
 if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {

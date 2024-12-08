@@ -4,6 +4,7 @@ import Today from '../components/Today.vue';
 import UpcomingEvents from '../components/UpcomingEvents.vue';
 import FilterBar from '../components/FilterBar.vue';
 import Filters from '../components/Filters.vue';
+import filtersStore from '../store/filtersStore';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
@@ -12,15 +13,19 @@ export const prerender = false;
 console.log('Fetching events during SSR...');
 const response = await fetch('https://deploy-preview-85--eventua11y.netlify.app/get-events');
 const { future: events } = await response.json();
-console.log('Events fetched during SSR:', events);
+console.log('Events fetched during SSR:', events.length);
+
+// Initialize the Vue store with events
+filtersStore.initializeEvents(events);
+console.log('Initialized events in store:', filtersStore.events);
 ---
 
 <DefaultLayout>
-  <Today :events="events" />
-  <FilterBar client:load v-if="events.length > 0" />
+  <Today events={filtersStore.filteredEvents} />
+  <FilterBar client:load v-if={filtersStore.filteredEvents.length > 0} />
   <Filters client:load />
   <div class="container readable">
-    <UpcomingEvents :events="events" client:load />
+    <UpcomingEvents events={filtersStore.filteredEvents} client:load />
   </div>
   <!-- End container -->
 </DefaultLayout>
