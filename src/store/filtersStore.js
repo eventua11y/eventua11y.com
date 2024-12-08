@@ -23,22 +23,26 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
 const filtersStore = reactive({
   filters: { ...storedFilters },
   events: [],
-  todayEvents: [], // Add a separate property for today's events
+  todayEvents: [],
+  futureEvents: [],
+  pastEvents: [],
   filteredEvents: [],
   async fetchEvents() {
     try {
       const stackTrace = new Error().stack;
-      console.log('fetchEvents called by:', stackTrace);
+      console.log('Fetching events from the edge', stackTrace);
       const response = await fetch('/get-events');
       const events = await response.json();
-      this.setEvents(events.future, events.today);
+      this.setEvents(events.future, events.today, events.past);
     } catch (error) {
       console.error('Error fetching events:', error);
     }
   },
-  setEvents(futureEvents, todayEvents) {
-    this.events = futureEvents;
-    this.todayEvents = todayEvents; // Set today's events
+  setEvents(futureEvents, todayEvents, pastEvents) {
+    this.events = [...futureEvents, ...todayEvents, ...pastEvents];
+    this.todayEvents = todayEvents;
+    this.futureEvents = futureEvents;
+    this.pastEvents = pastEvents;
     this.updateFilteredEvents();
   },
   resetFilters() {
@@ -84,17 +88,11 @@ const filtersStore = reactive({
     });
   },
   updateFilteredEvents() {
-    this.filteredEvents = this.filterEvents(this.events);
+    this.filteredEvents = this.filterEvents(this.futureEvents);
     console.log('Filtered events updated:', this.filteredEvents);
   },
-  filteredEventCount: computed(() => {
-    return filtersStore.filteredEvents.length;
-  }),
-  totalEventCount: computed(() => {
-    return filtersStore.events.length;
-  }),
   showingAllEvents: computed(() => {
-    return filtersStore.filteredEventCount === filtersStore.totalEventCount;
+    return filtersStore.filteredEvents.length === filtersStore.futureEvents.length;
   }),
 });
 
@@ -108,6 +106,11 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     },
     { deep: true }
   );
+}
+
+// If events are not already loaded, fetch them
+if (!filtersStore.events.length) {
+  await filtersStore.fetchEvents();
 }
 
 export default filtersStore;

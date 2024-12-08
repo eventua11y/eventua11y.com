@@ -28,7 +28,7 @@
       </fieldset>
       <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Show awareness days</sl-switch>
       <div class="d-flex flex-col items-start gap-xs">
-        <sl-button variant="primary" size="large" @click="closeDrawer">Show {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events</sl-button>
+        <sl-button variant="primary" size="large" @click="closeDrawer">Show {{ filtersStore.filteredEvents.length }} of {{ filtersStore.futureEvents.length }} events</sl-button>
         <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary" name="filter-reset" data-testid="drawer-reset">
           <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
         </sl-button>

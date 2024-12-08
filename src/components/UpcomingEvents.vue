@@ -28,11 +28,6 @@ import filtersStore from '../store/filtersStore';
 
 const groupedEvents = ref({});
 
-// Fetch events on component mount
-onMounted(async () => {
-  await filtersStore.fetchEvents();
-});
-
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
   const date = new Date(year, month - 1);
@@ -56,19 +51,18 @@ const groupEvents = (events) => {
 };
 
 onMounted(() => {
-  console.log('UpcomingEvents component mounted with events:', filtersStore.filteredEvents);
   groupEvents(filtersStore.filteredEvents);
 });
 
 watch(
   () => filtersStore.filteredEvents,
   (newFilteredEvents) => {
-    console.log('UpcomingEvents component updated with new filtered events:', newFilteredEvents);
     groupEvents(newFilteredEvents);
   },
   { deep: true }
 );
 </script>
 
-<!-- <style scoped>
-</style> -->
+<style scoped>
+/* Add any scoped styles here */
+</style>

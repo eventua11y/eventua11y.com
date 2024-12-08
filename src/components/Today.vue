@@ -34,7 +34,9 @@ const updateTodaysEvents = () => {
 };
 
 onMounted(async () => {
-  await filtersStore.fetchEvents();
+  // if (!filtersStore.events.length) {
+  //   await filtersStore.fetchEvents();
+  // }
   updateTodaysEvents();
 });
 

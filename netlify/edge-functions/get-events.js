@@ -79,7 +79,7 @@ async function fetchEventsFromSanity(client) {
         )
       ),
       past: eventsWithChildren.filter(event => 
-        new Date(event.dateStart) < now && !event.parent
+        new Date(event.dateEnd) < now && !event.parent
       ),
       today: sortEventsByDate(
         eventsWithChildren.filter(event => 

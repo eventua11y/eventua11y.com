@@ -3,9 +3,9 @@
     <div class="container">
         <div class="filters__status">
           <p class="filters__count text-muted" aria-live="polite" aria-atomic="true">
-            <small v-if="filtersStore.showingAllEvents">Showing all {{ filtersStore.totalEventCount }} events</small>
+            <small v-if="filtersStore.showingAllEvents">Showing all {{ filtersStore.futureEvents.length }} upcoming events</small>
             <small v-else>
-              Showing {{ filtersStore.filteredEventCount }} of {{ filtersStore.totalEventCount }} events
+              Showing {{ filtersStore.filteredEvents.length }} of {{ filtersStore.futureEvents.length }} upcoming events
             </small>
           </p>
           <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary"
