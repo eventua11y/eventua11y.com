@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@sanity/client';
+import dayjs from 'https://esm.sh/dayjs';
 
 // In-memory cache
 let cache = {
@@ -67,6 +68,8 @@ async function fetchEventsFromSanity(client) {
     }));
 
     const now = new Date();
+    const todayStart = dayjs().startOf('day').toDate();
+    const todayEnd = dayjs().endOf('day').toDate();
     
     return {
       events: eventsWithChildren,
@@ -77,6 +80,11 @@ async function fetchEventsFromSanity(client) {
       ),
       past: eventsWithChildren.filter(event => 
         new Date(event.dateStart) < now && !event.parent
+      ),
+      today: sortEventsByDate(
+        eventsWithChildren.filter(event => 
+          new Date(event.dateStart) >= todayStart && new Date(event.dateStart) <= todayEnd && !event.parent
+        )
       ),
     };
   } catch (error) {

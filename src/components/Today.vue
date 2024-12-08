@@ -30,7 +30,7 @@ const today = dayjs().startOf('day');
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
-  todaysEvents.value = filtersStore.state.events.filter(event => dayjs(event.date).isSame(today, 'day'));
+  todaysEvents.value = filtersStore.todayEvents;
 };
 
 onMounted(async () => {
@@ -39,7 +39,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => filtersStore.state.events,
+  () => filtersStore.todayEvents,
   () => {
     updateTodaysEvents();
   },

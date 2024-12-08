@@ -23,17 +23,22 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
 const filtersStore = reactive({
   filters: { ...storedFilters },
   events: [],
+  todayEvents: [], // Add a separate property for today's events
   filteredEvents: [],
   async fetchEvents() {
     try {
-      console.log('No local events. Fetching events from edge function...');
+      console.log('Fetching events from edge function...');
       const response = await fetch('/get-events');
       const events = await response.json();
-      this.events = events.future;
-      this.updateFilteredEvents();
+      this.setEvents(events.future, events.today);
     } catch (error) {
       console.error('Error fetching events:', error);
     }
+  },
+  setEvents(futureEvents, todayEvents) {
+    this.events = futureEvents;
+    this.todayEvents = todayEvents; // Set today's events
+    this.updateFilteredEvents();
   },
   resetFilters() {
     this.filters = { ...defaultFilters };
