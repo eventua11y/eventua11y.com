@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
 
@@ -55,15 +55,18 @@ function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
 }
 
-onMounted(() => {
-  // Create an Intersection Observer to toggle the "is-pinned" class on the filter toolbar
-  // when it intersects with the viewport
-  const observer = new IntersectionObserver(
-    ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
-    { threshold: [1] }
-  );
-  // Start observing the filter toolbar
-  observer.observe(filterToolbar.value);
+onMounted(async () => {
+  await nextTick();
+  if (filterToolbar.value) {
+    // Create an Intersection Observer to toggle the "is-pinned" class on the filter toolbar
+    // when it intersects with the viewport
+    const observer = new IntersectionObserver(
+      ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
+      { threshold: [1] }
+    );
+    // Start observing the filter toolbar
+    observer.observe(filterToolbar.value);
+  }
 });
 
 </script>
