@@ -20,37 +20,31 @@
   </section>
 </template>
 
-<script>
-import { ref, onMounted, defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue';
 import dayjs from 'dayjs';
 import Event from './Event.vue';
+import filtersStore from '../store/filtersStore';
 
-export default defineComponent({
-  name: 'Today',
-  components: {
-    Event,
-  },
-  props: {
-    events: {
-      type: Array,
-      required: true,
-    },
-  },
-  setup(props) {
-    const today = dayjs().startOf('day');
-    const todaysEvents = ref([]);
+const today = dayjs().startOf('day');
+const todaysEvents = ref([]);
 
-    onMounted(() => {
-      console.log('Today component mounted with events:', props.events);
-      todaysEvents.value = props.events.filter(event => dayjs(event.date).isSame(today, 'day'));
-    });
+const updateTodaysEvents = () => {
+  todaysEvents.value = filtersStore.state.events.filter(event => dayjs(event.date).isSame(today, 'day'));
+};
 
-    return {
-      today,
-      todaysEvents,
-    };
-  },
+onMounted(async () => {
+  await filtersStore.fetchEvents();
+  updateTodaysEvents();
 });
+
+watch(
+  () => filtersStore.state.events,
+  () => {
+    updateTodaysEvents();
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

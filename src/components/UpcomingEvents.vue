@@ -26,12 +26,12 @@ import { ref, onMounted, watch } from 'vue';
 import Event from '../components/Event.vue';
 import filtersStore from '../store/filtersStore';
 
+const groupedEvents = ref({});
+
 // Fetch events on component mount
 onMounted(async () => {
   await filtersStore.fetchEvents();
 });
-
-const groupedEvents = ref({});
 
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');

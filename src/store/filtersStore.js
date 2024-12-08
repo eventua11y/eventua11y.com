@@ -25,16 +25,14 @@ const filtersStore = reactive({
   events: [],
   filteredEvents: [],
   async fetchEvents() {
-    if (this.events.length === 0) {
-      try {
-        console.log('No local events. Fetching events from edge function...');
-        const response = await fetch('/get-events');
-        const events = await response.json();
-        this.events = events.future;
-        this.updateFilteredEvents();
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
+    try {
+      console.log('No local events. Fetching events from edge function...');
+      const response = await fetch('/get-events');
+      const events = await response.json();
+      this.events = events.future;
+      this.updateFilteredEvents();
+    } catch (error) {
+      console.error('Error fetching events:', error);
     }
   },
   resetFilters() {
