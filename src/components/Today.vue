@@ -47,6 +47,5 @@ watch(
 );
 </script>
 
-<style scoped>
-/* Add any scoped styles here */
-</style>
+<!-- <style scoped>
+</style> -->

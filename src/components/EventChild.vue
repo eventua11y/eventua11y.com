@@ -46,6 +46,5 @@ const displayFormat = computed(() => formatStrings[props.event.format] || props.
 
 </script>
 
-<style scoped>
-/* Add any scoped styles here */
-</style>
+<!-- <style scoped>
+</style> -->
