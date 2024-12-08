@@ -1,6 +1,6 @@
 <template>
   <article class="flow-s" itemprop="subEvent" itemscope itemtype="https://schema.org/Event">
-    <EventDebug :event="event" />
+    <!-- <EventDebug :event="event" /> -->
     <span itemprop="name">
       <a v-if="event.website" :href="event.website">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>

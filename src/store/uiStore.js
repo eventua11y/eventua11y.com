@@ -8,6 +8,9 @@ const uiStore = reactive({
   closeFilterDrawer() {
     this.isFilterDrawerOpen = false;
   },
+  toggleFilterDrawer() {
+    this.isFilterDrawerOpen = !this.isFilterDrawerOpen;
+  },
 });
 
 export default uiStore;

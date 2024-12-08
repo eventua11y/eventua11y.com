@@ -38,13 +38,26 @@
 </template>
 
 <script setup lang="ts">
-
+import { ref, onMounted, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
+
+// Debug initial state
+onMounted(() => {
+  console.log('Mounted: Initial state of isFilterDrawerOpen:', uiStore.isFilterDrawerOpen);
+  uiStore.closeFilterDrawer();
+  console.log('After closeFilterDrawer: State of isFilterDrawerOpen:', uiStore.isFilterDrawerOpen);
+});
+
+// Watch for state changes
+watch(() => uiStore.isFilterDrawerOpen, (newVal) => {
+  console.log('State change: isFilterDrawerOpen:', newVal);
+});
 
 // Function to close the drawer
 function closeDrawer() {
   uiStore.closeFilterDrawer();
+  console.log('closeDrawer called: State of isFilterDrawerOpen:', uiStore.isFilterDrawerOpen);
 }
 
 // Function to reset filters and close the drawer

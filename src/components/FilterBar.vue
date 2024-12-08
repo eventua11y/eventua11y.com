@@ -54,8 +54,8 @@ function toggleAwarenessDays(event) {
 }
 
 // Fetch events on component mount
-onMounted(async () => {
-  await filtersStore.fetchEvents();
-});
+// onMounted(async () => {
+//   await filtersStore.fetchEvents();
+// });
 
 </script>
