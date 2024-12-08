@@ -2,14 +2,14 @@
   targetPort = 4321
 
 [[edge_functions]]
-  path = "/hello"
+  path = "/api/hello"
   function = "hello"
 
 [[edge_functions]]
-  path = "/get-events"
+  path = "/api/get-events"
   function = "get-events"
 
 
 [[edge_functions]]
-  path = "/debug"
+  path = "/api/debug"
   function = "debug"

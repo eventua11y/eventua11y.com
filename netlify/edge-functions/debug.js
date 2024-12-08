@@ -35,4 +35,4 @@ export default async (request) => {
   }
 };
 
-export const config = { path: "/debug" };
+export const config = { path: "/api/debug" };

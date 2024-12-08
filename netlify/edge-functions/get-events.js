@@ -135,4 +135,4 @@ export default async function handler(request) {
   }
 }
 
-export const config = { path: '/get-events' };
+export const config = { path: '/api/get-events' };

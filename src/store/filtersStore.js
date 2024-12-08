@@ -31,7 +31,7 @@ const filtersStore = reactive({
     try {
       const stackTrace = new Error().stack;
       console.log('Fetching events from the edge', stackTrace);
-      const response = await fetch('/get-events');
+      const response = await fetch('/api/get-events');
       const events = await response.json();
       this.setEvents(events.future, events.today, events.past);
     } catch (error) {
