@@ -27,7 +27,8 @@ const filtersStore = reactive({
   filteredEvents: [],
   async fetchEvents() {
     try {
-      console.log('Fetching events from edge function...');
+      const stackTrace = new Error().stack;
+      console.log('fetchEvents called by:', stackTrace);
       const response = await fetch('/get-events');
       const events = await response.json();
       this.setEvents(events.future, events.today);
