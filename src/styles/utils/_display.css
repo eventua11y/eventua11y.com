@@ -1,3 +1,11 @@
 .d-flex {
-  display: flex;
+  display: flex !important;
+}
+
+.flex-col {
+  flex-direction: column !important;
+}
+
+.flex-row {
+  flex-direction: row !important;
 }

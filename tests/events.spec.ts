@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
+  await page.waitForSelector('#upcoming-events');
 });
 
 test('has title', async ({ page }) => {
