@@ -33,7 +33,7 @@ jobs:
     needs: tests_e2e_netlify_prepare
     name: Run end-to-end tests on Netlify PR preview
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,19 +43,8 @@ jobs:
         run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
-      - name: Install Allure CLI and Allure Playwright
-        run: |
-          npm install -g allure-commandline --save-dev
-          npm install --save-dev allure-playwright
-      - name: Run tests and generate Allure results
-        run: npx playwright test --reporter=line,allure-playwright
+      - name: Run tests
+        run: npx playwright test
         env:
           PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
           DEBUG: pw:api
-      - name: Generate Allure report
-        run: allure generate allure-results --clean -o allure-report --single-file
-      - name: Upload Allure report
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report
-          path: allure-report
