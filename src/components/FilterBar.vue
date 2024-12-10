@@ -13,18 +13,11 @@
         </div>
         <!-- End status -->
         <div class="filters__controls d-flex gap-xs items-center">
-          <TimezoneSelector />
           <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Awareness days</sl-switch>
           <sl-button id="open-filter-drawer" @click="openFilterDrawer">
             <i class="fa-solid fa-filter"></i> Filter
           </sl-button>
-          <!-- <sl-dropdown>
-            <sl-button slot="trigger" caret>Your timezone (GMT)</sl-button>
-            <sl-menu>
-              <sl-menu-item>Your timezone (GMT)</sl-menu-item>
-              <sl-menu-item>Event timezone</sl-menu-item>
-            </sl-menu>
-          </sl-dropdown> -->
+          <TimezoneSelector />
         </div>
         <!-- End filters__controls -->
     </div>

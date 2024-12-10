@@ -1,11 +1,22 @@
 <template>
   <div>
-    <label for="timezone">Select Timezone:</label>
-    <select id="timezone" v-model="selectedTimezone" @change="updateTimezone">
-      <option v-for="timezone in timezones" :key="timezone" :value="timezone">
-        {{ timezone }}
-      </option>
-    </select>
+    <label class="sr-only" for="timezone-dropdown">Timezone</label>
+    <sl-dropdown id="timezone-dropdown" distance="3" placement="bottom-end">
+      <sl-button slot="trigger" caret>
+        {{ selectedTimezone }}
+      </sl-button>
+      <sl-menu @sl-select="updateTimezone">
+        <sl-menu-item 
+          v-for="timezone in timezones" 
+          :key="timezone" 
+          :value="timezone" 
+          type="checkbox" 
+          :checked="timezone === selectedTimezone"
+        >
+          {{ timezone }}
+        </sl-menu-item>
+      </sl-menu>
+    </sl-dropdown>
   </div>
 </template>
 
@@ -21,18 +32,18 @@ const timezones = [
   // Add more timezones as needed
 ];
 
-function updateTimezone() {
-  userStore.timezone = selectedTimezone.value;
-  localStorage.setItem('userTimezone', selectedTimezone.value);
+function updateTimezone(event) {
+  const timezone = event.detail.item.value;
+  selectedTimezone.value = timezone;
+  userStore.timezone = timezone;
+  localStorage.setItem('userTimezone', timezone);
 }
 
 onMounted(() => {
-  if (!userStore.timezone) {
-    const savedTimezone = localStorage.getItem('userTimezone');
-    if (savedTimezone) {
-      selectedTimezone.value = savedTimezone;
-      userStore.timezone = savedTimezone;
-    }
+  const savedTimezone = localStorage.getItem('userTimezone');
+  if (savedTimezone) {
+    selectedTimezone.value = savedTimezone;
+    userStore.timezone = savedTimezone;
   }
 });
 </script>
