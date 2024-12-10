@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -43,6 +44,36 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+});
+
+// Fetch user info when the component is mounted, only if not already populated
+onMounted(async () => {
+  if (!userStore.userInfoFetched) {
+    try {
+      console.log('Fetching user info...');
+      const response = await fetch('/api/get-user-info');
+      const data = await response.json();
+      console.log('User info fetched:', data);
+      if (!userStore.timezone) {
+        userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+      } else {
+        userStore.setUserInfo(userStore.timezone, data.acceptLanguage, data.geo);
+      }
+      console.log('User info set in store:', {
+        timezone: userStore.timezone,
+        locale: userStore.locale,
+        geo: userStore.geo,
+      });
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+    }
+  } else {
+    console.log('User info already set in store:', {
+      timezone: userStore.timezone,
+      locale: userStore.locale,
+      geo: userStore.geo,
+    });
+  }
 });
 
 // Mapping of timezone abbreviations to their full names

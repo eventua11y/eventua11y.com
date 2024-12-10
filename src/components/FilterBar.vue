@@ -13,6 +13,7 @@
         </div>
         <!-- End status -->
         <div class="filters__controls d-flex gap-xs items-center">
+          <TimezoneSelector />
           <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Awareness days</sl-switch>
           <sl-button id="open-filter-drawer" @click="openFilterDrawer">
             <i class="fa-solid fa-filter"></i> Filter
@@ -37,6 +38,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
+import TimezoneSelector from './TimezoneSelector.vue';
 
 const filterToolbar = ref(null);
 
