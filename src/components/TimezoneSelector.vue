@@ -38,8 +38,8 @@ function updateTimezone(event) {
 
 onMounted(() => {
   // Update userTimezone and userTimezoneLabel on page refresh
-  userTimezone.value = userStore.geo.timezone;
-  userTimezoneLabel.value = dayjs.tz.guess();
+  userTimezone.value = dayjs.tz.guess();
+  userTimezoneLabel.value = userTimezone.value;
 
   const savedUseLocalTimezone = localStorage.getItem('useLocalTimezone');
   if (savedUseLocalTimezone !== null) {
