@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -23,13 +23,19 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const userTimezone = ref(userStore.geo.timezone);
-const userTimezoneLabel = ref('');
-const selectedTimezoneLabel = ref('Event local times');
+const userTimezone = computed(() => userStore.geo.timezone);
+const userTimezoneLabel = computed(() => {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: userTimezone.value,
+    timeZoneName: 'long'
+  }).format(new Date());
+});
+const selectedTimezoneLabel = computed(() => {
+  return userStore.useLocalTimezone ? userTimezoneLabel.value : 'Event local times';
+});
 
 function updateTimezone(event) {
   const isLocalTimezone = event.detail.item.value === userTimezone.value;
-  selectedTimezoneLabel.value = isLocalTimezone ? userTimezoneLabel.value : 'Event local times';
   userStore.setTimezone(
     isLocalTimezone ? userTimezone.value : 'event',
     isLocalTimezone
@@ -37,14 +43,8 @@ function updateTimezone(event) {
 }
 
 onMounted(() => {
-  userTimezone.value = userStore.geo.timezone;
-  userTimezoneLabel.value = new Intl.DateTimeFormat('en-US', {
-    timeZone: userTimezone.value,
-    timeZoneName: 'long'
-  }).format(new Date());
-
   if (userStore.useLocalTimezone) {
-    selectedTimezoneLabel.value = userTimezoneLabel.value;
+    userStore.setTimezone(userTimezone.value, true);
   }
 });
 </script>
