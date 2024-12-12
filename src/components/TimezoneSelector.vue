@@ -23,7 +23,7 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const userTimezone = ref(userStore.userGeo.timezone);
+const userTimezone = ref(userStore.geo.timezone);
 const userTimezoneLabel = ref('');
 const selectedTimezoneLabel = ref('Event local times');
 const useLocalTimezone = ref(false);
@@ -32,7 +32,7 @@ function updateTimezone(event) {
   const timezone = event.detail.item.value;
   useLocalTimezone.value = timezone === userTimezone.value;
   selectedTimezoneLabel.value = useLocalTimezone.value ? userTimezoneLabel.value : 'Event local times';
-  userStore.userTimezone = useLocalTimezone.value ? userTimezone.value : 'event';
+  userStore.timezone = useLocalTimezone.value ? userTimezone.value : 'event';
   localStorage.setItem('useLocalTimezone', useLocalTimezone.value);
 }
 
