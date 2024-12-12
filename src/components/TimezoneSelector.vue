@@ -24,28 +24,28 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const userTimezone = ref(userStore.geo.timezone);
-const userTimezoneLabel = ref(dayjs.tz(userStore.geo.timezone).format('z'));
-const selectedTimezone = ref('event');
+const userTimezoneLabel = ref(dayjs.tz.guess());
 const selectedTimezoneLabel = ref('Event local times');
+const useLocalTimezone = ref(false);
 
 function updateTimezone(event) {
   const timezone = event.detail.item.value;
-  selectedTimezone.value = timezone;
-  selectedTimezoneLabel.value = timezone === userTimezone.value ? userTimezoneLabel.value : 'Event local times';
-  userStore.timezone = timezone === userTimezone.value ? userTimezone.value : 'event';
-  localStorage.setItem('selectedTimezone', selectedTimezone.value);
+  useLocalTimezone.value = timezone === userTimezone.value;
+  selectedTimezoneLabel.value = useLocalTimezone.value ? userTimezoneLabel.value : 'Event local times';
+  userStore.timezone = useLocalTimezone.value ? userTimezone.value : 'event';
+  localStorage.setItem('useLocalTimezone', useLocalTimezone.value);
 }
 
 onMounted(() => {
   // Update userTimezone and userTimezoneLabel on page refresh
   userTimezone.value = userStore.geo.timezone;
-  userTimezoneLabel.value = dayjs.tz(userStore.geo.timezone).format('z');
+  userTimezoneLabel.value = dayjs.tz.guess();
 
-  const savedTimezone = localStorage.getItem('selectedTimezone');
-  if (savedTimezone) {
-    selectedTimezone.value = savedTimezone;
-    selectedTimezoneLabel.value = savedTimezone === userTimezone.value ? userTimezoneLabel.value : 'Event local times';
-    userStore.timezone = savedTimezone === userTimezone.value ? userTimezone.value : 'event';
+  const savedUseLocalTimezone = localStorage.getItem('useLocalTimezone');
+  if (savedUseLocalTimezone !== null) {
+    useLocalTimezone.value = savedUseLocalTimezone === 'true';
+    selectedTimezoneLabel.value = useLocalTimezone.value ? userTimezoneLabel.value : 'Event local times';
+    userStore.timezone = useLocalTimezone.value ? userTimezone.value : 'event';
   }
 });
 </script>
