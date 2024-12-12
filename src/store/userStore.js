@@ -8,10 +8,6 @@ if (typeof window !== 'undefined' && window.localStorage) {
   savedTimezone = localStorage.getItem('userTimezone') || null;
   savedLocale = localStorage.getItem('userLocale') || null;
   savedGeo = JSON.parse(localStorage.getItem('userGeo')) || null;
-} else {
-  savedTimezone = null;
-  savedLocale = null;
-  savedGeo = null;
 }
 
 const userStore = reactive({
