@@ -26,26 +26,25 @@ dayjs.extend(timezone);
 const userTimezone = ref(userStore.geo.timezone);
 const userTimezoneLabel = ref('');
 const selectedTimezoneLabel = ref('Event local times');
-const useLocalTimezone = ref(false);
 
 function updateTimezone(event) {
-  const timezone = event.detail.item.value;
-  useLocalTimezone.value = timezone === userTimezone.value;
-  selectedTimezoneLabel.value = useLocalTimezone.value ? userTimezoneLabel.value : 'Event local times';
-  userStore.timezone = useLocalTimezone.value ? userTimezone.value : 'event';
-  localStorage.setItem('useLocalTimezone', useLocalTimezone.value);
+  const isLocalTimezone = event.detail.item.value === userTimezone.value;
+  selectedTimezoneLabel.value = isLocalTimezone ? userTimezoneLabel.value : 'Event local times';
+  userStore.setTimezone(
+    isLocalTimezone ? userTimezone.value : 'event',
+    isLocalTimezone
+  );
 }
 
 onMounted(() => {
-  // Update userTimezone and userTimezoneLabel on page refresh
-  userTimezone.value = dayjs.tz.guess();
-  userTimezoneLabel.value = new Intl.DateTimeFormat('en-US', { timeZone: userTimezone.value, timeZoneName: 'long' }).format(new Date());
+  userTimezone.value = userStore.geo.timezone;
+  userTimezoneLabel.value = new Intl.DateTimeFormat('en-US', {
+    timeZone: userTimezone.value,
+    timeZoneName: 'long'
+  }).format(new Date());
 
-  const savedUseLocalTimezone = localStorage.getItem('useLocalTimezone');
-  if (savedUseLocalTimezone !== null) {
-    useLocalTimezone.value = savedUseLocalTimezone === 'true';
-    selectedTimezoneLabel.value = useLocalTimezone.value ? userTimezoneLabel.value : 'Event local times';
-    userStore.timezone = useLocalTimezone.value ? userTimezone.value : 'event';
+  if (userStore.useLocalTimezone) {
+    selectedTimezoneLabel.value = userTimezoneLabel.value;
   }
 });
 </script>
