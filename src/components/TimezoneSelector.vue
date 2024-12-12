@@ -24,7 +24,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const userTimezone = ref(userStore.geo.timezone);
-const userTimezoneLabel = ref(dayjs.tz.guess());
+const userTimezoneLabel = ref('');
 const selectedTimezoneLabel = ref('Event local times');
 const useLocalTimezone = ref(false);
 
@@ -39,7 +39,7 @@ function updateTimezone(event) {
 onMounted(() => {
   // Update userTimezone and userTimezoneLabel on page refresh
   userTimezone.value = dayjs.tz.guess();
-  userTimezoneLabel.value = userTimezone.value;
+  userTimezoneLabel.value = new Intl.DateTimeFormat('en-US', { timeZone: userTimezone.value, timeZoneName: 'long' }).format(new Date());
 
   const savedUseLocalTimezone = localStorage.getItem('useLocalTimezone');
   if (savedUseLocalTimezone !== null) {
