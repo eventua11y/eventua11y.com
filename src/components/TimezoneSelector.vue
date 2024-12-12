@@ -25,10 +25,8 @@ dayjs.extend(timezone);
 
 const userTimezone = computed(() => userStore.geo.timezone);
 const userTimezoneLabel = computed(() => {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: userTimezone.value,
-    timeZoneName: 'long'
-  }).format(new Date());
+  const location = userTimezone.value.split('/').pop().replace('_', ' ');
+  return `${location} (UTC ${dayjs().tz(userTimezone.value).format('ZZ')})`;
 });
 const selectedTimezoneLabel = computed(() => {
   return userStore.useLocalTimezone ? userTimezoneLabel.value : 'Event local times';
