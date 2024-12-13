@@ -109,8 +109,8 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
 }
 
 // If events are not already loaded, fetch them
-if (!filtersStore.events.length) {
-  await filtersStore.fetchEvents();
+if (typeof window !== 'undefined' && !filtersStore.events.length) {
+  filtersStore.fetchEvents();
 }
 
 export default filtersStore;
