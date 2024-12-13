@@ -45,6 +45,7 @@
     "@astrojs/vue": "^5.0.1",
     "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.0.2",
+    "@shoelace-style/shoelace": "^2.19.1",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
     "dayjs": "^1.11.9",
