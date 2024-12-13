@@ -41,8 +41,6 @@ import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
 import EventDebug from './EventDebug.vue';
 
-myUndefinedFunction();
-
 const props = defineProps({
   event: {
     type: Object,
