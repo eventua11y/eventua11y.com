@@ -41,29 +41,6 @@ const props = defineProps({
   },
 });
 
-// Fetch user info when component mounts
-onMounted(async () => {
-  if (!userStore.userInfoFetched) {
-    try {
-      console.log('Fetching user info...');
-      const response = await fetch('/api/get-user-info');
-      const data = await response.json();
-      console.log('User info fetched:', data);
-      if (!userStore.timezone) {
-        userStore.setUserInfo(data.timezone, data.locale, data.geo);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-    }
-  } else {
-    console.log('User info already set in store:', {
-      timezone: userStore.timezone,
-      locale: userStore.locale,
-      geo: userStore.geo,
-    });
-  }
-});
-
 // Mapping of timezone abbreviations to their full names
 const timezoneFullNames = {
   // US Timezones
