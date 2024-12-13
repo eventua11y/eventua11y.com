@@ -7,8 +7,9 @@
     "test": "npx playwright test",
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "build": "astro build && npm run sentry:sourcemaps",
+    "preview": "astro preview",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org matt-obee --project eventua11y ./dist && sentry-cli sourcemaps upload --org matt-obee --project eventua11y ./dist"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,8 @@
     "@astrojs/vue": "^5.0.1",
     "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.0.2",
+    "@sentry/cli": "^2.39.1",
+    "@sentry/vue": "^8.45.0",
     "@shoelace-style/shoelace": "^2.19.1",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",

@@ -25,3 +25,6 @@ dist
 /playwright/.cache/
 
 .astro
+
+# Sentry Config File
+.sentryclirc
