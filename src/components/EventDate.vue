@@ -3,10 +3,8 @@
     <!-- Display the start date of the event -->
     <span class="event__dateStart">
       <span class="sr-only">Starts</span>
-      <!-- Format the start date for the datetime attribute and display it in a human-readable format -->
       <time :datetime="formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')" itemprop="startDate">
         {{ formatDate(event.dateStart, event.day ? 'LL' : 'LLL') }}
-        <!-- If the event is not a full day event, display the timezone abbreviation -->
         <abbr v-if="!event.day" :title="getFullTimezoneName(formatDate(event.dateStart, 'z')) || undefined">{{ formatDate(event.dateStart, 'z') }}</abbr>
       </time>
     </span>
@@ -14,11 +12,8 @@
     <span v-if="event.dateEnd" class="event__dateEnd">
       <span class="sr-only">Ends</span>
       <i class="fa-solid fa-arrow-right-long"></i>
-      <!-- Format the end date for the datetime attribute and display it in a human-readable format -->
       <time :datetime="formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')" itemprop="endDate">
-        <!-- If the start and end date are on the same day, display only the time for the end date -->
         {{ formatDate(event.dateEnd, event.day ? 'LL' : isSameDay(event.dateStart, event.dateEnd) ? 'LT' : 'LLL') }}
-        <!-- If the event is not a full day event, display the timezone abbreviation -->
         <abbr v-if="!event.day" :title="getFullTimezoneName(formatDate(event.dateEnd, 'z')) || undefined">{{ formatDate(event.dateEnd, 'z') }}</abbr>
       </time>
     </span>
@@ -26,7 +21,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -46,7 +41,7 @@ const props = defineProps({
   },
 });
 
-// Fetch user info when the component is mounted, only if not already populated
+// Fetch user info when component mounts
 onMounted(async () => {
   if (!userStore.userInfoFetched) {
     try {
@@ -55,15 +50,8 @@ onMounted(async () => {
       const data = await response.json();
       console.log('User info fetched:', data);
       if (!userStore.timezone) {
-        userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
-      } else {
-        userStore.setUserInfo(userStore.timezone, data.acceptLanguage, data.geo);
+        userStore.setUserInfo(data.timezone, data.locale, data.geo);
       }
-      console.log('User info set in store:', {
-        timezone: userStore.timezone,
-        locale: userStore.locale,
-        geo: userStore.geo,
-      });
     } catch (error) {
       console.error('Failed to fetch user info:', error);
     }
@@ -87,13 +75,7 @@ const timezoneFullNames = {
   'MDT': 'Mountain Daylight Time',
   'PST': 'Pacific Standard Time',
   'PDT': 'Pacific Daylight Time',
-  'AKST': 'Alaska Standard Time',
-  'AKDT': 'Alaska Daylight Time',
-  'HST': 'Hawaii Standard Time',
-  'HDT': 'Hawaii Daylight Time',
-  'AST': 'Atlantic Standard Time',
-  'ADT': 'Atlantic Daylight Time',
-
+  
   // European Timezones
   'GMT': 'Greenwich Mean Time',
   'BST': 'British Summer Time',
@@ -112,15 +94,26 @@ function getFullTimezoneName(abbreviation) {
 
 // Helper function to format date and time
 function formatDate(date, format) {
-  const userTimezone = userStore.timezone || 'UTC'; // Default to 'UTC' if timezone is not set
-  const userLocale = userStore.locale || 'en'; // Default to 'en' if locale is not set
-
-  return dayjs(date).tz(userTimezone).locale(userLocale).format(format);
+  const utcDate = dayjs.utc(date);
+  
+  if (userStore.useLocalTimezone) {
+    const userTimezone = userStore.timezone || 'UTC';
+    const userLocale = userStore.locale || 'en';
+    return utcDate.tz(userTimezone).locale(userLocale).format(format);
+  } else {
+    // If event has no timezone, keep it in UTC
+    const eventTimezone = props.event.timezone || 'UTC';
+    return utcDate.tz(eventTimezone).format(format);
+  }
 }
 
 // Helper function to check if two dates are on the same day
 function isSameDay(date1, date2) {
-  const userTimezone = userStore.timezone || 'UTC'; // Default to 'UTC' if timezone is not set
-  return dayjs(date1).tz(userTimezone).isSame(dayjs(date2).tz(userTimezone), 'day');
+  if (userStore.useLocalTimezone) {
+    const userTimezone = userStore.timezone || 'UTC';
+    return dayjs(date1).tz(userTimezone).isSame(dayjs(date2).tz(userTimezone), 'day');
+  } else {
+    return dayjs(date1).tz(props.event.timezone).isSame(dayjs(date2).tz(props.event.timezone), 'day');
+  }
 }
 </script>
