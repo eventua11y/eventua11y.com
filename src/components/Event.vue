@@ -28,6 +28,9 @@
       </summary>
       <EventChild v-for="child in event.children" :key="child._id" :event="child" />
     </details>
+    <div v-if="event.callForSpeakers" class="event__badges">
+      <sl-badge v-if="event.callForSpeakers" variant="success" pill pulse>Call for speakers</sl-badge> <small v-if="event.callForSpeakersClosingDate" class="text-muted">Closes: {{ formatDate(event.callForSpeakersClosingDate) }}</small>
+    </div>
   </article>
 </template>
 
@@ -44,6 +47,13 @@ const props = defineProps({
     required: true,
   },
 });
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-GB', {
+    month: 'long',
+    day: 'numeric'
+  })
+}
 </script>
 
 <!-- <style scoped>
