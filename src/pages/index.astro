@@ -13,7 +13,7 @@ export const prerender = false;
 <DefaultLayout>
   <Today client:load />
   <FilterBar client:only="vue" />
-  <Filters client:idle />
+  <Filters client:only />
   <div class="container readable py-l">
     <EventList type="upcoming" client:load />
   </div>

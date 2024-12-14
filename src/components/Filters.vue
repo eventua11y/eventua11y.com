@@ -1,5 +1,5 @@
 <template>
-  <sl-drawer id="filter-drawer" label="Filters" :open="uiStore.isFilterDrawerOpen" @sl-after-hide="uiStore.closeFilterDrawer">
+  <sl-drawer id="filter-drawer" label="Filters" :open="isDrawerMounted && uiStore.isFilterDrawerOpen"  @sl-after-hide="uiStore.closeFilterDrawer">
     <div class="flow">
       <fieldset class="checkbox-group filter flow flow-tight">
         <legend class="text-muted">Call for speakers</legend>
@@ -42,11 +42,14 @@ import { ref, onMounted, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
 
-// Debug initial state
+// Add mounted state tracking
+const isDrawerMounted = ref(false);
+
 onMounted(() => {
-  console.log('Mounted: Initial state of isFilterDrawerOpen:', uiStore.isFilterDrawerOpen);
+  // Ensure drawer starts closed
   uiStore.closeFilterDrawer();
-  console.log('After closeFilterDrawer: State of isFilterDrawerOpen:', uiStore.isFilterDrawerOpen);
+  // Only show drawer after mounted
+  isDrawerMounted.value = true;
 });
 
 // Watch for state changes
