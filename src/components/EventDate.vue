@@ -50,6 +50,7 @@ const props = defineProps({
 
 // Mapping of timezone abbreviations to their full names
 const timezoneFullNames = {
+  'UTC': 'Coordinated Universal Time',
   // US Timezones
   'EST': 'Eastern Standard Time',
   'EDT': 'Eastern Daylight Time',
