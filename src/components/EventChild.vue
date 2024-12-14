@@ -36,14 +36,12 @@ const displayFormat = computed(() =>
       <span v-else>{{ event.title }}</span>
     </span>
 
-    <div class="event__dates text-muted">
-      {{ displayFormat }} ·
+    <div class="event__meta text-muted">
       <template v-if="event.scheduled">
-        <EventDate :event="event" /> ·
-        <EventDuration :event="event" />
+        {{ displayFormat }} <span>·</span> <EventDate :event="event" /> · <EventDuration :event="event" />
       </template>
       <template v-else>
-        Not yet scheduled
+        {{ displayFormat }} <span>·</span> Not yet scheduled
       </template>
     </div>
   </article>

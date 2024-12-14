@@ -24,6 +24,12 @@
   }
 }
 
+.event__meta {
+  font-size: var(--p-step--1);
+  display: flex;
+  gap: .5em;
+}
+
 .event__delivery {
   font-size: var(--p-step--1);
   margin-bottom: var(--p-space-xs);

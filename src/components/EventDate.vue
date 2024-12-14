@@ -4,17 +4,21 @@
       <span class="sr-only">Starts</span>
       <time :datetime="formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')" itemprop="startDate">
         {{ formatDate(event.dateStart, event.day ? 'LL' : 'LLL') }}
-        <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
-          {{ currentTimezone }}
-        </abbr>
+        <template v-if="!event.dateEnd">
+          <span> </span>
+          <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
+            {{ currentTimezone }}
+          </abbr>
+        </template>
       </time>
     </span>
-    
+
     <span v-if="event.dateEnd" class="event__dateEnd">
       <span class="sr-only">Ends</span>
       <i class="fa-solid fa-arrow-right-long"></i>
       <time :datetime="formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')" itemprop="endDate">
         {{ formatDate(event.dateEnd, event.day ? 'LL' : isSameDay(event.dateStart, event.dateEnd) ? 'LT' : 'LLL') }}
+        <span> </span>
         <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
           {{ currentTimezone }}
         </abbr>
@@ -55,7 +59,7 @@ const timezoneFullNames = {
   'MDT': 'Mountain Daylight Time',
   'PST': 'Pacific Standard Time',
   'PDT': 'Pacific Daylight Time',
-  
+
   // European Timezones
   'GMT': 'Greenwich Mean Time',
   'GMT+1': 'Greenwich Mean Time +1',
