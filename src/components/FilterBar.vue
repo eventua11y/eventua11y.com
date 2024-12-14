@@ -17,14 +17,14 @@
           </small>
         </p>
         <sl-button
-          v-if="filtersStore.isChanged()"
+          v-if="filtersChanged"
           id="filter-reset"
           @click="resetFilters"
           type="primary"
           name="filter-reset"
-          ><i class="fa-solid fa-filter-circle-xmark"></i> Reset
-          Filters</sl-button
         >
+          <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
+        </sl-button>
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
         <sl-switch
@@ -43,9 +43,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
+
+const filtersChanged = computed(() => filtersStore.isChanged());
+
+watch(() => filtersStore.filters, () => {
+  console.debug('Filters changed:', filtersStore.filters);
+  console.debug('Is changed:', filtersStore.isChanged());
+}, { deep: true });
 
 const filterToolbar = ref(null);
 

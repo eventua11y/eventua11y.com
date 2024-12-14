@@ -25,18 +25,24 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const userTimezone = computed(() => userStore.geo.timezone);
+const defaultTimezone = 'UTC';
+
+const userTimezone = computed(() => userStore.geo?.timezone || defaultTimezone);
 const userTimezoneLabel = computed(() => {
+  if (!userStore.geo?.timezone) return 'Loading timezone...';
   const location = userTimezone.value.split('/').pop().replace('_', ' ');
   return `${location} (UTC ${dayjs().tz(userTimezone.value).format('Z')})`;
 });
+
 const selectedTimezoneLabel = computed(() => {
+  if (!userStore.geo?.timezone) return 'Loading timezone...';
   return userStore.useLocalTimezone
     ? userTimezoneLabel.value
     : 'Event local times';
 });
 
 function updateTimezone(event) {
+  if (!userStore.geo?.timezone) return;
   const isLocalTimezone = event.detail.item.value === userTimezone.value;
   userStore.setTimezone(
     isLocalTimezone ? userTimezone.value : 'event',
@@ -45,7 +51,7 @@ function updateTimezone(event) {
 }
 
 onMounted(() => {
-  if (userStore.useLocalTimezone) {
+  if (userStore.useLocalTimezone && userStore.geo?.timezone) {
     userStore.setTimezone(userTimezone.value, true);
   }
 });
