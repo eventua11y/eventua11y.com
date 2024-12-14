@@ -5,12 +5,11 @@ import dayjs from 'https://esm.sh/dayjs';
 let cache = {
   data: null,
   timestamp: 0,
-  ttl: 300000 // 5 minutes in milliseconds
+  ttl: 300000, // 5 minutes in milliseconds
 };
 
 // Get Sanity config from environment variables
 function getConfig() {
-
   const projectId = Deno.env.get('SANITY_PROJECT');
   const dataset = Deno.env.get('SANITY_DATASET');
   const apiVersion = Deno.env.get('SANITY_API_VERSION');
@@ -27,7 +26,7 @@ function getConfig() {
     projectId,
     dataset,
     apiVersion,
-    useCdn: true
+    useCdn: true,
   };
 }
 
@@ -44,8 +43,8 @@ function createSanityClient() {
 
 // Utility functions
 function sortEventsByDate(events) {
-  return events.sort((a, b) => 
-    new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+  return events.sort(
+    (a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
   );
 }
 
@@ -56,34 +55,42 @@ async function fetchEventsFromSanity(client) {
     `);
 
     // Fetch children for each event
-    const eventsWithChildren = await Promise.all(events.map(async (event) => {
-      const children = await client.fetch(`
+    const eventsWithChildren = await Promise.all(
+      events.map(async (event) => {
+        const children = await client.fetch(
+          `
         *[_type == "event" && parent._ref == $eventId] | order(dateStart asc)
-      `, { eventId: event._id });
+      `,
+          { eventId: event._id }
+        );
 
-      return {
-        ...event,
-        children: children.length > 0 ? children : undefined
-      };
-    }));
+        return {
+          ...event,
+          children: children.length > 0 ? children : undefined,
+        };
+      })
+    );
 
     const now = new Date();
     const todayStart = dayjs().startOf('day').toDate();
     const todayEnd = dayjs().endOf('day').toDate();
-    
+
     return {
       events: eventsWithChildren,
       future: sortEventsByDate(
-        eventsWithChildren.filter(event => 
-          new Date(event.dateStart) > now && !event.parent
+        eventsWithChildren.filter(
+          (event) => new Date(event.dateStart) > now && !event.parent
         )
       ),
-      past: eventsWithChildren.filter(event => 
-        new Date(event.dateEnd) < now && !event.parent
+      past: eventsWithChildren.filter(
+        (event) => new Date(event.dateEnd) < now && !event.parent
       ),
       today: sortEventsByDate(
-        eventsWithChildren.filter(event => 
-          new Date(event.dateStart) >= todayStart && new Date(event.dateStart) <= todayEnd && !event.parent
+        eventsWithChildren.filter(
+          (event) =>
+            new Date(event.dateStart) >= todayStart &&
+            new Date(event.dateStart) <= todayEnd &&
+            !event.parent
         )
       ),
     };
@@ -97,7 +104,7 @@ async function getEvents() {
   const client = createSanityClient();
 
   // Check cache
-  if (cache.data && (Date.now() - cache.timestamp < cache.ttl)) {
+  if (cache.data && Date.now() - cache.timestamp < cache.ttl) {
     console.log('Returning cached data');
     return cache.data;
   }
@@ -115,23 +122,20 @@ async function getEvents() {
 export default async function handler(request) {
   try {
     const events = await getEvents();
-    
+
     return new Response(JSON.stringify(events), {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
-        'Vary': 'Accept-Encoding',
+        Vary: 'Accept-Encoding',
       },
     });
   } catch (error) {
     console.error('[handler] Failed:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal Server Error' }), 
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 

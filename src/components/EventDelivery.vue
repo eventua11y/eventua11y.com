@@ -2,7 +2,7 @@
 const ATTENDANCE_MODES = {
   ONLINE: 'online',
   OFFLINE: 'offline',
-  MIXED: 'mixed'
+  MIXED: 'mixed',
 };
 </script>
 
@@ -13,12 +13,12 @@ const props = defineProps({
   attendanceMode: {
     type: String,
     required: true,
-    validator: (value) => Object.values(ATTENDANCE_MODES).includes(value)
+    validator: (value) => Object.values(ATTENDANCE_MODES).includes(value),
   },
   location: {
     type: String,
-    default: 'International'
-  }
+    default: 'International',
+  },
 });
 
 const displayLocation = computed(() => props.location || 'International');

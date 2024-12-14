@@ -11,12 +11,12 @@ const props = defineProps({
     required: true,
     validator: (event) => {
       return event.title && event.type;
-    }
-  }
+    },
+  },
 });
 
-const hasChildren = computed(() =>
-  props.event.children && props.event.children.length > 0
+const hasChildren = computed(
+  () => props.event.children && props.event.children.length > 0
 );
 
 const childrenCount = computed(() =>
@@ -37,7 +37,7 @@ const formatDate = (dateString) => {
     }
     return date.toLocaleDateString('en-GB', {
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   } catch (error) {
     console.error('Date formatting error:', error);
@@ -47,21 +47,30 @@ const formatDate = (dateString) => {
 </script>
 
 <template>
-  <article :class="`event event--${event.type}`" itemscope itemtype="https://schema.org/Event"
-    :data-event-type="event.type">
+  <article
+    :class="`event event--${event.type}`"
+    itemscope
+    itemtype="https://schema.org/Event"
+    :data-event-type="event.type"
+  >
     <h3 class="event__title">
-      <a v-if="event.website" :href="event.website" itemprop="url">{{ event.title }}</a>
+      <a v-if="event.website" :href="event.website" itemprop="url">{{
+        event.title
+      }}</a>
       <span v-else>{{ event.title }}</span>
     </h3>
 
     <EventDate :event="event" />
-    <EventDelivery 
+    <EventDelivery
       v-if="event.attendanceMode && event.attendanceMode !== 'none'"
-      :attendanceMode="event.attendanceMode" 
-      :location="event.location" 
+      :attendanceMode="event.attendanceMode"
+      :location="event.location"
     />
 
-    <details v-if="event.description && event.type !== 'theme'" class="event__description flow">
+    <details
+      v-if="event.description && event.type !== 'theme'"
+      class="event__description flow"
+    >
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Description
@@ -74,13 +83,15 @@ const formatDate = (dateString) => {
         <i class="icon fa-solid fa-caret-right"></i>
         {{ childrenCount }} accessibility highlights
       </summary>
-      <EventChild v-for="child in event.children" :key="child._id" :event="child" />
+      <EventChild
+        v-for="child in event.children"
+        :key="child._id"
+        :event="child"
+      />
     </details>
 
     <div v-if="isCallForSpeakersOpen" class="event__badges">
-      <sl-badge variant="success" pill pulse>
-        Call for speakers
-      </sl-badge>
+      <sl-badge variant="success" pill pulse> Call for speakers </sl-badge>
       <small v-if="event.callForSpeakersClosingDate" class="text-muted">
         Closes: {{ formatDate(event.callForSpeakersClosingDate) }}
       </small>

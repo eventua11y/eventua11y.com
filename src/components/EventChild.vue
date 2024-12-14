@@ -9,8 +9,8 @@ const props = defineProps({
     required: true,
     validator: (event) => {
       return event.title;
-    }
-  }
+    },
+  },
 });
 
 const formatStrings = {
@@ -24,13 +24,18 @@ const formatStrings = {
   keynote: 'Keynote',
 };
 
-const displayFormat = computed(() =>
-  formatStrings[props.event.format] || props.event.format
+const displayFormat = computed(
+  () => formatStrings[props.event.format] || props.event.format
 );
 </script>
 
 <template>
-  <article class="flow-s" itemprop="subEvent" itemscope itemtype="https://schema.org/Event">
+  <article
+    class="flow-s"
+    itemprop="subEvent"
+    itemscope
+    itemtype="https://schema.org/Event"
+  >
     <span itemprop="name">
       <a v-if="event.website" :href="event.website">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
@@ -38,7 +43,8 @@ const displayFormat = computed(() =>
 
     <div class="event__meta text-muted">
       <template v-if="event.scheduled">
-        {{ displayFormat }} <span>·</span> <EventDate :event="event" /> · <EventDuration :event="event" />
+        {{ displayFormat }} <span>·</span> <EventDate :event="event" /> ·
+        <EventDuration :event="event" />
       </template>
       <template v-else>
         {{ displayFormat }} <span>·</span> Not yet scheduled

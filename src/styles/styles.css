@@ -36,7 +36,8 @@ main {
   background-color: var(--s-color-background);
 }
 
-*:focus-visible, .masthead__logo > a:focus-visible {
+*:focus-visible,
+.masthead__logo > a:focus-visible {
   outline-color: var(--c-focus-ring-color);
   outline-style: solid;
   outline-offset: var(--c-focus-ring-offset);
@@ -55,7 +56,7 @@ main {
 
 /* Adds a top margin to elements with an id attribute when scrolled into view */
 [id] {
-	scroll-margin-top: 7rem;
+  scroll-margin-top: 7rem;
 }
 
 .content {

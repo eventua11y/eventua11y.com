@@ -14,7 +14,7 @@ const uiStore = reactive({
   // Add reset method
   reset() {
     this.isFilterDrawerOpen = false;
-  }
+  },
 });
 
 // Reset state when module is loaded

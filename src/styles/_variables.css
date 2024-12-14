@@ -1,9 +1,9 @@
 :root {
   --s-border-radius: var(--p-space-s);
   --s-hover-color: var(--s-color-primary);
-  --c-focus-ring-offset: .25rem;
-  --c-focus-ring-width: .25rem;
-  
+  --c-focus-ring-offset: 0.25rem;
+  --c-focus-ring-width: 0.25rem;
+
   /* Type scale */
   --p-step--2: clamp(0.78rem, calc(0.77rem + 0.03vw), 0.8rem);
   --p-step--1: clamp(0.94rem, calc(0.92rem + 0.11vw), 1rem);

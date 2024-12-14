@@ -18,7 +18,7 @@ const userStore = reactive({
   geo: savedGeo,
   useLocalTimezone: savedUseLocalTimezone,
   userInfoFetched: false,
-  
+
   setUserInfo(timezone, locale, geo) {
     this.timezone = timezone;
     this.locale = locale;
@@ -38,7 +38,7 @@ const userStore = reactive({
       localStorage.setItem('userTimezone', timezone);
       localStorage.setItem('useLocalTimezone', useLocal);
     }
-  }
+  },
 });
 
 export default userStore;

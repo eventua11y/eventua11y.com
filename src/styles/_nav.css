@@ -42,8 +42,8 @@
   background-color: var(--c-nav-hover-bg);
 }
 
-.primaryNav__link[aria-current='page'], .primaryNav__link[aria-current='page']:hover {
+.primaryNav__link[aria-current='page'],
+.primaryNav__link[aria-current='page']:hover {
   background-color: var(--c-nav-active-bg);
   color: var(--c-nav-active-fg);
 }
-

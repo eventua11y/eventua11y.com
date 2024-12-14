@@ -7,7 +7,7 @@ const defaultFilters = {
   attendanceOnline: false,
   attendanceOffline: false,
   themes: true,
-  showAwarenessDays: true
+  showAwarenessDays: true,
 };
 
 const isCallForSpeakersOpen = (event) => {
@@ -19,7 +19,7 @@ const isCallForSpeakersOpen = (event) => {
 // Load filters from localStorage
 const getStoredFilters = () => {
   if (typeof window === 'undefined' || !localStorage) return defaultFilters;
-  
+
   const saved = localStorage.getItem('filters');
   return saved ? JSON.parse(saved) : defaultFilters;
 };
@@ -95,7 +95,9 @@ const filtersStore = reactive({
   },
 
   showingAllEvents: computed(() => {
-    return filtersStore.filteredEvents.length === filtersStore.futureEvents.length;
+    return (
+      filtersStore.filteredEvents.length === filtersStore.futureEvents.length
+    );
   }),
 });
 

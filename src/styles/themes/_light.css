@@ -1,5 +1,4 @@
 :root {
-
   --s-color-background: var(--p-color-white);
   --s-color-on-background: var(--p-color-grey-700);
   --s-color-surface: var(--p-color-white);
@@ -63,5 +62,4 @@
   --page-header-color-bg: var(--color-primary);
   --page-header-color-fg: var(--color-fg);
   --page-header-accent-color: var(--color-fg); */
-
 }

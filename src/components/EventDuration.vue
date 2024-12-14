@@ -23,7 +23,9 @@ const dateStart = props.event.dateStart;
 const dateEnd = props.event.dateEnd;
 
 // Compute the duration of the event in minutes
-const duration = computed(() => dayjs(dateEnd).diff(dayjs(dateStart), 'minutes'));
+const duration = computed(() =>
+  dayjs(dateEnd).diff(dayjs(dateStart), 'minutes')
+);
 
 // Format the duration
 const formattedDuration = computed(() => {

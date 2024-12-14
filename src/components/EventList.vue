@@ -10,8 +10,8 @@ const props = defineProps({
   type: {
     type: String,
     required: true,
-    validator: (value) => ['past', 'upcoming'].includes(value)
-  }
+    validator: (value) => ['past', 'upcoming'].includes(value),
+  },
 });
 
 const groupedEvents = ref({});
@@ -27,7 +27,8 @@ const formatDate = (yearMonth) => {
 const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
-    const comparison = new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    const comparison =
+      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
     return props.type === 'past' ? -comparison : comparison;
   });
 
@@ -63,10 +64,11 @@ onMounted(async () => {
       const data = await response.json();
       userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
     }
-    
-    const events = props.type === 'past' 
-      ? filtersStore.pastEvents 
-      : filtersStore.filteredEvents;
+
+    const events =
+      props.type === 'past'
+        ? filtersStore.pastEvents
+        : filtersStore.filteredEvents;
     groupEvents(events);
   } catch (e) {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
@@ -78,7 +80,10 @@ onMounted(async () => {
 
 // Watch for changes in the respective events list
 watch(
-  () => props.type === 'past' ? filtersStore.pastEvents : filtersStore.filteredEvents,
+  () =>
+    props.type === 'past'
+      ? filtersStore.pastEvents
+      : filtersStore.filteredEvents,
   (newEvents) => {
     loading.value = true;
     error.value = null;
@@ -110,21 +115,31 @@ watch(
     </sl-alert>
 
     <!-- No events state -->
-    <sl-alert 
-      v-else-if="!loading && Object.keys(groupedEvents).length === 0" 
-      open 
+    <sl-alert
+      v-else-if="!loading && Object.keys(groupedEvents).length === 0"
+      open
       class="my-xl"
     >
       <sl-icon slot="icon" name="info-circle"></sl-icon>
-      {{ type === 'past' ? 'There are no past events to display.' : 'There are no upcoming events to display.' }}
+      {{
+        type === 'past'
+          ? 'There are no past events to display.'
+          : 'There are no upcoming events to display.'
+      }}
     </sl-alert>
 
     <!-- Events list -->
     <div :id="`${type}-events`" v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
         <section :id="'section-' + yearMonth" class="month">
-          <h2 :id="'heading-' + yearMonth" class="month__heading">{{ formatDate(yearMonth) }}</h2>
-          <ul role="list" class="flow" :aria-labelledby="'heading-' + yearMonth">
+          <h2 :id="'heading-' + yearMonth" class="month__heading">
+            {{ formatDate(yearMonth) }}
+          </h2>
+          <ul
+            role="list"
+            class="flow"
+            :aria-labelledby="'heading-' + yearMonth"
+          >
             <li v-for="event in events" :key="event._id">
               <Event :event="event" />
             </li>

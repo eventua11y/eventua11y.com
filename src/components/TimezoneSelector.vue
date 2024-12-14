@@ -6,7 +6,9 @@
         {{ selectedTimezoneLabel }}
       </sl-button>
       <sl-menu @sl-select="updateTimezone">
-        <sl-menu-item :value="userTimezone">{{ userTimezoneLabel }}</sl-menu-item>
+        <sl-menu-item :value="userTimezone">{{
+          userTimezoneLabel
+        }}</sl-menu-item>
         <sl-menu-item value="event">Event local times</sl-menu-item>
       </sl-menu>
     </sl-dropdown>
@@ -29,7 +31,9 @@ const userTimezoneLabel = computed(() => {
   return `${location} (UTC ${dayjs().tz(userTimezone.value).format('Z')})`;
 });
 const selectedTimezoneLabel = computed(() => {
-  return userStore.useLocalTimezone ? userTimezoneLabel.value : 'Event local times';
+  return userStore.useLocalTimezone
+    ? userTimezoneLabel.value
+    : 'Event local times';
 });
 
 function updateTimezone(event) {

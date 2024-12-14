@@ -27,7 +27,7 @@
 .event__meta {
   font-size: var(--p-step--1);
   display: flex;
-  gap: .5em;
+  gap: 0.5em;
 }
 
 .event__delivery {
@@ -37,17 +37,15 @@
   white-space: pre-wrap;
 }
 
-[itemprop="eventAttendanceMode"] {
+[itemprop='eventAttendanceMode'] {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
 
-[itemprop="eventAttendanceMode"] > * {
+[itemprop='eventAttendanceMode'] > * {
   flex: 0 0 auto;
 }
-
-
 
 .event__online {
   white-space: nowrap;

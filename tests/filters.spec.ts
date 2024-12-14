@@ -33,9 +33,7 @@ test('reset button appears when filters are applied', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: 'Reset Filters' })
   ).not.toBeVisible();
-  await page
-    .getByRole('checkbox', { name: 'Not accepting talks' })
-    .check();
+  await page.getByRole('checkbox', { name: 'Not accepting talks' }).check();
   await expect(
     page.getByRole('button', { name: 'Reset Filters' }).first()
   ).toBeVisible();

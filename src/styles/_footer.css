@@ -1,5 +1,4 @@
 #global-footer {
-
   --c-color-focus-ring: currentColor;
 
   background: var(--c-footer-color-bg);
@@ -47,5 +46,4 @@
   .text-muted {
     color: var(--c-footer-color-fg-muted);
   }
-  
 }

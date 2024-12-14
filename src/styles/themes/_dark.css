@@ -1,5 +1,4 @@
-html[data-theme="dark"] {
-  
+html[data-theme='dark'] {
   --s-color-background: var(--p-color-black);
   --s-color-on-background: var(--p-color-white);
   --s-color-surface: var(--p-color-grey-900);
@@ -30,7 +29,7 @@ html[data-theme="dark"] {
   --c-masthead-color-fg: var(--p-color-white);
   --c-masthead-color-border: var(--s-color-border);
   --c-masthead-focus-ring-color: var(--p-color-white);
- 
+
   /* Navigation */
   --c-nav-active-bg: var(--p-color-purple-500);
   --c-nav-active-fg: var(--p-color-white);

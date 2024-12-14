@@ -1,25 +1,45 @@
 <template>
   <div id="filters" class="py-xs-s">
     <div class="container">
-        <div class="filters__status">
-          <p class="filters__count text-muted" aria-live="polite" aria-atomic="true">
-            <small v-if="filtersStore.showingAllEvents">Showing all {{ filtersStore.futureEvents.length }} upcoming events</small>
-            <small v-else>
-              Showing {{ filtersStore.filteredEvents.length }} of {{ filtersStore.futureEvents.length }} upcoming events
-            </small>
-          </p>
-          <sl-button v-if="filtersStore.isChanged()" id="filter-reset" @click="resetFilters" type="primary"
-            name="filter-reset"><i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters</sl-button>
-        </div>
-        <!-- End status -->
-        <div class="filters__controls d-flex gap-xs items-center">
-          <sl-switch :checked="filtersStore.filters.showAwarenessDays" @sl-change="toggleAwarenessDays" id="filter-show-awareness-days">Awareness days</sl-switch>
-          <sl-button id="open-filter-drawer" @click="openFilterDrawer">
-            <i class="fa-solid fa-filter"></i> Filter
-          </sl-button>
-          <TimezoneSelector />
-        </div>
-        <!-- End filters__controls -->
+      <div class="filters__status">
+        <p
+          class="filters__count text-muted"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <small v-if="filtersStore.showingAllEvents"
+            >Showing all {{ filtersStore.futureEvents.length }} upcoming
+            events</small
+          >
+          <small v-else>
+            Showing {{ filtersStore.filteredEvents.length }} of
+            {{ filtersStore.futureEvents.length }} upcoming events
+          </small>
+        </p>
+        <sl-button
+          v-if="filtersStore.isChanged()"
+          id="filter-reset"
+          @click="resetFilters"
+          type="primary"
+          name="filter-reset"
+          ><i class="fa-solid fa-filter-circle-xmark"></i> Reset
+          Filters</sl-button
+        >
+      </div>
+      <!-- End status -->
+      <div class="filters__controls d-flex gap-xs items-center">
+        <sl-switch
+          :checked="filtersStore.filters.showAwarenessDays"
+          @sl-change="toggleAwarenessDays"
+          id="filter-show-awareness-days"
+          >Awareness days</sl-switch
+        >
+        <sl-button id="open-filter-drawer" @click="openFilterDrawer">
+          <i class="fa-solid fa-filter"></i> Filter
+        </sl-button>
+        <TimezoneSelector />
+      </div>
+      <!-- End filters__controls -->
     </div>
     <!-- End container -->
   </div>
@@ -27,7 +47,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { ref, onMounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
 import uiStore from '../store/uiStore';
@@ -63,5 +82,4 @@ onMounted(async () => {
     observer.observe(filterToolbar.value);
   }
 });
-
 </script>

@@ -6,19 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Theme selection functionality
-  const LIGHT_MODE_ICON = '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
-  const DARK_MODE_ICON = '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
+  const LIGHT_MODE_ICON =
+    '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
+  const DARK_MODE_ICON =
+    '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
 
-  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');  
+  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
   function applyTheme(theme) {
-    const themeSelectorButton = document.getElementById('theme-selector-button');
+    const themeSelectorButton = document.getElementById(
+      'theme-selector-button'
+    );
 
     if (!themeSelectorButton) {
       console.error('Theme selector button not found');
       return;
     }
-    
+
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('sl-theme-dark');
