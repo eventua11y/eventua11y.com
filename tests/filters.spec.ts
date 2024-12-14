@@ -2,6 +2,17 @@ import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
+  // Wait for hydration indicators
+  await page.waitForSelector('#upcoming-events');
+  await page.waitForSelector('#filters');
+  await page.waitForSelector('.filters__count:not(:empty)');
+  await page.waitForSelector('#open-filter-drawer:not([disabled])');
+  const filterDrawer = page.locator('#filter-drawer');
+  const isVisible = await filterDrawer.isVisible();
+  if (isVisible) {
+    await page.keyboard.press('Escape');
+    await expect(filterDrawer).not.toBeVisible();
+  }
   await page.waitForSelector('#upcoming-events');
   await page.waitForSelector('#filters');
 });

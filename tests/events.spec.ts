@@ -4,6 +4,13 @@ import AxeBuilder from '@axe-core/playwright';
 
 test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
+  await page.waitForLoadState('networkidle');
+  const filterDrawer = page.locator('#filter-drawer');
+  const isVisible = await filterDrawer.isVisible();
+  if (isVisible) {
+    await page.keyboard.press('Escape');
+    await expect(filterDrawer).not.toBeVisible();
+  }
   await page.waitForSelector('#upcoming-events');
 });
 
