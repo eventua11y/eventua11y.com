@@ -15,8 +15,13 @@
 }
 
 .event__dates {
+  display: flex;
+  flex-wrap: wrap;
   font-size: var(--p-step--1);
-  white-space: pre-wrap;
+  /* gap: 0.2rem; */
+  .fa-arrow-right-long {
+    margin: 0 0.3rem;
+  }
 }
 
 .event__delivery {
