@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import dayjs from 'dayjs';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
@@ -21,6 +22,12 @@ const hasChildren = computed(() =>
 const childrenCount = computed(() =>
   hasChildren.value ? props.event.children.length : 0
 );
+
+const isCallForSpeakersOpen = computed(() => {
+  if (!props.event.callForSpeakers) return false;
+  if (!props.event.callForSpeakersClosingDate) return true;
+  return dayjs().isBefore(dayjs(props.event.callForSpeakersClosingDate));
+});
 
 const formatDate = (dateString) => {
   try {
@@ -66,7 +73,7 @@ const formatDate = (dateString) => {
       <EventChild v-for="child in event.children" :key="child._id" :event="child" />
     </details>
 
-    <div v-if="event.callForSpeakers" class="event__badges">
+    <div v-if="isCallForSpeakersOpen" class="event__badges">
       <sl-badge variant="success" pill pulse>
         Call for speakers
       </sl-badge>
