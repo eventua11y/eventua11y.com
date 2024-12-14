@@ -1,11 +1,33 @@
 <template>
   <div>
-    <!-- If there are no upcoming events -->
-    <sl-alert open v-if="Object.keys(groupedEvents).length === 0" class="my-xl">
-      <sl-icon slot="icon" name="info-circle"></sl-icon>
-      For one reason or another, there are no events to display at the moment.
+    <!-- Loading state -->
+    <div v-if="loading" class="flow flow-xl">
+      <Skeleton />
+      <Skeleton />
+      <Skeleton />
+    </div>
+    <!-- Error state -->
+    <sl-alert 
+      v-else-if="error" 
+      open 
+      variant="danger" 
+      class="my-xl"
+    >
+      <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+      {{ error }}
     </sl-alert>
-    <!-- If there are upcoming events -->
+
+    <!-- No events state -->
+    <sl-alert 
+      v-else-if="!loading && Object.keys(groupedEvents).length === 0" 
+      open 
+      class="my-xl"
+    >
+      <sl-icon slot="icon" name="info-circle"></sl-icon>
+      For one reason or another, there are no events to display at the moment. You may need to refresh.
+    </sl-alert>
+
+    <!-- Events list -->
     <div id="upcoming-events" v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
         <section :id="'section-' + yearMonth" class="month">
@@ -24,10 +46,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import Event from '../components/Event.vue';
+import Skeleton from '../components/Skeleton.vue';
 import filtersStore from '../store/filtersStore';
 import userStore from '../store/userStore';
 
 const groupedEvents = ref({});
+const loading = ref(true);
+const error = ref(null);
 
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
@@ -52,42 +77,46 @@ const groupEvents = (events) => {
 };
 
 onMounted(async () => {
-  // Fetch user info when the component is mounted, only if not already populated
-  if (!userStore.userInfoFetched) {
-    try {
-      console.log('Fetching user info...');
-      const response = await fetch('/api/get-user-info');
-      const data = await response.json();
-      console.log('User info fetched:', data);
-      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
-      console.log('User info set in store:', {
-        timezone: userStore.timezone,
-        locale: userStore.locale,
-        geo: userStore.geo,
-      });
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-    }
-  } else {
-    console.log('User info already set in store:', {
-      timezone: userStore.timezone,
-      locale: userStore.locale,
-      geo: userStore.geo,
-    });
-  }
+  loading.value = true;
+  error.value = null;
 
-  groupEvents(filtersStore.filteredEvents);
+  try {
+    if (!userStore.userInfoFetched) {
+      const response = await fetch('/api/get-user-info');
+      if (!response.ok) throw new Error('Failed to fetch user info');
+      const data = await response.json();
+      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+    }
+    
+    groupEvents(filtersStore.filteredEvents);
+  } catch (e) {
+    error.value = 'Unable to load events. Please try again later.';
+    console.error('Error:', e);
+  } finally {
+    loading.value = false;
+  }
 });
 
 watch(
   () => filtersStore.filteredEvents,
   (newFilteredEvents) => {
-    groupEvents(newFilteredEvents);
+    loading.value = true;
+    error.value = null;
+    try {
+      groupEvents(newFilteredEvents);
+    } catch (e) {
+      error.value = 'Error updating events.';
+      console.error('Error:', e);
+    } finally {
+      loading.value = false;
+    }
   },
   { deep: true }
 );
 </script>
 
 <style scoped>
-/* Add any scoped styles here */
+.mb-m {
+  margin-bottom: 1rem;
+}
 </style>
