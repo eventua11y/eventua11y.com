@@ -100,16 +100,16 @@ test.describe('Theme Switching', () => {
   }) => {
     // Test menu opening
     await page.click('#theme-selector-button');
-    await expect(page.locator('sl-menu')).toBeVisible();
+    await expect(page.locator('#theme-selector sl-menu')).toBeVisible();
 
     // Test click outside
     await page.click('body');
-    await expect(page.locator('sl-menu')).not.toBeVisible();
+    await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
 
     // Test keyboard interaction
     await page.click('#theme-selector-button');
-    await expect(page.locator('sl-menu')).toBeVisible();
+    await expect(page.locator('#theme-selector sl-menu')).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(page.locator('sl-menu')).not.toBeVisible();
+    await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
   });
 });
