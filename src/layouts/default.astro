@@ -1,17 +1,26 @@
+---
+import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '../styles/styles.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+const { title } = Astro.props.frontmatter || Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Eleventy">
+    <meta name="generator" content="Astro">
     <meta name="description" content="Calendar of digital accessibility events.">
     <meta name="keywords" content="accessibility, a11y, events, calendar">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Matt Obee">
     <meta name="theme-color" content="#650fca" />
-    <title>{{ title }}</title>
-    <script>
+    <title>{title ? `${title} - Eventua11y - digital accessibility events calendar` : 'Eventua11y - digital accessibility events calendar'}</title>
+    <script is:inline>
       (function() {
         const storedTheme = localStorage.getItem('theme');
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -39,32 +48,28 @@
       sizes="16x16"
       href="/favicon/favicon-16x16.png">
     <link rel="manifest" href="/favicon/site.webmanifest">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/light.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/dark.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/shoelace-autoloader.js"></script>
-    <link rel="stylesheet" href="/styles/styles.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script
       defer
       src="https://kit.fontawesome.com/6fc2948f48.js"
       crossorigin="anonymous"></script>
-    <script src="/scripts/main.js"></script>
+    <script src="../scripts/main.js"></script>
   </head>
-  <body x-data class="page--{% if page.fileSlug %}{{ page.fileSlug }}{% else %}home{% endif %} layout--{{ layout }}">
+  <body>
+
     <a href="#main" class="skip">
       <i class="fa-solid fa-down-to-line"></i> Skip to main content
     </a>
     
-    {% include 'masthead.liquid' %}
+    <Header />
 
     <main id="main">
-      {{ content }}
+        <slot />
     </main>
 
-    {% include 'footer.liquid' %}
+    <Footer />
     
   </body>
 </html>

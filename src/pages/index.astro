@@ -1,0 +1,50 @@
+---
+import DefaultLayout from '../layouts/default.astro';
+import Today from '../components/Today.vue';
+import EventList from '../components/EventList.vue';
+import FilterBar from '../components/FilterBar.vue';
+import Filters from '../components/Filters.vue';
+
+// Disable prerendering to enable SSR
+export const prerender = false;
+
+---
+
+<DefaultLayout>
+  <Today client:load />
+  <FilterBar client:only="vue" />
+  <Filters client:only />
+  <div class="container readable py-l">
+    <EventList type="upcoming" client:load />
+  </div>
+  <!-- End container -->
+</DefaultLayout>
+
+<script>
+  // Import Shoelace components after hydration
+  import '@shoelace-style/shoelace/dist/components/button/button.js';
+  import '@shoelace-style/shoelace/dist/components/badge/badge.js';
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+  import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
+  import '@shoelace-style/shoelace/dist/components/menu/menu.js';
+  import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
+  import '@shoelace-style/shoelace/dist/components/alert/alert.js';
+  import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
+  import '@shoelace-style/shoelace/dist/components/switch/switch.js';
+  import '@shoelace-style/shoelace/dist/components/skeleton/skeleton.js';
+  import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+
+  // Set base path for Shoelace assets
+  import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
+  setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/');
+
+  // Initialize Sentry
+  import * as Sentry from "@sentry/vue";
+  
+  Sentry.init({
+    dsn: "https://63a5e1fe7a29dc3df46923bd277aa87e@o4505086842437632.ingest.us.sentry.io/4508463077588992",
+    integrations: [],
+    enabled: import.meta.env.PROD
+  });
+  
+</script>

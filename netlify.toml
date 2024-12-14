@@ -1,10 +1,15 @@
-# [[edge_functions]]
-#   path = "/*"
-#   function = "localize-time"
+[dev]
+  targetPort = 4321
 
 [[edge_functions]]
-  function = "eleventy-edge"
-  path = "/*"
+  path = "/api/hello"
+  function = "hello"
 
-[dev]
-  targetPort = 8081
+[[edge_functions]]
+  path = "/api/get-events"
+  function = "get-events"
+
+
+[[edge_functions]]
+  path = "/api/debug"
+  function = "debug"

@@ -1,8 +1,27 @@
 {
   "liquid.format.enable": true,
   "deno.enable": true,
-  "deno.enablePaths": ["netlify/edge-functions"],
+  "deno.enablePaths": [
+    "netlify/edge-functions"
+  ],
   "deno.unstable": true,
   "deno.importMap": ".netlify/edge-functions-import-map.json",
-  "deno.path": "/Users/mattobee/Library/Preferences/netlify/deno-cli/deno"
+  "deno.path": "/Users/mattobee/Library/Preferences/netlify/deno-cli/deno",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "astro", // Enable .astro
+    "typescript", // Enable .ts
+    "typescriptreact" // Enable .tsx
+  ],
+  "stylelint.validate": [
+    // ↓ Add "html" language.
+    "html",
+    // ↓ Add "vue" language.
+    "vue",
+    // ↓ Add "svelte" language.
+    "svelte",
+    // ↓ Add "astro" language.
+    "astro"
+  ]
 }

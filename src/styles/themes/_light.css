@@ -56,6 +56,9 @@
   --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
+  /* Panel */
+  --c-panel-color-bg: var(--s-color-surface);
+
   /* Page header
   --page-header-color-bg: var(--color-primary);
   --page-header-color-fg: var(--color-fg);

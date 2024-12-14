@@ -4,6 +4,7 @@
   --sl-focus-ring-color: var(--c-focus-ring-color);
   --sl-focus-ring-offset: var(--c-focus-ring-offset);
   --sl-focus-ring-width: var(--c-focus-ring-width);
+  --sl-panel-background-color: var(--c-panel-color-bg);
 }
 
 sl-badge[variant='success']::part(base) {
