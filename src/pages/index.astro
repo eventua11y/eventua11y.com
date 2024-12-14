@@ -13,7 +13,7 @@ export const prerender = false;
 <DefaultLayout>
   <Today client:load />
   <FilterBar client:only="vue" />
-  <Filters client:only />
+  <Filters client:only="vue" />
   <div class="container readable py-l">
     <h1 class="sr-only">Upcoming accessibility events</h1>
     <EventList type="upcoming" client:load />
@@ -38,6 +38,19 @@ export const prerender = false;
   // Set base path for Shoelace assets
   import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
   setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/');
+
+  // Handle drawer state outside of Vue
+  const drawer = document.querySelector('sl-drawer');
+  const filterBtn = document.querySelector('#filter-btn');
+
+  // Listen for custom events from Vue component
+  document.addEventListener('filters:open', () => drawer.show());
+  document.addEventListener('filters:close', () => drawer.hide());
+
+  // Optional: Add transition complete listener
+  drawer.addEventListener('sl-after-show', () => {
+    // Additional handling if needed
+  });
 
   // Initialize Sentry
   import * as Sentry from "@sentry/vue";

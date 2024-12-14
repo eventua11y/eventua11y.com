@@ -26,7 +26,6 @@
           Filters</sl-button
         >
       </div>
-      <!-- End status -->
       <div class="filters__controls d-flex gap-xs items-center">
         <sl-switch
           :checked="filtersStore.filters.showAwarenessDays"
@@ -34,37 +33,31 @@
           id="filter-show-awareness-days"
           >Awareness days</sl-switch
         >
-        <sl-button id="open-filter-drawer" @click="openFilterDrawer">
+        <sl-button id="open-filter-drawer" @click="handleFilterClick">
           <i class="fa-solid fa-filter"></i> Filter
         </sl-button>
         <TimezoneSelector />
       </div>
-      <!-- End filters__controls -->
     </div>
-    <!-- End container -->
   </div>
-  <!-- end Filter Bar -->
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
-import uiStore from '../store/uiStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 
 const filterToolbar = ref(null);
 
-// Function to reset filters
 function resetFilters() {
   filtersStore.resetFilters();
 }
 
-// Function to open the filter drawer
-function openFilterDrawer() {
-  uiStore.openFilterDrawer();
+function handleFilterClick() {
+  const event = new CustomEvent('filters:open');
+  document.dispatchEvent(event);
 }
 
-// Function to toggle awareness days filter
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
 }
@@ -72,13 +65,10 @@ function toggleAwarenessDays(event) {
 onMounted(async () => {
   await nextTick();
   if (filterToolbar.value) {
-    // Create an Intersection Observer to toggle the "is-pinned" class on the filter toolbar
-    // when it intersects with the viewport
     const observer = new IntersectionObserver(
       ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
       { threshold: [1] }
     );
-    // Start observing the filter toolbar
     observer.observe(filterToolbar.value);
   }
 });
