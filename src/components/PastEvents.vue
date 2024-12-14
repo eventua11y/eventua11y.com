@@ -118,7 +118,7 @@ watch(
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
         <section :id="'section-' + yearMonth" class="month">
           <h2 :id="'heading-' + yearMonth" class="month__heading">{{ formatDate(yearMonth) }}</h2>
-          <ul role="list" class="flow">
+          <ul role="list" class="flow" :aria-labelledby="'heading-' + yearMonth">
             <li v-for="event in events" :key="event._id">
               <Event :event="event" />
             </li>
