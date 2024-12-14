@@ -16,15 +16,27 @@
 
 .event__dates {
   font-size: var(--p-step--1);
+  white-space: pre-wrap;
 }
 
 .event__delivery {
-  display: flex;
   font-size: var(--p-step--1);
-  gap: 0.5em;
   margin-bottom: var(--p-space-xs);
   order: 3;
+  white-space: pre-wrap;
 }
+
+[itemprop="eventAttendanceMode"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+[itemprop="eventAttendanceMode"] > * {
+  flex: 0 0 auto;
+}
+
+
 
 .event__online {
   white-space: nowrap;
