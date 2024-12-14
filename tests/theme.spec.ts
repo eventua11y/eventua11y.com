@@ -112,4 +112,5 @@ test.describe('Theme Switching', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
   });
+
 });
