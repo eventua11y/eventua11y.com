@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logo from '../images/eventua11y_logo_wordmark_white.svg';
+const currentPath = Astro.url.pathname;
 ---
 
 <header id="global-header" class="masthead" role="banner">
@@ -11,16 +12,47 @@ import logo from '../images/eventua11y_logo_wordmark_white.svg';
       </a>
     </div>
     <div class="masthead__actions">
+      <nav class="primaryNav">
+        <ul role="list" class="primaryNav__list">
+          <li class="primaryNav__item">
+            <a
+              class="primaryNav__link"
+              href="/past-events"
+              aria-current={currentPath === '/past-events' ? 'page' : undefined}
+            >
+              Past Events
+            </a>
+          </li>
+          <li class="primaryNav__item">
+            <a
+              class="primaryNav__link"
+              href="/"
+              aria-current={currentPath === '/' ? 'page' : undefined}
+            >
+              Upcoming
+            </a>
+          </li>
+        </ul>
+      </nav>
       <sl-dropdown id="theme-selector" placement="bottom-end" distance="3">
-          <sl-button circle    slot="trigger" id="theme-selector-button">
-              <sl-icon label="Light mode" name="sun-fill"></sl-icon>
-          </sl-button>
-          <sl-menu>
-              <sl-menu-item type="checkbox" id="light-mode" value="light">Light mode</sl-menu-item>
-              <sl-menu-item type="checkbox" id="dark-mode" value="dark">Dark mode</sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item type="checkbox" id="system-default" value="system" checked>System default</sl-menu-item>
-          </sl-menu>
+        <sl-button circle slot="trigger" id="theme-selector-button">
+          <sl-icon label="Light mode" name="sun-fill"></sl-icon>
+        </sl-button>
+        <sl-menu>
+          <sl-menu-item type="checkbox" id="light-mode" value="light"
+            >Light mode</sl-menu-item
+          >
+          <sl-menu-item type="checkbox" id="dark-mode" value="dark"
+            >Dark mode</sl-menu-item
+          >
+          <sl-divider></sl-divider>
+          <sl-menu-item
+            type="checkbox"
+            id="system-default"
+            value="system"
+            checked>System default</sl-menu-item
+          >
+        </sl-menu>
       </sl-dropdown>
     </div>
   </div>
