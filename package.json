@@ -5,6 +5,7 @@
   "main": "index.astro",
   "scripts": {
     "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
     "dev": "concurrently \"astro dev\" \"npm run check:watch\"",
     "start": "astro dev",
     "build": "npm run check && astro build && npm run sentry:sourcemaps",
