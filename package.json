@@ -26,20 +26,25 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.8.1",
+    "@eslint/js": "^9.17.0",
     "@playwright/test": "^1.40.0",
     "@types/node": "^20.10.0",
-    "@typescript-eslint/parser": "^6.14.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "astro": "^5.0.3",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-astro": "^0.31.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-playwright": "^1.0.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "globals": "^15.13.0",
     "netlify-cli": "^17.38.0",
     "playwright-chromium": "^1.40.0",
     "postcss-html": "^1.5.0",
     "prettier": "^3.1.1",
     "prettier-plugin-astro": "^0.12.2",
-    "stylelint-config-html": "^1.1.0"
+    "stylelint-config-html": "^1.1.0",
+    "typescript-eslint": "^8.18.0"
   },
   "dependencies": {
     "@astrojs/netlify": "^6.0.0",

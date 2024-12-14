@@ -9,35 +9,42 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:playwright/recommended",
     "plugin:astro/recommended",
+    "plugin:vue/vue3-recommended", // Add Vue 3 support
     "prettier",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 12,
+    ecmaVersion: "latest", // Update to latest instead of 12
     sourceType: "module",
-    parser: "@typescript-eslint/parser",
-    extraFileExtensions: [".astro"],
+    extraFileExtensions: [".astro", ".vue"], // Add .vue extension
   },
   plugins: [
     "@typescript-eslint",
     "playwright",
+    "vue", // Add Vue plugin
   ],
-  rules: {
-    // Add any custom rules here
-    // "astro/no-set-html-directive": "error"
-  },
   overrides: [
     {
+      // Astro files
       files: ["*.astro"],
       parser: "astro-eslint-parser",
       parserOptions: {
         parser: "@typescript-eslint/parser",
         extraFileExtensions: [".astro"],
       },
-      rules: {
-        // Add any custom rules for .astro files here
-        // "astro/no-set-html-directive": "error"
+    },
+    {
+      // Vue files
+      files: ["*.vue"],
+      parser: "vue-eslint-parser",
+      parserOptions: {
+        parser: "@typescript-eslint/parser",
       },
     },
   ],
+  rules: {
+    "vue/multi-word-component-names": "off", // Optional: if you want to allow single-word component names
+    "vue/require-default-prop": "error", // Recommended for better prop definitions
+    "vue/component-api-style": ["error", ["script-setup"]], // Enforce script setup syntax
+  },
 };
