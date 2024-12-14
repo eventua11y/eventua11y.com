@@ -32,6 +32,16 @@ module.exports = {
         parser: '@typescript-eslint/parser',
         extraFileExtensions: ['.astro'],
       },
+      rules: {
+        '@typescript-eslint/triple-slash-reference': 'off'
+      }
+    },
+    {
+      // Type definition files
+      files: ['*.d.ts'],
+      rules: {
+        '@typescript-eslint/triple-slash-reference': 'off'
+      }
     },
     {
       // Vue files
