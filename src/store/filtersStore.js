@@ -1,36 +1,39 @@
 import { reactive, computed, watch } from 'vue';
+import dayjs from 'dayjs';
 
-// Define the default filters
 const defaultFilters = {
   cfsOpen: false,
   cfsClosed: false,
   attendanceOnline: false,
   attendanceOffline: false,
   themes: true,
-  showAwarenessDays: true, // New filter for awareness days
+  showAwarenessDays: true
 };
 
-// Load filters from local storage or use default filters
-let storedFilters = { ...defaultFilters };
-if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-  const savedFilters = localStorage.getItem('filters');
-  if (savedFilters) {
-    storedFilters = JSON.parse(savedFilters);
-  }
-}
+const isCallForSpeakersOpen = (event) => {
+  if (!event.callForSpeakers) return false;
+  if (!event.callForSpeakersClosingDate) return true;
+  return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
+};
 
-// Create a reactive store
+// Load filters from localStorage
+const getStoredFilters = () => {
+  if (typeof window === 'undefined' || !localStorage) return defaultFilters;
+  
+  const saved = localStorage.getItem('filters');
+  return saved ? JSON.parse(saved) : defaultFilters;
+};
+
 const filtersStore = reactive({
-  filters: { ...storedFilters },
+  filters: getStoredFilters(),
   events: [],
   todayEvents: [],
   futureEvents: [],
   pastEvents: [],
   filteredEvents: [],
+
   async fetchEvents() {
     try {
-      const stackTrace = new Error().stack;
-      console.log('Fetching events from the edge', stackTrace);
       const response = await fetch('/api/get-events');
       const events = await response.json();
       this.setEvents(events.future, events.today, events.past);
@@ -38,6 +41,7 @@ const filtersStore = reactive({
       console.error('Error fetching events:', error);
     }
   },
+
   setEvents(futureEvents, todayEvents, pastEvents) {
     this.events = [...futureEvents, ...todayEvents, ...pastEvents];
     this.todayEvents = todayEvents;
@@ -45,41 +49,39 @@ const filtersStore = reactive({
     this.pastEvents = pastEvents;
     this.updateFilteredEvents();
   },
+
   resetFilters() {
     this.filters = { ...defaultFilters };
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    if (typeof window !== 'undefined' && localStorage) {
       localStorage.setItem('filters', JSON.stringify(this.filters));
     }
     this.updateFilteredEvents();
   },
+
   isChanged() {
     return JSON.stringify(this.filters) !== JSON.stringify(defaultFilters);
   },
+
   filterEvents(events) {
     return events.filter((event) => {
-      // Always include awareness days if the filter is enabled
-      if (this.filters.showAwarenessDays && event.type === 'theme') {
-        return true;
-      }
-
-      // Exclude awareness days from other filters
-      if (event.type === 'theme') {
-        return false;
-      }
+      // Handle awareness days
+      if (this.filters.showAwarenessDays && event.type === 'theme') return true;
+      if (event.type === 'theme') return false;
 
       // Call for speakers filter
+      const cfsStatus = isCallForSpeakersOpen(event);
       const matchesCfs =
         (!this.filters.cfsOpen && !this.filters.cfsClosed) ||
-        (this.filters.cfsOpen && event.callForSpeakers) ||
-        (this.filters.cfsClosed && !event.callForSpeakers);
+        (this.filters.cfsOpen && cfsStatus) ||
+        (this.filters.cfsClosed && !cfsStatus);
 
       // Attendance mode filter
       const matchesAttendance =
         (!this.filters.attendanceOnline && !this.filters.attendanceOffline) ||
         (this.filters.attendanceOnline &&
-          (event.attendanceMode === 'online' || event.attendanceMode === 'mixed')) ||
+          ['online', 'mixed'].includes(event.attendanceMode)) ||
         (this.filters.attendanceOffline &&
-          (event.attendanceMode === 'offline' || event.attendanceMode === 'mixed'));
+          ['offline', 'mixed'].includes(event.attendanceMode));
 
       // Themes filter
       const matchesThemes = this.filters.themes || event.type !== 'theme';
@@ -87,28 +89,29 @@ const filtersStore = reactive({
       return matchesCfs && matchesAttendance && matchesThemes;
     });
   },
+
   updateFilteredEvents() {
     this.filteredEvents = this.filterEvents(this.futureEvents);
-    console.log('Filtered events updated:', this.filteredEvents);
   },
+
   showingAllEvents: computed(() => {
     return filtersStore.filteredEvents.length === filtersStore.futureEvents.length;
   }),
 });
 
-// Watch for changes to the filters and save them to local storage
-if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+// Watch filters for changes
+if (typeof window !== 'undefined' && localStorage) {
   watch(
     () => filtersStore.filters,
     (newFilters) => {
       localStorage.setItem('filters', JSON.stringify(newFilters));
-      filtersStore.updateFilteredEvents(); // Trigger re-computation of events
+      filtersStore.updateFilteredEvents();
     },
     { deep: true }
   );
 }
 
-// If events are not already loaded, fetch them
+// Initial events fetch
 if (typeof window !== 'undefined' && !filtersStore.events.length) {
   filtersStore.fetchEvents();
 }
