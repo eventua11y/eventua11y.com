@@ -1,20 +1,23 @@
 <template>
   <div class="event__dates text-muted">
-    <!-- Display the start date of the event -->
     <span class="event__dateStart">
       <span class="sr-only">Starts</span>
       <time :datetime="formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')" itemprop="startDate">
         {{ formatDate(event.dateStart, event.day ? 'LL' : 'LLL') }}
-        <abbr v-if="!event.day" :title="getFullTimezoneName(formatDate(event.dateStart, 'z')) || undefined">{{ formatDate(event.dateStart, 'z') }}</abbr>
+        <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
+          {{ currentTimezone }}
+        </abbr>
       </time>
     </span>
-    <!-- If the event has an end date, display it -->
+    
     <span v-if="event.dateEnd" class="event__dateEnd">
       <span class="sr-only">Ends</span>
       <i class="fa-solid fa-arrow-right-long"></i>
       <time :datetime="formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')" itemprop="endDate">
         {{ formatDate(event.dateEnd, event.day ? 'LL' : isSameDay(event.dateStart, event.dateEnd) ? 'LT' : 'LLL') }}
-        <abbr v-if="!event.day" :title="getFullTimezoneName(formatDate(event.dateEnd, 'z')) || undefined">{{ formatDate(event.dateEnd, 'z') }}</abbr>
+        <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
+          {{ currentTimezone }}
+        </abbr>
       </time>
     </span>
   </div>
@@ -72,25 +75,21 @@ function getFullTimezoneName(abbreviation) {
 // Helper function to format date and time
 function formatDate(date, format) {
   const utcDate = dayjs.utc(date);
-  
-  if (userStore.useLocalTimezone) {
-    const userTimezone = userStore.timezone || 'UTC';
-    const userLocale = userStore.locale || 'en';
-    return utcDate.tz(userTimezone).locale(userLocale).format(format);
-  } else {
-    // If event has no timezone, keep it in UTC
-    const eventTimezone = props.event.timezone || 'UTC';
-    return utcDate.tz(eventTimezone).format(format);
-  }
+  const timezone = userStore.useLocalTimezone ? userStore.timezone || 'UTC' : props.event.timezone || 'UTC';
+  const locale = userStore.locale || 'en';
+  return utcDate.tz(timezone).locale(locale).format(format);
 }
 
 // Helper function to check if two dates are on the same day
 function isSameDay(date1, date2) {
-  if (userStore.useLocalTimezone) {
-    const userTimezone = userStore.timezone || 'UTC';
-    return dayjs(date1).tz(userTimezone).isSame(dayjs(date2).tz(userTimezone), 'day');
-  } else {
-    return dayjs(date1).tz(props.event.timezone).isSame(dayjs(date2).tz(props.event.timezone), 'day');
-  }
+  const timezone = userStore.useLocalTimezone ? userStore.timezone || 'UTC' : props.event.timezone || 'UTC';
+  return dayjs(date1).tz(timezone).isSame(dayjs(date2).tz(timezone), 'day');
 }
+
+const currentTimezone = computed(() => {
+  const date = dayjs.utc(props.event.dateStart);
+  const timezone = userStore.useLocalTimezone ? userStore.timezone || 'UTC' : props.event.timezone || 'UTC';
+  return date.tz(timezone).format('z');
+});
+
 </script>
