@@ -5,6 +5,15 @@ import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 
+const props = defineProps({
+  // 'past' or 'upcoming'
+  type: {
+    type: String,
+    required: true,
+    validator: (value) => ['past', 'upcoming'].includes(value)
+  }
+});
+
 const groupedEvents = ref({});
 const loading = ref(true);
 const error = ref(null);
@@ -16,29 +25,27 @@ const formatDate = (yearMonth) => {
 };
 
 const groupEvents = (events) => {
-  // Sort events in reverse chronological order
-  const sortedEvents = [...events].sort((a, b) => 
-    new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime()
-  );
+  // Sort events based on type (past events in reverse chronological order)
+  const sortedEvents = [...events].sort((a, b) => {
+    const comparison = new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    return props.type === 'past' ? -comparison : comparison;
+  });
 
-  // Group sorted events by month
   const groups = sortedEvents.reduce((groups, event) => {
     const date = new Date(event.dateStart);
     const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
-
-    if (!groups[yearMonth]) {
-      groups[yearMonth] = [];
-    }
+    if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
   }, {});
 
-  // Sort months in reverse chronological order
+  // Sort months (reverse for past events)
   const sortedGroups = Object.fromEntries(
     Object.entries(groups).sort((a, b) => {
       const [yearA, monthA] = a[0].split('-').map(Number);
       const [yearB, monthB] = b[0].split('-').map(Number);
-      return yearB - yearA || monthB - monthA;
+      const comparison = yearA - yearB || monthA - monthB;
+      return props.type === 'past' ? -comparison : comparison;
     })
   );
 
@@ -57,24 +64,28 @@ onMounted(async () => {
       userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
     }
     
-    groupEvents(filtersStore.pastEvents);
+    const events = props.type === 'past' 
+      ? filtersStore.pastEvents 
+      : filtersStore.filteredEvents;
+    groupEvents(events);
   } catch (e) {
-    error.value = 'Unable to load past events. Please try again later.';
+    error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
     loading.value = false;
   }
 });
 
+// Watch for changes in the respective events list
 watch(
-  () => filtersStore.pastEvents,
+  () => props.type === 'past' ? filtersStore.pastEvents : filtersStore.filteredEvents,
   (newEvents) => {
     loading.value = true;
     error.value = null;
     try {
       groupEvents(newEvents);
     } catch (e) {
-      error.value = 'Error updating past events.';
+      error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
     } finally {
       loading.value = false;
@@ -93,12 +104,7 @@ watch(
     </div>
 
     <!-- Error state -->
-    <sl-alert 
-      v-else-if="error" 
-      open 
-      variant="danger" 
-      class="my-xl"
-    >
+    <sl-alert v-else-if="error" open variant="danger" class="my-xl">
       <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
       {{ error }}
     </sl-alert>
@@ -110,11 +116,11 @@ watch(
       class="my-xl"
     >
       <sl-icon slot="icon" name="info-circle"></sl-icon>
-      There are no past events to display.
+      {{ type === 'past' ? 'There are no past events to display.' : 'There are no upcoming events to display.' }}
     </sl-alert>
 
     <!-- Events list -->
-    <div id="past-events" v-else>
+    <div :id="`${type}-events`" v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
         <section :id="'section-' + yearMonth" class="month">
           <h2 :id="'heading-' + yearMonth" class="month__heading">{{ formatDate(yearMonth) }}</h2>

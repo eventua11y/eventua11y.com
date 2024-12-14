@@ -1,7 +1,7 @@
 ---
 import DefaultLayout from '../layouts/default.astro';
 import Today from '../components/Today.vue';
-import UpcomingEvents from '../components/UpcomingEvents.vue';
+import EventList from '../components/EventList.vue';
 import FilterBar from '../components/FilterBar.vue';
 import Filters from '../components/Filters.vue';
 
@@ -15,7 +15,7 @@ export const prerender = false;
   <FilterBar client:only="vue" />
   <Filters client:idle />
   <div class="container readable py-l">
-    <UpcomingEvents client:load />
+    <EventList type="upcoming" client:load />
   </div>
   <!-- End container -->
 </DefaultLayout>

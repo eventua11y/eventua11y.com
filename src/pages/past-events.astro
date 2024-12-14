@@ -1,6 +1,6 @@
 ---
 import DefaultLayout from '../layouts/default.astro';
-import PastEvents from '../components/PastEvents.vue';
+import EventList from '../components/EventList.vue';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
@@ -10,7 +10,7 @@ export const prerender = false;
 <DefaultLayout title="Past Events">
   <div class="container readable py-l">
     <h1 class="sr-only">Past Events</h1>
-    <PastEvents client:load />
+    <EventList type="past" client:load />
   </div>
   <!-- End container -->
 </DefaultLayout>
