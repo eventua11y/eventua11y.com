@@ -33,15 +33,15 @@ module.exports = {
         extraFileExtensions: ['.astro'],
       },
       rules: {
-        '@typescript-eslint/triple-slash-reference': 'off'
-      }
+        '@typescript-eslint/triple-slash-reference': 'off',
+      },
     },
     {
       // Type definition files
       files: ['*.d.ts'],
       rules: {
-        '@typescript-eslint/triple-slash-reference': 'off'
-      }
+        '@typescript-eslint/triple-slash-reference': 'off',
+      },
     },
     {
       // Vue files
