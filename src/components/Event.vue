@@ -55,7 +55,11 @@ const formatDate = (dateString) => {
     </h3>
 
     <EventDate :event="event" />
-    <EventDelivery :attendanceMode="event.attendanceMode" :location="event.location" />
+    <EventDelivery 
+      v-if="event.attendanceMode && event.attendanceMode !== 'none'"
+      :attendanceMode="event.attendanceMode" 
+      :location="event.location" 
+    />
 
     <details v-if="event.description && event.type !== 'theme'" class="event__description flow">
       <summary>
