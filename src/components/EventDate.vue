@@ -58,6 +58,7 @@ const timezoneFullNames = {
   
   // European Timezones
   'GMT': 'Greenwich Mean Time',
+  'GMT+1': 'Greenwich Mean Time +1',
   'BST': 'British Summer Time',
   'CET': 'Central European Time',
   'CEST': 'Central European Summer Time',
