@@ -11,7 +11,7 @@ export default defineConfig({
       template: {
         compilerOptions: { isCustomElement: (tag) => tag.startsWith('sl-') },
       },
-      devtools: true,
+      devtools: false,
     }),
   ],
 });
