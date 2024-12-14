@@ -3,7 +3,6 @@ export default async (request, context) => {
   const acceptLanguage = request.headers.get('accept-language');
   const geo = context.geo || {};
   const timezone = geo.timezone;
-  const geo = context.geo;
 
   const userInfo = {
     userAgent,
