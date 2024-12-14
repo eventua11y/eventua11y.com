@@ -1,9 +1,5 @@
 <template>
-  <sl-drawer
-    id="filter-drawer"
-    label="Filters"
-    @sl-after-hide="emitCloseEvent"
-  >
+  <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
     <div class="flow">
       <fieldset class="checkbox-group filter flow flow-tight">
         <legend class="text-muted">Call for speakers</legend>
