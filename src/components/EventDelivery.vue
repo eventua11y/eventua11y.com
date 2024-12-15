@@ -28,7 +28,8 @@ const props = defineProps({
     type: String,
     required: false,
     default: ATTENDANCE_MODES.NONE,
-    validator: (value) => !value || Object.values(ATTENDANCE_MODES).includes(value),
+    validator: (value) =>
+      !value || Object.values(ATTENDANCE_MODES).includes(value),
   },
   location: {
     type: String,
@@ -86,9 +87,7 @@ const displayLocation = computed(() => props.location || 'International');
       </span>
     </div>
 
-    <div
-      v-else-if="attendanceMode === ATTENDANCE_MODES.NONE"
-    >
+    <div v-else-if="attendanceMode === ATTENDANCE_MODES.NONE">
       <span class="event__location">
         <i class="fa-solid fa-fw fa-location-dot"></i>
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
@@ -96,6 +95,5 @@ const displayLocation = computed(() => props.location || 'International');
         </span>
       </span>
     </div>
-
   </div>
 </template>
