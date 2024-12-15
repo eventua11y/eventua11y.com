@@ -14,34 +14,31 @@ export default async (request, context) => {
     // Extract user information from request headers
     const userAgent = request.headers.get('user-agent');
     const acceptLanguage = request.headers.get('accept-language');
-    
+
     // Get geo data from Netlify Edge context
     const geo = context.geo || {};
     const timezone = geo.timezone;
 
     // Construct response object
     const userInfo = {
-      userAgent,      // Browser and OS information
+      userAgent, // Browser and OS information
       acceptLanguage, // User's language preferences
-      timezone,       // User's timezone from geo data
-      geo,           // Full geo data object
+      timezone, // User's timezone from geo data
+      geo, // Full geo data object
     };
 
     return new Response(JSON.stringify(userInfo), {
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'private, no-cache'
+        'Cache-Control': 'private, no-cache',
       },
     });
   } catch (error) {
     console.error('[get-user-info] Failed:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to get user info' }), 
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to get user info' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };
 
