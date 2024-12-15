@@ -16,6 +16,9 @@ const isCallForSpeakersOpen = (event) => {
   return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
 };
 
+// Create a reactive reference to defaultFilters
+const initialFilters = reactive({ ...defaultFilters });
+
 // Load filters from localStorage
 const getStoredFilters = () => {
   if (typeof window === 'undefined' || !localStorage) return defaultFilters;
@@ -59,7 +62,10 @@ const filtersStore = reactive({
   },
 
   isChanged: computed(() => {
-    return JSON.stringify(filtersStore.filters) !== JSON.stringify(defaultFilters);
+    // Compare each property individually to ensure reactive tracking
+    return Object.keys(defaultFilters).some(
+      key => filtersStore.filters[key] !== initialFilters[key]
+    );
   }),
 
   filterEvents(events) {
