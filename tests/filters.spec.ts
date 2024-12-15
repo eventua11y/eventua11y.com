@@ -13,7 +13,6 @@ test.beforeEach(async ({ page, baseURL }) => {
 
 test('filter button is visible', async ({ page }) => {
   // Wait for page ready
-  await page.waitForLoadState('networkidle');
   await page.waitForLoadState('domcontentloaded');
 
   // Locate and verify button
@@ -25,7 +24,6 @@ test('filter button is visible', async ({ page }) => {
 
 test('filter drawer opens when filter button is clicked', async ({ page }) => {
   // Wait for initial page load
-  await page.waitForLoadState('networkidle');
   await page.waitForLoadState('domcontentloaded');
 
   // Get filter button and wait for it to be ready
@@ -45,8 +43,6 @@ test('filter drawer opens when filter button is clicked', async ({ page }) => {
 });
 
 test('filter drawer closes when close button is clicked', async ({ page }) => {
-  // Wait for initial page load
-  await page.waitForLoadState('networkidle');
 
   // Open drawer
   const filterButton = page.getByRole('button', { name: 'Filter' });
@@ -71,7 +67,6 @@ test('filter drawer closes when close button is clicked', async ({ page }) => {
 
 test('filter drawer closes when esc key is pressed', async ({ page }) => {
   // Initial page load
-  await page.waitForLoadState('networkidle');
   await page.waitForLoadState('domcontentloaded');
 
   // Get and click filter button
@@ -95,7 +90,6 @@ test('filter drawer closes when esc key is pressed', async ({ page }) => {
 
 test('reset button appears when filters are applied', async ({ page }) => {
   // Setup
-  await page.waitForLoadState('networkidle');
   await page.waitForLoadState('domcontentloaded');
 
   // Open drawer
