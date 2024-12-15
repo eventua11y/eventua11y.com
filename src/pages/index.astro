@@ -39,17 +39,49 @@ export const prerender = false;
   import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
   setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/');
 
-  // Handle drawer state outside of Vue
-  const drawer = document.querySelector('sl-drawer');
-  const filterBtn = document.querySelector('#filter-btn');
+  document.addEventListener('DOMContentLoaded', () => {
+    let drawer = document.querySelector('sl-drawer');
+    let retries = 0;
+    const maxRetries = 5;
 
-  // Listen for custom events from Vue component
-  document.addEventListener('filters:open', () => drawer.show());
-  document.addEventListener('filters:close', () => drawer.hide());
+    // If drawer not found, retry with delay
+    function initDrawer() {
+      if (!drawer && retries < maxRetries) {
+        setTimeout(() => {
+          drawer = document.querySelector('sl-drawer');
+          if (drawer) {
+            setupEventListeners();
+          } else {
+            retries++;
+            initDrawer();
+          }
+        }, 100);
+      } else if (drawer) {
+        setupEventListeners();
+      } else {
+        console.error('Drawer not found after retries');
+      }
+    }
 
-  // Optional: Add transition complete listener
-  drawer.addEventListener('sl-after-show', () => {
-    // Additional handling if needed
+    function setupEventListeners() {
+      document.addEventListener('filters:open', () => {
+        try {
+          drawer.show();
+        } catch (e) {
+          console.error('Error showing drawer:', e);
+        }
+      });
+
+      document.addEventListener('filters:close', () => {
+        try {
+          drawer.hide();
+        } catch (e) {
+          console.error('Error hiding drawer:', e);
+        }
+      });
+    }
+
+    initDrawer();
   });
 
   // Initialize Sentry

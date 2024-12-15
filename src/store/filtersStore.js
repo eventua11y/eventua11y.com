@@ -1,14 +1,15 @@
 import { reactive, computed, watch } from 'vue';
 import dayjs from 'dayjs';
 
-const defaultFilters = {
+const DEFAULT_FILTER_VALUES = {
   cfsOpen: false,
   cfsClosed: false,
   attendanceOnline: false,
   attendanceOffline: false,
-  themes: true,
   showAwarenessDays: true,
 };
+
+const defaultFilters = { ...DEFAULT_FILTER_VALUES };
 
 const isCallForSpeakersOpen = (event) => {
   if (!event.callForSpeakers) return false;
@@ -16,12 +17,16 @@ const isCallForSpeakersOpen = (event) => {
   return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
 };
 
+// Create a reactive reference to defaultFilters
+const initialFilters = reactive({ ...defaultFilters });
+
 // Load filters from localStorage
 const getStoredFilters = () => {
-  if (typeof window === 'undefined' || !localStorage) return defaultFilters;
+  if (typeof window === 'undefined' || !localStorage)
+    return { ...defaultFilters };
 
   const saved = localStorage.getItem('filters');
-  return saved ? JSON.parse(saved) : defaultFilters;
+  return saved ? JSON.parse(saved) : { ...defaultFilters };
 };
 
 const filtersStore = reactive({
@@ -51,16 +56,17 @@ const filtersStore = reactive({
   },
 
   resetFilters() {
+    // Reset filters by copying default values
     this.filters = { ...defaultFilters };
-    if (typeof window !== 'undefined' && localStorage) {
-      localStorage.setItem('filters', JSON.stringify(this.filters));
-    }
+    localStorage.setItem('filters', JSON.stringify(this.filters));
     this.updateFilteredEvents();
   },
 
-  isChanged() {
-    return JSON.stringify(this.filters) !== JSON.stringify(defaultFilters);
-  },
+  isChanged: computed(() => {
+    return Object.keys(defaultFilters).some(
+      (key) => filtersStore.filters[key] !== defaultFilters[key]
+    );
+  }),
 
   filterEvents(events) {
     return events.filter((event) => {

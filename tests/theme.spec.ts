@@ -13,7 +13,6 @@ test.describe('Theme Switching', () => {
 
     // Load page
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     const filterDrawer = page.locator('#filter-drawer');
     const isVisible = await filterDrawer.isVisible();
     if (isVisible) {
@@ -91,7 +90,6 @@ test.describe('Theme Switching', () => {
     // Test light preference
     await page.emulateMedia({ colorScheme: 'light' });
     await page.reload();
-    await page.waitForLoadState('networkidle');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 

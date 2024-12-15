@@ -17,7 +17,7 @@
           </small>
         </p>
         <sl-button
-          v-if="filtersChanged"
+          v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
           type="primary"
@@ -47,18 +47,17 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 
-const filtersChanged = computed(() => filtersStore.isChanged());
+const filterToolbar = ref(null);
+const isFiltersChanged = computed(() => filtersStore.isChanged);
 
 watch(
   () => filtersStore.filters,
   () => {
     console.debug('Filters changed:', filtersStore.filters);
-    console.debug('Is changed:', filtersStore.isChanged());
+    console.debug('Is changed:', isFiltersChanged.value);
   },
   { deep: true }
 );
-
-const filterToolbar = ref(null);
 
 function resetFilters() {
   filtersStore.resetFilters();
