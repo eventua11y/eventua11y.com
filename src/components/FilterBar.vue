@@ -49,10 +49,14 @@ import TimezoneSelector from './TimezoneSelector.vue';
 
 const filtersChanged = computed(() => filtersStore.isChanged());
 
-watch(() => filtersStore.filters, () => {
-  console.debug('Filters changed:', filtersStore.filters);
-  console.debug('Is changed:', filtersStore.isChanged());
-}, { deep: true });
+watch(
+  () => filtersStore.filters,
+  () => {
+    console.debug('Filters changed:', filtersStore.filters);
+    console.debug('Is changed:', filtersStore.isChanged());
+  },
+  { deep: true }
+);
 
 const filterToolbar = ref(null);
 

@@ -34,7 +34,7 @@ test('filter drawer opens when filter button is clicked', async ({ page }) => {
 
   // Click and wait for drawer
   await filterButton.click();
-  
+
   // Get drawer and verify state
   const drawer = page.locator('#filter-drawer');
   await expect(drawer).toHaveAttribute('open', '');
@@ -47,24 +47,24 @@ test('filter drawer opens when filter button is clicked', async ({ page }) => {
 test('filter drawer closes when close button is clicked', async ({ page }) => {
   // Wait for initial page load
   await page.waitForLoadState('networkidle');
-  
+
   // Open drawer
   const filterButton = page.getByRole('button', { name: 'Filter' });
   await filterButton.waitFor({ state: 'visible' });
   await filterButton.click();
-  
+
   // Wait for drawer to be visible
   const drawer = page.locator('#filter-drawer');
   await expect(drawer).toBeVisible();
-  
+
   // Close drawer
   const closeButton = page.getByRole('button', { name: 'Close' });
   await closeButton.waitFor({ state: 'visible' });
   await closeButton.click();
-  
+
   // Verify drawer is closed
   await expect(drawer).not.toBeVisible();
-  
+
   // Optional: Wait for animation
   await page.waitForTimeout(300);
 });
