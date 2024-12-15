@@ -8,6 +8,7 @@ const ATTENDANCE_MODES = {
   ONLINE: 'online',
   OFFLINE: 'offline',
   MIXED: 'mixed',
+  NONE: 'none',
 };
 </script>
 
@@ -25,8 +26,10 @@ import { computed } from 'vue';
 const props = defineProps({
   attendanceMode: {
     type: String,
-    required: true,
-    validator: (value) => Object.values(ATTENDANCE_MODES).includes(value),
+    required: false,
+    default: ATTENDANCE_MODES.NONE,
+    validator: (value) =>
+      !value || Object.values(ATTENDANCE_MODES).includes(value),
   },
   location: {
     type: String,
@@ -40,6 +43,16 @@ const props = defineProps({
  * @returns {string} Location to display
  */
 const displayLocation = computed(() => props.location || 'International');
+
+/**
+ * Determines which icon to show based on location
+ * @returns {string} Icon class name
+ */
+const locationIcon = computed(() =>
+  displayLocation.value === 'International'
+    ? 'fa-solid fa-fw fa-globe'
+    : 'fa-solid fa-fw fa-location-dot'
+);
 </script>
 
 <template>
@@ -81,6 +94,15 @@ const displayLocation = computed(() => props.location || 'International');
       <span class="event__online">
         <i class="fa-solid fa-laptop"></i>
         Online
+      </span>
+    </div>
+
+    <div v-else-if="attendanceMode === ATTENDANCE_MODES.NONE">
+      <span class="event__location">
+        <i :class="locationIcon"></i>
+        <span itemprop="location" itemscope itemtype="https://schema.org/Place">
+          {{ displayLocation }}
+        </span>
       </span>
     </div>
   </div>

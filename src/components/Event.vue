@@ -79,7 +79,7 @@ const formatDate = (dateString) => {
     itemtype="https://schema.org/Event"
     :data-event-type="event.type"
   >
-    <h3 class="event__title">
+    <h3 class="event__title" itemprop="name">
       <a v-if="event.website" :href="event.website" itemprop="url">{{
         event.title
       }}</a>
@@ -88,7 +88,6 @@ const formatDate = (dateString) => {
 
     <EventDate :event="event" />
     <EventDelivery
-      v-if="event.attendanceMode && event.attendanceMode !== 'none'"
       :attendanceMode="event.attendanceMode"
       :location="event.location"
     />
