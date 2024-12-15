@@ -75,10 +75,14 @@ import filtersStore from '../store/filtersStore';
 
 const isFiltersChanged = computed(() => filtersStore.isChanged);
 
-watch(() => filtersStore.filters, () => {
-  console.debug('Filters changed:', filtersStore.filters);
-  console.debug('Is changed:', isFiltersChanged.value);
-}, { deep: true });
+watch(
+  () => filtersStore.filters,
+  () => {
+    console.debug('Filters changed:', filtersStore.filters);
+    console.debug('Is changed:', isFiltersChanged.value);
+  },
+  { deep: true }
+);
 
 function emitCloseEvent() {
   const event = new CustomEvent('filters:close');

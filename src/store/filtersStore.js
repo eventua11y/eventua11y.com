@@ -22,7 +22,8 @@ const initialFilters = reactive({ ...defaultFilters });
 
 // Load filters from localStorage
 const getStoredFilters = () => {
-  if (typeof window === 'undefined' || !localStorage) return { ...defaultFilters };
+  if (typeof window === 'undefined' || !localStorage)
+    return { ...defaultFilters };
 
   const saved = localStorage.getItem('filters');
   return saved ? JSON.parse(saved) : { ...defaultFilters };
@@ -63,7 +64,7 @@ const filtersStore = reactive({
 
   isChanged: computed(() => {
     return Object.keys(defaultFilters).some(
-      key => filtersStore.filters[key] !== defaultFilters[key]
+      (key) => filtersStore.filters[key] !== defaultFilters[key]
     );
   }),
 

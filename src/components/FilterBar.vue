@@ -50,10 +50,14 @@ import TimezoneSelector from './TimezoneSelector.vue';
 const filterToolbar = ref(null);
 const isFiltersChanged = computed(() => filtersStore.isChanged);
 
-watch(() => filtersStore.filters, () => {
-  console.debug('Filters changed:', filtersStore.filters);
-  console.debug('Is changed:', isFiltersChanged.value);
-}, { deep: true });
+watch(
+  () => filtersStore.filters,
+  () => {
+    console.debug('Filters changed:', filtersStore.filters);
+    console.debug('Is changed:', isFiltersChanged.value);
+  },
+  { deep: true }
+);
 
 function resetFilters() {
   filtersStore.resetFilters();
