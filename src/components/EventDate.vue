@@ -121,10 +121,10 @@ function isSameDay(date1, date2) {
  * @returns {string} Format pattern for dayjs
  */
 function getStartDateFormat() {
-  if (!props.event.dateEnd) return 'MMM D, YYYY';  // Show full date with year for single dates
-  return isSameDay(props.event.dateStart, props.event.dateEnd) 
-    ? 'LLL'  // Show full date for same-day events
-    : 'MMM D';  // Show month/day only for multi-day events
+  if (!props.event.dateEnd) return 'MMM D, YYYY'; // Show full date with year for single dates
+  return isSameDay(props.event.dateStart, props.event.dateEnd)
+    ? 'LLL' // Show full date for same-day events
+    : 'MMM D'; // Show month/day only for multi-day events
 }
 
 /**
@@ -136,9 +136,9 @@ function getStartDateFormat() {
  */
 function getEndDateFormat() {
   if (props.event.day) return 'LL';
-  return isSameDay(props.event.dateStart, props.event.dateEnd) 
-    ? 'LT'  // Show time only for same-day events
-    : 'MMM D, YYYY';  // Show full date for multi-day events
+  return isSameDay(props.event.dateStart, props.event.dateEnd)
+    ? 'LT' // Show time only for same-day events
+    : 'MMM D, YYYY'; // Show full date for multi-day events
 }
 
 /**
