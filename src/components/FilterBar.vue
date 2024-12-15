@@ -30,13 +30,15 @@
         <sl-switch
           :checked="filtersStore.filters.showAwarenessDays"
           @sl-change="toggleAwarenessDays"
-          id="filter-show-awareness-days"
+          id="filter-show-awareness-days-bar"
           >Awareness days</sl-switch
         >
-        <sl-button id="open-filter-drawer" @click="handleFilterClick">
-          <i class="fa-solid fa-filter"></i> Filter
-        </sl-button>
-        <TimezoneSelector />
+        <div class="group">
+          <sl-button id="open-filter-drawer" @click="handleFilterClick">
+            <i class="fa-solid fa-filter"></i> Filter
+          </sl-button>
+          <TimezoneSelector />
+        </div>
       </div>
     </div>
   </div>

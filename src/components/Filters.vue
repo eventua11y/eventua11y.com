@@ -46,7 +46,7 @@
       <sl-switch
         :checked="filtersStore.filters.showAwarenessDays"
         @sl-change="toggleAwarenessDays"
-        id="filter-show-awareness-days"
+        id="filter-show-awareness-days-drawer"
         >Show awareness days</sl-switch
       >
       <div class="d-flex flex-col items-start gap-xs">
