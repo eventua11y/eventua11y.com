@@ -1,4 +1,9 @@
 <script>
+/**
+ * Enum for event attendance modes
+ * Maps to schema.org event attendance modes
+ * @enum {string}
+ */
 const ATTENDANCE_MODES = {
   ONLINE: 'online',
   OFFLINE: 'offline',
@@ -9,6 +14,14 @@ const ATTENDANCE_MODES = {
 <script setup>
 import { computed } from 'vue';
 
+/**
+ * Event delivery component
+ * Displays event attendance mode (online/offline/mixed) and location
+ * Includes schema.org markup for event attendance mode
+ * 
+ * @prop {string} attendanceMode - Event attendance mode (online/offline/mixed)
+ * @prop {string} [location] - Event location, defaults to 'International'
+ */
 const props = defineProps({
   attendanceMode: {
     type: String,
@@ -21,6 +34,11 @@ const props = defineProps({
   },
 });
 
+/**
+ * Computed property for event location display
+ * Falls back to 'International' if no location provided
+ * @returns {string} Location to display
+ */
 const displayLocation = computed(() => props.location || 'International');
 </script>
 

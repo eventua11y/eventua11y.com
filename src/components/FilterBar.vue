@@ -47,9 +47,28 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 
+/**
+ * FilterBar component
+ * Displays filter controls and current filter status
+ * Includes reset button, awareness days toggle, and filter drawer trigger
+ */
+
+/**
+ * Reference to filter toolbar element for intersection observer
+ * Used to add sticky positioning when scrolled
+ */
 const filterToolbar = ref(null);
+
+/**
+ * Computed property to track filter changes
+ * Used to show/hide reset button
+ */
 const isFiltersChanged = computed(() => filtersStore.isChanged);
 
+/**
+ * Watch filter changes for debugging
+ * Logs current filters state and change status
+ */
 watch(
   () => filtersStore.filters,
   () => {
@@ -59,19 +78,35 @@ watch(
   { deep: true }
 );
 
+/**
+ * Resets all filters to default values
+ * Triggers store reset and updates UI
+ */
 function resetFilters() {
   filtersStore.resetFilters();
 }
 
+/**
+ * Handles filter button click
+ * Dispatches custom event to open filter drawer
+ */
 function handleFilterClick() {
   const event = new CustomEvent('filters:open');
   document.dispatchEvent(event);
 }
 
+/**
+ * Toggles awareness days filter
+ * Updates store when switch changes
+ */
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
 }
 
+/**
+ * Sets up intersection observer for sticky positioning
+ * Adds 'is-pinned' class when toolbar scrolls out of view
+ */
 onMounted(async () => {
   await nextTick();
   if (filterToolbar.value) {

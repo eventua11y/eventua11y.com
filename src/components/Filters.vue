@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, watch } from 'vue';
+import { computed, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 
 const isFiltersChanged = computed(() => filtersStore.isChanged);

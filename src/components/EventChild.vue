@@ -3,6 +3,11 @@ import { computed } from 'vue';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
 
+/**
+ * Child event component (e.g., conference session, workshop)
+ * Renders a sub-event with its title, format, date and duration
+ */
+
 const props = defineProps({
   event: {
     type: Object,
@@ -13,6 +18,10 @@ const props = defineProps({
   },
 });
 
+/**
+ * Mapping of event format codes to display strings
+ * Used to convert format property to human-readable text
+ */
 const formatStrings = {
   talk: 'Talk',
   workshop: 'Workshop',
@@ -24,6 +33,11 @@ const formatStrings = {
   keynote: 'Keynote',
 };
 
+/**
+ * Computes display format string from event format
+ * Falls back to raw format value if no mapping exists
+ * @returns {string} Human-readable format string
+ */
 const displayFormat = computed(
   () => formatStrings[props.event.format] || props.event.format
 );

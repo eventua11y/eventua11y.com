@@ -5,6 +5,15 @@ import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 
+/**
+ * EventList component
+ * Displays a grouped list of events by month
+ * Handles both upcoming and past events with different sorting
+ */
+
+/**
+ * @prop {string} type - Type of events to display ('past' or 'upcoming')
+ */
 const props = defineProps({
   // 'past' or 'upcoming'
   type: {
@@ -14,16 +23,28 @@ const props = defineProps({
   },
 });
 
+// Reactive references for component state
 const groupedEvents = ref({});
 const loading = ref(true);
 const error = ref(null);
 
+/**
+ * Formats year-month string into readable date
+ * @param {string} yearMonth - Format: "YYYY-M"
+ * @returns {string} Formatted date (e.g., "January 2024")
+ */
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
   const date = new Date(year, month - 1);
   return `${date.toLocaleString('default', { month: 'long' })} ${year}`;
 };
 
+/**
+ * Groups events by month and sorts them
+ * - Past events: reverse chronological order
+ * - Upcoming events: chronological order
+ * @param {Array} events - Array of event objects
+ */
 const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
@@ -32,6 +53,7 @@ const groupEvents = (events) => {
     return props.type === 'past' ? -comparison : comparison;
   });
 
+  // Group by year-month
   const groups = sortedEvents.reduce((groups, event) => {
     const date = new Date(event.dateStart);
     const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
@@ -53,6 +75,10 @@ const groupEvents = (events) => {
   groupedEvents.value = sortedGroups;
 };
 
+/**
+ * Lifecycle hook: fetch user info and initialize events
+ * Sets up initial component state and handles errors
+ */
 onMounted(async () => {
   loading.value = true;
   error.value = null;
@@ -78,7 +104,10 @@ onMounted(async () => {
   }
 });
 
-// Watch for changes in the respective events list
+/**
+ * Watch for changes in filtered events
+ * Updates grouped events when filters change
+ */
 watch(
   () =>
     props.type === 'past'
