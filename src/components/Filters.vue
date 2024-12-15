@@ -1,10 +1,5 @@
 <template>
-  <sl-drawer
-    id="filter-drawer"
-    label="Filters"
-    :open="isDrawerMounted && uiStore.isFilterDrawerOpen"
-    @sl-after-hide="uiStore.closeFilterDrawer"
-  >
+  <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
     <div class="flow">
       <fieldset class="checkbox-group filter flow flow-tight">
         <legend class="text-muted">Call for speakers</legend>
@@ -75,47 +70,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
-import uiStore from '../store/uiStore';
 
-// Add mounted state tracking
-const isDrawerMounted = ref(false);
-
-onMounted(() => {
-  // Ensure drawer starts closed
-  uiStore.closeFilterDrawer();
-  // Only show drawer after mounted
-  isDrawerMounted.value = true;
-});
-
-// Watch for state changes
-watch(
-  () => uiStore.isFilterDrawerOpen,
-  (newVal) => {
-    console.log('State change: isFilterDrawerOpen:', newVal);
-  }
-);
-
-// Function to close the drawer
-function closeDrawer() {
-  uiStore.closeFilterDrawer();
-  console.log(
-    'closeDrawer called: State of isFilterDrawerOpen:',
-    uiStore.isFilterDrawerOpen
-  );
+function emitCloseEvent() {
+  const event = new CustomEvent('filters:close');
+  document.dispatchEvent(event);
 }
 
-// Function to reset filters and close the drawer
+function closeDrawer() {
+  emitCloseEvent();
+}
+
 function resetFilters() {
   filtersStore.resetFilters();
 }
 
-// Function to toggle awareness days filter
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
 }
 </script>
-
-<!-- <style scoped>
-</style> -->
