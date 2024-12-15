@@ -5,6 +5,11 @@ import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
 
+/**
+ * Event component displays a single event with its details
+ * Props:
+ * @prop {Object} event - Event object containing title, type, dates, and other metadata
+ */
 const props = defineProps({
   event: {
     type: Object,
@@ -15,20 +20,41 @@ const props = defineProps({
   },
 });
 
+/**
+ * Checks if event has child events (e.g., conference tracks, sessions)
+ * @returns {boolean} True if event has children
+ */
 const hasChildren = computed(
   () => props.event.children && props.event.children.length > 0
 );
 
+/**
+ * Gets count of child events
+ * @returns {number} Number of child events or 0 if none
+ */
 const childrenCount = computed(() =>
   hasChildren.value ? props.event.children.length : 0
 );
 
+/**
+ * Checks if call for speakers is currently open
+ * Returns true if:
+ * - Event has call for speakers enabled AND
+ * - Either no closing date is set OR current date is before closing date
+ * @returns {boolean} True if call for speakers is open
+ */
 const isCallForSpeakersOpen = computed(() => {
   if (!props.event.callForSpeakers) return false;
   if (!props.event.callForSpeakersClosingDate) return true;
   return dayjs().isBefore(dayjs(props.event.callForSpeakersClosingDate));
 });
 
+/**
+ * Formats a date string to readable format (e.g., "January 1")
+ * Used for call for speakers closing date display
+ * @param {string} dateString - ISO date string
+ * @returns {string} Formatted date or error message if invalid
+ */
 const formatDate = (dateString) => {
   try {
     const date = new Date(dateString);
