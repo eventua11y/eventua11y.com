@@ -43,7 +43,6 @@ test('filter drawer opens when filter button is clicked', async ({ page }) => {
 });
 
 test('filter drawer closes when close button is clicked', async ({ page }) => {
-
   // Open drawer
   const filterButton = page.getByRole('button', { name: 'Filter' });
   await filterButton.waitFor({ state: 'visible' });
