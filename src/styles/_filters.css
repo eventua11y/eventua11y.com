@@ -11,7 +11,7 @@
     flex-direction: column;
     gap: var(--p-space-xs);
     justify-content: space-between;
-    @media (min-width: 700px) {
+    @media (min-width: 800px) {
       flex-direction: row;
     }
     .group {
@@ -38,9 +38,9 @@
   #filter-reset {
     margin-left: var(--p-space-xs-m);
   }
-  #filter-show-awareness-days-bar {
+  #filter-show-awareness-days-bar, #filter-reset {
     display: none;
-    @media (min-width: 500px) {
+    @media (min-width: 700px) {
       display: unset;
     }
   }
