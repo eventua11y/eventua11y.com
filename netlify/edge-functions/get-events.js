@@ -1,14 +1,25 @@
+/**
+ * Edge function to fetch events from Sanity CMS
+ * Handles caching, data transformation and API response
+ */
+
 import { createClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
 
-// In-memory cache
+/**
+ * In-memory cache configuration
+ * Caches events data for 5 minutes to reduce API calls
+ */
 let cache = {
   data: null,
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };
 
-// Get Sanity config from environment variables
+/**
+ * Gets Sanity configuration from environment variables
+ * @returns {Object} Sanity client configuration
+ */
 function getConfig() {
   const projectId = Deno.env.get('SANITY_PROJECT');
   const dataset = Deno.env.get('SANITY_DATASET');
@@ -30,7 +41,11 @@ function getConfig() {
   };
 }
 
-// Initialize Sanity client
+/**
+ * Creates and configures Sanity client
+ * @returns {Object} Configured Sanity client
+ * @throws {Error} If client initialization fails
+ */
 function createSanityClient() {
   try {
     const config = getConfig();
@@ -41,13 +56,25 @@ function createSanityClient() {
   }
 }
 
-// Utility functions
+/**
+ * Sorts events array by start date
+ * @param {Array} events - Array of event objects
+ * @returns {Array} Sorted events array
+ */
 function sortEventsByDate(events) {
   return events.sort(
     (a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
   );
 }
 
+/**
+ * Fetches events from Sanity and processes them
+ * - Fetches all non-draft events
+ * - Fetches child events for each parent
+ * - Separates into future, past, and today's events
+ * @param {Object} client - Sanity client
+ * @returns {Object} Processed events object
+ */
 async function fetchEventsFromSanity(client) {
   try {
     const events = await client.fetch(`
@@ -100,6 +127,11 @@ async function fetchEventsFromSanity(client) {
   }
 }
 
+/**
+ * Gets events with caching
+ * Returns cached data if valid, otherwise fetches fresh data
+ * @returns {Object} Events object
+ */
 async function getEvents() {
   const client = createSanityClient();
 
@@ -119,6 +151,12 @@ async function getEvents() {
   return events;
 }
 
+/**
+ * Edge function handler
+ * Serves events API endpoint with caching headers
+ * @param {Request} request - HTTP request object
+ * @returns {Response} JSON response with events data
+ */
 export default async function handler(request) {
   try {
     const events = await getEvents();
@@ -139,4 +177,8 @@ export default async function handler(request) {
   }
 }
 
+/**
+ * Edge function configuration
+ * Defines API endpoint path
+ */
 export const config = { path: '/api/get-events' };
