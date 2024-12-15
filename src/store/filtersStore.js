@@ -6,7 +6,6 @@ const defaultFilters = {
   cfsClosed: false,
   attendanceOnline: false,
   attendanceOffline: false,
-  themes: true,
   showAwarenessDays: true,
 };
 
