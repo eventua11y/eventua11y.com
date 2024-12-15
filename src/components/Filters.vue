@@ -55,7 +55,7 @@
           {{ filtersStore.futureEvents.length }} events</sl-button
         >
         <sl-button
-          v-if="filtersStore.isChanged()"
+          v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
           type="primary"
@@ -70,8 +70,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, computed, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
+
+const isFiltersChanged = computed(() => filtersStore.isChanged);
+
+watch(() => filtersStore.filters, () => {
+  console.debug('Filters changed:', filtersStore.filters);
+  console.debug('Is changed:', isFiltersChanged.value);
+}, { deep: true });
 
 function emitCloseEvent() {
   const event = new CustomEvent('filters:close');

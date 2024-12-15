@@ -58,9 +58,9 @@ const filtersStore = reactive({
     this.updateFilteredEvents();
   },
 
-  isChanged() {
-    return JSON.stringify(this.filters) !== JSON.stringify(defaultFilters);
-  },
+  isChanged: computed(() => {
+    return JSON.stringify(filtersStore.filters) !== JSON.stringify(defaultFilters);
+  }),
 
   filterEvents(events) {
     return events.filter((event) => {
