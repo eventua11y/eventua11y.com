@@ -18,7 +18,7 @@ import { computed } from 'vue';
  * Event delivery component
  * Displays event attendance mode (online/offline/mixed) and location
  * Includes schema.org markup for event attendance mode
- * 
+ *
  * @prop {string} attendanceMode - Event attendance mode (online/offline/mixed)
  * @prop {string} [location] - Event location, defaults to 'International'
  */

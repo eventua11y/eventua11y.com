@@ -16,7 +16,7 @@ import dayjs from 'dayjs';
  * Event duration component
  * Displays event duration in hours and minutes
  * Includes schema.org markup and screen reader text
- * 
+ *
  * @prop {Object} event - Event object with start and end dates
  * @prop {string} event.dateStart - ISO date string for event start
  * @prop {string} event.dateEnd - ISO date string for event end
