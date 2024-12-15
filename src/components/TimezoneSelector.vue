@@ -6,10 +6,15 @@
         {{ selectedTimezoneLabel }}
       </sl-button>
       <sl-menu @sl-select="updateTimezone">
-        <sl-menu-item type="checkbox" :value="userTimezone" :checked="isLocalTimezone">{{
-          userTimezoneLabel
-        }}</sl-menu-item>
-        <sl-menu-item type="checkbox" value="event" :checked="isEventTimezone">Event local times</sl-menu-item>
+        <sl-menu-item
+          type="checkbox"
+          :value="userTimezone"
+          :checked="isLocalTimezone"
+          >{{ userTimezoneLabel }}</sl-menu-item
+        >
+        <sl-menu-item type="checkbox" value="event" :checked="isEventTimezone"
+          >Event local times</sl-menu-item
+        >
       </sl-menu>
     </sl-dropdown>
   </div>
@@ -90,7 +95,6 @@ onMounted(() => {
 /**
  * Computed properties to determine which timezone is active
  */
- const isLocalTimezone = computed(() => userStore.useLocalTimezone);
+const isLocalTimezone = computed(() => userStore.useLocalTimezone);
 const isEventTimezone = computed(() => !userStore.useLocalTimezone);
-
 </script>
