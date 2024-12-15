@@ -8,6 +8,7 @@ const ATTENDANCE_MODES = {
   ONLINE: 'online',
   OFFLINE: 'offline',
   MIXED: 'mixed',
+  NONE: 'none',
 };
 </script>
 
@@ -25,8 +26,9 @@ import { computed } from 'vue';
 const props = defineProps({
   attendanceMode: {
     type: String,
-    required: true,
-    validator: (value) => Object.values(ATTENDANCE_MODES).includes(value),
+    required: false,
+    default: ATTENDANCE_MODES.NONE,
+    validator: (value) => !value || Object.values(ATTENDANCE_MODES).includes(value),
   },
   location: {
     type: String,
@@ -83,5 +85,17 @@ const displayLocation = computed(() => props.location || 'International');
         Online
       </span>
     </div>
+
+    <div
+      v-else-if="attendanceMode === ATTENDANCE_MODES.NONE"
+    >
+      <span class="event__location">
+        <i class="fa-solid fa-fw fa-location-dot"></i>
+        <span itemprop="location" itemscope itemtype="https://schema.org/Place">
+          {{ displayLocation }}
+        </span>
+      </span>
+    </div>
+
   </div>
 </template>
