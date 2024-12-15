@@ -43,6 +43,16 @@ const props = defineProps({
  * @returns {string} Location to display
  */
 const displayLocation = computed(() => props.location || 'International');
+
+/**
+ * Determines which icon to show based on location
+ * @returns {string} Icon class name
+ */
+const locationIcon = computed(() =>
+  displayLocation.value === 'International'
+    ? 'fa-solid fa-fw fa-globe'
+    : 'fa-solid fa-fw fa-location-dot'
+);
 </script>
 
 <template>
@@ -89,7 +99,7 @@ const displayLocation = computed(() => props.location || 'International');
 
     <div v-else-if="attendanceMode === ATTENDANCE_MODES.NONE">
       <span class="event__location">
-        <i class="fa-solid fa-fw fa-location-dot"></i>
+        <i :class="locationIcon"></i>
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
           {{ displayLocation }}
         </span>
