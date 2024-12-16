@@ -29,6 +29,11 @@ const { title } = Astro.props.frontmatter || Astro.props;
           : 'Eventua11y - digital accessibility events calendar'
       }
     </title>
+    <meta property="og:title" content={title ? `${title} - Eventua11y` : 'Eventua11y'} />
+    <meta property="og:description" content="A calendar of digital accessibility events, curated by Matt Obee." />
+    <meta property="og:image" content="/favicon/eventua11y_og_min.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
     <script is:inline>
       (function () {
         const storedTheme = localStorage.getItem('theme');
