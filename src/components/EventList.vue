@@ -139,7 +139,7 @@ watch(
 
     <!-- Error state -->
     <sl-alert v-else-if="error" open variant="danger" class="my-xl">
-      <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+      <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
       {{ error }}
     </sl-alert>
 
