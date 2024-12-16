@@ -62,12 +62,12 @@
     "@sentry/profiling-node": "^8.45.1",
     "@sentry/vue": "^8.45.0",
     "@shoelace-style/shoelace": "^2.19.1",
-    "@types/react": "^18.2.45",
+    "@types/react": "^19.0.1",
     "@types/react-dom": "^18.2.18",
     "dayjs": "^1.11.9",
     "dotenv": "^16.3.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "sanity": "^3.23.4",
     "vue": "^3.5.13"
   }
