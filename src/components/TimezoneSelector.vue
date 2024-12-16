@@ -7,12 +7,17 @@
       </sl-button>
       <sl-menu @sl-select="updateTimezone">
         <sl-menu-item
-          type="checkbox"
+          type="radio"
+          name="timezone"
           :value="userTimezone"
-          :checked="isLocalTimezone"
+          :selected="isLocalTimezone"
           >{{ userTimezoneLabel }}</sl-menu-item
         >
-        <sl-menu-item type="checkbox" value="event" :checked="isEventTimezone"
+        <sl-menu-item
+          type="radio"
+          name="timezone"
+          value="event"
+          :selected="!isLocalTimezone"
           >Event local times</sl-menu-item
         >
       </sl-menu>
@@ -93,8 +98,9 @@ onMounted(() => {
 });
 
 /**
- * Computed properties to determine which timezone is active
+ * Determines which timezone option is active
+ * Only one option should be checked at a time
+ * @returns {boolean} True if using local timezone
  */
-const isLocalTimezone = computed(() => userStore.useLocalTimezone);
-const isEventTimezone = computed(() => !userStore.useLocalTimezone);
+const isLocalTimezone = computed(() => userStore.useLocalTimezone === true);
 </script>
