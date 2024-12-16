@@ -17,7 +17,7 @@ export default defineConfig({
     }),
     sentry({
       sourceMapsUploadOptions: {
-        project: "eventua11y",
+        project: 'eventua11y',
         authToken: process.env.SENTRY_AUTH_TOKEN,
       },
     }),
