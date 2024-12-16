@@ -1,7 +1,42 @@
 import { reactive, computed, watch } from 'vue';
 import dayjs from 'dayjs';
 
-const DEFAULT_FILTER_VALUES = {
+interface Event {
+  callForSpeakers?: boolean;
+  callForSpeakersClosingDate?: string;
+  type: string;
+  attendanceMode: string;
+}
+
+interface Filters {
+  cfsOpen: boolean;
+  cfsClosed: boolean;
+  attendanceOnline: boolean;
+  attendanceOffline: boolean;
+  showAwarenessDays: boolean;
+}
+
+interface FiltersStore {
+  filters: Filters;
+  events: Event[];
+  todayEvents: Event[];
+  futureEvents: Event[];
+  pastEvents: Event[];
+  filteredEvents: Event[];
+  fetchEvents: () => Promise<void>;
+  setEvents: (
+    futureEvents: Event[],
+    todayEvents: Event[],
+    pastEvents: Event[]
+  ) => void;
+  resetFilters: () => void;
+  isChanged: boolean;
+  filterEvents: (events: Event[]) => Event[];
+  updateFilteredEvents: () => void;
+  showingAllEvents: boolean;
+}
+
+const DEFAULT_FILTER_VALUES: Filters = {
   cfsOpen: false,
   cfsClosed: false,
   attendanceOnline: false,
@@ -9,9 +44,14 @@ const DEFAULT_FILTER_VALUES = {
   showAwarenessDays: true,
 };
 
-const defaultFilters = { ...DEFAULT_FILTER_VALUES };
+const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
 
-const isCallForSpeakersOpen = (event) => {
+/**
+ * Checks if the call for speakers is open for a given event.
+ * @param event - The event to check.
+ * @returns True if the call for speakers is open, false otherwise.
+ */
+const isCallForSpeakersOpen = (event: Event): boolean => {
   if (!event.callForSpeakers) return false;
   if (!event.callForSpeakersClosingDate) return true;
   return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
@@ -20,8 +60,11 @@ const isCallForSpeakersOpen = (event) => {
 // Create a reactive reference to defaultFilters
 const initialFilters = reactive({ ...defaultFilters });
 
-// Load filters from localStorage
-const getStoredFilters = () => {
+/**
+ * Loads filters from localStorage.
+ * @returns The stored filters or the default filters if none are stored.
+ */
+const getStoredFilters = (): Filters => {
   if (typeof window === 'undefined' || !localStorage)
     return { ...defaultFilters };
 
@@ -29,7 +72,7 @@ const getStoredFilters = () => {
   return saved ? JSON.parse(saved) : { ...defaultFilters };
 };
 
-const filtersStore = reactive({
+const filtersStore: FiltersStore = reactive({
   filters: getStoredFilters(),
   events: [],
   todayEvents: [],
@@ -37,6 +80,9 @@ const filtersStore = reactive({
   pastEvents: [],
   filteredEvents: [],
 
+  /**
+   * Fetches events from the API and sets them in the store.
+   */
   async fetchEvents() {
     try {
       const response = await fetch('/api/get-events');
@@ -47,7 +93,13 @@ const filtersStore = reactive({
     }
   },
 
-  setEvents(futureEvents, todayEvents, pastEvents) {
+  /**
+   * Sets the events in the store and updates the filtered events.
+   * @param futureEvents - The future events.
+   * @param todayEvents - The events happening today.
+   * @param pastEvents - The past events.
+   */
+  setEvents(futureEvents: Event[], todayEvents: Event[], pastEvents: Event[]) {
     this.events = [...futureEvents, ...todayEvents, ...pastEvents];
     this.todayEvents = todayEvents;
     this.futureEvents = futureEvents;
@@ -55,6 +107,9 @@ const filtersStore = reactive({
     this.updateFilteredEvents();
   },
 
+  /**
+   * Resets the filters to their default values and updates the filtered events.
+   */
   resetFilters() {
     // Reset filters by copying default values
     this.filters = { ...defaultFilters };
@@ -62,13 +117,23 @@ const filtersStore = reactive({
     this.updateFilteredEvents();
   },
 
+  /**
+   * Computed property to check if the filters have changed from their default values.
+   */
   isChanged: computed(() => {
     return Object.keys(defaultFilters).some(
-      (key) => filtersStore.filters[key] !== defaultFilters[key]
+      (key) =>
+        filtersStore.filters[key as keyof Filters] !==
+        defaultFilters[key as keyof Filters]
     );
   }),
 
-  filterEvents(events) {
+  /**
+   * Filters the events based on the current filters.
+   * @param events - The events to filter.
+   * @returns The filtered events.
+   */
+  filterEvents(events: Event[]): Event[] {
     return events.filter((event) => {
       // Handle awareness days
       if (this.filters.showAwarenessDays && event.type === 'theme') return true;
@@ -96,10 +161,16 @@ const filtersStore = reactive({
     });
   },
 
+  /**
+   * Updates the filtered events based on the current filters.
+   */
   updateFilteredEvents() {
     this.filteredEvents = this.filterEvents(this.futureEvents);
   },
 
+  /**
+   * Computed property to check if all future events are being shown.
+   */
   showingAllEvents: computed(() => {
     return (
       filtersStore.filteredEvents.length === filtersStore.futureEvents.length
@@ -107,7 +178,7 @@ const filtersStore = reactive({
   }),
 });
 
-// Watch filters for changes
+// Watch filters for changes and update localStorage and filtered events
 if (typeof window !== 'undefined' && localStorage) {
   watch(
     () => filtersStore.filters,

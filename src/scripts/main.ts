@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Find all elements with the "no-js" class and remove that class
-  const noJsElements = document.querySelectorAll('.no-js');
+  const noJsElements = document.querySelectorAll<HTMLElement>('.no-js');
   noJsElements.forEach((element) => {
     element.classList.remove('no-js');
   });
@@ -13,10 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
-  function applyTheme(theme) {
+  /**
+   * Applies the selected theme to the document.
+   * @param theme - The theme to apply ('light', 'dark', or null for system default).
+   */
+  function applyTheme(theme: string | null) {
     const themeSelectorButton = document.getElementById(
       'theme-selector-button'
-    );
+    ) as HTMLElement;
 
     if (!themeSelectorButton) {
       console.error('Theme selector button not found');
@@ -48,10 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function updateSelection(theme) {
-    const lightModeItem = document.getElementById('light-mode');
-    const darkModeItem = document.getElementById('dark-mode');
-    const systemDefaultItem = document.getElementById('system-default');
+  /**
+   * Updates the theme selection UI based on the current theme.
+   * @param theme - The current theme ('light', 'dark', or null for system default).
+   */
+  function updateSelection(theme: string | null) {
+    const lightModeItem = document.getElementById(
+      'light-mode'
+    ) as HTMLInputElement;
+    const darkModeItem = document.getElementById(
+      'dark-mode'
+    ) as HTMLInputElement;
+    const systemDefaultItem = document.getElementById(
+      'system-default'
+    ) as HTMLInputElement;
 
     if (!lightModeItem || !darkModeItem || !systemDefaultItem) {
       console.error('Theme selection items not found');
@@ -63,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     systemDefaultItem.checked = theme === null;
   }
 
+  // Apply the stored theme or the system default theme on initial load
   const storedTheme = localStorage.getItem('theme');
   if (storedTheme) {
     applyTheme(storedTheme);
@@ -72,11 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelection(null);
   }
 
-  document.querySelector('sl-menu').addEventListener('sl-select', (event) => {
-    const selectedTheme = event.detail.item.value;
-    applyTheme(selectedTheme);
-    updateSelection(selectedTheme);
-  });
+  // Add event listener for theme selection changes
+  const menu = document.querySelector('sl-menu');
+  if (menu) {
+    menu.addEventListener('sl-select', (event: CustomEvent) => {
+      const selectedTheme = event.detail.item.value;
+      applyTheme(selectedTheme);
+      updateSelection(selectedTheme);
+    });
+  }
 
   // Listen for changes to the user's system preference and update the theme accordingly
   prefersDarkScheme.addEventListener('change', (event) => {

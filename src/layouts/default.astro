@@ -77,7 +77,6 @@ const { title } = Astro.props.frontmatter || Astro.props;
       defer
       src="https://kit.fontawesome.com/6fc2948f48.js"
       crossorigin="anonymous"></script>
-    <script src="../scripts/main.js"></script>
   </head>
   <body>
     <a href="#main" class="skip">
@@ -102,6 +101,8 @@ const { title } = Astro.props.frontmatter || Astro.props;
 <script>
   // Initialize Sentry
   import * as Sentry from '@sentry/vue';
+  import '../scripts/main.ts';
+
 
   Sentry.init({
     dsn: 'https://63a5e1fe7a29dc3df46923bd277aa87e@o4505086842437632.ingest.us.sentry.io/4508463077588992',
