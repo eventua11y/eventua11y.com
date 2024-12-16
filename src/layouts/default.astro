@@ -73,3 +73,15 @@ const { title } = Astro.props.frontmatter || Astro.props;
     <script src="https://cdn.usefathom.com/script.js" data-spa="auto" data-site="XTSPEPUF" defer></script>
   </body>
 </html>
+
+<script>
+  // Initialize Sentry
+  import * as Sentry from '@sentry/vue';
+
+  Sentry.init({
+    dsn: 'https://63a5e1fe7a29dc3df46923bd277aa87e@o4505086842437632.ingest.us.sentry.io/4508463077588992',
+    integrations: [],
+    enabled: import.meta.env.PROD,
+  });
+
+</script>

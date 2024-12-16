@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelection(null);
   }
 
-    document.querySelector('sl-menu').addEventListener('sl-select', (event) => {
+  document.querySelector('sl-menu').addEventListener('sl-select', (event) => {
     const selectedTheme = event.detail.item.value;
     applyTheme(selectedTheme);
     updateSelection(selectedTheme);
