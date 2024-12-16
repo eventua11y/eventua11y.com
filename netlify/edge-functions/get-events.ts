@@ -3,15 +3,31 @@
  * Handles caching, data transformation and API response
  */
 
-import { createClient } from 'https://esm.sh/@sanity/client';
+import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
+
+interface Event {
+  _id: string;
+  _type: string;
+  dateStart: string;
+  dateEnd: string;
+  parent?: { _ref: string };
+  children?: Event[];
+}
+
+interface EventsResponse {
+  events: Event[];
+  future: Event[];
+  past: Event[];
+  today: Event[];
+}
 
 /**
  * In-memory cache configuration
  * Caches events data for 5 minutes to reduce API calls
  */
 let cache = {
-  data: null,
+  data: null as EventsResponse | null,
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };
@@ -24,7 +40,7 @@ function getConfig() {
   const projectId = Deno.env.get('SANITY_PROJECT');
   const dataset = Deno.env.get('SANITY_DATASET');
   const apiVersion = Deno.env.get('SANITY_API_VERSION');
-  const useCdn = Deno.env.get('SANITY_CDN');
+  const useCdn = Deno.env.get('SANITY_CDN') === 'true';
 
   console.log('Environment Variables:', {
     SANITY_PROJECT: projectId,
@@ -34,19 +50,19 @@ function getConfig() {
   });
 
   return {
-    projectId,
-    dataset,
-    apiVersion,
-    useCdn: true,
+    projectId: projectId || '',
+    dataset: dataset || '',
+    apiVersion: apiVersion || '2021-03-25',
+    useCdn,
   };
 }
 
 /**
  * Creates and configures Sanity client
- * @returns {Object} Configured Sanity client
+ * @returns {SanityClient} Configured Sanity client
  * @throws {Error} If client initialization fails
  */
-function createSanityClient() {
+function createSanityClient(): SanityClient {
   try {
     const config = getConfig();
     return createClient(config);
@@ -58,10 +74,10 @@ function createSanityClient() {
 
 /**
  * Sorts events array by start date
- * @param {Array} events - Array of event objects
- * @returns {Array} Sorted events array
+ * @param {Event[]} events - Array of event objects
+ * @returns {Event[]} Sorted events array
  */
-function sortEventsByDate(events) {
+function sortEventsByDate(events: Event[]): Event[] {
   return events.sort(
     (a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
   );
@@ -72,19 +88,21 @@ function sortEventsByDate(events) {
  * - Fetches all non-draft events
  * - Fetches child events for each parent
  * - Separates into future, past, and today's events
- * @param {Object} client - Sanity client
- * @returns {Object} Processed events object
+ * @param {SanityClient} client - Sanity client
+ * @returns {EventsResponse} Processed events object
  */
-async function fetchEventsFromSanity(client) {
+async function fetchEventsFromSanity(
+  client: SanityClient
+): Promise<EventsResponse> {
   try {
-    const events = await client.fetch(`
+    const events: Event[] = await client.fetch(`
       *[_type == "event" && !(_id in path("drafts.**"))]
     `);
 
     // Fetch children for each event
     const eventsWithChildren = await Promise.all(
       events.map(async (event) => {
-        const children = await client.fetch(
+        const children: Event[] = await client.fetch(
           `
         *[_type == "event" && parent._ref == $eventId] | order(dateStart asc)
       `,
@@ -130,9 +148,9 @@ async function fetchEventsFromSanity(client) {
 /**
  * Gets events with caching
  * Returns cached data if valid, otherwise fetches fresh data
- * @returns {Object} Events object
+ * @returns {EventsResponse} Events object
  */
-async function getEvents() {
+async function getEvents(): Promise<EventsResponse> {
   const client = createSanityClient();
 
   // Check cache
@@ -157,7 +175,7 @@ async function getEvents() {
  * @param {Request} request - HTTP request object
  * @returns {Response} JSON response with events data
  */
-export default async function handler(request) {
+export default async function handler(request: Request): Promise<Response> {
   try {
     const events = await getEvents();
 
