@@ -10,12 +10,12 @@ See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this p
 
 ## Technology
 
-This website is built using [Eleventy](https://www.11ty.dev/), which is a static site generator. This means that instead of waiting until a page is requested by a visitor and then building it on demand, the pages are all built in advance so that they are ready to serve ahead of time.
+This website is built using [Astro](https://astro.build/) and [Vue](https://vuejs.org/).
 
-Page templates are written in the [Liquid](https://github.com/Shopify/liquid) templating language, which is then transformed into HTML.
+Pages are built using a combination of Astro and Vue components. The Vue components are hydrated client-side for interactivity.
 
-The events themselves are stored in a [Sanity](https://sanity.io/) real-time database, edited in [Sanity Studio](https://github.com/eventua11y/eventua11y-sanity).
+The events are stored in a [Sanity](https://sanity.io/) real-time database, edited in [Sanity Studio](https://github.com/eventua11y/eventua11y-sanity).
 
-The website is hosted by [Netlify](https://www.netlify.com/). Whenever changes are pushed to the main branch in GitHub, Netlify builds and deploys the changes automatically. Branches are also deployed temporarily for testing purposes.
+The website is hosted by [Netlify](https://www.netlify.com/). Changes pushed to the main branch in GitHub are automatically built and deployed by Netlify. Branches are deployed to temporary URLs for previewing changes before they go live.
 
-Netlify edge functions pull events from Sanity and apply localisation to the dates, which means that visitors should see a list of events that is appropriate for their locale and timezone.
+Netlify edge functions pull events from Sanity and apply localization to the dates.
