@@ -72,19 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelection(null);
   }
 
-  document.querySelector('sl-menu').addEventListener('sl-select', (event) => {
-    const selectedItem = event.detail.item;
-    const selectedTheme = selectedItem.value;
-    if (selectedTheme === 'light') {
-      applyTheme('light');
-      updateSelection('light');
-    } else if (selectedTheme === 'dark') {
-      applyTheme('dark');
-      updateSelection('dark');
-    } else {
-      applyTheme(null);
-      updateSelection(null);
-    }
+    document.querySelector('sl-menu').addEventListener('sl-select', (event) => {
+    const selectedTheme = event.detail.item.value;
+    applyTheme(selectedTheme);
+    updateSelection(selectedTheme);
   });
 
   // Listen for changes to the user's system preference and update the theme accordingly
