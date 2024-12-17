@@ -1,6 +1,7 @@
 {
   "name": "Eventua11y",
   "short_name": "Eventua11y",
+  "description": "Calendar of digital accessibility events.",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -21,5 +22,7 @@
   ],
   "theme_color": "#650fca",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
 }
