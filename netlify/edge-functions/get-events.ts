@@ -180,7 +180,7 @@ export default async function handler(request: Request): Promise<Response> {
   try {
     console.log('[handler] Fetching events...');
     const events = await getEvents();
-    console.log('[handler] Events fetched successfully:', events);
+    console.log('[handler] Events fetched successfully:', events.events.length);
 
     return new Response(JSON.stringify(events), {
       headers: {
