@@ -1,8 +1,11 @@
 import { defineConfig } from 'astro/config';
 import netlify from '@astrojs/netlify';
 import vue from '@astrojs/vue';
-
 import sentry from '@sentry/astro';
+
+// Ensure environment variables are loaded
+import dotenv from 'dotenv';
+dotenv.config();
 
 // https://astro.build/config
 export default defineConfig({
