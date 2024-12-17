@@ -102,6 +102,7 @@ const formatDate = (dateString) => {
       :dateEnd="event.dateEnd"
       :timezone="event.timezone"
       :day="event.day"
+      :type="event.type"
     />
     <EventDelivery
       :attendanceMode="event.attendanceMode"

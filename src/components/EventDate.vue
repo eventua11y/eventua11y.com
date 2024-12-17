@@ -74,6 +74,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  type: {
+    type: String,
+    required: false,
+    default: 'event',
+  },
 });
 
 // Maps timezone abbreviations to their full names
@@ -143,7 +148,7 @@ function isSameDay(date1, date2) {
  * @returns {string} Format pattern for dayjs
  */
 function getStartDateFormat() {
-  if (props.isTheme) return 'LL';
+  if (props.type === 'theme') return 'LL';
   if (props.isDeadline) return 'LL';
   if (props.day) return 'LL';
   
