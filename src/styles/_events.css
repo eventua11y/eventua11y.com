@@ -52,7 +52,8 @@
 }
 
 .event__dateStart {
-  display: inline-block;
+  display: inline-flex;
+  gap: .3em;
   white-space: nowrap;
 }
 
@@ -89,6 +90,21 @@
   }
   .event__location {
     font-size: var(--p-step--1);
+  }
+}
+
+.event--deadline {
+  background: none;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--p-space-xs-m);
+  .event__title {
+    font-size: var(--p-step-0);
+    margin-bottom: 0;
+    margin-top: var(--p-space-3xs);
+    order: unset;
   }
 }
 
