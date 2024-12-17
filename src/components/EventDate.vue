@@ -115,7 +115,9 @@ function getFullTimezoneName(abbreviation) {
  */
 function formatDate(date, format) {
   const utcDate = dayjs.utc(date);
-  const tz = userStore.useLocalTimezone ? userStore.timezone || 'UTC' : props.timezone || 'UTC';
+  const tz = userStore.useLocalTimezone
+    ? userStore.timezone || 'UTC'
+    : props.timezone || 'UTC';
   const locale = userStore.locale || 'en';
   return utcDate.tz(tz).locale(locale).format(format);
 }
@@ -127,7 +129,9 @@ function formatDate(date, format) {
  * @returns {boolean} True if dates are on the same day
  */
 function isSameDay(date1, date2) {
-  const tz = userStore.useLocalTimezone ? userStore.timezone || 'UTC' : props.timezone || 'UTC';
+  const tz = userStore.useLocalTimezone
+    ? userStore.timezone || 'UTC'
+    : props.timezone || 'UTC';
   return dayjs(date1).tz(tz).isSame(dayjs(date2).tz(tz), 'day');
 }
 
@@ -161,7 +165,9 @@ function getEndDateFormat() {
  */
 const currentTimezone = computed(() => {
   const date = dayjs.utc(props.dateStart);
-  const tz = userStore.useLocalTimezone ? userStore.timezone || 'UTC' : props.timezone || 'UTC';
+  const tz = userStore.useLocalTimezone
+    ? userStore.timezone || 'UTC'
+    : props.timezone || 'UTC';
   return date.tz(tz).format('z');
 });
 </script>

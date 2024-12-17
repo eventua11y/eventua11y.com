@@ -53,7 +53,7 @@
 
 .event__dateStart {
   display: inline-flex;
-  gap: .3em;
+  gap: 0.3em;
   white-space: nowrap;
 }
 

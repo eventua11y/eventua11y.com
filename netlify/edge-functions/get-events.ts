@@ -91,7 +91,9 @@ function sortEventsByDate(events: Event[]): Event[] {
  * @param {SanityClient} client - Sanity client
  * @returns {EventsResponse} Processed events object
  */
-async function fetchEventsFromSanity(client: SanityClient): Promise<EventsResponse> {
+async function fetchEventsFromSanity(
+  client: SanityClient
+): Promise<EventsResponse> {
   try {
     const events: Event[] = await client.fetch(`
       *[_type == "event" && !(_id in path("drafts.**"))]

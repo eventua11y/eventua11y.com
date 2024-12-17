@@ -74,10 +74,17 @@ const formatDate = (dateString) => {
 
 <template>
   <div v-if="event.type === 'deadline'" class="event event--deadline">
-    <EventDate :dateStart="event.dateStart" :timezone="event.timezone" :isDeadline="true" />
-    <span class="event__title">Submit proposals for <a :href="event.website">{{ event.title }}</a></span>
+    <EventDate
+      :dateStart="event.dateStart"
+      :timezone="event.timezone"
+      :isDeadline="true"
+    />
+    <span class="event__title"
+      >Submit proposals for <a :href="event.website">{{ event.title }}</a></span
+    >
   </div>
-  <article v-else
+  <article
+    v-else
     :class="`event event--${event.type}`"
     itemscope
     itemtype="https://schema.org/Event"
@@ -90,7 +97,12 @@ const formatDate = (dateString) => {
       <span v-else>{{ event.title }}</span>
     </h3>
 
-    <EventDate :dateStart="event.dateStart" :dateEnd="event.dateEnd" :timezone="event.timezone" :day="event.day" />
+    <EventDate
+      :dateStart="event.dateStart"
+      :dateEnd="event.dateEnd"
+      :timezone="event.timezone"
+      :day="event.day"
+    />
     <EventDelivery
       :attendanceMode="event.attendanceMode"
       :location="event.location"
