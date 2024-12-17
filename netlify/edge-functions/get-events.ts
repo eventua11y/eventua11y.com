@@ -176,8 +176,11 @@ async function getEvents(): Promise<EventsResponse> {
  * @returns {Response} JSON response with events data
  */
 export default async function handler(request: Request): Promise<Response> {
+  console.log('[handler] Received request:', request);
   try {
+    console.log('[handler] Fetching events...');
     const events = await getEvents();
+    console.log('[handler] Events fetched successfully:', events);
 
     return new Response(JSON.stringify(events), {
       headers: {
