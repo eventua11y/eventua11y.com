@@ -34,6 +34,8 @@ interface FiltersStore {
   filterEvents: (events: Event[]) => Event[];
   updateFilteredEvents: () => void;
   showingAllEvents: boolean;
+  nonDeadlineFutureCount: number;
+  nonDeadlineFilteredCount: number;
 }
 
 const DEFAULT_FILTER_VALUES: Filters = {
@@ -176,6 +178,15 @@ const filtersStore: FiltersStore = reactive({
       filtersStore.filteredEvents.length === filtersStore.futureEvents.length
     );
   }),
+
+  nonDeadlineFutureCount: computed(() => {
+    return filtersStore.futureEvents.filter(event => event.type !== 'deadline').length;
+  }),
+
+  nonDeadlineFilteredCount: computed(() => {
+    return filtersStore.filteredEvents.filter(event => event.type !== 'deadline').length;
+  })
+  
 });
 
 // Watch filters for changes and update localStorage and filtered events
