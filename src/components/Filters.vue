@@ -51,8 +51,8 @@
       >
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer"
-          >Show {{ filtersStore.filteredEvents.length }} of
-          {{ filtersStore.futureEvents.length }} events</sl-button
+          >Show {{ filtersStore.nonDeadlineFilteredCount }} of
+          {{ filtersStore.nonDeadlineFutureCount }} events</sl-button
         >
         <sl-button
           v-if="filtersStore.isChanged"

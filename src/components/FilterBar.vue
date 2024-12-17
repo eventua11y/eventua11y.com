@@ -8,12 +8,12 @@
           aria-atomic="true"
         >
           <small v-if="filtersStore.showingAllEvents"
-            >Showing all {{ filtersStore.futureEvents.length }} upcoming
+            >Showing all {{ filtersStore.nonDeadlineFutureCount }} upcoming
             events</small
           >
           <small v-else>
-            Showing {{ filtersStore.filteredEvents.length }} of
-            {{ filtersStore.futureEvents.length }} upcoming events
+            Showing {{ filtersStore.nonDeadlineFilteredCount }} of
+            {{ filtersStore.nonDeadlineFutureCount }} upcoming events
           </small>
         </p>
         <sl-button

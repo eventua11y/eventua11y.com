@@ -3,27 +3,30 @@
     <span class="event__dateStart">
       <span class="sr-only">Starts</span>
       <time
-        :datetime="formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
+        :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
         itemprop="startDate"
       >
-        {{ formatDate(event.dateStart, getStartDateFormat()) }}
-        <template v-if="!event.dateEnd">
+        {{ formatDate(dateStart, getStartDateFormat()) }}
+        <template v-if="!dateEnd">
           <span> </span>
           <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
             {{ currentTimezone }}
           </abbr>
         </template>
       </time>
+      <template v-if="isDeadline">
+        <sl-badge variant="danger" pill>Deadline</sl-badge>
+      </template>
     </span>
 
-    <span v-if="event.dateEnd" class="event__dateEnd">
+    <span v-if="dateEnd" class="event__dateEnd">
       <span class="sr-only">Ends</span>
       <i class="fa-solid fa-arrow-right-long"></i>
       <time
-        :datetime="formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
+        :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
         itemprop="endDate"
       >
-        {{ formatDate(event.dateEnd, getEndDateFormat()) }}
+        {{ formatDate(dateEnd, getEndDateFormat()) }}
         <span> </span>
         <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
           {{ currentTimezone }}
@@ -48,9 +51,33 @@ dayjs.extend(localizedFormat);
 dayjs.extend(advancedFormat);
 
 const props = defineProps({
-  event: {
-    type: Object,
+  dateStart: {
+    type: String,
     required: true,
+  },
+  dateEnd: {
+    type: String,
+    required: false,
+  },
+  timezone: {
+    type: String,
+    required: false,
+    default: 'UTC',
+  },
+  day: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  isDeadline: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  type: {
+    type: String,
+    required: false,
+    default: 'event',
   },
 });
 
@@ -93,11 +120,11 @@ function getFullTimezoneName(abbreviation) {
  */
 function formatDate(date, format) {
   const utcDate = dayjs.utc(date);
-  const timezone = userStore.useLocalTimezone
+  const tz = userStore.useLocalTimezone
     ? userStore.timezone || 'UTC'
-    : props.event.timezone || 'UTC';
+    : props.timezone || 'UTC';
   const locale = userStore.locale || 'en';
-  return utcDate.tz(timezone).locale(locale).format(format);
+  return utcDate.tz(tz).locale(locale).format(format);
 }
 
 /**
@@ -107,10 +134,10 @@ function formatDate(date, format) {
  * @returns {boolean} True if dates are on the same day
  */
 function isSameDay(date1, date2) {
-  const timezone = userStore.useLocalTimezone
+  const tz = userStore.useLocalTimezone
     ? userStore.timezone || 'UTC'
-    : props.event.timezone || 'UTC';
-  return dayjs(date1).tz(timezone).isSame(dayjs(date2).tz(timezone), 'day');
+    : props.timezone || 'UTC';
+  return dayjs(date1).tz(tz).isSame(dayjs(date2).tz(tz), 'day');
 }
 
 /**
@@ -121,10 +148,13 @@ function isSameDay(date1, date2) {
  * @returns {string} Format pattern for dayjs
  */
 function getStartDateFormat() {
-  if (!props.event.dateEnd) return 'MMM D, YYYY'; // Show full date with year for single dates
-  return isSameDay(props.event.dateStart, props.event.dateEnd)
-    ? 'LLL' // Show full date for same-day events
-    : 'MMM D'; // Show month/day only for multi-day events
+  if (props.type === 'theme') return 'LL';
+  if (props.isDeadline) return 'LL';
+  if (props.day) return 'LL';
+
+  if (!props.dateEnd) return 'LLL';
+  if (isSameDay(props.dateStart, props.dateEnd)) return 'HH:mm';
+  return 'LLL';
 }
 
 /**
@@ -135,10 +165,8 @@ function getStartDateFormat() {
  * @returns {string} Format pattern for dayjs
  */
 function getEndDateFormat() {
-  if (props.event.day) return 'LL';
-  return isSameDay(props.event.dateStart, props.event.dateEnd)
-    ? 'LT' // Show time only for same-day events
-    : 'MMM D, YYYY'; // Show full date for multi-day events
+  if (props.day) return 'LL';
+  return isSameDay(props.dateStart, props.dateEnd) ? 'LT' : 'MMM D, YYYY'; // Show full date for multi-day events
 }
 
 /**
@@ -146,10 +174,10 @@ function getEndDateFormat() {
  * @returns {string} Timezone abbreviation (e.g., 'UTC', 'EST')
  */
 const currentTimezone = computed(() => {
-  const date = dayjs.utc(props.event.dateStart);
-  const timezone = userStore.useLocalTimezone
+  const date = dayjs.utc(props.dateStart);
+  const tz = userStore.useLocalTimezone
     ? userStore.timezone || 'UTC'
-    : props.event.timezone || 'UTC';
-  return date.tz(timezone).format('z');
+    : props.timezone || 'UTC';
+  return date.tz(tz).format('z');
 });
 </script>

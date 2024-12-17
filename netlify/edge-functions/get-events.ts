@@ -99,8 +99,8 @@ async function fetchEventsFromSanity(
       *[_type == "event" && !(_id in path("drafts.**"))]
     `);
 
-    // Fetch children for each event
-    const eventsWithChildren = await Promise.all(
+    // Fetch children for each event and add CFS deadline events
+    const eventsWithChildrenAndDeadlines = await Promise.all(
       events.map(async (event) => {
         const children: Event[] = await client.fetch(
           `
@@ -109,29 +109,50 @@ async function fetchEventsFromSanity(
           { eventId: event._id }
         );
 
-        return {
+        const eventWithChildren = {
           ...event,
           children: children.length > 0 ? children : undefined,
         };
+
+        // Add CFS deadline event if applicable
+        const cfsDeadlineEvents: Event[] = [];
+        if (event.callForSpeakersClosingDate) {
+          cfsDeadlineEvents.push({
+            _id: `${event._id}-cfs-deadline`,
+            _type: 'event',
+            type: 'deadline',
+            title: `${event.title}`,
+            dateStart: event.callForSpeakersClosingDate,
+            timezone: event.timezone,
+            website: event.website,
+            attendanceMode: event.attendanceMode,
+            callForSpeakers: event.callForSpeakers,
+          });
+        }
+
+        return [eventWithChildren, ...cfsDeadlineEvents];
       })
     );
+
+    // Flatten the array of events
+    const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
 
     const now = new Date();
     const todayStart = dayjs().startOf('day').toDate();
     const todayEnd = dayjs().endOf('day').toDate();
 
     return {
-      events: eventsWithChildren,
+      events: flattenedEvents,
       future: sortEventsByDate(
-        eventsWithChildren.filter(
+        flattenedEvents.filter(
           (event) => new Date(event.dateStart) > now && !event.parent
         )
       ),
-      past: eventsWithChildren.filter(
+      past: flattenedEvents.filter(
         (event) => new Date(event.dateEnd) < now && !event.parent
       ),
       today: sortEventsByDate(
-        eventsWithChildren.filter(
+        flattenedEvents.filter(
           (event) =>
             new Date(event.dateStart) >= todayStart &&
             new Date(event.dateStart) <= todayEnd &&
