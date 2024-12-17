@@ -180,13 +180,16 @@ const filtersStore: FiltersStore = reactive({
   }),
 
   nonDeadlineFutureCount: computed(() => {
-    return filtersStore.futureEvents.filter(event => event.type !== 'deadline').length;
+    return filtersStore.futureEvents.filter(
+      (event) => event.type !== 'deadline'
+    ).length;
   }),
 
   nonDeadlineFilteredCount: computed(() => {
-    return filtersStore.filteredEvents.filter(event => event.type !== 'deadline').length;
-  })
-  
+    return filtersStore.filteredEvents.filter(
+      (event) => event.type !== 'deadline'
+    ).length;
+  }),
 });
 
 // Watch filters for changes and update localStorage and filtered events

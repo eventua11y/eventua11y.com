@@ -151,7 +151,7 @@ function getStartDateFormat() {
   if (props.type === 'theme') return 'LL';
   if (props.isDeadline) return 'LL';
   if (props.day) return 'LL';
-  
+
   if (!props.dateEnd) return 'LLL';
   if (isSameDay(props.dateStart, props.dateEnd)) return 'HH:mm';
   return 'LLL';
