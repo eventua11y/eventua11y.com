@@ -156,7 +156,10 @@ async function getEvents(): Promise<EventsResponse> {
   // Check cache
   if (cache.data && Date.now() - cache.timestamp < cache.ttl) {
     console.log('[getEvents] Returning cached data');
-    console.log('[getEvents] Cache timestamp:', new Date(cache.timestamp).toISOString());
+    console.log(
+      '[getEvents] Cache timestamp:',
+      new Date(cache.timestamp).toISOString()
+    );
     console.log('[getEvents] Cache TTL (ms):', cache.ttl);
     return cache.data;
   }
@@ -168,7 +171,10 @@ async function getEvents(): Promise<EventsResponse> {
   // Update cache
   cache.data = events;
   cache.timestamp = Date.now();
-  console.log('[getEvents] Cache updated at:', new Date(cache.timestamp).toISOString());
+  console.log(
+    '[getEvents] Cache updated at:',
+    new Date(cache.timestamp).toISOString()
+  );
 
   return events;
 }
