@@ -120,11 +120,13 @@ async function fetchEventsFromSanity(
           cfsDeadlineEvents.push({
             _id: `${event._id}-cfs-deadline`,
             _type: 'event',
+            type: 'deadline',
             title: `${event.title}`,
             dateStart: event.callForSpeakersClosingDate,
             timezone: event.timezone,
             website: event.website,
-            type: 'deadline',
+            attendanceMode: event.attendanceMode,
+            callForSpeakers: event.callForSpeakers,
           });
         }
 
