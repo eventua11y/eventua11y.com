@@ -153,7 +153,7 @@ function getStartDateFormat() {
   if (props.day) return 'LL';
 
   if (!props.dateEnd) return 'LLL';
-  if (isSameDay(props.dateStart, props.dateEnd)) return 'HH:mm';
+  if (isSameDay(props.dateStart, props.dateEnd)) return 'h:mma';
   return 'LLL';
 }
 
@@ -166,7 +166,8 @@ function getStartDateFormat() {
  */
 function getEndDateFormat() {
   if (props.day) return 'LL';
-  return isSameDay(props.dateStart, props.dateEnd) ? 'LT' : 'MMM D, YYYY'; // Show full date for multi-day events
+  if (isSameDay(props.dateStart, props.dateEnd)) return 'h:mma LL';
+  return 'LLL';
 }
 
 /**
