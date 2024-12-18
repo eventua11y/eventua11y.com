@@ -31,12 +31,19 @@ const error = ref(null);
 /**
  * Formats year-month string into readable date
  * @param {string} yearMonth - Format: "YYYY-M"
- * @returns {string} Formatted date (e.g., "January 2024")
+ * @returns {string} Formatted date (e.g., "January" or "January 2024")
  */
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
   const date = new Date(year, month - 1);
-  return `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+  const currentYear = new Date().getFullYear();
+
+  const formatter = new Intl.DateTimeFormat('default', {
+    month: 'long',
+    year: Number(year) !== currentYear ? 'numeric' : undefined,
+  });
+
+  return formatter.format(date);
 };
 
 /**
