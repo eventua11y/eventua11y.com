@@ -9,7 +9,7 @@
   .container {
     display: flex;
     flex-direction: column;
-    gap: var(--p-space-xs);
+    gap: var(--p-space-2xs);
     justify-content: space-between;
     @media (min-width: 800px) {
       flex-direction: row;
@@ -19,6 +19,16 @@
       flex-direction: row;
       gap: var(--p-space-2xs);
       align-items: center;
+      width: 100%;
+      @media (min-width: 700px) {
+        width: auto;
+      }
+      > * {
+        flex: 1;
+      }
+      sl-button, sl-dropdown {
+        width: 100%;
+      };
     }
   }
   .filters__status {
