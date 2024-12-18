@@ -45,7 +45,7 @@ const displayFormat = computed(
 
 <template>
   <article
-    class="child-event flow-s"
+    class="child-event flow flow-3xs"
     itemprop="subEvent"
     itemscope
     itemtype="https://schema.org/Event"
