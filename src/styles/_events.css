@@ -12,6 +12,7 @@
   font-size: var(--p-step-2);
   margin-bottom: var(--p-space-3xs);
   order: 3;
+  text-wrap: balance;
 }
 
 .event__dates {
