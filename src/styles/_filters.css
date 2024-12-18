@@ -26,9 +26,10 @@
       > * {
         flex: 1;
       }
-      sl-button, sl-dropdown {
+      sl-button,
+      sl-dropdown {
         width: 100%;
-      };
+      }
     }
   }
   .filters__status {
