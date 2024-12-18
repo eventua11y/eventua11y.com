@@ -22,7 +22,7 @@
   padding: 0 var(--p-space-xs-m);
 }
 
-.container.readable {
+.readable {
   max-width: 55rem;
 }
 
