@@ -57,7 +57,11 @@ const displayFormat = computed(
 
     <div class="event__meta text-muted">
       <template v-if="event.scheduled">
-        {{ displayFormat }} <span>·</span> <EventDate :event="event" /> ·
+        {{ displayFormat }} <span>·</span> <EventDate :dateStart="event.dateStart"
+      :dateEnd="event.dateEnd"
+      :timezone="event.timezone"
+      :day="event.day"
+      :type="event.type" /> ·
         <EventDuration :event="event" />
       </template>
       <template v-else>
