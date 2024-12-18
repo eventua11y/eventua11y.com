@@ -173,7 +173,7 @@ watch(
           </h2>
           <ul
             role="list"
-            class="flow"
+            class="flow flow-l"
             :aria-labelledby="'heading-' + yearMonth"
           >
             <li v-for="event in events" :key="event._id">

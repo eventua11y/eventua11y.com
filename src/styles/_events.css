@@ -39,6 +39,10 @@
   white-space: pre-wrap;
 }
 
+.event--theme .event__delivery {
+  margin-bottom: 0;
+}
+
 [itemprop='eventAttendanceMode'] {
   display: inline-flex;
   align-items: center;
