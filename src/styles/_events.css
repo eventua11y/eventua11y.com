@@ -28,7 +28,8 @@
 .event__meta {
   font-size: var(--p-step--1);
   display: flex;
-  gap: 0.5em;
+  column-gap: 0.5em;
+  flex-wrap: wrap;
 }
 
 .event__delivery {
@@ -72,6 +73,11 @@
 
 .event__badges {
   order: 6;
+}
+
+.child-event__title {
+  display: block;
+  text-wrap: pretty;
 }
 
 .event--theme {

@@ -45,12 +45,12 @@ const displayFormat = computed(
 
 <template>
   <article
-    class="flow-s"
+    class="child-event flow-s"
     itemprop="subEvent"
     itemscope
     itemtype="https://schema.org/Event"
   >
-    <span itemprop="name">
+    <span class="child-event__title" itemprop="name">
       <a v-if="event.website" :href="event.website">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
     </span>
