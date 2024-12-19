@@ -11,7 +11,7 @@
       </hgroup>
 
       <p v-if="todaysEvents.length === 0">
-        Take it easy, there are no events today.
+        Take it easy, there are no events today. Browse <a href="/past-events">past events</a> to see what you missed.
       </p>
       <div v-else class="events flow">
         <ul role="list" class="flow">
