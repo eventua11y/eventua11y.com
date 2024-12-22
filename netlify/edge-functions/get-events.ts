@@ -148,10 +148,9 @@ async function fetchEventsFromSanity(
     // Flatten the array of events
     const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
 
-    const now = dayjs.utc();
-    const todayStart = dayjs.utc().startOf('day');
-    const todayEnd = dayjs.utc().endOf('day');
-
+    const now = dayjs();
+    const todayStart = now.startOf('day');
+    const todayEnd = now.endOf('day');
     // Separate events into future, past, and today's events
     return {
       events: flattenedEvents,
