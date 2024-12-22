@@ -5,6 +5,9 @@
 
 import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
+import utc from 'https://esm.sh/dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 interface Event {
   _id: string;
