@@ -5,6 +5,13 @@
 
 import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
+import utc from 'https://esm.sh/dayjs/plugin/utc';
+import timezone from 'https://esm.sh/dayjs/plugin/timezone';
+import isBetween from 'https://esm.sh/dayjs/plugin/isBetween';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(isBetween);
 
 interface Event {
   _id: string;
@@ -95,6 +102,7 @@ async function fetchEventsFromSanity(
   client: SanityClient
 ): Promise<EventsResponse> {
   try {
+    // Fetch all non-draft events
     const events: Event[] = await client.fetch(`
       *[_type == "event" && !(_id in path("drafts.**"))]
     `);
@@ -102,6 +110,7 @@ async function fetchEventsFromSanity(
     // Fetch children for each event and add CFS deadline events
     const eventsWithChildrenAndDeadlines = await Promise.all(
       events.map(async (event) => {
+        // Fetch child events for each parent event
         const children: Event[] = await client.fetch(
           `
         *[_type == "event" && parent._ref == $eventId] | order(dateStart asc)
@@ -109,12 +118,13 @@ async function fetchEventsFromSanity(
           { eventId: event._id }
         );
 
+        // Add children to the event if any
         const eventWithChildren = {
           ...event,
           children: children.length > 0 ? children : undefined,
         };
 
-        // Add CFS deadline event if applicable
+        // Add CFS (Call for Speakers) deadline event if applicable
         const cfsDeadlineEvents: Event[] = [];
         if (event.callForSpeakersClosingDate) {
           cfsDeadlineEvents.push({
@@ -130,6 +140,7 @@ async function fetchEventsFromSanity(
           });
         }
 
+        // Return the event with children and CFS deadline events
         return [eventWithChildren, ...cfsDeadlineEvents];
       })
     );
@@ -137,10 +148,11 @@ async function fetchEventsFromSanity(
     // Flatten the array of events
     const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
 
-    const now = new Date();
-    const todayStart = dayjs().startOf('day').toDate();
-    const todayEnd = dayjs().endOf('day').toDate();
+    const now = dayjs();
+    const todayStart = now.startOf('day');
+    const todayEnd = now.endOf('day');
 
+    // Separate events into future, past, and today's events
     return {
       events: flattenedEvents,
       future: sortEventsByDate(
