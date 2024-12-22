@@ -179,15 +179,26 @@ async function fetchEventsFromSanity(
       today: sortEventsByDate(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
+            // For international events, compare dates only
+            const eventStart = dayjs(event.dateStart).startOf('day');
+            const eventEnd = dayjs(event.dateEnd || event.dateStart).endOf(
+              'day'
+            );
             return (
-              dayjs(event.dateStart).isBetween(todayStart, todayEnd) &&
+              eventStart.isBefore(todayEnd) &&
+              eventEnd.isAfter(todayStart) &&
               !event.parent
             );
           } else {
+            // For location-specific events, compare with timezone conversion
+            const eventStart = dayjs(event.dateStart).tz(event.timezone);
+            const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(
+              event.timezone
+            );
             return (
-              dayjs(event.dateStart)
-                .tz(event.timezone)
-                .isBetween(todayStart, todayEnd) && !event.parent
+              eventStart.isBefore(todayEnd) &&
+              eventEnd.isAfter(todayStart) &&
+              !event.parent
             );
           }
         })
