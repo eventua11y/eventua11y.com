@@ -26,12 +26,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
+import userStore from '../store/userStore';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import Event from './Event.vue';
 import filtersStore from '../store/filtersStore';
 
-const today = dayjs().startOf('day');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Get the start of the day in the user's local timezone
+const today = computed(() => dayjs().tz(userStore.timezone || dayjs.tz.guess()).startOf('day'));
 console.log('Today is:', today);
 const todaysEvents = ref([]);
 
