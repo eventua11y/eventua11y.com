@@ -43,6 +43,7 @@ const today = computed(() =>
     .tz(userStore.timezone || dayjs.tz.guess())
     .startOf('day')
 );
+console.log('User timezone is:', userStore.timezone);
 console.log('Today is:', today);
 const todaysEvents = ref([]);
 
