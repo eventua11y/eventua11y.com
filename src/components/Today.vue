@@ -32,6 +32,7 @@ import Event from './Event.vue';
 import filtersStore from '../store/filtersStore';
 
 const today = dayjs().startOf('day');
+console.log("Today is:", today);
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
