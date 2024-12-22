@@ -6,8 +6,12 @@
 import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
 import utc from 'https://esm.sh/dayjs/plugin/utc';
+import timezone from 'https://esm.sh/dayjs/plugin/timezone';
+import isBetween from 'https://esm.sh/dayjs/plugin/isBetween';
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(isBetween);
 
 interface Event {
   _id: string;
