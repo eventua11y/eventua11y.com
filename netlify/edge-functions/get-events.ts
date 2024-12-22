@@ -96,12 +96,10 @@ function sortEventsByDate(events: Event[]): Event[] {
  * - Fetches child events for each parent
  * - Separates into future, past, and today's events
  * @param {SanityClient} client - Sanity client
- * @param {string} userTimezone - User's timezone
  * @returns {EventsResponse} Processed events object
  */
 async function fetchEventsFromSanity(
-  client: SanityClient,
-  userTimezone: string
+  client: SanityClient
 ): Promise<EventsResponse> {
   try {
     // Fetch all non-draft events
@@ -150,9 +148,9 @@ async function fetchEventsFromSanity(
     // Flatten the array of events
     const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
 
-    // Convert to user's timezone for comparison
-    const now = dayjs().tz(userTimezone);
-    const todayInUserTZ = now.startOf('day');
+    const now = dayjs();
+    const todayStart = now.startOf('day');
+    const todayEnd = now.endOf('day');
 
     // Separate events into future, past, and today's events
     return {
@@ -161,24 +159,18 @@ async function fetchEventsFromSanity(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
             // For international events, compare dates only
-            const eventDate = dayjs(event.dateStart)
-              .tz(userTimezone)
-              .startOf('day');
-            return eventDate.isAfter(todayInUserTZ, 'day') && !event.parent;
+            const eventStart = dayjs(event.dateStart).startOf('day');
+            return eventStart.isAfter(todayEnd) && !event.parent;
           } else {
-            // For location-specific events, use event timezone
+            // For location-specific events, compare with timezone conversion
             const eventStart = dayjs(event.dateStart).tz(event.timezone);
-            return eventStart.isAfter(now) && !event.parent;
+            return eventStart.isAfter(todayEnd) && !event.parent;
           }
         })
       ),
       past: flattenedEvents.filter((event) => {
         if (!event.timezone) {
-          // For international events, compare dates only
-          const eventDate = dayjs(event.dateEnd || event.dateStart)
-            .tz(userTimezone)
-            .startOf('day');
-          return eventDate.isBefore(todayInUserTZ, 'day') && !event.parent;
+          return dayjs(event.dateEnd).isBefore(now) && !event.parent;
         } else {
           return (
             dayjs(event.dateEnd).tz(event.timezone).isBefore(now) &&
@@ -189,20 +181,25 @@ async function fetchEventsFromSanity(
       today: sortEventsByDate(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
-            // For international events, check if date matches today
-            const eventDate = dayjs(event.dateStart)
-              .tz(userTimezone)
-              .startOf('day');
-            return eventDate.isSame(todayInUserTZ, 'day') && !event.parent;
+            // For international events, compare dates only
+            const eventStart = dayjs(event.dateStart).startOf('day');
+            const eventEnd = dayjs(event.dateEnd || event.dateStart).endOf(
+              'day'
+            );
+            return (
+              eventStart.isBefore(todayEnd) &&
+              eventEnd.isAfter(todayStart) &&
+              !event.parent
+            );
           } else {
-            // For location-specific events, check overlap with today
+            // For location-specific events, compare with timezone conversion
             const eventStart = dayjs(event.dateStart).tz(event.timezone);
             const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(
               event.timezone
             );
             return (
-              eventStart.isBefore(now.endOf('day')) &&
-              eventEnd.isAfter(now.startOf('day')) &&
+              eventStart.isBefore(todayEnd) &&
+              eventEnd.isAfter(todayStart) &&
               !event.parent
             );
           }
@@ -218,10 +215,9 @@ async function fetchEventsFromSanity(
 /**
  * Gets events with caching
  * Returns cached data if valid, otherwise fetches fresh data
- * @param {string} userTimezone - User's timezone
  * @returns {EventsResponse} Events object
  */
-async function getEvents(userTimezone: string): Promise<EventsResponse> {
+async function getEvents(): Promise<EventsResponse> {
   const client = createSanityClient();
 
   // Check cache
@@ -237,7 +233,7 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
 
   // Fetch from Sanity
   console.log('[getEvents] Fetching fresh data from Sanity');
-  const events = await fetchEventsFromSanity(client, userTimezone);
+  const events = await fetchEventsFromSanity(client);
 
   // Update cache
   cache.data = events;
@@ -259,9 +255,8 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
 export default async function handler(request: Request): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
-    const userTimezone = request.headers.get('x-timezone') || 'UTC';
     console.log('[handler] Fetching events...');
-    const events = await getEvents(userTimezone);
+    const events = await getEvents();
     console.log('[handler] Events fetched successfully:', events.events.length);
 
     return new Response(JSON.stringify(events), {
