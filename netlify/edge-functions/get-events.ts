@@ -137,27 +137,49 @@ async function fetchEventsFromSanity(
     // Flatten the array of events
     const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
 
-    const now = new Date();
-    const todayStart = dayjs().startOf('day').toDate();
-    const todayEnd = dayjs().endOf('day').toDate();
+    const now = dayjs.utc();
+    const todayStart = dayjs.utc().startOf('day');
+    const todayEnd = dayjs.utc().endOf('day');
 
     return {
       events: flattenedEvents,
       future: sortEventsByDate(
-        flattenedEvents.filter(
-          (event) => new Date(event.dateStart) > now && !event.parent
-        )
+        flattenedEvents.filter((event) => {
+          if (!event.timezone) {
+            return dayjs(event.dateStart).isAfter(now) && !event.parent;
+          } else {
+            return (
+              dayjs(event.dateStart).tz(event.timezone).isAfter(now) &&
+              !event.parent
+            );
+          }
+        })
       ),
-      past: flattenedEvents.filter(
-        (event) => new Date(event.dateEnd) < now && !event.parent
-      ),
-      today: sortEventsByDate(
-        flattenedEvents.filter(
-          (event) =>
-            new Date(event.dateStart) >= todayStart &&
-            new Date(event.dateStart) <= todayEnd &&
+      past: flattenedEvents.filter((event) => {
+        if (!event.timezone) {
+          return dayjs(event.dateEnd).isBefore(now) && !event.parent;
+        } else {
+          return (
+            dayjs(event.dateEnd).tz(event.timezone).isBefore(now) &&
             !event.parent
-        )
+          );
+        }
+      }),
+      today: sortEventsByDate(
+        flattenedEvents.filter((event) => {
+          if (!event.timezone) {
+            return (
+              dayjs(event.dateStart).isBetween(todayStart, todayEnd) &&
+              !event.parent
+            );
+          } else {
+            return (
+              dayjs(event.dateStart)
+                .tz(event.timezone)
+                .isBetween(todayStart, todayEnd) && !event.parent
+            );
+          }
+        })
       ),
     };
   } catch (error) {
