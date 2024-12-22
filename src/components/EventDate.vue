@@ -7,7 +7,7 @@
         itemprop="startDate"
       >
         {{ formatDate(dateStart, getStartDateFormat()) }}
-        <template v-if="!dateEnd">
+        <template v-if="!dateEnd && !isInternational">
           <span> </span>
           <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
             {{ currentTimezone }}
@@ -27,10 +27,12 @@
         itemprop="endDate"
       >
         {{ formatDate(dateEnd, getEndDateFormat()) }}
-        <span> </span>
-        <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
-          {{ currentTimezone }}
-        </abbr>
+        <template v-if="!isInternational">
+          <span> </span>
+          <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
+            {{ currentTimezone }}
+          </abbr>
+        </template>
       </time>
     </span>
   </div>
@@ -62,7 +64,7 @@ const props = defineProps({
   timezone: {
     type: String,
     required: false,
-    default: 'UTC',
+    default: '',
   },
   day: {
     type: Boolean,
@@ -113,18 +115,22 @@ function getFullTimezoneName(abbreviation) {
 }
 
 /**
- * Formats a date using dayjs with timezone support
+ * Formats a date using dayjs with or without timezone conversion
  * @param {string|Date} date - The date to format
  * @param {string} format - The desired format pattern
  * @returns {string} Formatted date string
  */
 function formatDate(date, format) {
   const utcDate = dayjs.utc(date);
-  const tz = userStore.useLocalTimezone
-    ? userStore.timezone || 'UTC'
-    : props.timezone || 'UTC';
   const locale = userStore.locale || 'en';
-  return utcDate.tz(tz).locale(locale).format(format);
+  if (isInternational.value) {
+    return utcDate.locale(locale).format(format);
+  } else {
+    const tz = userStore.useLocalTimezone
+      ? userStore.timezone || 'UTC'
+      : props.timezone || 'UTC';
+    return utcDate.tz(tz).locale(locale).format(format);
+  }
 }
 
 /**
@@ -181,4 +187,10 @@ const currentTimezone = computed(() => {
     : props.timezone || 'UTC';
   return date.tz(tz).format('z');
 });
+
+/**
+ * Computes if the event is international based on the absence of timezone
+ * @returns {boolean} True if the event is international
+ */
+const isInternational = computed(() => !props.timezone);
 </script>
