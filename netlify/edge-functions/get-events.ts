@@ -151,6 +151,7 @@ async function fetchEventsFromSanity(
     const now = dayjs();
     const todayStart = now.startOf('day');
     const todayEnd = now.endOf('day');
+
     // Separate events into future, past, and today's events
     return {
       events: flattenedEvents,
