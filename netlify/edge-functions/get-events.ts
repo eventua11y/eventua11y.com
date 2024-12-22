@@ -158,12 +158,13 @@ async function fetchEventsFromSanity(
       future: sortEventsByDate(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
-            return dayjs(event.dateStart).isAfter(now) && !event.parent;
+            // For international events, compare dates only
+            const eventStart = dayjs(event.dateStart).startOf('day');
+            return eventStart.isAfter(todayEnd) && !event.parent;
           } else {
-            return (
-              dayjs(event.dateStart).tz(event.timezone).isAfter(now) &&
-              !event.parent
-            );
+            // For location-specific events, compare with timezone conversion
+            const eventStart = dayjs(event.dateStart).tz(event.timezone);
+            return eventStart.isAfter(todayEnd) && !event.parent;
           }
         })
       ),
