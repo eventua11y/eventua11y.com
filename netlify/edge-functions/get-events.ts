@@ -332,18 +332,24 @@ export default async function handler(
 ): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
-    // Get the base URL from the current request
     const url = new URL(request.url);
     const baseUrl = `${url.protocol}//${url.host}`;
 
     console.log('[handler] Fetching user info...');
-    // Use absolute URL for the user info request
     const userInfoResponse = await fetch(`${baseUrl}/api/get-user-info`);
     if (!userInfoResponse.ok) {
       throw new Error('Failed to fetch user info');
     }
     const userInfo = await userInfoResponse.json();
     const userTimezone = userInfo.timezone || 'UTC';
+
+    // Add debug logging for timezone resolution
+    console.log('[handler] Timezone debug:', {
+      userInfoTimezone: userInfo.timezone,
+      resolvedTimezone: userTimezone,
+      geo: userInfo.geo,
+      headers: Object.fromEntries(request.headers),
+    });
 
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
