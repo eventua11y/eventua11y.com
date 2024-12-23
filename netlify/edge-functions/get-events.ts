@@ -211,12 +211,15 @@ async function fetchEventsFromSanity(
         return isToday;
       }
 
-      // For location-specific events, check if any part overlaps with today
-      const eventStart = dayjs(event.dateStart).tz(event.timezone);
-      const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(
-        event.timezone
-      );
+      // For CFS deadlines or events without end dates, only check if they fall within today
+      if (event.type === 'deadline' || !event.dateEnd) {
+        const eventDate = dayjs(event.dateStart).tz(event.timezone);
+        return eventDate.isSame(todayStart, 'day');
+      }
 
+      // For events with start and end dates, check if they overlap with today
+      const eventStart = dayjs(event.dateStart).tz(event.timezone);
+      const eventEnd = dayjs(event.dateEnd).tz(event.timezone);
       return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart);
     };
 
