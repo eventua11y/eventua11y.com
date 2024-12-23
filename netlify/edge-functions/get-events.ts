@@ -20,10 +20,17 @@ dayjs.extend(isSameOrAfter);
 interface Event {
   _id: string;
   _type: string;
+  title: string;
   dateStart: string;
-  dateEnd: string;
+  dateEnd?: string;
   parent?: { _ref: string };
   children?: Event[];
+  callForSpeakersClosingDate?: string;
+  timezone?: string;
+  website?: string;
+  attendanceMode?: string;
+  callForSpeakers?: boolean;
+  type?: string;
 }
 
 interface EventsResponse {
@@ -54,7 +61,7 @@ interface EventsResponse {
  * In-memory cache configuration
  * Caches events data for 5 minutes to reduce API calls
  */
-let cache = {
+const cache = {
   data: null as EventsResponse | null,
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
@@ -117,7 +124,7 @@ async function fetchEventsFromSanity(
   client: SanityClient,
   userTimezone: string
 ): Promise<EventsResponse> {
-  const debugLogs = [];
+  const debugLogs: Array<Record<string, any>> = [];
 
   try {
     // Fetch all non-draft events
@@ -288,7 +295,10 @@ async function fetchEventsFromSanity(
       debug: debugLogs,
     };
   } catch (error) {
-    console.error('[fetchEventsFromSanity] Failed:', error?.message || error);
+    console.error(
+      '[fetchEventsFromSanity] Failed:',
+      (error as unknown as { message?: string })?.message || error
+    );
     throw new Error('Failed to fetch events from Sanity');
   }
 }
