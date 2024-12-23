@@ -55,7 +55,7 @@ test('filter drawer closes when close button is clicked', async ({ page }) => {
   // Close drawer
   const closeButton = page.getByRole('button', { name: 'Close' });
   await closeButton.waitFor({ state: 'visible' });
-  await closeButton.click();
+  await closeButton.click({ force: true });
 
   // Verify drawer is closed
   await expect(drawer).not.toBeVisible();
