@@ -8,9 +8,6 @@
     color: var(--s-color-on-background);
     padding: 0;
   }
-  hgroup {
-    padding: 0 var(--p-space-xs-m);
-  }
 }
 
 #today-heading {
