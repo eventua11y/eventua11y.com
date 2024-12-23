@@ -120,6 +120,6 @@ test('reset button clears filters', async ({ page }) => {
   await page
     .getByRole('checkbox', { name: 'Not accepting talks' }, { exact: true })
     .check({ force: true });
-  await page.getByTestId('drawer-reset').click();
+  await page.getByTestId('drawer-reset').click({ force: true });
   await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
 });
