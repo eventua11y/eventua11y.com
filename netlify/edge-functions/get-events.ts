@@ -103,13 +103,11 @@ function sortEventsByDate(events: Event[]): Event[] {
  * - Separates into future, past, and today's events
  * @param {SanityClient} client - Sanity client
  * @param {string} userTimezone - User's timezone
- * @param {boolean} debug - Debug flag
  * @returns {EventsResponse} Processed events object
  */
 async function fetchEventsFromSanity(
   client: SanityClient,
-  userTimezone: string,
-  debug?: boolean
+  userTimezone: string
 ): Promise<EventsResponse> {
   const debugLogs = [];
 
@@ -177,11 +175,9 @@ async function fetchEventsFromSanity(
 
     // Helper function to check if event is happening today
     const isEventToday = (event: Event): boolean => {
-      // Get today's date in user's timezone
       const userToday = dayjs().tz(userTimezone).startOf('day');
 
       if (!event.timezone) {
-        // For international events, compare dates only
         const eventStart = dayjs(event.dateStart).startOf('day');
         const eventEnd = dayjs(event.dateEnd || event.dateStart).startOf('day');
 
@@ -192,7 +188,7 @@ async function fetchEventsFromSanity(
           eventEnd.isSame(userToday, 'day');
 
         if (!eventEnd.isBefore(userToday)) {
-          const debugInfo = {
+          debugLogs.push({
             eventId: event._id,
             eventTitle: event.title,
             eventStart: eventStart.format('YYYY-MM-DD'),
@@ -200,12 +196,7 @@ async function fetchEventsFromSanity(
             userToday: userToday.format('YYYY-MM-DD'),
             isToday,
             isInternational: true,
-          };
-          debugLogs.push(debugInfo);
-          console.log(
-            `[Event ${event._id}] International event today check:`,
-            debugInfo
-          );
+          });
         }
 
         return isToday;
@@ -253,7 +244,7 @@ async function fetchEventsFromSanity(
       future,
       past,
       today,
-      ...(debug ? { debug: debugLogs } : {}),
+      debug: debugLogs,
     };
   } catch (error) {
     console.error('[fetchEventsFromSanity] Failed:', error?.message || error);
@@ -306,7 +297,6 @@ export default async function handler(request: Request): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
     const url = new URL(request.url);
-    const debug = url.searchParams.has('debug');
     const userTimezone = request.headers.get('x-timezone') || 'UTC';
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
