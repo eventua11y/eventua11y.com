@@ -155,61 +155,63 @@ async function fetchEventsFromSanity(
     const todayStart = now.startOf('day');
     const todayEnd = now.endOf('day');
 
-    // Separate events into future, past, and today's events
+    // Helper function to convert event time to user's timezone
+    const getEventTimeInUserTz = (dateStr: string, eventTz?: string) => {
+      if (!eventTz) {
+        // For international events, preserve the date but use user's timezone
+        return dayjs.utc(dateStr).tz(userTimezone, true);
+      }
+      // For location-specific events, properly convert the time
+      return dayjs(dateStr).tz(eventTz).tz(userTimezone);
+    };
+
+    const today = sortEventsByDate(
+      flattenedEvents.filter((event) => {
+        if (!event.parent) {
+          const eventStart = getEventTimeInUserTz(
+            event.dateStart,
+            event.timezone
+          );
+          const eventEnd = getEventTimeInUserTz(
+            event.dateEnd || event.dateStart,
+            event.timezone
+          );
+
+          return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart);
+        }
+        return false;
+      })
+    );
+
+    const future = sortEventsByDate(
+      flattenedEvents.filter((event) => {
+        if (!event.parent) {
+          const eventStart = getEventTimeInUserTz(
+            event.dateStart,
+            event.timezone
+          );
+          return eventStart.isAfter(todayEnd);
+        }
+        return false;
+      })
+    );
+
+    const past = flattenedEvents.filter((event) => {
+      if (!event.parent) {
+        const eventEnd = getEventTimeInUserTz(
+          event.dateEnd || event.dateStart,
+          event.timezone
+        );
+        return eventEnd.isBefore(todayStart);
+      }
+      return false;
+    });
+
     return {
       events: flattenedEvents,
-      future: sortEventsByDate(
-        flattenedEvents.filter((event) => {
-          if (!event.timezone) {
-            // For international events, compare dates in user's timezone
-            const eventStart = dayjs(event.dateStart)
-              .tz(userTimezone)
-              .startOf('day');
-            return eventStart.isAfter(todayEnd) && !event.parent;
-          } else {
-            // For location-specific events, compare event time to user's today
-            const eventStart = dayjs(event.dateStart).tz(event.timezone);
-            return eventStart.isAfter(todayEnd) && !event.parent;
-          }
-        })
-      ),
-      past: flattenedEvents.filter((event) => {
-        if (!event.timezone) {
-          // For international events, compare dates in user's timezone
-          const eventEnd = dayjs(event.dateEnd || event.dateStart)
-            .tz(userTimezone)
-            .endOf('day');
-          return eventEnd.isBefore(todayStart) && !event.parent;
-        } else {
-          // For location-specific events, compare event time to user's now
-          return (
-            dayjs(event.dateEnd).tz(event.timezone).isBefore(now) &&
-            !event.parent
-          );
-        }
-      }),
-      today: sortEventsByDate(
-        flattenedEvents.filter((event) => {
-          if (!event.timezone) {
-            // For international events, compare dates in user's timezone
-            const eventDate = dayjs(event.dateStart)
-              .tz(userTimezone)
-              .startOf('day');
-            return eventDate.isSame(todayStart, 'day') && !event.parent;
-          } else {
-            // For location-specific events, check if spans user's today
-            const eventStart = dayjs(event.dateStart).tz(event.timezone);
-            const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(
-              event.timezone
-            );
-            return (
-              eventStart.isBefore(todayEnd) &&
-              eventEnd.isAfter(todayStart) &&
-              !event.parent
-            );
-          }
-        })
-      ),
+      future,
+      past,
+      today,
     };
   } catch (error) {
     console.error('[fetchEventsFromSanity] Failed:', error?.message || error);

@@ -44,7 +44,7 @@ const today = computed(() =>
     .startOf('day')
 );
 console.log('User timezone is:', userStore.timezone);
-console.log('Today is:', today);
+console.log('Today is:', today.value.format('YYYY-MM-DD'));
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
