@@ -165,22 +165,41 @@ async function fetchEventsFromSanity(
       return dayjs(dateStr).tz(eventTz).tz(userTimezone);
     };
 
-    const today = sortEventsByDate(
-      flattenedEvents.filter((event) => {
-        if (!event.parent) {
-          const eventStart = getEventTimeInUserTz(
-            event.dateStart,
-            event.timezone
-          );
-          const eventEnd = getEventTimeInUserTz(
-            event.dateEnd || event.dateStart,
-            event.timezone
-          );
+    // Helper function to check if event is happening today
+    const isEventToday = (event: Event): boolean => {
+      const eventStart = getEventTimeInUserTz(event.dateStart, event.timezone);
+      const eventEnd = getEventTimeInUserTz(
+        event.dateEnd || event.dateStart,
+        event.timezone
+      );
 
-          return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart);
-        }
-        return false;
-      })
+      if (!event.timezone) {
+        // For international events, only compare dates
+        return (
+          eventStart.format('YYYY-MM-DD') === todayStart.format('YYYY-MM-DD')
+        );
+      }
+
+      // For location-specific events, check if any part overlaps with today
+      const startsBeforeEndOfDay = eventStart.isBefore(todayEnd);
+      const endsAfterStartOfDay = eventEnd.isAfter(todayStart);
+
+      console.log(`[Event ${event._id}] Today check:`, {
+        eventTitle: event.title,
+        eventStart: eventStart.format(),
+        eventEnd: eventEnd.format(),
+        todayStart: todayStart.format(),
+        todayEnd: todayEnd.format(),
+        startsBeforeEndOfDay,
+        endsAfterStartOfDay,
+        isToday: startsBeforeEndOfDay && endsAfterStartOfDay,
+      });
+
+      return startsBeforeEndOfDay && endsAfterStartOfDay;
+    };
+
+    const today = sortEventsByDate(
+      flattenedEvents.filter((event) => !event.parent && isEventToday(event))
     );
 
     const future = sortEventsByDate(
