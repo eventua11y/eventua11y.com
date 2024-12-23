@@ -177,6 +177,14 @@ async function fetchEventsFromSanity(
     const isEventToday = (event: Event): boolean => {
       const userToday = dayjs().tz(userTimezone).startOf('day');
 
+      // For CFS deadlines, only check if they fall within today
+      if (event.type === 'deadline') {
+        const eventDate = dayjs(event.dateStart)
+          .tz(event.timezone)
+          .startOf('day');
+        return eventDate.isSame(userToday, 'day');
+      }
+
       if (!event.timezone) {
         // For international events, use user's timezone but only compare dates
         const eventStart = dayjs
@@ -209,12 +217,6 @@ async function fetchEventsFromSanity(
         });
 
         return isToday;
-      }
-
-      // For CFS deadlines, only check if they fall within today
-      if (event.type === 'deadline') {
-        const eventDate = dayjs(event.dateStart).tz(event.timezone);
-        return eventDate.isSame(todayStart, 'day');
       }
 
       // For events with start and end dates, check if they overlap with today
