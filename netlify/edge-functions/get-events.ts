@@ -178,14 +178,16 @@ async function fetchEventsFromSanity(
             eventEnd.isAfter(userToday, 'day')) ||
           eventEnd.isSame(userToday, 'day');
 
-        console.log(`[Event ${event._id}] International event today check:`, {
-          eventTitle: event.title,
-          eventStart: eventStart.format('YYYY-MM-DD'),
-          eventEnd: eventEnd.format('YYYY-MM-DD'),
-          userToday: userToday.format('YYYY-MM-DD'),
-          isToday,
-          isInternational: true,
-        });
+        if (!eventEnd.isBefore(userToday)) {
+          console.log(`[Event ${event._id}] International event today check:`, {
+            eventTitle: event.title,
+            eventStart: eventStart.format('YYYY-MM-DD'),
+            eventEnd: eventEnd.format('YYYY-MM-DD'),
+            userToday: userToday.format('YYYY-MM-DD'),
+            isToday,
+            isInternational: true,
+          });
+        }
 
         return isToday;
       }
