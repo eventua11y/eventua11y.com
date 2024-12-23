@@ -219,7 +219,10 @@ async function fetchEventsFromSanity(
 
       // For events with start and end dates, check if they overlap with today
       const eventStart = dayjs(event.dateStart).tz(event.timezone);
-      const eventEnd = dayjs(event.dateEnd).tz(event.timezone);
+      const eventEnd = event.dateEnd
+        ? dayjs(event.dateEnd).tz(event.timezone)
+        : eventStart.endOf('day'); // Use end of start date for events without end date
+
       return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart);
     };
 
