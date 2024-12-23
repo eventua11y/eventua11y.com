@@ -340,26 +340,17 @@ export default async function handler(
 ): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
-    const url = new URL(request.url);
-    const baseUrl = `${url.protocol}//${url.host}`;
-
-    console.log('[handler] Fetching user info...');
-    const userInfoResponse = await fetch(`${baseUrl}/api/get-user-info`);
-    if (!userInfoResponse.ok) {
-      throw new Error('Failed to fetch user info');
-    }
-    const userInfo = await userInfoResponse.json();
-    const userTimezone = userInfo.timezone || 'UTC';
+    // Use the context directly instead of making another request
+    const userTimezone = context.geo?.timezone || 'UTC';
 
     const timezoneDebug = {
-      userInfoTimezone: userInfo.timezone,
+      userInfoTimezone: context.geo?.timezone,
       resolvedTimezone: userTimezone,
-      geo: userInfo.geo,
+      geo: context.geo,
       headers: Object.fromEntries(request.headers),
     };
 
     console.log('[handler] Timezone debug:', timezoneDebug);
-
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
     const eventsWithDebug = {
