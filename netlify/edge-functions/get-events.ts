@@ -162,7 +162,9 @@ async function fetchEventsFromSanity(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
             // For international events, compare dates in user's timezone
-            const eventStart = dayjs(event.dateStart).tz(userTimezone).startOf('day');
+            const eventStart = dayjs(event.dateStart)
+              .tz(userTimezone)
+              .startOf('day');
             return eventStart.isAfter(todayEnd) && !event.parent;
           } else {
             // For location-specific events, compare event time to user's today
@@ -174,24 +176,37 @@ async function fetchEventsFromSanity(
       past: flattenedEvents.filter((event) => {
         if (!event.timezone) {
           // For international events, compare dates in user's timezone
-          const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(userTimezone).startOf('day');
+          const eventEnd = dayjs(event.dateEnd || event.dateStart)
+            .tz(userTimezone)
+            .startOf('day');
           return eventEnd.isBefore(todayStart) && !event.parent;
         } else {
           // For location-specific events, compare event time to user's now
-          return dayjs(event.dateEnd).tz(event.timezone).isBefore(now) && !event.parent;
+          return (
+            dayjs(event.dateEnd).tz(event.timezone).isBefore(now) &&
+            !event.parent
+          );
         }
       }),
       today: sortEventsByDate(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
             // For international events, compare dates in user's timezone
-            const eventDate = dayjs(event.dateStart).tz(userTimezone).startOf('day');
+            const eventDate = dayjs(event.dateStart)
+              .tz(userTimezone)
+              .startOf('day');
             return eventDate.isSame(todayStart, 'day') && !event.parent;
           } else {
             // For location-specific events, check if spans user's today
             const eventStart = dayjs(event.dateStart).tz(event.timezone);
-            const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(event.timezone);
-            return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart) && !event.parent;
+            const eventEnd = dayjs(event.dateEnd || event.dateStart).tz(
+              event.timezone
+            );
+            return (
+              eventStart.isBefore(todayEnd) &&
+              eventEnd.isAfter(todayStart) &&
+              !event.parent
+            );
           }
         })
       ),
