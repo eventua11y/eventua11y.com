@@ -31,6 +31,15 @@ interface EventsResponse {
   future: Event[];
   past: Event[];
   today: Event[];
+  debug?: Array<{
+    eventId: string;
+    eventTitle: string;
+    eventStart: string;
+    eventEnd: string;
+    userToday: string;
+    isToday: boolean;
+    isInternational: boolean;
+  }>;
 }
 
 /**
@@ -94,12 +103,16 @@ function sortEventsByDate(events: Event[]): Event[] {
  * - Separates into future, past, and today's events
  * @param {SanityClient} client - Sanity client
  * @param {string} userTimezone - User's timezone
+ * @param {boolean} debug - Debug flag
  * @returns {EventsResponse} Processed events object
  */
 async function fetchEventsFromSanity(
   client: SanityClient,
-  userTimezone: string
+  userTimezone: string,
+  debug?: boolean
 ): Promise<EventsResponse> {
+  const debugLogs = [];
+
   try {
     // Fetch all non-draft events
     const events: Event[] = await client.fetch(`
@@ -179,14 +192,20 @@ async function fetchEventsFromSanity(
           eventEnd.isSame(userToday, 'day');
 
         if (!eventEnd.isBefore(userToday)) {
-          console.log(`[Event ${event._id}] International event today check:`, {
+          const debugInfo = {
+            eventId: event._id,
             eventTitle: event.title,
             eventStart: eventStart.format('YYYY-MM-DD'),
             eventEnd: eventEnd.format('YYYY-MM-DD'),
             userToday: userToday.format('YYYY-MM-DD'),
             isToday,
             isInternational: true,
-          });
+          };
+          debugLogs.push(debugInfo);
+          console.log(
+            `[Event ${event._id}] International event today check:`,
+            debugInfo
+          );
         }
 
         return isToday;
@@ -234,6 +253,7 @@ async function fetchEventsFromSanity(
       future,
       past,
       today,
+      ...(debug ? { debug: debugLogs } : {}),
     };
   } catch (error) {
     console.error('[fetchEventsFromSanity] Failed:', error?.message || error);
@@ -285,6 +305,8 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
 export default async function handler(request: Request): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
+    const url = new URL(request.url);
+    const debug = url.searchParams.has('debug');
     const userTimezone = request.headers.get('x-timezone') || 'UTC';
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
