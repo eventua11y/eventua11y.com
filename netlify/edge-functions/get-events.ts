@@ -192,20 +192,18 @@ async function fetchEventsFromSanity(
             (eventStart.isBefore(userToday, 'day') &&
               eventEnd.isAfter(userToday, 'day'));
 
-        if (isToday) {
-          debugLogs.push({
-            eventId: event._id,
-            eventTitle: event.title,
-            rawStartDate: event.dateStart,
-            rawEndDate: event.dateEnd || 'No end date (single day event)',
-            isSingleDayEvent,
-            eventStart: eventStart.format('YYYY-MM-DD'),
-            eventEnd: eventEnd.format('YYYY-MM-DD'),
-            userToday: userToday.format('YYYY-MM-DD'),
-            isToday,
-            isInternational: true,
-          });
-        }
+        debugLogs.push({
+          eventId: event._id,
+          eventTitle: event.title,
+          rawStartDate: event.dateStart,
+          rawEndDate: event.dateEnd || 'No end date',
+          isSingleDayEvent,
+          eventStart: eventStart.format('YYYY-MM-DD'),
+          eventEnd: eventEnd.format('YYYY-MM-DD'),
+          userToday: userToday.format('YYYY-MM-DD'),
+          isToday,
+          isInternational: true,
+        });
 
         return isToday;
       }
