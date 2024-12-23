@@ -31,15 +31,23 @@ interface EventsResponse {
   future: Event[];
   past: Event[];
   today: Event[];
-  debug?: Array<{
-    eventId: string;
-    eventTitle: string;
-    eventStart: string;
-    eventEnd: string;
-    userToday: string;
-    isToday: boolean;
-    isInternational: boolean;
-  }>;
+  debug?: {
+    timezone?: {
+      userInfoTimezone: string;
+      resolvedTimezone: string;
+      geo: any;
+      headers: Record<string, string>;
+    };
+    events?: Array<{
+      eventId: string;
+      eventTitle: string;
+      eventStart: string;
+      eventEnd: string;
+      userToday: string;
+      isToday: boolean;
+      isInternational: boolean;
+    }>;
+  };
 }
 
 /**
@@ -343,19 +351,27 @@ export default async function handler(
     const userInfo = await userInfoResponse.json();
     const userTimezone = userInfo.timezone || 'UTC';
 
-    // Add debug logging for timezone resolution
-    console.log('[handler] Timezone debug:', {
+    const timezoneDebug = {
       userInfoTimezone: userInfo.timezone,
       resolvedTimezone: userTimezone,
       geo: userInfo.geo,
       headers: Object.fromEntries(request.headers),
-    });
+    };
+
+    console.log('[handler] Timezone debug:', timezoneDebug);
 
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
+    const eventsWithDebug = {
+      ...events,
+      debug: {
+        timezone: timezoneDebug,
+        events: events.debug,
+      },
+    };
     console.log('[handler] Events fetched successfully:', events.events.length);
 
-    return new Response(JSON.stringify(events), {
+    return new Response(JSON.stringify(eventsWithDebug), {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
