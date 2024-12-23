@@ -212,7 +212,7 @@ async function fetchEventsFromSanity(
       }
 
       // For CFS deadlines or events without end dates, only check if they fall within today
-      if (event.type === 'deadline' || !event.dateEnd) {
+      if (event.type === 'deadline') {
         const eventDate = dayjs(event.dateStart).tz(event.timezone);
         return eventDate.isSame(todayStart, 'day');
       }
