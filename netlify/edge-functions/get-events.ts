@@ -293,11 +293,21 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
  * @param {Request} request - HTTP request object
  * @returns {Response} JSON response with events data
  */
-export default async function handler(request: Request): Promise<Response> {
+export default async function handler(
+  request: Request,
+  context: Context
+): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
-    const url = new URL(request.url);
-    const userTimezone = request.headers.get('x-timezone') || 'UTC';
+    console.log('[handler] Fetching user info...');
+    // Get user info first
+    const userInfoResponse = await fetch('/api/get-user-info');
+    if (!userInfoResponse.ok) {
+      throw new Error('Failed to fetch user info');
+    }
+    const userInfo = await userInfoResponse.json();
+    const userTimezone = userInfo.timezone || 'UTC';
+
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
     console.log('[handler] Events fetched successfully:', events.events.length);
