@@ -8,10 +8,14 @@ import dayjs from 'https://esm.sh/dayjs';
 import utc from 'https://esm.sh/dayjs/plugin/utc';
 import timezone from 'https://esm.sh/dayjs/plugin/timezone';
 import isBetween from 'https://esm.sh/dayjs/plugin/isBetween';
+import isSameOrBefore from 'https://esm.sh/dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'https://esm.sh/dayjs/plugin/isSameOrAfter';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isBetween);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 interface Event {
   _id: string;
@@ -48,13 +52,6 @@ function getConfig() {
   const dataset = Deno.env.get('SANITY_DATASET');
   const apiVersion = Deno.env.get('SANITY_API_VERSION');
   const useCdn = Deno.env.get('SANITY_CDN') === 'true';
-
-  console.log('Environment Variables:', {
-    SANITY_PROJECT: projectId,
-    SANITY_DATASET: dataset,
-    SANITY_API_VERSION: apiVersion,
-    SANITY_CDN: useCdn,
-  });
 
   return {
     projectId: projectId || '',
@@ -166,36 +163,33 @@ async function fetchEventsFromSanity(
     };
 
     // Helper function to check if event is happening today
-    const isEventToday = (event: Event): boolean => {
-      const eventStart = getEventTimeInUserTz(event.dateStart, event.timezone);
-      const eventEnd = getEventTimeInUserTz(
-        event.dateEnd || event.dateStart,
-        event.timezone
-      );
-
+        const isEventToday = (event: Event): boolean => {
       if (!event.timezone) {
-        // For international events, only compare dates
-        return (
-          eventStart.format('YYYY-MM-DD') === todayStart.format('YYYY-MM-DD')
-        );
+        // For international events, compare dates only
+        const today = dayjs().tz(userTimezone).startOf('day');
+        const eventStart = dayjs(event.dateStart).startOf('day');
+        const eventEnd = dayjs(event.dateEnd || event.dateStart).startOf('day');
+    
+        const isToday = eventStart.isSameOrBefore(today, 'day') && 
+                       eventEnd.isSameOrAfter(today, 'day');
+    
+        console.log(`[Event ${event._id}] International event today check:`, {
+          eventTitle: event.title,
+          eventStart: eventStart.format('YYYY-MM-DD'),
+          eventEnd: eventEnd.format('YYYY-MM-DD'),
+          todayForUser: today.format('YYYY-MM-DD'),
+          todayUTC: dayjs().startOf('day').format('YYYY-MM-DD'),
+          isToday,
+          isInternational: true
+        });
+    
+        return isToday;
       }
-
+    
       // For location-specific events, check if any part overlaps with today
-      const startsBeforeEndOfDay = eventStart.isBefore(todayEnd);
-      const endsAfterStartOfDay = eventEnd.isAfter(todayStart);
-
-      console.log(`[Event ${event._id}] Today check:`, {
-        eventTitle: event.title,
-        eventStart: eventStart.format(),
-        eventEnd: eventEnd.format(),
-        todayStart: todayStart.format(),
-        todayEnd: todayEnd.format(),
-        startsBeforeEndOfDay,
-        endsAfterStartOfDay,
-        isToday: startsBeforeEndOfDay && endsAfterStartOfDay,
-      });
-
-      return startsBeforeEndOfDay && endsAfterStartOfDay;
+      const eventStart = getEventTimeInUserTz(event.dateStart, event.timezone);
+      const eventEnd = getEventTimeInUserTz(event.dateEnd || event.dateStart, event.timezone);
+      return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart);
     };
 
     const today = sortEventsByDate(
