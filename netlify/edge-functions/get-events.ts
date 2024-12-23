@@ -192,7 +192,7 @@ async function fetchEventsFromSanity(
             (eventStart.isBefore(userToday, 'day') &&
               eventEnd.isAfter(userToday, 'day'));
 
-        if (!eventEnd.isBefore(userToday)) {
+        if (isToday) {
           debugLogs.push({
             eventId: event._id,
             eventTitle: event.title,
