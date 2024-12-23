@@ -179,10 +179,26 @@ async function fetchEventsFromSanity(
 
       // For CFS deadlines, only check if they fall within today
       if (event.type === 'deadline') {
-        const eventDate = dayjs(event.dateStart)
-          .tz(event.timezone)
-          .startOf('day');
-        return eventDate.isSame(userToday, 'day');
+        // Convert event time to user timezone first
+        const eventDateInEventTz = dayjs(event.dateStart).tz(event.timezone);
+        const eventDateInUserTz = eventDateInEventTz.tz(userTimezone);
+
+        // Add debug logging
+        debugLogs.push({
+          eventId: event._id,
+          eventTitle: event.title,
+          rawStartDate: event.dateStart,
+          eventDateInEventTz: eventDateInEventTz.format(
+            'YYYY-MM-DD HH:mm:ss Z'
+          ),
+          eventDateInUserTz: eventDateInUserTz.format('YYYY-MM-DD HH:mm:ss Z'),
+          userToday: userToday.format('YYYY-MM-DD HH:mm:ss Z'),
+          isDeadline: true,
+          eventTimezone: event.timezone,
+          userTimezone: userTimezone,
+        });
+
+        return eventDateInUserTz.isSame(userToday, 'day');
       }
 
       if (!event.timezone) {
