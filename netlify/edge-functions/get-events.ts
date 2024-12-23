@@ -293,13 +293,16 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
  * @param {Request} request - HTTP request object
  * @returns {Response} JSON response with events data
  */
-export default async function handler(request: Request, context: Context): Promise<Response> {
+export default async function handler(
+  request: Request,
+  context: Context
+): Promise<Response> {
   console.log('[handler] Received request:', request);
   try {
     // Get the base URL from the current request
     const url = new URL(request.url);
     const baseUrl = `${url.protocol}//${url.host}`;
-    
+
     console.log('[handler] Fetching user info...');
     // Use absolute URL for the user info request
     const userInfoResponse = await fetch(`${baseUrl}/api/get-user-info`);
