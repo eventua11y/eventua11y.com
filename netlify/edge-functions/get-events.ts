@@ -178,11 +178,14 @@ async function fetchEventsFromSanity(
       const userToday = dayjs().tz(userTimezone).startOf('day');
 
       if (!event.timezone) {
-        const eventStart = dayjs(event.dateStart).startOf('day');
+        // For international events, use user's timezone but only compare dates
+        const eventStart = dayjs
+          .tz(event.dateStart, userTimezone)
+          .startOf('day');
         const isSingleDayEvent = !event.dateEnd;
         const eventEnd = isSingleDayEvent
           ? eventStart
-          : dayjs(event.dateEnd).startOf('day');
+          : dayjs.tz(event.dateEnd, userTimezone).startOf('day');
 
         // Simplified logic for single day events
         const isToday = isSingleDayEvent
