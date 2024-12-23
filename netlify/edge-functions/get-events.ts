@@ -181,19 +181,27 @@ async function fetchEventsFromSanity(
         const eventStart = dayjs(event.dateStart).startOf('day');
         const eventEnd = dayjs(event.dateEnd || event.dateStart).startOf('day');
 
-        const isToday =
-          eventStart.isSame(userToday, 'day') ||
-          (eventStart.isBefore(userToday, 'day') &&
-            eventEnd.isAfter(userToday, 'day')) ||
-          eventEnd.isSame(userToday, 'day');
+        // Break down conditions
+        const startsToday = eventStart.isSame(userToday, 'day');
+        const endsToday = eventEnd.isSame(userToday, 'day');
+        const spansToday =
+          eventStart.isBefore(userToday, 'day') &&
+          eventEnd.isAfter(userToday, 'day');
+
+        const isToday = startsToday || endsToday || spansToday;
 
         if (!eventEnd.isBefore(userToday)) {
           debugLogs.push({
             eventId: event._id,
             eventTitle: event.title,
-            eventStart: eventStart.format('YYYY-MM-DD'),
-            eventEnd: eventEnd.format('YYYY-MM-DD'),
-            userToday: userToday.format('YYYY-MM-DD'),
+            rawStartDate: event.dateStart,
+            rawEndDate: event.dateEnd,
+            eventStart: eventStart.format('YYYY-MM-DD HH:mm:ss'),
+            eventEnd: eventEnd.format('YYYY-MM-DD HH:mm:ss'),
+            userToday: userToday.format('YYYY-MM-DD HH:mm:ss'),
+            startsToday,
+            endsToday,
+            spansToday,
             isToday,
             isInternational: true,
           });
