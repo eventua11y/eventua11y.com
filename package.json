@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@astrojs/netlify": "^6.0.1",
-    "@astrojs/vue": "^5.0.1",
+    "@astrojs/vue": "^5.0.3",
     "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.0.2",
     "@sentry/astro": "^8.45.1",
