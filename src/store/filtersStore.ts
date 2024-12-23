@@ -87,7 +87,7 @@ const filtersStore: FiltersStore = reactive({
    */
   async fetchEvents() {
     try {
-      const response = await fetch('/api/get-events');
+      const response = await fetch('/api/get-events?debug');
       const events = await response.json();
       this.setEvents(events.future, events.today, events.past);
     } catch (error) {
