@@ -178,7 +178,7 @@ async function fetchEventsFromSanity(
           // For international events, compare dates in user's timezone
           const eventEnd = dayjs(event.dateEnd || event.dateStart)
             .tz(userTimezone)
-            .startOf('day');
+            .endOf('day');
           return eventEnd.isBefore(todayStart) && !event.parent;
         } else {
           // For location-specific events, compare event time to user's now
@@ -192,10 +192,17 @@ async function fetchEventsFromSanity(
         flattenedEvents.filter((event) => {
           if (!event.timezone) {
             // For international events, compare dates in user's timezone
-            const eventDate = dayjs(event.dateStart)
+            const eventStart = dayjs(event.dateStart)
               .tz(userTimezone)
               .startOf('day');
-            return eventDate.isSame(todayStart, 'day') && !event.parent;
+            const eventEnd = dayjs(event.dateEnd || event.dateStart)
+              .tz(userTimezone)
+              .endOf('day');
+            return (
+              eventStart.isBefore(todayEnd) &&
+              eventEnd.isAfter(todayStart) &&
+              !event.parent
+            );
           } else {
             // For location-specific events, check if spans user's today
             const eventStart = dayjs(event.dateStart).tz(event.timezone);
