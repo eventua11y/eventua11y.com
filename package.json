@@ -55,7 +55,7 @@
     "typescript-eslint": "^8.18.0"
   },
   "dependencies": {
-    "@astrojs/netlify": "^6.0.0",
+    "@astrojs/netlify": "^6.0.1",
     "@astrojs/vue": "^5.0.1",
     "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.0.2",
