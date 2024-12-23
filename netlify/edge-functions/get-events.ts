@@ -1,6 +1,9 @@
 /**
- * Edge function to fetch events from Sanity CMS
- * Handles caching, data transformation and API response
+ * Edge function to fetch and process events from Sanity CMS
+ * - Handles timezone conversion for international/local events
+ * - Manages event classification (today/future/past)
+ * - Includes debug info for timezone and event processing
+ * - Implements caching to reduce API calls
  */
 
 import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
@@ -33,6 +36,10 @@ interface Event {
   type?: string;
 }
 
+/**
+ * Response structure for the events API
+ * Includes processed event lists and optional debug information
+ */
 interface EventsResponse {
   events: Event[];
   future: Event[];
@@ -58,8 +65,9 @@ interface EventsResponse {
 }
 
 /**
- * In-memory cache configuration
- * Caches events data for 5 minutes to reduce API calls
+ * Cache configuration to reduce Sanity API calls
+ * - Stores processed event data for 5 minutes
+ * - Includes timestamp for TTL calculation
  */
 const cache = {
   data: null as EventsResponse | null,
@@ -112,13 +120,11 @@ function sortEventsByDate(events: Event[]): Event[] {
 }
 
 /**
- * Fetches events from Sanity and processes them
- * - Fetches all non-draft events
- * - Fetches child events for each parent
- * - Separates into future, past, and today's events
- * @param {SanityClient} client - Sanity client
- * @param {string} userTimezone - User's timezone
- * @returns {EventsResponse} Processed events object
+ * Processes events from Sanity and categorizes them
+ * - Fetches events and their child events
+ * - Creates CFS deadline events from parent events
+ * - Converts dates to user's timezone
+ * - Categorizes events as today/future/past
  */
 async function fetchEventsFromSanity(
   client: SanityClient,
@@ -178,7 +184,12 @@ async function fetchEventsFromSanity(
     const todayStart = now.startOf('day');
     const todayEnd = now.endOf('day');
 
-    // Helper function to convert event time to user's timezone
+    /**
+     * Converts event time to user's timezone
+     * - Handles international events (no timezone) differently
+     * - For international events: preserves date, uses user's timezone
+     * - For local events: converts from event timezone to user timezone
+     */
     const getEventTimeInUserTz = (dateStr: string, eventTz?: string) => {
       if (!eventTz) {
         // For international events, preserve the date but use user's timezone
@@ -188,7 +199,16 @@ async function fetchEventsFromSanity(
       return dayjs(dateStr).tz(eventTz).tz(userTimezone);
     };
 
-    // Helper function to check if event is happening today
+    /**
+     * Determines if event is happening today
+     * Event types and rules:
+     * 1. Deadline events: Must match user's today exactly
+     * 2. International events (no timezone):
+     *    - Single day: Must match user's today
+     *    - Multi-day: Must overlap with user's today
+     * 3. Local events (with timezone):
+     *    - Must overlap with user's today considering timezone
+     */
     const isEventToday = (event: Event): boolean => {
       const userToday = dayjs().tz(userTimezone).startOf('day');
 
@@ -340,7 +360,10 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
 
 /**
  * Edge function handler
- * Serves events API endpoint with caching headers
+ * - Gets user timezone from Netlify geo context
+ * - Fetches and processes events
+ * - Adds debug information to response
+ * - Sets caching headers
  * @param {Request} request - HTTP request object
  * @returns {Response} JSON response with events data
  */
