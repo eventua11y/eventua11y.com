@@ -179,29 +179,29 @@ async function fetchEventsFromSanity(
 
       if (!event.timezone) {
         const eventStart = dayjs(event.dateStart).startOf('day');
-        const eventEnd = dayjs(event.dateEnd || event.dateStart).startOf('day');
+        const isSingleDayEvent = !event.dateEnd;
+        const eventEnd = isSingleDayEvent
+          ? eventStart
+          : dayjs(event.dateEnd).startOf('day');
 
-        // Break down conditions
-        const startsToday = eventStart.isSame(userToday, 'day');
-        const endsToday = eventEnd.isSame(userToday, 'day');
-        const spansToday =
-          eventStart.isBefore(userToday, 'day') &&
-          eventEnd.isAfter(userToday, 'day');
-
-        const isToday = startsToday || endsToday || spansToday;
+        // Simplified logic for single day events
+        const isToday = isSingleDayEvent
+          ? eventStart.isSame(userToday, 'day')
+          : eventStart.isSame(userToday, 'day') ||
+            eventEnd.isSame(userToday, 'day') ||
+            (eventStart.isBefore(userToday, 'day') &&
+              eventEnd.isAfter(userToday, 'day'));
 
         if (!eventEnd.isBefore(userToday)) {
           debugLogs.push({
             eventId: event._id,
             eventTitle: event.title,
             rawStartDate: event.dateStart,
-            rawEndDate: event.dateEnd,
-            eventStart: eventStart.format('YYYY-MM-DD HH:mm:ss'),
-            eventEnd: eventEnd.format('YYYY-MM-DD HH:mm:ss'),
-            userToday: userToday.format('YYYY-MM-DD HH:mm:ss'),
-            startsToday,
-            endsToday,
-            spansToday,
+            rawEndDate: event.dateEnd || 'No end date (single day event)',
+            isSingleDayEvent,
+            eventStart: eventStart.format('YYYY-MM-DD'),
+            eventEnd: eventEnd.format('YYYY-MM-DD'),
+            userToday: userToday.format('YYYY-MM-DD'),
             isToday,
             isInternational: true,
           });
