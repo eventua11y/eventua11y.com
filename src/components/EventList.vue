@@ -98,16 +98,24 @@ onMounted(async () => {
       userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
     }
 
+    // Get events from the store
     const events =
       props.type === 'past'
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
-    groupEvents(events);
+
+    // Only process events and set loading to false if we have events
+    if (events && events.length > 0) {
+      groupEvents(events);
+    }
   } catch (e) {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    loading.value = false;
+    // Only set loading to false if we have events or an error
+    if (error.value || Object.keys(groupedEvents.value).length > 0) {
+      loading.value = false;
+    }
   }
 });
 
@@ -121,14 +129,17 @@ watch(
       ? filtersStore.pastEvents
       : filtersStore.filteredEvents,
   (newEvents) => {
-    loading.value = true;
+    if (!loading.value) loading.value = true;
     error.value = null;
+
     try {
-      groupEvents(newEvents);
+      if (newEvents && newEvents.length > 0) {
+        groupEvents(newEvents);
+        loading.value = false;
+      }
     } catch (e) {
       error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
-    } finally {
       loading.value = false;
     }
   }
