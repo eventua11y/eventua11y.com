@@ -150,9 +150,9 @@ watch(
   <div>
     <!-- Loading state -->
     <div v-if="loading" class="flow flow-xl">
-      <Skeleton />
-      <Skeleton />
-      <Skeleton />
+      <Skeleton effect="sheen" />
+      <Skeleton effect="sheen" />
+      <Skeleton effect="sheen" />
     </div>
 
     <!-- Error state -->
