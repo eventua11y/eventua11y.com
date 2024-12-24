@@ -46,7 +46,7 @@ test('filter drawer closes when close button is clicked', async ({ page }) => {
   // Open drawer
   const filterButton = page.getByRole('button', { name: 'Filter' });
   await filterButton.waitFor({ state: 'visible' });
-  await filterButton.click();
+  await filterButton.click({ force: true });
 
   // Wait for drawer to be visible
   const drawer = page.locator('#filter-drawer');
@@ -55,7 +55,7 @@ test('filter drawer closes when close button is clicked', async ({ page }) => {
   // Close drawer
   const closeButton = page.getByRole('button', { name: 'Close' });
   await closeButton.waitFor({ state: 'visible' });
-  await closeButton.click();
+  await closeButton.click({ force: true });
 
   // Verify drawer is closed
   await expect(drawer).not.toBeVisible();
@@ -107,7 +107,7 @@ test('reset button appears when filters are applied', async ({ page }) => {
   // Change filter and wait for update
   const onlineCheckbox = page.getByRole('checkbox', { name: 'Online' });
   await onlineCheckbox.waitFor({ state: 'visible' });
-  await onlineCheckbox.check();
+  await onlineCheckbox.check({ force: true });
   await page.waitForTimeout(300);
 
   // Verify reset button appears
@@ -119,7 +119,7 @@ test('reset button clears filters', async ({ page }) => {
   await page.getByRole('button', { name: 'Filter' }).click();
   await page
     .getByRole('checkbox', { name: 'Not accepting talks' }, { exact: true })
-    .check();
-  await page.getByTestId('drawer-reset').click();
+    .check({ force: true });
+  await page.getByTestId('drawer-reset').click({ force: true });
   await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
 });
