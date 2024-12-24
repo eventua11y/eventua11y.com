@@ -10,6 +10,10 @@
         </p>
       </hgroup>
 
+      <p v-if="today.format('MM-DD') === '01-01'">
+        Happy New Year! Here's to an eventful {{ today.format('YYYY') }}. 🎉
+      </p>
+
       <p v-if="todaysEvents.length === 0">
         Take it easy, there are no accessibility events today. Browse
         <a href="/past-events">past accessibility events</a> to see what you
