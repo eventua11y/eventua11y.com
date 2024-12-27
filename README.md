@@ -18,4 +18,4 @@ The events are stored in a [Sanity](https://sanity.io/) real-time database, edit
 
 The website is hosted by [Netlify](https://www.netlify.com/). Changes pushed to the main branch in GitHub are automatically built and deployed by Netlify. Branches are deployed to temporary URLs for previewing changes before they go live.
 
-Netlify edge functions pull events from Sanity and apply localization to the dates.
+Netlify edge functions pull events from Sanity and apply localization to the dates, based on the user's timezone. Date formatting and timezone conversion is handled by [Day.js](https://github.com/iamkun/dayjs).
