@@ -14,9 +14,7 @@
           </abbr>
         </template>
       </time>
-      <template v-if="isDeadline">
-        <sl-badge variant="danger" pill>Deadline</sl-badge>
-      </template>
+      <sl-badge v-if="isDeadline" variant="danger" pill>Deadline</sl-badge>
     </span>
 
     <span v-if="dateEnd" class="event__dateEnd">
