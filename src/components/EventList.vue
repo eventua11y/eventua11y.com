@@ -37,10 +37,12 @@ const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
   const date = new Date(year, month - 1);
   const now = new Date();
-  
+
   // Check if date is current month and year
-  if (date.getMonth() === now.getMonth() && 
-      date.getFullYear() === now.getFullYear()) {
+  if (
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  ) {
     return 'This month';
   }
 
