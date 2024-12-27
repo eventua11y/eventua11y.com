@@ -1,9 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
 import Event from './Event.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
+
+dayjs.extend(timezone);
 
 /**
  * EventList component
@@ -33,17 +37,16 @@ const error = ref(null);
  * @param {string} yearMonth - Format: "YYYY-M"
  * @returns {string} Formatted date (e.g., "January" or "January 2024")
  */
-const formatDate = (yearMonth) => {
+const formatDate = (yearMonth: string) => {
   const [year, month] = yearMonth.split('-');
-  const date = new Date(year, month - 1);
-  const currentYear = new Date().getFullYear();
+  const date = dayjs()
+    .year(parseInt(year))
+    .month(parseInt(month) - 1);
+  const today = dayjs().tz(userStore.timezone || dayjs.tz.guess());
 
-  const formatter = new Intl.DateTimeFormat('default', {
-    month: 'long',
-    year: Number(year) !== currentYear ? 'numeric' : undefined,
-  });
-
-  return formatter.format(date);
+  return date.format('YYYY-MM') === today.format('YYYY-MM')
+    ? 'This month'
+    : date.format('MMMM YYYY');
 };
 
 /**
