@@ -36,11 +36,17 @@ const error = ref(null);
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
   const date = new Date(year, month - 1);
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  
+  // Check if date is current month and year
+  if (date.getMonth() === now.getMonth() && 
+      date.getFullYear() === now.getFullYear()) {
+    return 'This month';
+  }
 
   const formatter = new Intl.DateTimeFormat('default', {
     month: 'long',
-    year: Number(year) !== currentYear ? 'numeric' : undefined,
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
   });
 
   return formatter.format(date);
