@@ -1,9 +1,29 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import Event from './Event.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
+
+// Extend dayjs with required plugins
+dayjs.extend(utc); // Add UTC plugin first
+dayjs.extend(timezone);
+
+// Helper function to get current timezone
+const getCurrentTimezone = () => {
+  return userStore.timezone || dayjs.tz.guess();
+};
+
+// Helper function to create timezone-aware date
+const createTzDate = (year, month) => {
+  return dayjs.tz(
+    `${year}-${month.toString().padStart(2, '0')}-01`,
+    getCurrentTimezone()
+  );
+};
 
 /**
  * EventList component
@@ -35,15 +55,14 @@ const error = ref(null);
  */
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
-  const date = new Date(year, month - 1);
-  const currentYear = new Date().getFullYear();
+  const date = createTzDate(year, month);
+  const now = dayjs().tz(getCurrentTimezone());
 
-  const formatter = new Intl.DateTimeFormat('default', {
-    month: 'long',
-    year: Number(year) !== currentYear ? 'numeric' : undefined,
-  });
+  if (date.format('YYYY-MM') === now.format('YYYY-MM')) {
+    return 'This month';
+  }
 
-  return formatter.format(date);
+  return date.format('MMMM' + (date.year() !== now.year() ? ' YYYY' : ''));
 };
 
 /**
@@ -56,14 +75,15 @@ const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
     const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+      dayjs.tz(a.dateStart, getCurrentTimezone()).valueOf() -
+      dayjs.tz(b.dateStart, getCurrentTimezone()).valueOf();
     return props.type === 'past' ? -comparison : comparison;
   });
 
-  // Group by year-month
+  // Group by year-month in user's timezone
   const groups = sortedEvents.reduce((groups, event) => {
-    const date = new Date(event.dateStart);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    const date = dayjs.tz(event.dateStart, getCurrentTimezone());
+    const yearMonth = date.format('YYYY-M');
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
@@ -91,20 +111,11 @@ onMounted(async () => {
   error.value = null;
 
   try {
-    if (!userStore.userInfoFetched) {
-      const response = await fetch('/api/get-user-info');
-      if (!response.ok) throw new Error('Failed to fetch user info');
-      const data = await response.json();
-      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
-    }
-
-    // Get events from the store
     const events =
       props.type === 'past'
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
 
-    // Only process events and set loading to false if we have events
     if (events && events.length > 0) {
       groupEvents(events);
     }
@@ -112,10 +123,7 @@ onMounted(async () => {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    // Only set loading to false if we have events or an error
-    if (error.value || Object.keys(groupedEvents.value).length > 0) {
-      loading.value = false;
-    }
+    loading.value = false;
   }
 });
 
