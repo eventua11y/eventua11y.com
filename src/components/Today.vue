@@ -43,11 +43,12 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 // Get the start of the day in the user's local timezone
-const today = computed(() =>
-  dayjs()
-    .tz(userStore.timezone || dayjs.tz.guess())
-    .startOf('day')
-);
+const today = computed(() => {
+  const userTz = userStore.useLocalTimezone
+    ? userStore.timezone || dayjs.tz.guess()
+    : dayjs.tz.guess(); // Always use local timezone if not using user-selected timezone
+  return dayjs().tz(userTz).startOf('day');
+});
 console.log('User timezone is:', userStore.timezone);
 console.log('Today is:', today.value.format('YYYY-MM-DD'));
 const todaysEvents = ref([]);
