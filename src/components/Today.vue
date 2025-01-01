@@ -42,12 +42,10 @@ import filtersStore from '../store/filtersStore';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Get the start of the day in the user's local timezone
+// Get the start of the day using the timezone from the edge function
 const today = computed(() => {
-  const userTz = userStore.useLocalTimezone
-    ? userStore.timezone || dayjs.tz.guess()
-    : dayjs.tz.guess(); // Always use local timezone if not using user-selected timezone
-  return dayjs().tz(userTz).startOf('day');
+  const timezone = userStore.geo?.timezone || 'UTC';
+  return dayjs().tz(timezone).startOf('day');
 });
 console.log('User timezone is:', userStore.timezone);
 console.log('Today is:', today.value.format('YYYY-MM-DD'));
