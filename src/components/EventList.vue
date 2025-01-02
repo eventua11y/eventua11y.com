@@ -32,6 +32,7 @@ const loading = ref(true); // Main loading state for events
 const error = ref(null); // Error state for failed fetches
 const monthlyBooks = ref({}); // Books organized by month
 const booksLoading = ref(props.type === 'upcoming'); // Separate loading for books
+const cachedBooks = ref(null); // Cache for books
 
 /**
  * Formats month display with special handling for current month
@@ -136,13 +137,11 @@ const groupMonthItems = (events, books) => {
     return groups;
   }, {});
 
-  // Only add books if we're showing upcoming events
-  if (props.type === 'upcoming') {
+  // Only add books if we're showing upcoming events and books are enabled
+  if (props.type === 'upcoming' && filtersStore.filters.showBooks) {
     Object.entries(books).forEach(([yearMonth, book]) => {
       if (!groups[yearMonth]) groups[yearMonth] = [];
-      // Remove any existing book (shouldn't happen, but just in case)
       groups[yearMonth] = groups[yearMonth].filter((item) => !item.isBook);
-      // Add the book at the beginning
       groups[yearMonth].unshift({ ...book, isBook: true });
     });
   }
@@ -221,24 +220,29 @@ onMounted(async () => {
  * - Maintains correct loading states
  */
 watch(
-  () =>
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents,
-  async (newEvents) => {
-    if (!loading.value) loading.value = true;
+  [
+    () =>
+      props.type === 'past'
+        ? filtersStore.pastEvents
+        : filtersStore.filteredEvents,
+    () => filtersStore.filters.showBooks,
+  ],
+  async ([newEvents]) => {
     error.value = null;
 
     try {
       if (newEvents && newEvents.length > 0) {
         let groupedBooks = {};
 
-        // Only fetch books for upcoming events
-        if (props.type === 'upcoming') {
-          const booksResponse = await fetch('/api/get-books');
-          if (!booksResponse.ok) throw new Error('Failed to fetch books');
-          const booksData = await booksResponse.json();
-          groupedBooks = booksData.reduce((acc, book) => {
+        // Only fetch books once and cache them
+        if (props.type === 'upcoming' && filtersStore.filters.showBooks) {
+          if (!cachedBooks.value) {
+            const booksResponse = await fetch('/api/get-books');
+            if (!booksResponse.ok) throw new Error('Failed to fetch books');
+            cachedBooks.value = await booksResponse.json();
+          }
+          
+          groupedBooks = cachedBooks.value.reduce((acc, book) => {
             const date = new Date(book.date);
             const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
             acc[yearMonth] = book;
@@ -247,12 +251,12 @@ watch(
         }
 
         groupMonthItems(newEvents, groupedBooks);
+      } else {
+        groupedEvents.value = {};
       }
     } catch (e) {
       error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
-    } finally {
-      loading.value = false;
     }
   }
 );
