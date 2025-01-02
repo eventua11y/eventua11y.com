@@ -241,7 +241,7 @@ watch(
             if (!booksResponse.ok) throw new Error('Failed to fetch books');
             cachedBooks.value = await booksResponse.json();
           }
-          
+
           groupedBooks = cachedBooks.value.reduce((acc, book) => {
             const date = new Date(book.date);
             const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
