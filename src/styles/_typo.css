@@ -1,18 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Slab&display=swap');
 
 h1 {
-  font-size: var(--p-step-5);
-  margin-bottom: 2rem;
+  font-family: 'Roboto Slab', sans-serif;
+  font-size: var(--p-step-4);
+  /* margin-bottom: 2rem; */
 }
 
 h2 {
   font-family: 'Roboto Slab', sans-serif;
-  font-size: var(--p-step-4);
+  font-size: var(--p-step-3);
   font-weight: 700;
-  margin-bottom: var(--p-space-m);
+  /* margin-bottom: var(--p-space-m); */
 }
 
 h3 {
+  font-family: 'Roboto Slab', sans-serif;
   font-size: var(--p-step-2);
   font-weight: 400;
 }
