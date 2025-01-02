@@ -204,3 +204,9 @@ watch(
     </div>
   </div>
 </template>
+
+<style>
+h2 {
+  font-size: var(--p-step-4);
+}
+</style>
