@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * EventList component
+ * - Displays events and book club selections grouped by month
+ * - Handles both upcoming and past events with different sorting
+ * - Shows book club selections only in upcoming events view
+ * - Places books at the start of their respective month's list
+ */
+
 import { ref, onMounted, watch } from 'vue';
 import Event from './Event.vue';
 import Skeleton from './Skeleton.vue';
@@ -6,13 +14,8 @@ import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 
 /**
- * EventList component
- * Displays a grouped list of events by month
- * Handles both upcoming and past events with different sorting
- */
-
-/**
  * @prop {string} type - Type of events to display ('past' or 'upcoming')
+ * Controls sorting direction and whether books are displayed
  */
 const props = defineProps({
   // 'past' or 'upcoming'
@@ -24,14 +27,16 @@ const props = defineProps({
 });
 
 // Reactive references for component state
-const groupedEvents = ref({});
-const loading = ref(true);
-const error = ref(null);
+const groupedEvents = ref({}); // Events and books organized by month
+const loading = ref(true);     // Main loading state for events
+const error = ref(null);       // Error state for failed fetches
+const monthlyBooks = ref({}); // Books organized by month
+const booksLoading = ref(props.type === 'upcoming'); // Separate loading for books
 
 /**
- * Formats year-month string into readable date
+ * Formats month display with special handling for current month
  * @param {string} yearMonth - Format: "YYYY-M"
- * @returns {string} Formatted date (e.g., "January" or "January 2024")
+ * @returns {string} Formatted date (e.g., "This month", "January", or "January 2024")
  */
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
@@ -55,7 +60,7 @@ const formatDate = (yearMonth) => {
 };
 
 /**
- * Groups events by month and sorts them
+ * Groups and sorts events chronologically
  * - Past events: reverse chronological order
  * - Upcoming events: chronological order
  * @param {Array} events - Array of event objects
@@ -91,8 +96,76 @@ const groupEvents = (events) => {
 };
 
 /**
- * Lifecycle hook: fetch user info and initialize events
- * Sets up initial component state and handles errors
+ * Processes and groups books by month
+ * - Used only for upcoming events view
+ * - Stores a single book per month
+ * @param {Array} books - Array of book objects
+ */
+const groupBooks = (books) => {
+  // Reduce to object with single book per month
+  monthlyBooks.value = books.reduce((groups, book) => {
+    const date = new Date(book.date);
+    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    groups[yearMonth] = book;
+    return groups;
+  }, {});
+};
+
+/**
+ * Combines events and books into monthly groups
+ * - Sorts events chronologically
+ * - Places books at the start of their month
+ * - Only includes books in upcoming events view
+ * @param {Array} events - Array of event objects
+ * @param {Object} books - Object containing book data by month
+ */
+const groupMonthItems = (events, books) => {
+  // Sort events based on type (past events in reverse chronological order)
+  const sortedEvents = [...events].sort((a, b) => {
+    const comparison =
+      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    return props.type === 'past' ? -comparison : comparison;
+  });
+
+  // Group by year-month
+  const groups = sortedEvents.reduce((groups, event) => {
+    const date = new Date(event.dateStart);
+    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    if (!groups[yearMonth]) groups[yearMonth] = [];
+    groups[yearMonth].push(event);
+    return groups;
+  }, {});
+
+  // Only add books if we're showing upcoming events
+  if (props.type === 'upcoming') {
+    Object.entries(books).forEach(([yearMonth, book]) => {
+      if (!groups[yearMonth]) groups[yearMonth] = [];
+      // Remove any existing book (shouldn't happen, but just in case)
+      groups[yearMonth] = groups[yearMonth].filter((item) => !item.isBook);
+      // Add the book at the beginning
+      groups[yearMonth].unshift({ ...book, isBook: true });
+    });
+  }
+
+  // Sort months (reverse for past events)
+  const sortedGroups = Object.fromEntries(
+    Object.entries(groups).sort((a, b) => {
+      const [yearA, monthA] = a[0].split('-').map(Number);
+      const [yearB, monthB] = b[0].split('-').map(Number);
+      const comparison = yearA - yearB || monthA - monthB;
+      return props.type === 'past' ? -comparison : comparison;
+    })
+  );
+
+  groupedEvents.value = sortedGroups;
+};
+
+/**
+ * Component initialization
+ * - Fetches and sets user timezone if needed
+ * - Loads events from store based on type (past/upcoming)
+ * - Fetches books only for upcoming events view
+ * - Handles loading states and errors
  */
 onMounted(async () => {
   loading.value = true;
@@ -112,42 +185,73 @@ onMounted(async () => {
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
 
-    // Only process events and set loading to false if we have events
+    // Only fetch books for upcoming events
+    let groupedBooks = {};
+    if (props.type === 'upcoming') {
+      const booksResponse = await fetch('/api/get-books');
+      if (!booksResponse.ok) throw new Error('Failed to fetch books');
+      const booksData = await booksResponse.json();
+      groupedBooks = booksData.reduce((acc, book) => {
+        const date = new Date(book.date);
+        const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        acc[yearMonth] = book;
+        return acc;
+      }, {});
+    }
+
+    // Process events if we have them
     if (events && events.length > 0) {
-      groupEvents(events);
+      groupMonthItems(events, groupedBooks);
     }
   } catch (e) {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    // Only set loading to false if we have events or an error
-    if (error.value || Object.keys(groupedEvents.value).length > 0) {
-      loading.value = false;
+    loading.value = false;
+    if (props.type === 'upcoming') {
+      booksLoading.value = false;
     }
   }
 });
 
 /**
- * Watch for changes in filtered events
- * Updates grouped events when filters change
+ * Watches for event filter changes
+ * - Updates displayed events when filters change
+ * - Refetches books for upcoming events view
+ * - Maintains correct loading states
  */
 watch(
   () =>
     props.type === 'past'
       ? filtersStore.pastEvents
       : filtersStore.filteredEvents,
-  (newEvents) => {
+  async (newEvents) => {
     if (!loading.value) loading.value = true;
     error.value = null;
 
     try {
       if (newEvents && newEvents.length > 0) {
-        groupEvents(newEvents);
-        loading.value = false;
+        let groupedBooks = {};
+
+        // Only fetch books for upcoming events
+        if (props.type === 'upcoming') {
+          const booksResponse = await fetch('/api/get-books');
+          if (!booksResponse.ok) throw new Error('Failed to fetch books');
+          const booksData = await booksResponse.json();
+          groupedBooks = booksData.reduce((acc, book) => {
+            const date = new Date(book.date);
+            const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+            acc[yearMonth] = book;
+            return acc;
+          }, {});
+        }
+
+        groupMonthItems(newEvents, groupedBooks);
       }
     } catch (e) {
       error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
+    } finally {
       loading.value = false;
     }
   }
@@ -157,7 +261,7 @@ watch(
 <template>
   <div>
     <!-- Loading state -->
-    <div v-if="loading" class="flow flow-xl">
+    <div v-if="loading || booksLoading" class="flow flow-xl">
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
@@ -183,7 +287,7 @@ watch(
       }}
     </sl-alert>
 
-    <!-- Events list -->
+    <!-- Events and books list -->
     <div :id="`${type}-events`" v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
         <section :id="'section-' + yearMonth" class="month flow">
@@ -192,11 +296,19 @@ watch(
           </h2>
           <ul
             role="list"
-            class="flow flow-l"
+            class="flow flow-m"
             :aria-labelledby="'heading-' + yearMonth"
           >
-            <li v-for="event in events" :key="event._id">
-              <Event :event="event" />
+            <li v-for="item in events" :key="item._id">
+              <Event v-if="!item.isBook" :event="item" />
+              <p v-else class="event event--book">
+                <span class="text-small"
+                  >Accessibility Book Club is reading</span
+                >
+                <a :href="item.link" target="_blank" rel="noopener">
+                  {{ item.title }}
+                </a>
+              </p>
             </li>
           </ul>
         </section>
@@ -208,5 +320,10 @@ watch(
 <style>
 h2 {
   font-size: var(--p-step-4);
+}
+.event--book {
+  align-items: flex-start;
+  border: none;
+  padding: 0 var(--p-space-xs-m);
 }
 </style>
