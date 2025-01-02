@@ -64,3 +64,9 @@ main {
   flex-direction: column;
   padding: var(--p-space-xs-m);
 }
+
+.callout {
+  background-color: var(--c-callout-color-bg);
+  border-radius: var(--p-space-2xs);
+  padding: var(--p-space-xs-m);
+}
