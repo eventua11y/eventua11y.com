@@ -1,0 +1,30 @@
+---
+import DefaultLayout from '../layouts/default.astro';
+---
+
+<DefaultLayout title="Accessibility Statement">
+  <div class="container readable py-l flow">
+    <h1>Accessibility Statement</h1>
+    <p>This statement explains how accessibility is incorporated in the design and development of this website (eventua11y.com). It was last updated on <time datetime="2025-01-02">2 January 2025</time>.</p>
+    <h2>Reporting problems</h2>
+    <p>If you notice any defects or struggle to use this website, please <a href="https://github.com/eventua11y/eventua11y.com/issues/new?template=a11y.yml">report it</a> and we'll do our best to fix it. If you need assistance, please email <a href="mailto:help@eventua11y.com">help@eventua11y.com</a>.</p>
+    <div class="callout">
+      <p><a href="https://mcmw.abilitynet.org.uk/">My Computer My Way (external website)</a> provides advice on how to adapt your phone, computer or tablet to meet your needs.</p>
+    </div>
+    <h3>Known problems</h3>
+    <p>No accessibility issues are currently known.</p>
+    <h2>Resolving problems</h2>
+    <p>Problems with the accessibility of this website are treated as high-priority defects and not feature requests. This means that they will be investigated and resolved as quickly as possible. Any issues that cannot be resolved, for whatever reason, will be listed here.</p>
+    <h2>Standards</h2>
+    <p>The goal is for each page of this website to meet the requirements of <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> 2.2 Level AA, an international standard for creating accessible online content.</p>
+    <h2>Testing</h2>
+    <p>Updates are made to this website regularly and both manual and automated checks help identify accessibility issues before changes go live.<p>
+    <ul>
+      <li>During design, tools are used to test things like readability, use of color, and the contrast between foreground and background.</li>
+      <li>When the code is being written, potential problems are flagged by a system called 'linting' so that they can be fixed immediately.</li>
+      <li>Each time the website is built, automated checks are performed on the code to identify problems that may have been introduced.</li>
+      <li>Before going live, changes are published to a 'staging' environment for testing. Automated end-to-end checks run in a web browser, but because only 20–30% of accessibility requirements can be tested automatically, a person also reviews the site to catch anything that automated tests may miss.</li>
+    </ul>
+  </div>
+  <!-- End container -->
+</DefaultLayout>
