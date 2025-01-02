@@ -186,7 +186,7 @@ watch(
     <!-- Events list -->
     <div :id="`${type}-events`" v-else>
       <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
-        <section :id="'section-' + yearMonth" class="month">
+        <section :id="'section-' + yearMonth" class="month flow">
           <h2 :id="'heading-' + yearMonth" class="month__heading">
             {{ formatDate(yearMonth) }}
           </h2>
