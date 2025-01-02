@@ -28,8 +28,8 @@ const props = defineProps({
 
 // Reactive references for component state
 const groupedEvents = ref({}); // Events and books organized by month
-const loading = ref(true);     // Main loading state for events
-const error = ref(null);       // Error state for failed fetches
+const loading = ref(true); // Main loading state for events
+const error = ref(null); // Error state for failed fetches
 const monthlyBooks = ref({}); // Books organized by month
 const booksLoading = ref(props.type === 'upcoming'); // Separate loading for books
 
