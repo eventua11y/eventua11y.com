@@ -5,3 +5,7 @@
 .text-large {
   font-size: var(--p-step-1);
 }
+
+.text-small {
+  font-size: var(--p-step--1);
+}
