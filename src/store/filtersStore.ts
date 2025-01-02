@@ -14,6 +14,7 @@ interface Filters {
   attendanceOnline: boolean;
   attendanceOffline: boolean;
   showAwarenessDays: boolean;
+  showBooks: boolean;
 }
 
 interface FiltersStore {
@@ -44,6 +45,7 @@ const DEFAULT_FILTER_VALUES: Filters = {
   attendanceOnline: false,
   attendanceOffline: false,
   showAwarenessDays: true,
+  showBooks: true,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
