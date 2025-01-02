@@ -9,7 +9,7 @@
   /* Colors */
   --s-color-secondary: var(--p-color-cyan);
   --s-color-bg: var(--p-color-white);
-  --s-color-bg-muted: var(--p-color-grey-50);
+  --s-color-bg-muted: var(--p-color-grey-100);
   --s-color-fg: var(--p-color-grey-700);
   --s-color-fg-muted: var(--p-color-grey-500);
   --s-color-border: var(--p-color-grey-200);
@@ -57,6 +57,9 @@
 
   /* Panel */
   --c-panel-color-bg: var(--s-color-surface);
+
+  /* Callout */
+  --c-callout-color-bg: var(--s-color-bg-muted);
 
   /* Page header
   --page-header-color-bg: var(--color-primary);
