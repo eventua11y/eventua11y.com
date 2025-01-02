@@ -13,10 +13,6 @@
       color: var(--c-footer-color-link-hover);
     }
   }
-  .logo {
-    margin-bottom: var(--p-space-m-l);
-    max-width: 10rem;
-  }
 
   .social {
     display: flex;
