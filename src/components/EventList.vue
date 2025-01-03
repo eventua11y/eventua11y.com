@@ -10,12 +10,14 @@
 import { ref, onMounted, watch } from 'vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import Event from './Event.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Helper function for events month grouping - use user's timezone
 const getEventMonthKey = (dateString) => {
