@@ -57,7 +57,6 @@ const groupedEvents = ref({}); // Events and books organized by month
 const loading = ref(true); // Main loading state for events
 const error = ref(null); // Error state for failed fetches
 const monthlyBooks = ref({}); // Books organized by month
-const booksLoading = ref(props.type === 'upcoming'); // Separate loading for books
 const cachedBooks = ref(null); // Cache for books
 
 /**
@@ -236,9 +235,6 @@ onMounted(async () => {
     console.error('Error:', e);
   } finally {
     loading.value = false;
-    if (props.type === 'upcoming') {
-      booksLoading.value = false;
-    }
   }
 });
 
@@ -290,8 +286,8 @@ watch(
 
 <template>
   <div>
-    <!-- Loading state -->
-    <div v-if="loading || booksLoading" class="flow flow-xl">
+    <!-- Loading state - simplified -->
+    <div v-if="loading" class="flow flow-xl">
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
@@ -303,11 +299,9 @@ watch(
       {{ error }}
     </sl-alert>
 
-    <!-- No events state - only show when not loading and we're sure there are no events -->
+    <!-- No events state - simplified check -->
     <sl-alert
-      v-else-if="
-        !loading && !booksLoading && Object.keys(groupedEvents).length === 0
-      "
+      v-else-if="Object.keys(groupedEvents).length === 0"
       open
       class="my-xl"
     >
