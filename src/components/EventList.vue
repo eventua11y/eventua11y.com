@@ -246,7 +246,11 @@ watch(
         let groupedBooks = {};
 
         // Just use cached books, no fetching
-        if (props.type === 'upcoming' && filtersStore.filters.showBooks && cachedBooks.value) {
+        if (
+          props.type === 'upcoming' &&
+          filtersStore.filters.showBooks &&
+          cachedBooks.value
+        ) {
           groupedBooks = cachedBooks.value.reduce((acc, book) => {
             const date = new Date(book.date);
             const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
