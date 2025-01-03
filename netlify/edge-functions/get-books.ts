@@ -16,7 +16,7 @@ import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
 const cache = {
   data: null as any | null,
   timestamp: 0,
-  ttl: 300000, // 1 hour in milliseconds
+  ttl: 300000, // 5 minutes in milliseconds
 };
 
 /**
