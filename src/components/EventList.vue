@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import Event from './Event.vue';
+import EventBook from './EventBook.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
