@@ -75,26 +75,25 @@ const formatDate = (yearMonth) => {
  * Groups and sorts events chronologically
  * - Past events: reverse chronological order
  * - Upcoming events: chronological order
- * @param {Array} events - Array of event objects
+ * @param {Array} items - Array of event or book objects
+ * @param {Function} getKey - Function to get the grouping key
+ * @returns {Object} Grouped items by year-month
  */
-const groupEvents = (events) => {
-  // Sort events based on type (past events in reverse chronological order)
-  const sortedEvents = [...events].sort((a, b) => {
+const groupItems = (items, getKey) => {
+  const sortedItems = [...items].sort((a, b) => {
     const comparison =
       dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
     return props.type === 'past' ? -comparison : comparison;
   });
 
-  // Group by year-month
-  const groups = sortedEvents.reduce((groups, event) => {
-    const yearMonth = getEventMonthKey(event.dateStart);
+  const groups = sortedItems.reduce((groups, item) => {
+    const yearMonth = getKey(item.dateStart);
     if (!groups[yearMonth]) groups[yearMonth] = [];
-    groups[yearMonth].push(event);
+    groups[yearMonth].push(item);
     return groups;
   }, {});
 
-  // Sort months (reverse for past events)
-  const sortedGroups = Object.fromEntries(
+  return Object.fromEntries(
     Object.entries(groups).sort((a, b) => {
       const [yearA, monthA] = a[0].split('-').map(Number);
       const [yearB, monthB] = b[0].split('-').map(Number);
@@ -102,24 +101,6 @@ const groupEvents = (events) => {
       return props.type === 'past' ? -comparison : comparison;
     })
   );
-
-  groupedEvents.value = sortedGroups;
-};
-
-/**
- * Processes and groups books by month
- * - Used only for upcoming events view
- * - Stores a single book per month
- * @param {Array} books - Array of book objects
- */
-const groupBooks = (books) => {
-  // Reduce to object with single book per month
-  monthlyBooks.value = books.reduce((groups, book) => {
-    const date = new Date(book.date);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
-    groups[yearMonth] = book;
-    return groups;
-  }, {});
 };
 
 /**
@@ -131,41 +112,20 @@ const groupBooks = (books) => {
  * @param {Object} books - Object containing book data by month
  */
 const groupMonthItems = (events, books) => {
-  // Sort events based on type (past events in reverse chronological order)
-  const sortedEvents = [...events].sort((a, b) => {
-    const comparison =
-      dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
-    return props.type === 'past' ? -comparison : comparison;
-  });
-
-  // Group by year-month
-  const groups = sortedEvents.reduce((groups, event) => {
-    const yearMonth = getEventMonthKey(event.dateStart);
-    if (!groups[yearMonth]) groups[yearMonth] = [];
-    groups[yearMonth].push(event);
-    return groups;
-  }, {});
+  const eventGroups = groupItems(events, getEventMonthKey);
 
   // Only add books if we're showing upcoming events and books are enabled
   if (props.type === 'upcoming' && filtersStore.filters.showBooks) {
     Object.entries(books).forEach(([yearMonth, book]) => {
-      if (!groups[yearMonth]) groups[yearMonth] = [];
-      groups[yearMonth] = groups[yearMonth].filter((item) => !item.isBook);
-      groups[yearMonth].unshift({ ...book, isBook: true });
+      if (!eventGroups[yearMonth]) eventGroups[yearMonth] = [];
+      eventGroups[yearMonth] = eventGroups[yearMonth].filter(
+        (item) => !item.isBook
+      );
+      eventGroups[yearMonth].unshift({ ...book, isBook: true });
     });
   }
 
-  // Sort months (reverse for past events)
-  const sortedGroups = Object.fromEntries(
-    Object.entries(groups).sort((a, b) => {
-      const [yearA, monthA] = a[0].split('-').map(Number);
-      const [yearB, monthB] = b[0].split('-').map(Number);
-      const comparison = yearA - yearB || monthA - monthB;
-      return props.type === 'past' ? -comparison : comparison;
-    })
-  );
-
-  groupedEvents.value = sortedGroups;
+  groupedEvents.value = eventGroups;
 };
 
 /**
@@ -174,9 +134,15 @@ const groupMonthItems = (events, books) => {
  */
 const fetchAndCacheBooks = async () => {
   if (!cachedBooks.value) {
-    const booksResponse = await fetch('/api/get-books');
-    if (!booksResponse.ok) throw new Error('Failed to fetch books');
-    cachedBooks.value = await booksResponse.json();
+    try {
+      const booksResponse = await fetch('/api/get-books');
+      if (!booksResponse.ok) throw new Error('Failed to fetch books');
+      cachedBooks.value = await booksResponse.json();
+    } catch (error) {
+      error.value = 'Failed to fetch books. Please try again later.';
+      console.error('Error fetching books:', error);
+      return {};
+    }
   }
 
   // Use UTC dates for books
@@ -218,7 +184,6 @@ onMounted(async () => {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    // Only set loading to false if we have events or an error
     if (error.value || Object.keys(groupedEvents.value).length > 0) {
       loading.value = false;
     }
@@ -277,7 +242,7 @@ watch(
 
 <template>
   <div>
-    <!-- Loading state - simplified -->
+    <!-- Loading state -->
     <div v-if="loading" class="flow flow-xl">
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
@@ -290,7 +255,7 @@ watch(
       {{ error }}
     </sl-alert>
 
-    <!-- No events state - simplified check -->
+    <!-- No events state -->
     <sl-alert
       v-else-if="!loading && Object.keys(groupedEvents).length === 0"
       open
@@ -334,7 +299,7 @@ watch(
   </div>
 </template>
 
-<style>
+<style scoped>
 h2 {
   font-size: var(--p-step-4);
 }
