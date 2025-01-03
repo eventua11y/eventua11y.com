@@ -56,10 +56,12 @@ const formatDate = (yearMonth) => {
 };
 
 /**
- * Groups events by month and sorts them
+ * Groups and sorts events and books by month
+ * - Groups items by calendar month
+ * - Books appear at top of each month group
  * - Past events: reverse chronological order
  * - Upcoming events: chronological order
- * @param {Array} events - Array of event objects
+ * @param {Array} events - Array of event and book objects
  */
 const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
@@ -104,8 +106,8 @@ const groupEvents = (events) => {
 };
 
 /**
- * Lifecycle hook: fetch user info and initialize events
- * Sets up initial component state and handles errors
+ * Fetches books from the API endpoint
+ * @returns {Promise<Array>} Array of book objects or empty array on error
  */
 async function fetchBooks() {
   try {
@@ -118,6 +120,11 @@ async function fetchBooks() {
   }
 }
 
+/**
+ * Normalizes a date string to ISO format
+ * @param {string} dateString - Date string from various sources
+ * @returns {string|null} ISO date string or null if invalid
+ */
 const normalizeDate = (dateString) => {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
@@ -127,6 +134,13 @@ const normalizeDate = (dateString) => {
   return date.toISOString();
 };
 
+/**
+ * Lifecycle hook: initializes component data
+ * - Fetches and sets user info if needed
+ * - Gets events from store
+ * - Fetches and merges books with events
+ * - Groups combined items by month
+ */
 onMounted(async () => {
   loading.value = true;
   error.value = null;
@@ -175,8 +189,9 @@ onMounted(async () => {
 });
 
 /**
- * Watch for changes in filtered events
- * Updates grouped events when filters change
+ * Watch handler: updates grouped events when filters change
+ * - Maintains books at top of each month group
+ * - Preserves past/upcoming sort order
  */
 watch(
   () =>
