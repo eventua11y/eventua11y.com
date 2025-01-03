@@ -110,13 +110,11 @@ const filtersStore: FiltersStore = reactive({
       const response = await fetch('/api/get-books');
       if (!response.ok) throw new Error('Failed to fetch books');
       const books = await response.json();
-      this.books = books
-        .map((book) => ({
-          ...book,
-          _type: 'book',
-          dateStart: new Date(book.date).toISOString(),
-        }))
-        .filter((book) => !isNaN(new Date(book.dateStart).getTime()));
+      this.books = books.map((book) => ({
+        ...book,
+        _type: 'book',
+        dateStart: book.date, // date is already in UTC ISO format
+      }));
       this.updateFilteredEvents();
     } catch (error) {
       console.error('Error fetching books:', error);

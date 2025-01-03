@@ -71,10 +71,14 @@ const groupEvents = (events) => {
     return props.type === 'past' ? -comparison : comparison;
   });
 
-  // Group by year-month
+  // Group by year-month, using UTC for books and local time for events
   const groups = sortedEvents.reduce((groups, event) => {
     const date = new Date(event.dateStart);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    // Use UTC methods for books since their dates are in UTC
+    const yearMonth =
+      event._type === 'book'
+        ? `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`
+        : `${date.getFullYear()}-${date.getMonth() + 1}`;
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
