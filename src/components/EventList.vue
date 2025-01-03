@@ -309,7 +309,12 @@ watch(
                 <span class="text-muted text-small"
                   >Accessibility Book Club is reading</span
                 >
-                <a class="book__title" :href="item.link" target="_blank" rel="noopener">
+                <a
+                  class="book__title"
+                  :href="item.link"
+                  target="_blank"
+                  rel="noopener"
+                >
                   {{ item.title }}
                 </a>
               </p>
