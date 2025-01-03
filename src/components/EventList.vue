@@ -159,18 +159,20 @@ onMounted(async () => {
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
 
-    // Fetch and merge books with events
-    const books = await fetchBooks();
-    if (books.length > 0) {
-      const processedBooks = books
-        .map(book => ({
-          ...book,
-          _type: 'book',
-          dateStart: normalizeDate(book.date)
-        }))
-        .filter(book => book.dateStart !== null); // Remove books with invalid dates
-      
-      events = [...(events || []), ...processedBooks];
+    // Only fetch and merge books for upcoming events
+    if (props.type === 'upcoming') {
+      const books = await fetchBooks();
+      if (books.length > 0) {
+        const processedBooks = books
+          .map(book => ({
+            ...book,
+            _type: 'book',
+            dateStart: normalizeDate(book.date)
+          }))
+          .filter(book => book.dateStart !== null);
+        
+        events = [...(events || []), ...processedBooks];
+      }
     }
 
     // Only process events and set loading to false if we have events
