@@ -245,9 +245,14 @@ watch(
       if (newEvents && newEvents.length > 0) {
         let groupedBooks = {};
 
-        // Use cached books or fetch if needed
-        if (props.type === 'upcoming' && filtersStore.filters.showBooks) {
-          groupedBooks = await fetchAndCacheBooks();
+        // Just use cached books, no fetching
+        if (props.type === 'upcoming' && filtersStore.filters.showBooks && cachedBooks.value) {
+          groupedBooks = cachedBooks.value.reduce((acc, book) => {
+            const date = new Date(book.date);
+            const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+            acc[yearMonth] = book;
+            return acc;
+          }, {});
         }
 
         groupMonthItems(newEvents, groupedBooks);
