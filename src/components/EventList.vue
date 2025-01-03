@@ -17,25 +17,15 @@ import filtersStore from '../store/filtersStore';
 
 dayjs.extend(utc);
 
-// Helper function to get month grouping key with timezone consideration
-const getMonthKey = (dateString) => {
-  const date = new Date(dateString);
-  // Convert to user's timezone
-  const userDate = new Date(
-    date.toLocaleString('en-US', { timeZone: userStore.timezone })
-  );
-  return `${userDate.getFullYear()}-${userDate.getMonth() + 1}`;
-};
-
-// Helper function to get month group for books - using UTC
-const getBookMonthKey = (dateString) => {
-  const date = dayjs.utc(dateString);
+// Helper function for events month grouping - use user's timezone
+const getEventMonthKey = (dateString) => {
+  const date = dayjs(dateString).tz(userStore.timezone);
   return `${date.year()}-${date.month() + 1}`;
 };
 
-// Helper function for events month grouping
-const getEventMonthKey = (dateString) => {
-  const date = dayjs(dateString);
+// Helper function for books month grouping - using UTC
+const getBookMonthKey = (dateString) => {
+  const date = dayjs.utc(dateString);
   return `${date.year()}-${date.month() + 1}`;
 };
 
