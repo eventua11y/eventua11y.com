@@ -305,7 +305,9 @@ watch(
 
     <!-- No events state - only show when not loading and we're sure there are no events -->
     <sl-alert
-      v-else-if="!loading && !booksLoading && Object.keys(groupedEvents).length === 0"
+      v-else-if="
+        !loading && !booksLoading && Object.keys(groupedEvents).length === 0
+      "
       open
       class="my-xl"
     >
