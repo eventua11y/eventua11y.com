@@ -44,12 +44,14 @@
         </div>
       </fieldset>
       <sl-switch
+        ref="awarenessDaysSwitch"
         :checked="filtersStore.filters.showAwarenessDays"
         @sl-change="toggleAwarenessDays"
         id="filter-show-awareness-days-drawer"
         >Show awareness days</sl-switch
       >
       <sl-switch
+        ref="booksSwitch"
         :checked="filtersStore.filters.showBooks"
         @sl-change="toggleBooks"
         id="filter-show-books-drawer"
@@ -76,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, watch, ref, onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
 
 const isFiltersChanged = computed(() => filtersStore.isChanged);
@@ -89,6 +91,22 @@ watch(
   },
   { deep: true }
 );
+
+const awarenessDaysSwitch = ref(null);
+const booksSwitch = ref(null);
+
+onMounted(() => {
+  // Wait for next tick to ensure switches are defined
+  setTimeout(() => {
+    if (awarenessDaysSwitch.value) {
+      awarenessDaysSwitch.value.checked =
+        filtersStore.filters.showAwarenessDays;
+    }
+    if (booksSwitch.value) {
+      booksSwitch.value.checked = filtersStore.filters.showBooks;
+    }
+  });
+});
 
 function emitCloseEvent() {
   const event = new CustomEvent('filters:close');
