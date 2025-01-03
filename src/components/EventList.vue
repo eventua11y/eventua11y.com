@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import Event from './Event.vue';
+import EventBook from './EventBook.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
@@ -55,10 +56,12 @@ const formatDate = (yearMonth) => {
 };
 
 /**
- * Groups events by month and sorts them
+ * Groups and sorts events and books by month
+ * - Groups items by calendar month
+ * - Books appear at top of each month group
  * - Past events: reverse chronological order
  * - Upcoming events: chronological order
- * @param {Array} events - Array of event objects
+ * @param {Array} events - Array of event and book objects
  */
 const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
@@ -68,14 +71,32 @@ const groupEvents = (events) => {
     return props.type === 'past' ? -comparison : comparison;
   });
 
-  // Group by year-month
+  // Group by year-month, using UTC for books and local time for events
   const groups = sortedEvents.reduce((groups, event) => {
     const date = new Date(event.dateStart);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    // Use UTC methods for books since their dates are in UTC
+    const yearMonth =
+      event._type === 'book'
+        ? `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`
+        : `${date.getFullYear()}-${date.getMonth() + 1}`;
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
   }, {});
+
+  // Sort each month's events: books first, then events in chronological order
+  Object.keys(groups).forEach((yearMonth) => {
+    groups[yearMonth].sort((a, b) => {
+      // If both are same type, maintain date order
+      if ((a._type === 'book') === (b._type === 'book')) {
+        return (
+          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+        );
+      }
+      // Books go first
+      return a._type === 'book' ? -1 : 1;
+    });
+  });
 
   // Sort months (reverse for past events)
   const sortedGroups = Object.fromEntries(
@@ -91,8 +112,40 @@ const groupEvents = (events) => {
 };
 
 /**
- * Lifecycle hook: fetch user info and initialize events
- * Sets up initial component state and handles errors
+ * Fetches books from the API endpoint
+ * @returns {Promise<Array>} Array of book objects or empty array on error
+ */
+async function fetchBooks() {
+  try {
+    const response = await fetch('/api/get-books');
+    if (!response.ok) throw new Error('Failed to fetch books');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    return [];
+  }
+}
+
+/**
+ * Normalizes a date string to ISO format
+ * @param {string} dateString - Date string from various sources
+ * @returns {string|null} ISO date string or null if invalid
+ */
+const normalizeDate = (dateString) => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    console.warn('Invalid date:', dateString);
+    return null;
+  }
+  return date.toISOString();
+};
+
+/**
+ * Lifecycle hook: initializes component data
+ * - Fetches and sets user info if needed
+ * - Gets events from store
+ * - Fetches and merges books with events
+ * - Groups combined items by month
  */
 onMounted(async () => {
   loading.value = true;
@@ -107,12 +160,12 @@ onMounted(async () => {
     }
 
     // Get events from the store
-    const events =
+    let events =
       props.type === 'past'
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
 
-    // Only process events and set loading to false if we have events
+    // Process events if we have them
     if (events && events.length > 0) {
       groupEvents(events);
     }
@@ -120,7 +173,6 @@ onMounted(async () => {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    // Only set loading to false if we have events or an error
     if (error.value || Object.keys(groupedEvents.value).length > 0) {
       loading.value = false;
     }
@@ -128,8 +180,9 @@ onMounted(async () => {
 });
 
 /**
- * Watch for changes in filtered events
- * Updates grouped events when filters change
+ * Watch handler: updates grouped events when filters change
+ * - Maintains books at top of each month group
+ * - Preserves past/upcoming sort order
  */
 watch(
   () =>
@@ -196,7 +249,8 @@ watch(
             :aria-labelledby="'heading-' + yearMonth"
           >
             <li v-for="event in events" :key="event._id">
-              <Event :event="event" />
+              <EventBook v-if="event._type === 'book'" :book="event" />
+              <Event v-else :event="event" />
             </li>
           </ul>
         </section>

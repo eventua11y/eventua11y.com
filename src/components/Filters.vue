@@ -49,6 +49,12 @@
         id="filter-show-awareness-days-drawer"
         >Show awareness days</sl-switch
       >
+      <sl-switch
+        :checked="filtersStore.filters.showBooks"
+        @sl-change="toggleBooks"
+        id="filter-show-books-drawer"
+        >Show Book Club</sl-switch
+      >
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
@@ -99,5 +105,9 @@ function resetFilters() {
 
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
+}
+
+function toggleBooks(event) {
+  filtersStore.filters.showBooks = event.target.checked;
 }
 </script>
