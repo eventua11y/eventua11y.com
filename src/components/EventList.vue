@@ -197,14 +197,6 @@ onMounted(async () => {
   error.value = null;
 
   try {
-    if (!userStore.userInfoFetched) {
-      const response = await fetch('/api/get-user-info');
-      if (!response.ok) throw new Error('Failed to fetch user info');
-      const data = await response.json();
-      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
-    }
-
-    // Get events from the store
     const events =
       props.type === 'past'
         ? filtersStore.pastEvents
@@ -224,7 +216,10 @@ onMounted(async () => {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    loading.value = false;
+    // Only set loading to false if we have events or an error
+    if (error.value || Object.keys(groupedEvents.value).length > 0) {
+      loading.value = false;
+    }
   }
 });
 
@@ -269,6 +264,10 @@ watch(
     } catch (e) {
       error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
+    } finally {
+      if (error.value || Object.keys(groupedEvents.value).length > 0) {
+        loading.value = false;
+      }
     }
   }
 );
@@ -291,16 +290,11 @@ watch(
 
     <!-- No events state - simplified check -->
     <sl-alert
-      v-else-if="Object.keys(groupedEvents).length === 0"
+      v-else-if="!loading && Object.keys(groupedEvents).length === 0"
       open
       class="my-xl"
     >
-      <sl-icon slot="icon" name="info-circle"></sl-icon>
-      {{
-        type === 'past'
-          ? 'There are no past events to display.'
-          : 'There are no upcoming events to display.'
-      }}
+      No {{ type }} events to display.
     </sl-alert>
 
     <!-- Events and books list -->
