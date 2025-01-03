@@ -154,28 +154,11 @@ onMounted(async () => {
     }
 
     // Get events from the store
-    let events =
-      props.type === 'past'
-        ? filtersStore.pastEvents
-        : filtersStore.filteredEvents;
+    let events = props.type === 'past' 
+      ? filtersStore.pastEvents 
+      : filtersStore.filteredEvents;
 
-    // Only fetch and merge books for upcoming events
-    if (props.type === 'upcoming') {
-      const books = await fetchBooks();
-      if (books.length > 0) {
-        const processedBooks = books
-          .map(book => ({
-            ...book,
-            _type: 'book',
-            dateStart: normalizeDate(book.date)
-          }))
-          .filter(book => book.dateStart !== null);
-        
-        events = [...(events || []), ...processedBooks];
-      }
-    }
-
-    // Only process events and set loading to false if we have events
+    // Process events if we have them
     if (events && events.length > 0) {
       groupEvents(events);
     }
@@ -183,7 +166,6 @@ onMounted(async () => {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    // Only set loading to false if we have events or an error
     if (error.value || Object.keys(groupedEvents.value).length > 0) {
       loading.value = false;
     }
