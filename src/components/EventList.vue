@@ -306,10 +306,10 @@ watch(
             <li v-for="item in events" :key="item._id">
               <Event v-if="!item.isBook" :event="item" />
               <p v-else class="event event--book">
-                <span class="text-small"
+                <span class="text-muted text-small"
                   >Accessibility Book Club is reading</span
                 >
-                <a :href="item.link" target="_blank" rel="noopener">
+                <a class="book__title" :href="item.link" target="_blank" rel="noopener">
                   {{ item.title }}
                 </a>
               </p>
@@ -329,5 +329,8 @@ h2 {
   align-items: flex-start;
   border: none;
   padding: 0 var(--p-space-xs-m);
+}
+.book__title {
+  font-family: var(--c-headings-font-family);
 }
 </style>
