@@ -8,10 +8,34 @@
  */
 
 import { ref, onMounted, watch } from 'vue';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import Event from './Event.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
+
+dayjs.extend(utc);
+
+// Helper function to get month grouping key with timezone consideration
+const getMonthKey = (dateString) => {
+  const date = new Date(dateString);
+  // Convert to user's timezone
+  const userDate = new Date(date.toLocaleString('en-US', { timeZone: userStore.timezone }));
+  return `${userDate.getFullYear()}-${userDate.getMonth() + 1}`;
+};
+
+// Helper function to get month group for books - using UTC
+const getBookMonthKey = (dateString) => {
+  const date = dayjs.utc(dateString);
+  return `${date.year()}-${date.month() + 1}`;
+};
+
+// Helper function for events month grouping
+const getEventMonthKey = (dateString) => {
+  const date = dayjs(dateString);
+  return `${date.year()}-${date.month() + 1}`;
+};
 
 /**
  * @prop {string} type - Type of events to display ('past' or 'upcoming')
@@ -41,23 +65,18 @@ const cachedBooks = ref(null); // Cache for books
  */
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
-  const date = new Date(year, month - 1);
-  const now = new Date();
+  const date = dayjs().year(parseInt(year)).month(parseInt(month) - 1);
+  const now = dayjs();
 
   // Check if date is current month and year
   if (
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
+    date.month() === now.month() &&
+    date.year() === now.year()
   ) {
     return 'This month';
   }
 
-  const formatter = new Intl.DateTimeFormat('default', {
-    month: 'long',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
-  });
-
-  return formatter.format(date);
+  return date.format(date.year() === now.year() ? 'MMMM' : 'MMMM YYYY');
 };
 
 /**
@@ -69,15 +88,13 @@ const formatDate = (yearMonth) => {
 const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
-    const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    const comparison = dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
     return props.type === 'past' ? -comparison : comparison;
   });
 
   // Group by year-month
   const groups = sortedEvents.reduce((groups, event) => {
-    const date = new Date(event.dateStart);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    const yearMonth = getEventMonthKey(event.dateStart);
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
@@ -123,15 +140,13 @@ const groupBooks = (books) => {
 const groupMonthItems = (events, books) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
-    const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+    const comparison = dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
     return props.type === 'past' ? -comparison : comparison;
   });
 
   // Group by year-month
   const groups = sortedEvents.reduce((groups, event) => {
-    const date = new Date(event.dateStart);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    const yearMonth = getEventMonthKey(event.dateStart);
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
@@ -170,9 +185,9 @@ const fetchAndCacheBooks = async () => {
     cachedBooks.value = await booksResponse.json();
   }
 
+  // Use UTC dates for books
   return cachedBooks.value.reduce((acc, book) => {
-    const date = new Date(book.date);
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    const yearMonth = getBookMonthKey(book.date);
     acc[yearMonth] = book;
     return acc;
   }, {});
@@ -245,15 +260,10 @@ watch(
       if (newEvents && newEvents.length > 0) {
         let groupedBooks = {};
 
-        // Just use cached books, no fetching
-        if (
-          props.type === 'upcoming' &&
-          filtersStore.filters.showBooks &&
-          cachedBooks.value
-        ) {
+        if (props.type === 'upcoming' && filtersStore.filters.showBooks && cachedBooks.value) {
+          // Use UTC dates for books
           groupedBooks = cachedBooks.value.reduce((acc, book) => {
-            const date = new Date(book.date);
-            const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+            const yearMonth = getBookMonthKey(book.date);
             acc[yearMonth] = book;
             return acc;
           }, {});
