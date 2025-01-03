@@ -42,7 +42,7 @@ a {
   text-decoration: underline;
 }
 
-a:not([class]) {
+a {
   text-underline-offset: 0.25em;
 }
 
