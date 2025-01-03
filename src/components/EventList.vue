@@ -78,6 +78,18 @@ const groupEvents = (events) => {
     return groups;
   }, {});
 
+  // Sort each month's events: books first, then events in chronological order
+  Object.keys(groups).forEach(yearMonth => {
+    groups[yearMonth].sort((a, b) => {
+      // If both are same type, maintain date order
+      if ((a._type === 'book') === (b._type === 'book')) {
+        return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+      }
+      // Books go first
+      return a._type === 'book' ? -1 : 1;
+    });
+  });
+
   // Sort months (reverse for past events)
   const sortedGroups = Object.fromEntries(
     Object.entries(groups).sort((a, b) => {
@@ -95,6 +107,26 @@ const groupEvents = (events) => {
  * Lifecycle hook: fetch user info and initialize events
  * Sets up initial component state and handles errors
  */
+async function fetchBooks() {
+  try {
+    const response = await fetch('/api/get-books');
+    if (!response.ok) throw new Error('Failed to fetch books');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    return [];
+  }
+}
+
+const normalizeDate = (dateString) => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    console.warn('Invalid date:', dateString);
+    return null;
+  }
+  return date.toISOString();
+};
+
 onMounted(async () => {
   loading.value = true;
   error.value = null;
@@ -108,10 +140,24 @@ onMounted(async () => {
     }
 
     // Get events from the store
-    const events =
+    let events =
       props.type === 'past'
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
+
+    // Fetch and merge books with events
+    const books = await fetchBooks();
+    if (books.length > 0) {
+      const processedBooks = books
+        .map(book => ({
+          ...book,
+          _type: 'book',
+          dateStart: normalizeDate(book.date)
+        }))
+        .filter(book => book.dateStart !== null); // Remove books with invalid dates
+      
+      events = [...(events || []), ...processedBooks];
+    }
 
     // Only process events and set loading to false if we have events
     if (events && events.length > 0) {
@@ -197,7 +243,8 @@ watch(
             :aria-labelledby="'heading-' + yearMonth"
           >
             <li v-for="event in events" :key="event._id">
-              <Event :event="event" />
+              <EventBook v-if="event._type === 'book'" :book="event" />
+              <Event v-else :event="event" />
             </li>
           </ul>
         </section>
