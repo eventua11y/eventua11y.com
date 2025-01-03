@@ -96,7 +96,7 @@ const filtersStore: FiltersStore = reactive({
     try {
       const [eventsResponse] = await Promise.all([
         fetch('/api/get-events'),
-        this.fetchBooks()
+        this.fetchBooks(),
       ]);
       const events = await eventsResponse.json();
       this.setEvents(events.future, events.today, events.past);
@@ -110,11 +110,13 @@ const filtersStore: FiltersStore = reactive({
       const response = await fetch('/api/get-books');
       if (!response.ok) throw new Error('Failed to fetch books');
       const books = await response.json();
-      this.books = books.map(book => ({
-        ...book,
-        _type: 'book',
-        dateStart: new Date(book.date).toISOString()
-      })).filter(book => !isNaN(new Date(book.dateStart).getTime()));
+      this.books = books
+        .map((book) => ({
+          ...book,
+          _type: 'book',
+          dateStart: new Date(book.date).toISOString(),
+        }))
+        .filter((book) => !isNaN(new Date(book.dateStart).getTime()));
       this.updateFilteredEvents();
     } catch (error) {
       console.error('Error fetching books:', error);
@@ -196,8 +198,10 @@ const filtersStore: FiltersStore = reactive({
     const filteredBaseEvents = this.filterEvents(this.futureEvents);
     // Only include books if the filter is enabled
     const relevantBooks = this.filters.showBooks ? this.books : [];
-    this.filteredEvents = [...filteredBaseEvents, ...relevantBooks]
-      .sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime());
+    this.filteredEvents = [...filteredBaseEvents, ...relevantBooks].sort(
+      (a, b) =>
+        new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+    );
   },
 
   /**
@@ -205,7 +209,8 @@ const filtersStore: FiltersStore = reactive({
    */
   showingAllEvents: computed(() => {
     return (
-      filtersStore.nonDeadlineFilteredCount === filtersStore.nonDeadlineFutureCount
+      filtersStore.nonDeadlineFilteredCount ===
+      filtersStore.nonDeadlineFutureCount
     );
   }),
 
