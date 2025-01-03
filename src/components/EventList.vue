@@ -160,6 +160,25 @@ const groupMonthItems = (events, books) => {
 };
 
 /**
+ * Fetches books and caches them
+ * @returns {Promise<Object>} Grouped books by month
+ */
+const fetchAndCacheBooks = async () => {
+  if (!cachedBooks.value) {
+    const booksResponse = await fetch('/api/get-books');
+    if (!booksResponse.ok) throw new Error('Failed to fetch books');
+    cachedBooks.value = await booksResponse.json();
+  }
+
+  return cachedBooks.value.reduce((acc, book) => {
+    const date = new Date(book.date);
+    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    acc[yearMonth] = book;
+    return acc;
+  }, {});
+};
+
+/**
  * Component initialization
  * - Fetches and sets user timezone if needed
  * - Loads events from store based on type (past/upcoming)
@@ -187,15 +206,7 @@ onMounted(async () => {
     // Only fetch books for upcoming events
     let groupedBooks = {};
     if (props.type === 'upcoming') {
-      const booksResponse = await fetch('/api/get-books');
-      if (!booksResponse.ok) throw new Error('Failed to fetch books');
-      const booksData = await booksResponse.json();
-      groupedBooks = booksData.reduce((acc, book) => {
-        const date = new Date(book.date);
-        const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
-        acc[yearMonth] = book;
-        return acc;
-      }, {});
+      groupedBooks = await fetchAndCacheBooks();
     }
 
     // Process events if we have them
@@ -234,20 +245,9 @@ watch(
       if (newEvents && newEvents.length > 0) {
         let groupedBooks = {};
 
-        // Only fetch books once and cache them
+        // Use cached books or fetch if needed
         if (props.type === 'upcoming' && filtersStore.filters.showBooks) {
-          if (!cachedBooks.value) {
-            const booksResponse = await fetch('/api/get-books');
-            if (!booksResponse.ok) throw new Error('Failed to fetch books');
-            cachedBooks.value = await booksResponse.json();
-          }
-
-          groupedBooks = cachedBooks.value.reduce((acc, book) => {
-            const date = new Date(book.date);
-            const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
-            acc[yearMonth] = book;
-            return acc;
-          }, {});
+          groupedBooks = await fetchAndCacheBooks();
         }
 
         groupMonthItems(newEvents, groupedBooks);
