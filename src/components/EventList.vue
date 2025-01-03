@@ -21,7 +21,9 @@ dayjs.extend(utc);
 const getMonthKey = (dateString) => {
   const date = new Date(dateString);
   // Convert to user's timezone
-  const userDate = new Date(date.toLocaleString('en-US', { timeZone: userStore.timezone }));
+  const userDate = new Date(
+    date.toLocaleString('en-US', { timeZone: userStore.timezone })
+  );
   return `${userDate.getFullYear()}-${userDate.getMonth() + 1}`;
 };
 
@@ -65,14 +67,13 @@ const cachedBooks = ref(null); // Cache for books
  */
 const formatDate = (yearMonth) => {
   const [year, month] = yearMonth.split('-');
-  const date = dayjs().year(parseInt(year)).month(parseInt(month) - 1);
+  const date = dayjs()
+    .year(parseInt(year))
+    .month(parseInt(month) - 1);
   const now = dayjs();
 
   // Check if date is current month and year
-  if (
-    date.month() === now.month() &&
-    date.year() === now.year()
-  ) {
+  if (date.month() === now.month() && date.year() === now.year()) {
     return 'This month';
   }
 
@@ -88,7 +89,8 @@ const formatDate = (yearMonth) => {
 const groupEvents = (events) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
-    const comparison = dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
+    const comparison =
+      dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
     return props.type === 'past' ? -comparison : comparison;
   });
 
@@ -140,7 +142,8 @@ const groupBooks = (books) => {
 const groupMonthItems = (events, books) => {
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...events].sort((a, b) => {
-    const comparison = dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
+    const comparison =
+      dayjs(a.dateStart).valueOf() - dayjs(b.dateStart).valueOf();
     return props.type === 'past' ? -comparison : comparison;
   });
 
@@ -260,7 +263,11 @@ watch(
       if (newEvents && newEvents.length > 0) {
         let groupedBooks = {};
 
-        if (props.type === 'upcoming' && filtersStore.filters.showBooks && cachedBooks.value) {
+        if (
+          props.type === 'upcoming' &&
+          filtersStore.filters.showBooks &&
+          cachedBooks.value
+        ) {
           // Use UTC dates for books
           groupedBooks = cachedBooks.value.reduce((acc, book) => {
             const yearMonth = getBookMonthKey(book.date);
