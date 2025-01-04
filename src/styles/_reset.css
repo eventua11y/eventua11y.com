@@ -77,5 +77,6 @@ select {
 
 /* Hide custom elements that are not yet registered to prevent FOUCE */
 :not(:defined) {
+  display: none;
   visibility: hidden;
 }
