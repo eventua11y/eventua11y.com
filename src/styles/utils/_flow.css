@@ -29,3 +29,7 @@
 .flow-xl {
   --flow-space: var(--p-space-xl);
 }
+
+.flow-2xl {
+  --flow-space: var(--p-space-2xl);
+}
