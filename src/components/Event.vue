@@ -74,6 +74,22 @@ const formatDate = (dateString) => {
     return 'Date unavailable';
   }
 };
+
+/**
+ * Enumerates child event types and their counts
+ * @returns {string} Formatted string of child event types and counts
+ */
+const enumeratedChildTypes = computed(() => {
+  const counts = {};
+  props.event.children.forEach((child) => {
+    if (!child.format) return;
+    if (!counts[child.format]) counts[child.format] = 0;
+    counts[child.format]++;
+  });
+  return Object.entries(counts)
+    .map(([format, count]) => `${count} ${format}${count > 1 ? 's' : ''}`)
+    .join(', ');
+});
 </script>
 
 <template>
@@ -130,7 +146,7 @@ const formatDate = (dateString) => {
     <details v-if="hasChildren" class="event__children flow">
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
-        {{ childrenCount }} accessibility highlights
+        Accessibility highlights: {{ enumeratedChildTypes }}
       </summary>
       <EventChild
         v-for="child in event.children"
@@ -138,12 +154,44 @@ const formatDate = (dateString) => {
         :event="child"
       />
     </details>
+    <details v-else-if="event.isParent" class="event__children flow">
+      <summary>
+        <i class="icon fa-solid fa-caret-right"></i>
+        Schedule not yet announced
+      </summary>
+      <p>
+        {{ event.title }} is expected to include one or more
+        accessibility-themed sessions but the full schedule has not yet been
+        announced. Details will be published here closer to the date of the
+        event.
+      </p>
+    </details>
 
-    <div v-if="isCallForSpeakersOpen" class="event__badges">
-      <sl-badge variant="success" pill pulse> Call for speakers </sl-badge>
-      <small v-if="event.callForSpeakersClosingDate" class="text-muted">
-        Closes: {{ formatDate(event.callForSpeakersClosingDate) }}
-      </small>
+    <div
+      class="event__badges"
+      v-if="
+        (!event.isParent && !event.hasChildren && event.type !== 'theme') ||
+        isCallForSpeakersOpen
+      "
+    >
+      <sl-badge
+        pill
+        variant="neutral"
+        v-if="!event.isParent && !event.hasChildren && event.type !== 'theme'"
+        >Dedicated to accessibility</sl-badge
+      >
+      <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
+        >Call for speakers</sl-badge
+      >
     </div>
   </article>
 </template>
+
+<style scoped>
+.event__badges {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--p-space-3xs);
+  row-gap: var(--p-space-3xs);
+}
+</style>
