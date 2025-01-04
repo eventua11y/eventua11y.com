@@ -22,7 +22,11 @@
       <div v-else class="events flow">
         <ul role="list" class="flow">
           <li v-for="event in todaysEvents" :key="event._id">
-            <Event :event="event" class="readable" :showDate="shouldShowDate(event)" />
+            <Event
+              :event="event"
+              class="readable"
+              :showDate="shouldShowDate(event)"
+            />
           </li>
         </ul>
       </div>

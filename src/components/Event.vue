@@ -20,8 +20,8 @@ const props = defineProps({
   },
   showDate: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 });
 
 /**
