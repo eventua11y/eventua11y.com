@@ -237,24 +237,27 @@ watch(
     </sl-alert>
 
     <!-- Events list -->
-    <div :id="`${type}-events`" v-else>
-      <div v-for="(events, yearMonth) in groupedEvents" :key="yearMonth">
-        <section :id="'section-' + yearMonth" class="month flow">
-          <h2 :id="'heading-' + yearMonth" class="month__heading">
-            {{ formatDate(yearMonth) }}
-          </h2>
-          <ul
-            role="list"
-            class="flow flow-l"
-            :aria-labelledby="'heading-' + yearMonth"
-          >
-            <li v-for="event in events" :key="event._id">
-              <EventBook v-if="event._type === 'book'" :book="event" />
-              <Event v-else :event="event" />
-            </li>
-          </ul>
-        </section>
-      </div>
+    <div :id="`${type}-events`" v-else class="flow flow-2xl">
+      <section
+        v-for="(events, yearMonth) in groupedEvents"
+        :key="yearMonth"
+        :id="'section-' + yearMonth"
+        class="month flow"
+      >
+        <h2 :id="'heading-' + yearMonth" class="month__heading">
+          {{ formatDate(yearMonth) }}
+        </h2>
+        <ul
+          role="list"
+          class="flow flow-l"
+          :aria-labelledby="'heading-' + yearMonth"
+        >
+          <li v-for="event in events" :key="event._id">
+            <EventBook v-if="event._type === 'book'" :book="event" />
+            <Event v-else :event="event" />
+          </li>
+        </ul>
+      </section>
     </div>
   </div>
 </template>
