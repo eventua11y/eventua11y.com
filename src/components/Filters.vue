@@ -40,7 +40,7 @@
             id="filter-attendance-offline"
             class="filter-option"
           />
-          <label for="filter-attendance-offline">Offline</label>
+          <label for="filter-attendance-offline">In-person</label>
         </div>
       </fieldset>
       <sl-switch
