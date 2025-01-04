@@ -28,7 +28,6 @@
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
         <sl-switch
-          ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
           @sl-change="toggleAwarenessDays"
           id="filter-show-awareness-days-bar"
@@ -61,8 +60,6 @@ import TimezoneSelector from './TimezoneSelector.vue';
  * Used to add sticky positioning when scrolled
  */
 const filterToolbar = ref(null);
-
-const awarenessDaysSwitch = ref(null);
 
 /**
  * Computed property to track filter changes
@@ -121,13 +118,5 @@ onMounted(async () => {
     );
     observer.observe(filterToolbar.value);
   }
-
-  // Initialize switch state
-  setTimeout(() => {
-    if (awarenessDaysSwitch.value) {
-      awarenessDaysSwitch.value.checked =
-        filtersStore.filters.showAwarenessDays;
-    }
-  });
 });
 </script>

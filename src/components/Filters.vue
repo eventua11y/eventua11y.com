@@ -57,6 +57,13 @@
         id="filter-show-books-drawer"
         >Show Book Club</sl-switch
       >
+      <sl-switch
+        ref="deadlinesSwitch"
+        :checked="filtersStore.filters.showDeadlines"
+        @sl-change="toggleDeadlines"
+        id="filter-show-deadlines-drawer"
+        >Show speaker deadlines</sl-switch
+      >
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
@@ -94,6 +101,7 @@ watch(
 
 const awarenessDaysSwitch = ref(null);
 const booksSwitch = ref(null);
+const deadlinesSwitch = ref(null);
 
 onMounted(() => {
   // Wait for next tick to ensure switches are defined
@@ -104,6 +112,9 @@ onMounted(() => {
     }
     if (booksSwitch.value) {
       booksSwitch.value.checked = filtersStore.filters.showBooks;
+    }
+    if (deadlinesSwitch.value) {
+      deadlinesSwitch.value.checked = filtersStore.filters.showDeadlines;
     }
   });
 });
@@ -127,5 +138,9 @@ function toggleAwarenessDays(event) {
 
 function toggleBooks(event) {
   filtersStore.filters.showBooks = event.target.checked;
+}
+
+function toggleDeadlines(event) {
+  filtersStore.filters.showDeadlines = event.target.checked;
 }
 </script>

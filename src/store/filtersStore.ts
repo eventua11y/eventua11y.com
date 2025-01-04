@@ -17,6 +17,7 @@ interface Filters {
   attendanceOffline: boolean;
   showAwarenessDays: boolean;
   showBooks: boolean;
+  showDeadlines: boolean;
 }
 
 interface FiltersStore {
@@ -50,6 +51,7 @@ const DEFAULT_FILTER_VALUES: Filters = {
   attendanceOffline: false,
   showAwarenessDays: true,
   showBooks: true,
+  showDeadlines: true,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
@@ -163,6 +165,9 @@ const filtersStore: FiltersStore = reactive({
    */
   filterEvents(events: Event[]): Event[] {
     return events.filter((event) => {
+      // Handle deadlines
+      if (event.type === 'deadline') return this.filters.showDeadlines;
+
       // Handle awareness days
       if (this.filters.showAwarenessDays && event.type === 'theme') return true;
       if (event.type === 'theme') return false;
