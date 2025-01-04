@@ -62,6 +62,12 @@ import TimezoneSelector from './TimezoneSelector.vue';
 const filterToolbar = ref(null);
 
 /**
+ * Reference to awareness days switch component
+ * Used to ensure proper initialization of checked state
+ */
+const awarenessDaysSwitch = ref(null);
+
+/**
  * Computed property to track filter changes
  * Used to show/hide reset button
  */
@@ -108,6 +114,7 @@ function toggleAwarenessDays(event) {
 /**
  * Sets up intersection observer for sticky positioning
  * Adds 'is-pinned' class when toolbar scrolls out of view
+ * Initializes switch checked state from store
  */
 onMounted(async () => {
   await nextTick();
