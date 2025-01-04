@@ -18,6 +18,10 @@ const props = defineProps({
       return event.title && event.type;
     },
   },
+  showDate: {
+    type: Boolean,
+    default: true
+  }
 });
 
 /**
@@ -75,6 +79,7 @@ const formatDate = (dateString) => {
 <template>
   <div v-if="event.type === 'deadline'" class="event event--deadline">
     <EventDate
+      v-if="showDate"
       :dateStart="event.dateStart"
       :timezone="event.timezone"
       :isDeadline="true"
@@ -98,6 +103,7 @@ const formatDate = (dateString) => {
     </h3>
 
     <EventDate
+      v-if="showDate"
       :dateStart="event.dateStart"
       :dateEnd="event.dateEnd"
       :timezone="event.timezone"
