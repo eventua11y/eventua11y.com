@@ -22,7 +22,7 @@
       <div v-else class="events flow">
         <ul role="list" class="flow">
           <li v-for="event in todaysEvents" :key="event._id">
-            <Event :event="event" class="readable" />
+            <Event :event="event" class="readable" :showDate="shouldShowDate(event)" />
           </li>
         </ul>
       </div>
@@ -53,6 +53,14 @@ const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
   todaysEvents.value = filtersStore.todayEvents;
+};
+
+/**
+ * Determines if date should be shown for an event
+ * Hides date for single-day international theme events
+ */
+const shouldShowDate = (event) => {
+  return !(event.type === 'theme' && !event.dateEnd);
 };
 
 onMounted(async () => {
