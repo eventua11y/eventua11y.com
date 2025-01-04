@@ -119,10 +119,6 @@
   }
 }
 
-.month {
-  padding: var(--p-space-s-l) 0;
-}
-
 .month:first-child {
   padding-top: 0;
 }
