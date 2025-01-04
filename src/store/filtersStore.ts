@@ -10,6 +10,12 @@ interface Event {
   dateStart: string;
 }
 
+/**
+ * Interface defining filter options
+ * - CFS filters (open/closed)
+ * - Attendance mode filters (online/offline)
+ * - Content type filters (awareness days, books, deadlines)
+ */
 interface Filters {
   cfsOpen: boolean;
   cfsClosed: boolean;
@@ -17,6 +23,7 @@ interface Filters {
   attendanceOffline: boolean;
   showAwarenessDays: boolean;
   showBooks: boolean;
+  showDeadlines: boolean;
 }
 
 interface FiltersStore {
@@ -50,6 +57,7 @@ const DEFAULT_FILTER_VALUES: Filters = {
   attendanceOffline: false,
   showAwarenessDays: true,
   showBooks: true,
+  showDeadlines: true,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
@@ -157,12 +165,19 @@ const filtersStore: FiltersStore = reactive({
   }),
 
   /**
-   * Filters the events based on the current filters.
-   * @param events - The events to filter.
-   * @returns The filtered events.
+   * Filters events based on current filter settings
+   * - Handles deadlines visibility
+   * - Handles awareness days visibility
+   * - Applies CFS status filters
+   * - Applies attendance mode filters
+   * @param events - Array of events to filter
+   * @returns Filtered array of events
    */
   filterEvents(events: Event[]): Event[] {
     return events.filter((event) => {
+      // Handle deadlines
+      if (event.type === 'deadline') return this.filters.showDeadlines;
+
       // Handle awareness days
       if (this.filters.showAwarenessDays && event.type === 'theme') return true;
       if (event.type === 'theme') return false;
@@ -190,7 +205,10 @@ const filtersStore: FiltersStore = reactive({
   },
 
   /**
-   * Updates the filtered events based on the current filters.
+   * Updates filtered events based on current filters
+   * - Applies filters to future events
+   * - Conditionally includes books based on showBooks filter
+   * - Sorts combined results chronologically
    */
   updateFilteredEvents() {
     const filteredBaseEvents = this.filterEvents(this.futureEvents);
@@ -212,12 +230,20 @@ const filtersStore: FiltersStore = reactive({
     );
   }),
 
+  /**
+   * Count of non-deadline and non-book future events
+   * Used for filter status display
+   */
   nonDeadlineFutureCount: computed(() => {
     return filtersStore.futureEvents.filter(
       (event) => event.type !== 'deadline' && event._type !== 'book'
     ).length;
   }),
 
+  /**
+   * Count of non-deadline and non-book filtered events
+   * Used for filter status display
+   */
   nonDeadlineFilteredCount: computed(() => {
     return filtersStore.filteredEvents.filter(
       (event) => event.type !== 'deadline' && event._type !== 'book'
