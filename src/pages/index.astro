@@ -14,8 +14,8 @@ export const prerender = false;
   <Today client:load />
   <FilterBar client:only="vue" />
   <Filters client:only="vue" />
-  <div class="container readable py-l">
-    <h1 class="sr-only">Upcoming accessibility events</h1>
+  <div role="region" aria-labelledby="upcoming-events-heading" class="container readable py-l">
+    <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
     <EventList type="upcoming" client:load />
   </div>
   <!-- End container -->
