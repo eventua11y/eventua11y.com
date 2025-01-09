@@ -247,7 +247,7 @@ watch(
         <h2 :id="'heading-' + yearMonth" class="month__heading">
           {{ formatDate(yearMonth) }}
         </h2>
-        <ul
+        <ol
           role="list"
           class="flow flow-l"
           :aria-labelledby="'heading-' + yearMonth"
@@ -256,7 +256,7 @@ watch(
             <EventBook v-if="event._type === 'book'" :book="event" />
             <Event v-else :event="event" />
           </li>
-        </ul>
+        </ol>
       </section>
     </div>
   </div>
