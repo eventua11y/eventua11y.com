@@ -34,7 +34,7 @@ interface Event {
   attendanceMode?: string;
   callForSpeakers?: boolean;
   type?: string;
-  isFree?: boolean; // Added isFree property
+  isFree?: boolean; // Added isFree property to indicate if an event is free
 }
 
 /**
@@ -143,14 +143,13 @@ async function fetchEventsFromSanity(
         dateStart,
         dateEnd,
         parent,
-        children,
         callForSpeakersClosingDate,
         timezone,
         website,
         attendanceMode,
         callForSpeakers,
         type,
-        isFree // Include isFree property
+        isFree
       }
     `);
 
@@ -184,6 +183,7 @@ async function fetchEventsFromSanity(
             website: event.website,
             attendanceMode: event.attendanceMode,
             callForSpeakers: event.callForSpeakers,
+            isFree: event.isFree,
           });
         }
 
