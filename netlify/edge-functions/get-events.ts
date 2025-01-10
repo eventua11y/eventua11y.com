@@ -102,6 +102,9 @@ function getConfig() {
 function createSanityClient(): SanityClient {
   try {
     const config = getConfig();
+    if (!config.projectId || !config.dataset) {
+      throw new Error('Sanity client configuration is incomplete');
+    }
     return createClient(config);
   } catch (error) {
     console.error('Failed to create Sanity client:', error);
@@ -152,6 +155,10 @@ async function fetchEventsFromSanity(
         isFree
       }
     `);
+
+    if (!Array.isArray(events)) {
+      throw new Error('Fetched events is not an array');
+    }
 
     // Fetch children for each event and add CFS deadline events
     const eventsWithChildrenAndDeadlines = await Promise.all(
@@ -362,6 +369,10 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
   // Fetch from Sanity
   console.log('[getEvents] Fetching fresh data from Sanity');
   const events = await fetchEventsFromSanity(client, userTimezone);
+
+  if (!Array.isArray(events.events)) {
+    throw new Error('Fetched events is not an array');
+  }
 
   // Update cache
   cache.data = events;
