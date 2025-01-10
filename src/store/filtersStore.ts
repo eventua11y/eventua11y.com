@@ -8,6 +8,7 @@ interface Event {
   attendanceMode: string;
   _type?: string;
   dateStart: string;
+  isFree?: boolean;
 }
 
 /**
@@ -15,6 +16,7 @@ interface Event {
  * - CFS filters (open/closed)
  * - Attendance mode filters (online/offline)
  * - Content type filters (awareness days, books, deadlines)
+ * - Event cost filters (free/paid)
  */
 interface Filters {
   cfsOpen: boolean;
@@ -24,6 +26,8 @@ interface Filters {
   showAwarenessDays: boolean;
   showBooks: boolean;
   showDeadlines: boolean;
+  showFreeEvents: boolean;
+  showPaidEvents: boolean;
 }
 
 interface FiltersStore {
@@ -58,6 +62,8 @@ const DEFAULT_FILTER_VALUES: Filters = {
   showAwarenessDays: true,
   showBooks: true,
   showDeadlines: true,
+  showFreeEvents: true,
+  showPaidEvents: true,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
@@ -170,6 +176,7 @@ const filtersStore: FiltersStore = reactive({
    * - Handles awareness days visibility
    * - Applies CFS status filters
    * - Applies attendance mode filters
+   * - Applies event cost filters
    * @param events - Array of events to filter
    * @returns Filtered array of events
    */
@@ -197,10 +204,16 @@ const filtersStore: FiltersStore = reactive({
         (this.filters.attendanceOffline &&
           ['offline', 'mixed'].includes(event.attendanceMode));
 
+      // Event cost filter
+      const matchesCost =
+        (!this.filters.showFreeEvents && !this.filters.showPaidEvents) ||
+        (this.filters.showFreeEvents && event.isFree) ||
+        (this.filters.showPaidEvents && !event.isFree);
+
       // Themes filter
       const matchesThemes = this.filters.themes || event.type !== 'theme';
 
-      return matchesCfs && matchesAttendance && matchesThemes;
+      return matchesCfs && matchesAttendance && matchesCost && matchesThemes;
     });
   },
 

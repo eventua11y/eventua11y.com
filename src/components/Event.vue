@@ -171,7 +171,7 @@ const enumeratedChildTypes = computed(() => {
       class="event__badges"
       v-if="
         (!event.isParent && !event.hasChildren && event.type !== 'theme') ||
-        isCallForSpeakersOpen
+        isCallForSpeakersOpen || event.isFree
       "
     >
       <sl-badge
@@ -183,6 +183,7 @@ const enumeratedChildTypes = computed(() => {
       <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
         >Call for speakers</sl-badge
       >
+      <sl-badge variant="primary" pill v-if="event.isFree">Free</sl-badge>
     </div>
   </article>
 </template>

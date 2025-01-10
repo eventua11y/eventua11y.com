@@ -34,6 +34,7 @@ interface Event {
   attendanceMode?: string;
   callForSpeakers?: boolean;
   type?: string;
+  isFree?: boolean; // Added isFree property
 }
 
 /**
@@ -135,7 +136,22 @@ async function fetchEventsFromSanity(
   try {
     // Fetch all non-draft events
     const events: Event[] = await client.fetch(`
-      *[_type == "event" && !(_id in path("drafts.**"))]
+      *[_type == "event" && !(_id in path("drafts.**"))] {
+        _id,
+        _type,
+        title,
+        dateStart,
+        dateEnd,
+        parent,
+        children,
+        callForSpeakersClosingDate,
+        timezone,
+        website,
+        attendanceMode,
+        callForSpeakers,
+        type,
+        isFree // Include isFree property
+      }
     `);
 
     // Fetch children for each event and add CFS deadline events

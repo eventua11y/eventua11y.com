@@ -123,3 +123,27 @@ test('reset button clears filters', async ({ page }) => {
   await page.getByTestId('drawer-reset').click({ force: true });
   await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
 });
+
+test('filter free events', async ({ page }) => {
+  await page.getByRole('button', { name: 'Filter' }).click();
+  await page.getByRole('checkbox', { name: 'Free' }).check({ force: true });
+  await page.getByRole('button', { name: 'Show' }).click();
+  const events = await page.locator('.event');
+  for (let i = 0; i < await events.count(); i++) {
+    const event = events.nth(i);
+    const badge = await event.locator('sl-badge', { hasText: 'Free' });
+    await expect(badge).toBeVisible();
+  }
+});
+
+test('filter paid events', async ({ page }) => {
+  await page.getByRole('button', { name: 'Filter' }).click();
+  await page.getByRole('checkbox', { name: 'Paid' }).check({ force: true });
+  await page.getByRole('button', { name: 'Show' }).click();
+  const events = await page.locator('.event');
+  for (let i = 0; i < await events.count(); i++) {
+    const event = events.nth(i);
+    const badge = await event.locator('sl-badge', { hasText: 'Free' });
+    await expect(badge).not.toBeVisible();
+  }
+});
