@@ -24,6 +24,8 @@ interface Filters {
   showAwarenessDays: boolean;
   showBooks: boolean;
   showDeadlines: boolean;
+  showFreeEvents: boolean;
+  showPaidEvents: boolean;
 }
 
 interface FiltersStore {
@@ -58,6 +60,8 @@ const DEFAULT_FILTER_VALUES: Filters = {
   showAwarenessDays: true,
   showBooks: true,
   showDeadlines: true,
+  showFreeEvents: true,
+  showPaidEvents: true,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
@@ -200,7 +204,12 @@ const filtersStore: FiltersStore = reactive({
       // Themes filter
       const matchesThemes = this.filters.themes || event.type !== 'theme';
 
-      return matchesCfs && matchesAttendance && matchesThemes;
+      const matchesFree =
+        (!this.filters.showFreeEvents && !this.filters.showPaidEvents) ||
+        (this.filters.showFreeEvents && event.isFree) ||
+        (this.filters.showPaidEvents && !event.isFree);
+
+      return matchesCfs && matchesAttendance && matchesThemes && matchesFree;
     });
   },
 
