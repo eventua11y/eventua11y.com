@@ -43,6 +43,27 @@
           <label for="filter-attendance-offline">In-person</label>
         </div>
       </fieldset>
+      <fieldset class="checkbox-group filter flow flow-tight">
+        <legend class="text-muted">Ticket cost</legend>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            v-model="filtersStore.filters.showFreeEvents"
+            id="filter-show-free-events"
+            class="filter-option"
+          />
+          <label for="filter-show-free-events">Free</label>
+        </div>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            v-model="filtersStore.filters.showPaidEvents"
+            id="filter-show-paid-events"
+            class="filter-option"
+          />
+          <label for="filter-show-paid-events">Paid</label>
+        </div>
+      </fieldset>
       <sl-switch
         ref="awarenessDaysSwitch"
         :checked="filtersStore.filters.showAwarenessDays"
