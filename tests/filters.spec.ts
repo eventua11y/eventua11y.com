@@ -129,7 +129,7 @@ test('filter free events', async ({ page }) => {
   await page.getByRole('checkbox', { name: 'Free' }).check({ force: true });
   await page.getByRole('button', { name: 'Show' }).click();
   const events = await page.locator('.event');
-  for (let i = 0; i < await events.count(); i++) {
+  for (let i = 0; i < (await events.count()); i++) {
     const event = events.nth(i);
     const badge = await event.locator('sl-badge', { hasText: 'Free' });
     await expect(badge).toBeVisible();
@@ -141,7 +141,7 @@ test('filter paid events', async ({ page }) => {
   await page.getByRole('checkbox', { name: 'Paid' }).check({ force: true });
   await page.getByRole('button', { name: 'Show' }).click();
   const events = await page.locator('.event');
-  for (let i = 0; i < await events.count(); i++) {
+  for (let i = 0; i < (await events.count()); i++) {
     const event = events.nth(i);
     const badge = await event.locator('sl-badge', { hasText: 'Free' });
     await expect(badge).not.toBeVisible();

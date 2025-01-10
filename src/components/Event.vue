@@ -171,7 +171,8 @@ const enumeratedChildTypes = computed(() => {
       class="event__badges"
       v-if="
         (!event.isParent && !event.hasChildren && event.type !== 'theme') ||
-        isCallForSpeakersOpen || event.isFree
+        isCallForSpeakersOpen ||
+        event.isFree
       "
     >
       <sl-badge
