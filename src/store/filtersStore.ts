@@ -60,8 +60,8 @@ const DEFAULT_FILTER_VALUES: Filters = {
   showAwarenessDays: true,
   showBooks: true,
   showDeadlines: true,
-  showFreeEvents: true,
-  showPaidEvents: true,
+  showFreeEvents: false,
+  showPaidEvents: false,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
