@@ -183,9 +183,7 @@ const enumeratedChildTypes = computed(() => {
       <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
         >Call for speakers</sl-badge
       >
-      <sl-badge variant="success" pill v-if="event.isFree"
-        >Free</sl-badge
-      >
+      <sl-badge variant="success" pill v-if="event.isFree">Free</sl-badge>
     </div>
   </article>
 </template>
