@@ -60,7 +60,7 @@
     "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.1.0",
     "@sentry/astro": "^8.47.0",
-    "@sentry/cli": "^2.39.1",
+    "@sentry/cli": "^2.40.0",
     "@sentry/profiling-node": "^8.47.0",
     "@sentry/vue": "^8.47.0",
     "@shoelace-style/shoelace": "^2.19.1",
