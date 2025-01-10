@@ -126,24 +126,30 @@ test('reset button clears filters', async ({ page }) => {
 
 test('filter free events', async ({ page }) => {
   await page.getByRole('button', { name: 'Filter' }).click();
-  await page.getByRole('checkbox', { name: 'Free' }).check({ force: true });
-  await page.getByRole('button', { name: 'Show' }).click();
+  await page
+    .getByRole('checkbox', { name: 'Free events' }, { exact: true })
+    .check({ force: true });
+  await page.getByRole('button', { name: 'Show events' }).click();
   const events = await page.locator('.event');
-  for (let i = 0; i < (await events.count()); i++) {
+  const count = await events.count();
+  for (let i = 0; i < count; i++) {
     const event = events.nth(i);
-    const badge = await event.locator('sl-badge', { hasText: 'Free' });
+    const badge = await event.locator('sl-badge:has-text("Free")');
     await expect(badge).toBeVisible();
   }
 });
 
 test('filter paid events', async ({ page }) => {
   await page.getByRole('button', { name: 'Filter' }).click();
-  await page.getByRole('checkbox', { name: 'Paid' }).check({ force: true });
-  await page.getByRole('button', { name: 'Show' }).click();
+  await page
+    .getByRole('checkbox', { name: 'Paid events' }, { exact: true })
+    .check({ force: true });
+  await page.getByRole('button', { name: 'Show events' }).click();
   const events = await page.locator('.event');
-  for (let i = 0; i < (await events.count()); i++) {
+  const count = await events.count();
+  for (let i = 0; i < count; i++) {
     const event = events.nth(i);
-    const badge = await event.locator('sl-badge', { hasText: 'Free' });
+    const badge = await event.locator('sl-badge:has-text("Free")');
     await expect(badge).not.toBeVisible();
   }
 });
