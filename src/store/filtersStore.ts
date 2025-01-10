@@ -206,14 +206,10 @@ const filtersStore: FiltersStore = reactive({
 
       // Event cost filter
       const matchesCost =
-        (!this.filters.showFreeEvents && !this.filters.showPaidEvents) ||
         (this.filters.showFreeEvents && event.isFree) ||
         (this.filters.showPaidEvents && !event.isFree);
 
-      // Themes filter
-      const matchesThemes = this.filters.themes || event.type !== 'theme';
-
-      return matchesCfs && matchesAttendance && matchesCost && matchesThemes;
+      return matchesCfs && matchesAttendance && matchesCost;
     });
   },
 

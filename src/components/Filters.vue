@@ -49,19 +49,19 @@
           <input
             type="checkbox"
             v-model="filtersStore.filters.showFreeEvents"
-            id="filter-show-free-events"
+            id="filter-free-events"
             class="filter-option"
           />
-          <label for="filter-show-free-events">Free</label>
+          <label for="filter-free-events">Free events</label>
         </div>
         <div class="checkbox">
           <input
             type="checkbox"
             v-model="filtersStore.filters.showPaidEvents"
-            id="filter-show-paid-events"
+            id="filter-paid-events"
             class="filter-option"
           />
-          <label for="filter-show-paid-events">Paid</label>
+          <label for="filter-paid-events">Paid events</label>
         </div>
       </fieldset>
       <sl-switch
