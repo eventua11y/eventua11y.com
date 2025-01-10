@@ -44,7 +44,7 @@
         </div>
       </fieldset>
       <fieldset class="checkbox-group filter flow flow-tight">
-        <legend class="text-muted">Event type</legend>
+        <legend class="text-muted">Event cost</legend>
         <div class="checkbox">
           <input
             type="checkbox"
@@ -52,7 +52,7 @@
             id="filter-show-free-events"
             class="filter-option"
           />
-          <label for="filter-show-free-events">Show Free Events</label>
+          <label for="filter-show-free-events">Free</label>
         </div>
         <div class="checkbox">
           <input
@@ -61,7 +61,7 @@
             id="filter-show-paid-events"
             class="filter-option"
           />
-          <label for="filter-show-paid-events">Show Paid Events</label>
+          <label for="filter-show-paid-events">Paid</label>
         </div>
       </fieldset>
       <sl-switch
