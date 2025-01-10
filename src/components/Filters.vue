@@ -44,7 +44,7 @@
         </div>
       </fieldset>
       <fieldset class="checkbox-group filter flow flow-tight">
-        <legend class="text-muted">Event cost</legend>
+        <legend class="text-muted">Ticket cost</legend>
         <div class="checkbox">
           <input
             type="checkbox"
