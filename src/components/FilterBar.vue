@@ -28,6 +28,7 @@
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
         <sl-switch
+          ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
           @sl-change="toggleAwarenessDays"
           id="filter-show-awareness-days-bar"
@@ -118,6 +119,15 @@ function toggleAwarenessDays(event) {
  */
 onMounted(async () => {
   await nextTick();
+  
+  // Initialize switch state with setTimeout
+  setTimeout(() => {
+    if (awarenessDaysSwitch.value) {
+      awarenessDaysSwitch.value.checked = filtersStore.filters.showAwarenessDays;
+    }
+  });
+  
+  // Existing intersection observer code
   if (filterToolbar.value) {
     const observer = new IntersectionObserver(
       ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
