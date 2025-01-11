@@ -119,14 +119,15 @@ function toggleAwarenessDays(event) {
  */
 onMounted(async () => {
   await nextTick();
-  
+
   // Initialize switch state with setTimeout
   setTimeout(() => {
     if (awarenessDaysSwitch.value) {
-      awarenessDaysSwitch.value.checked = filtersStore.filters.showAwarenessDays;
+      awarenessDaysSwitch.value.checked =
+        filtersStore.filters.showAwarenessDays;
     }
   });
-  
+
   // Existing intersection observer code
   if (filterToolbar.value) {
     const observer = new IntersectionObserver(
