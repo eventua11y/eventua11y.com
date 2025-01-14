@@ -416,3 +416,5 @@ export default async function handler(
  * Defines API endpoint path
  */
 export const config = { path: '/api/get-events' };
+
+export { getEvents };

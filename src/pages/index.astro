@@ -4,10 +4,14 @@ import Today from '../components/Today.vue';
 import EventList from '../components/EventList.vue';
 import FilterBar from '../components/FilterBar.vue';
 import Filters from '../components/Filters.vue';
+import { getEvents } from '../../netlify/edge-functions/get-events.ts';
+import { getBooks } from '../../netlify/edge-functions/get-books.ts';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
 
+const events = await getEvents();
+const books = await getBooks();
 ---
 
 <DefaultLayout>
@@ -16,7 +20,7 @@ export const prerender = false;
   <Filters client:only="vue" />
   <div role="region" aria-labelledby="upcoming-events-heading" class="container readable py-l">
     <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
-    <EventList type="upcoming" client:load />
+    <EventList type="upcoming" client:load :events="events" :books="books" />
   </div>
   <!-- End container -->
 </DefaultLayout>
