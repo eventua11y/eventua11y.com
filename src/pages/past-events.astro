@@ -1,12 +1,11 @@
 ---
 import DefaultLayout from '../layouts/default.astro';
-import EventList from '../components/EventList.vue';
-import { getEvents } from '../../netlify/edge-functions/get-events.ts';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
 
-const events = await getEvents();
+const eventsResponse = await fetch('/api/get-events');
+const events = await eventsResponse.json();
 ---
 
 <DefaultLayout title="Past accessibility events">

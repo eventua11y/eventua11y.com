@@ -4,14 +4,15 @@ import Today from '../components/Today.vue';
 import EventList from '../components/EventList.vue';
 import FilterBar from '../components/FilterBar.vue';
 import Filters from '../components/Filters.vue';
-import { getEvents } from '../../netlify/edge-functions/get-events.ts';
-import { getBooks } from '../../netlify/edge-functions/get-books.ts';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
 
-const events = await getEvents();
-const books = await getBooks();
+const eventsResponse = await fetch('/api/get-events');
+const events = await eventsResponse.json();
+
+const booksResponse = await fetch('/api/get-books');
+const books = await booksResponse.json();
 ---
 
 <DefaultLayout>
