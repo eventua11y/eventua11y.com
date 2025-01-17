@@ -24,6 +24,7 @@ const props = defineProps({
  */
 const formatStrings = {
   talk: 'Talk',
+  tutorial: 'Tutorial',
   workshop: 'Workshop',
   webinar: 'Webinar',
   panel: 'Panel',
@@ -31,6 +32,7 @@ const formatStrings = {
   interview: 'Interview',
   qna: 'Q&A',
   keynote: 'Keynote',
+  roundtable: 'Roundtable',
 };
 
 /**
@@ -41,11 +43,34 @@ const formatStrings = {
 const displayFormat = computed(
   () => formatStrings[props.event.format] || props.event.format
 );
+
+const formatPreposition = computed(() => {
+  const prepositions = {
+    talk: 'by',
+    tutorial: 'by',
+    workshop: 'with',
+    webinar: 'with',
+    panel: 'with',
+    meetup: 'with',
+    interview: 'with',
+    qna: 'with',
+    keynote: 'by',
+    roundtable: 'with',
+  };
+  return prepositions[props.event.format] || 'by'; // fallback to 'by' if format not found
+});
+
+const speakersList = computed(() => {
+  if (!props.event.speakers?.length) return '';
+  return props.event.speakers
+    .map((speaker) => `<span itemprop="name">${speaker.name}</span>`)
+    .join(', ');
+});
 </script>
 
 <template>
   <article
-    class="child-event flow flow-3xs"
+    class="child-event"
     itemprop="subEvent"
     itemscope
     itemtype="https://schema.org/Event"
@@ -55,9 +80,21 @@ const displayFormat = computed(
       <span v-else>{{ event.title }}</span>
     </span>
 
+    <div class="event__speakers text-muted text-small">
+      {{ displayFormat }}
+      <template v-if="event.speakers?.length">
+        {{ formatPreposition }}
+        <span
+          itemprop="performer"
+          itemscope
+          itemtype="https://schema.org/Person"
+          v-html="speakersList"
+        ></span>
+      </template>
+    </div>
+
     <div class="event__meta text-muted">
       <template v-if="event.scheduled">
-        {{ displayFormat }} <span>·</span>
         <EventDate
           :dateStart="event.dateStart"
           :dateEnd="event.dateEnd"
@@ -68,9 +105,13 @@ const displayFormat = computed(
         ·
         <EventDuration :event="event" />
       </template>
-      <template v-else>
-        {{ displayFormat }} <span>·</span> Not yet scheduled
-      </template>
+      <template v-else> Not yet scheduled </template>
     </div>
   </article>
 </template>
+
+<style>
+.child-event__title {
+  margin-bottom: var(--p-space-3xs);
+}
+</style>
