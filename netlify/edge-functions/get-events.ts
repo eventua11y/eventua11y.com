@@ -34,6 +34,10 @@ interface Event {
   attendanceMode?: string;
   callForSpeakers?: boolean;
   type?: string;
+  speakers?: Array<{
+    _id: string;
+    name: string;
+  }>;
 }
 
 /**
@@ -135,7 +139,10 @@ async function fetchEventsFromSanity(
   try {
     // Fetch all non-draft events
     const events: Event[] = await client.fetch(`
-      *[_type == "event" && !(_id in path("drafts.**"))]
+      *[_type == "event" && !(_id in path("drafts.**"))] {
+        ...,
+        "speakers": speakers[]->{ _id, name }
+      }
     `);
 
     // Fetch children for each event and add CFS deadline events
@@ -144,7 +151,10 @@ async function fetchEventsFromSanity(
         // Fetch child events for each parent event
         const children: Event[] = await client.fetch(
           `
-        *[_type == "event" && parent._ref == $eventId] | order(dateStart asc)
+        *[_type == "event" && parent._ref == $eventId] {
+          ...,
+          "speakers": speakers[]->{ _id, name }
+        } | order(dateStart asc)
       `,
           { eventId: event._id }
         );
