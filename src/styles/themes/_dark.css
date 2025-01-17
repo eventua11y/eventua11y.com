@@ -21,7 +21,7 @@ html[data-theme='dark'] {
   --c-body-color-bg: var(--s-color-bg);
   --c-body-color-fg: var(--s-color-fg);
   --c-color-link: var(--p-color-purple-100);
-  --c-color-link-hover: var(--p-color-purple-100);
+  --c-color-link-hover: var(--p-color-purple-50);
   --c-color-focus-ring: var(--p-color-white);
 
   /* Masthead */
