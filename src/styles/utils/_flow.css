@@ -1,3 +1,13 @@
+.flow {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.flow > * {
+  margin-block: 0;
+} 
+
 .flow > *:not(legend) + * {
   margin-block-start: var(--flow-space, 1em);
 }
