@@ -23,7 +23,7 @@ details > summary::-webkit-details-marker {
 }
 
 details > summary:hover {
-  color: var(--s-color-link-hover);
+  color: var(--c-color-link-hover);
   cursor: pointer;
 }
 
