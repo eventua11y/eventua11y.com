@@ -63,7 +63,10 @@ const formatPreposition = computed(() => {
 const speakersList = computed(() => {
   if (!props.event.speakers?.length) return '';
   return props.event.speakers
-    .map((speaker) => `<span itemprop="name">${speaker.name}</span>`)
+    .map(
+      (speaker) =>
+        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+    )
     .join(', ');
 });
 </script>
@@ -84,12 +87,7 @@ const speakersList = computed(() => {
       {{ displayFormat }}
       <template v-if="event.speakers?.length">
         {{ formatPreposition }}
-        <span
-          itemprop="performer"
-          itemscope
-          itemtype="https://schema.org/Person"
-          v-html="speakersList"
-        ></span>
+        <span v-html="speakersList"></span>
       </template>
     </div>
 
