@@ -103,7 +103,7 @@ const speakersList = computed(() => {
           :type="event.type"
         />
         ·
-        <EventDuration :event="event" />
+        <EventDuration v-if="event.dateEnd" :event="event" />
       </template>
       <template v-else> Not yet scheduled </template>
     </div>
