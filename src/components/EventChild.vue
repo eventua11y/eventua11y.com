@@ -56,16 +56,16 @@ const formatPreposition = computed(() => {
     qna: 'with',
     keynote: 'by',
     roundtable: 'with',
-  }
-  return prepositions[props.event.format] || 'by' // fallback to 'by' if format not found
-})
+  };
+  return prepositions[props.event.format] || 'by'; // fallback to 'by' if format not found
+});
 
 const speakersList = computed(() => {
-  if (!props.event.speakers?.length) return ''
+  if (!props.event.speakers?.length) return '';
   return props.event.speakers
-    .map(speaker => `<span itemprop="name">${speaker.name}</span>`)
-    .join(', ')
-})
+    .map((speaker) => `<span itemprop="name">${speaker.name}</span>`)
+    .join(', ');
+});
 </script>
 
 <template>
@@ -83,7 +83,13 @@ const speakersList = computed(() => {
     <div class="event__speakers text-muted text-small">
       {{ displayFormat }}
       <template v-if="event.speakers?.length">
-        {{ formatPreposition }} <span itemprop="performer" itemscope itemtype="https://schema.org/Person" v-html="speakersList"></span>
+        {{ formatPreposition }}
+        <span
+          itemprop="performer"
+          itemscope
+          itemtype="https://schema.org/Person"
+          v-html="speakersList"
+        ></span>
       </template>
     </div>
 
@@ -99,9 +105,7 @@ const speakersList = computed(() => {
         ·
         <EventDuration :event="event" />
       </template>
-      <template v-else>
-        Not yet scheduled
-      </template>
+      <template v-else> Not yet scheduled </template>
     </div>
   </article>
 </template>
