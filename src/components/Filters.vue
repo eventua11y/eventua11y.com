@@ -143,8 +143,15 @@ function updateFilter(filterName: 'cfs' | 'attendance' | 'cost', event: CustomEv
 }
 </script>
 
-<!-- <style scoped>
+<style scoped>
+
 sl-radio-group {
+  border: 1px solid var(--s-color-border);
+  border-radius: var(--p-space-2xs);
+  padding: var(--p-space-xs);
+}
+
+/* sl-radio-group {
   margin-bottom: var(--sl-spacing-medium);
 }
 
@@ -155,5 +162,5 @@ sl-radio-group::part(form-control-label) {
 
 sl-radio::part(base) {
   margin-bottom: var(--sl-spacing-2x-small);
-}
-</style> -->
+} */
+</style>
