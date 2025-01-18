@@ -153,17 +153,4 @@ sl-radio-group {
   border-radius: var(--p-space-2xs);
   padding: var(--p-space-xs);
 }
-
-/* sl-radio-group {
-  margin-bottom: var(--sl-spacing-medium);
-}
-
-sl-radio-group::part(form-control-label) {
-  color: var(--color-text-muted);
-  font-size: var(--step--1);
-}
-
-sl-radio::part(base) {
-  margin-bottom: var(--sl-spacing-2x-small);
-} */
 </style>
