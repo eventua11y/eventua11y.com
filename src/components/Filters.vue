@@ -152,5 +152,6 @@ sl-radio-group {
   border: 1px solid var(--s-color-border);
   border-radius: var(--p-space-2xs);
   padding: var(--p-space-xs);
+  padding-top: var(--p-space-2xs);
 }
 </style>
