@@ -5,7 +5,7 @@
         label="Call for speakers"
         name="cfs"
         :value="filtersStore.filters.cfs"
-        @sl-change="e => updateFilter('cfs', e)"
+        @sl-change="(e) => updateFilter('cfs', e)"
       >
         <sl-radio value="any">No preference</sl-radio>
         <sl-radio value="open">Accepting talks</sl-radio>
@@ -16,7 +16,7 @@
         label="Attendance mode"
         name="attendance"
         :value="filtersStore.filters.attendance"
-        @sl-change="e => updateFilter('attendance', e)"
+        @sl-change="(e) => updateFilter('attendance', e)"
       >
         <sl-radio value="any">No preference</sl-radio>
         <sl-radio value="online">Online</sl-radio>
@@ -27,7 +27,7 @@
         label="Ticket cost"
         name="cost"
         :value="filtersStore.filters.cost"
-        @sl-change="e => updateFilter('cost', e)"
+        @sl-change="(e) => updateFilter('cost', e)"
       >
         <sl-radio value="any">No preference</sl-radio>
         <sl-radio value="free">Free</sl-radio>
@@ -98,7 +98,8 @@ onMounted(() => {
   // Only handle switch initialization
   setTimeout(() => {
     if (awarenessDaysSwitch.value) {
-      awarenessDaysSwitch.value.checked = filtersStore.filters.showAwarenessDays;
+      awarenessDaysSwitch.value.checked =
+        filtersStore.filters.showAwarenessDays;
     }
     if (booksSwitch.value) {
       booksSwitch.value.checked = filtersStore.filters.showBooks;
@@ -138,13 +139,15 @@ function toggleDeadlines(event) {
 }
 
 // Add update handler for radio groups
-function updateFilter(filterName: 'cfs' | 'attendance' | 'cost', event: CustomEvent) {
+function updateFilter(
+  filterName: 'cfs' | 'attendance' | 'cost',
+  event: CustomEvent
+) {
   filtersStore.filters[filterName] = event.target.value;
 }
 </script>
 
 <style scoped>
-
 sl-radio-group {
   border: 1px solid var(--s-color-border);
   border-radius: var(--p-space-2xs);
