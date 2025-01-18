@@ -17,15 +17,19 @@ interface Event {
  * - Content type filters (awareness days, books, deadlines)
  */
 interface Filters {
-  cfsOpen: boolean;
-  cfsClosed: boolean;
-  attendanceOnline: boolean;
-  attendanceOffline: boolean;
+  cfs: 'any' | 'open' | 'closed';
+  attendance: 'any' | 'online' | 'offline';
+  cost: 'any' | 'free' | 'paid';
+  // Remove old boolean properties
+  cfsOpen?: never;
+  cfsClosed?: never;
+  attendanceOnline?: never;
+  attendanceOffline?: never;
+  showFreeEvents?: never;
+  showPaidEvents?: never;
   showAwarenessDays: boolean;
   showBooks: boolean;
   showDeadlines: boolean;
-  showFreeEvents: boolean;
-  showPaidEvents: boolean;
 }
 
 interface FiltersStore {
@@ -53,15 +57,12 @@ interface FiltersStore {
 }
 
 const DEFAULT_FILTER_VALUES: Filters = {
-  cfsOpen: false,
-  cfsClosed: false,
-  attendanceOnline: false,
-  attendanceOffline: false,
+  cfs: 'any',
+  attendance: 'any',
+  cost: 'any',
   showAwarenessDays: true,
   showBooks: true,
   showDeadlines: true,
-  showFreeEvents: false,
-  showPaidEvents: false,
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
@@ -189,27 +190,25 @@ const filtersStore: FiltersStore = reactive({
       // Call for speakers filter
       const cfsStatus = isCallForSpeakersOpen(event);
       const matchesCfs =
-        (!this.filters.cfsOpen && !this.filters.cfsClosed) ||
-        (this.filters.cfsOpen && cfsStatus) ||
-        (this.filters.cfsClosed && !cfsStatus);
+        this.filters.cfs === 'any' ||
+        (this.filters.cfs === 'open' && cfsStatus) ||
+        (this.filters.cfs === 'closed' && !cfsStatus);
 
       // Attendance mode filter
       const matchesAttendance =
-        (!this.filters.attendanceOnline && !this.filters.attendanceOffline) ||
-        (this.filters.attendanceOnline &&
+        this.filters.attendance === 'any' ||
+        (this.filters.attendance === 'online' &&
           ['online', 'mixed'].includes(event.attendanceMode)) ||
-        (this.filters.attendanceOffline &&
+        (this.filters.attendance === 'offline' &&
           ['offline', 'mixed'].includes(event.attendanceMode));
 
-      // Themes filter
-      const matchesThemes = this.filters.themes || event.type !== 'theme';
+      // Cost filter
+      const matchesCost =
+        this.filters.cost === 'any' ||
+        (this.filters.cost === 'free' && event.isFree) ||
+        (this.filters.cost === 'paid' && !event.isFree);
 
-      const matchesFree =
-        (!this.filters.showFreeEvents && !this.filters.showPaidEvents) ||
-        (this.filters.showFreeEvents && event.isFree) ||
-        (this.filters.showPaidEvents && !event.isFree);
-
-      return matchesCfs && matchesAttendance && matchesThemes && matchesFree;
+      return matchesCfs && matchesAttendance && matchesCost;
     });
   },
 

@@ -1,90 +1,64 @@
 <template>
   <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
-    <div class="flow">
-      <fieldset class="checkbox-group filter flow flow-tight">
-        <legend class="text-muted">Call for speakers</legend>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            v-model="filtersStore.filters.cfsOpen"
-            id="filter-cfs-open"
-            class="filter-option"
-          />
-          <label for="filter-cfs-open">Accepting talks</label>
-        </div>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            v-model="filtersStore.filters.cfsClosed"
-            id="filter-cfs-closed"
-            class="filter-option"
-          />
-          <label for="filter-cfs-closed">Not accepting talks</label>
-        </div>
-      </fieldset>
-      <fieldset class="checkbox-group filter flow flow-tight">
-        <legend class="text-muted">Attendance mode</legend>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            v-model="filtersStore.filters.attendanceOnline"
-            id="filter-attendance-online"
-            class="filter-option"
-          />
-          <label for="filter-attendance-online">Online</label>
-        </div>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            v-model="filtersStore.filters.attendanceOffline"
-            id="filter-attendance-offline"
-            class="filter-option"
-          />
-          <label for="filter-attendance-offline">In-person</label>
-        </div>
-      </fieldset>
-      <fieldset class="checkbox-group filter flow flow-tight">
-        <legend class="text-muted">Ticket cost</legend>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            v-model="filtersStore.filters.showFreeEvents"
-            id="filter-show-free-events"
-            class="filter-option"
-          />
-          <label for="filter-show-free-events">Free</label>
-        </div>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            v-model="filtersStore.filters.showPaidEvents"
-            id="filter-show-paid-events"
-            class="filter-option"
-          />
-          <label for="filter-show-paid-events">Paid</label>
-        </div>
-      </fieldset>
-      <sl-switch
-        ref="awarenessDaysSwitch"
-        :checked="filtersStore.filters.showAwarenessDays"
-        @sl-change="toggleAwarenessDays"
-        id="filter-show-awareness-days-drawer"
-        >Show awareness days</sl-switch
-      >
-      <sl-switch
-        ref="booksSwitch"
-        :checked="filtersStore.filters.showBooks"
-        @sl-change="toggleBooks"
-        id="filter-show-books-drawer"
-        >Show Book Club</sl-switch
-      >
-      <sl-switch
-        ref="deadlinesSwitch"
-        :checked="filtersStore.filters.showDeadlines"
-        @sl-change="toggleDeadlines"
-        id="filter-show-deadlines-drawer"
-        >Show speaker deadlines</sl-switch
-      >
+    <div class="flow flow-l">
+      <div class="flow flow-xs">
+        <sl-radio-group
+          label="Attendance mode"
+          name="attendance"
+          :value="filtersStore.filters.attendance"
+          @sl-change="(e) => updateFilter('attendance', e)"
+        >
+          <sl-radio value="any">No preference</sl-radio>
+          <sl-radio value="online">Online</sl-radio>
+          <sl-radio value="offline">In-person</sl-radio>
+        </sl-radio-group>
+
+        <sl-radio-group
+          label="Ticket cost"
+          name="cost"
+          :value="filtersStore.filters.cost"
+          @sl-change="(e) => updateFilter('cost', e)"
+        >
+          <sl-radio value="any">No preference</sl-radio>
+          <sl-radio value="free">Free</sl-radio>
+          <sl-radio value="paid">Paid</sl-radio>
+        </sl-radio-group>
+
+        <sl-radio-group
+          label="Call for speakers"
+          name="cfs"
+          :value="filtersStore.filters.cfs"
+          @sl-change="(e) => updateFilter('cfs', e)"
+        >
+          <sl-radio value="any">No preference</sl-radio>
+          <sl-radio value="open">Accepting talks</sl-radio>
+          <sl-radio value="closed">Not accepting talks</sl-radio>
+        </sl-radio-group>
+      </div>
+
+      <div class="flow flow-xs">
+        <sl-switch
+          ref="awarenessDaysSwitch"
+          :checked="filtersStore.filters.showAwarenessDays"
+          @sl-change="toggleAwarenessDays"
+          id="filter-show-awareness-days-drawer"
+          >Show awareness days</sl-switch
+        >
+        <sl-switch
+          ref="booksSwitch"
+          :checked="filtersStore.filters.showBooks"
+          @sl-change="toggleBooks"
+          id="filter-show-books-drawer"
+          >Show Book Club</sl-switch
+        >
+        <sl-switch
+          ref="deadlinesSwitch"
+          :checked="filtersStore.filters.showDeadlines"
+          @sl-change="toggleDeadlines"
+          id="filter-show-deadlines-drawer"
+          >Show speaker deadlines</sl-switch
+        >
+      </div>
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
@@ -125,7 +99,7 @@ const booksSwitch = ref(null);
 const deadlinesSwitch = ref(null);
 
 onMounted(() => {
-  // Wait for next tick to ensure switches are defined
+  // Only handle switch initialization
   setTimeout(() => {
     if (awarenessDaysSwitch.value) {
       awarenessDaysSwitch.value.checked =
@@ -151,6 +125,9 @@ function closeDrawer() {
 
 function resetFilters() {
   filtersStore.resetFilters();
+  filtersStore.filters.cfs = 'any';
+  filtersStore.filters.attendance = 'any';
+  filtersStore.filters.cost = 'any';
 }
 
 function toggleAwarenessDays(event) {
@@ -164,4 +141,21 @@ function toggleBooks(event) {
 function toggleDeadlines(event) {
   filtersStore.filters.showDeadlines = event.target.checked;
 }
+
+// Add update handler for radio groups
+function updateFilter(
+  filterName: 'cfs' | 'attendance' | 'cost',
+  event: CustomEvent
+) {
+  filtersStore.filters[filterName] = event.target.value;
+}
 </script>
+
+<style scoped>
+sl-radio-group {
+  border: 1px solid var(--s-color-border);
+  border-radius: var(--p-space-2xs);
+  padding: var(--p-space-xs);
+  padding-top: var(--p-space-2xs);
+}
+</style>
