@@ -1,6 +1,7 @@
 <template>
   <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
-    <div class="flow">
+    <div class="flow flow-l">
+      <div class="flow flow-xs">
       <sl-radio-group
         label="Attendance mode"
         name="attendance"
@@ -34,27 +35,31 @@
         <sl-radio value="closed">Not accepting talks</sl-radio>
       </sl-radio-group>
 
-      <sl-switch
-        ref="awarenessDaysSwitch"
-        :checked="filtersStore.filters.showAwarenessDays"
-        @sl-change="toggleAwarenessDays"
-        id="filter-show-awareness-days-drawer"
-        >Show awareness days</sl-switch
-      >
-      <sl-switch
-        ref="booksSwitch"
-        :checked="filtersStore.filters.showBooks"
-        @sl-change="toggleBooks"
-        id="filter-show-books-drawer"
-        >Show Book Club</sl-switch
-      >
-      <sl-switch
-        ref="deadlinesSwitch"
-        :checked="filtersStore.filters.showDeadlines"
-        @sl-change="toggleDeadlines"
-        id="filter-show-deadlines-drawer"
-        >Show speaker deadlines</sl-switch
-      >
+      </div>
+
+      <div class="flow flow-xs">
+        <sl-switch
+          ref="awarenessDaysSwitch"
+          :checked="filtersStore.filters.showAwarenessDays"
+          @sl-change="toggleAwarenessDays"
+          id="filter-show-awareness-days-drawer"
+          >Show awareness days</sl-switch
+        >
+        <sl-switch
+          ref="booksSwitch"
+          :checked="filtersStore.filters.showBooks"
+          @sl-change="toggleBooks"
+          id="filter-show-books-drawer"
+          >Show Book Club</sl-switch
+        >
+        <sl-switch
+          ref="deadlinesSwitch"
+          :checked="filtersStore.filters.showDeadlines"
+          @sl-change="toggleDeadlines"
+          id="filter-show-deadlines-drawer"
+          >Show speaker deadlines</sl-switch
+        >
+      </div>
       <div class="d-flex flex-col items-start gap-xs">
         <sl-button variant="primary" size="large" @click="closeDrawer"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
