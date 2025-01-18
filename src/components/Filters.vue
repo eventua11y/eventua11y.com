@@ -2,17 +2,6 @@
   <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
     <div class="flow">
       <sl-radio-group
-        label="Call for speakers"
-        name="cfs"
-        :value="filtersStore.filters.cfs"
-        @sl-change="(e) => updateFilter('cfs', e)"
-      >
-        <sl-radio value="any">No preference</sl-radio>
-        <sl-radio value="open">Accepting talks</sl-radio>
-        <sl-radio value="closed">Not accepting talks</sl-radio>
-      </sl-radio-group>
-
-      <sl-radio-group
         label="Attendance mode"
         name="attendance"
         :value="filtersStore.filters.attendance"
@@ -32,6 +21,17 @@
         <sl-radio value="any">No preference</sl-radio>
         <sl-radio value="free">Free</sl-radio>
         <sl-radio value="paid">Paid</sl-radio>
+      </sl-radio-group>
+
+      <sl-radio-group
+        label="Call for speakers"
+        name="cfs"
+        :value="filtersStore.filters.cfs"
+        @sl-change="(e) => updateFilter('cfs', e)"
+      >
+        <sl-radio value="any">No preference</sl-radio>
+        <sl-radio value="open">Accepting talks</sl-radio>
+        <sl-radio value="closed">Not accepting talks</sl-radio>
       </sl-radio-group>
 
       <sl-switch
