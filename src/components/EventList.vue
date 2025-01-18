@@ -179,6 +179,17 @@ onMounted(async () => {
   }
 });
 
+onMounted(() => {
+  const events =
+    props.type === 'past'
+      ? filtersStore.pastEvents
+      : filtersStore.filteredEvents;
+  if (events !== undefined) {
+    groupEvents(events);
+    loading.value = false;
+  }
+});
+
 /**
  * Watch handler: updates grouped events when filters change
  * - Maintains books at top of each month group
@@ -194,7 +205,30 @@ watch(
     error.value = null;
 
     try {
-      if (newEvents && newEvents.length > 0) {
+      if (newEvents) {
+        // Remove length check to handle empty arrays
+        groupEvents(newEvents);
+        loading.value = false; // Always set loading to false when we have a response
+      }
+    } catch (e) {
+      error.value = `Error updating ${props.type} events.`;
+      console.error('Error:', e);
+      loading.value = false;
+    }
+  }
+);
+
+watch(
+  () =>
+    props.type === 'past'
+      ? filtersStore.pastEvents
+      : filtersStore.filteredEvents,
+  (newEvents) => {
+    if (!loading.value) loading.value = true;
+    error.value = null;
+
+    try {
+      if (newEvents !== undefined) {
         groupEvents(newEvents);
         loading.value = false;
       }
