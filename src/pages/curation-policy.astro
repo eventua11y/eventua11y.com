@@ -3,7 +3,7 @@ import DefaultLayout from '../layouts/default.astro';
 import Debug from '../components/Debug.vue';
 
 // Disable prerendering to enable SSR
-// export const prerender = false;
+export const prerender = false;
 
 // Generate random number during SSR
 const ssrNumber = Math.floor(Math.random() * 1000);
