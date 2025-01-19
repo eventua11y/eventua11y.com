@@ -1,37 +1,35 @@
 <template>
   <div>
     <p>Random Number: {{ currentNumber }}</p>
-    <button type="button" @click="generateNew">
-      Generate New Number
-    </button>
+    <button type="button" @click="generateNew">Generate New Number</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
   name: 'Debug',
   props: {
     ssrNumber: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   setup(props) {
-    console.log('Received SSR number:', props.ssrNumber)
-    const currentNumber = ref(props.ssrNumber)
+    console.log('Received SSR number:', props.ssrNumber);
+    const currentNumber = ref(props.ssrNumber);
 
     const generateNew = () => {
-      currentNumber.value = Math.floor(Math.random() * 100) + 1
-    }
+      currentNumber.value = Math.floor(Math.random() * 100) + 1;
+    };
 
     return {
       currentNumber,
-      generateNew
-    }
-  }
-})
+      generateNew,
+    };
+  },
+});
 </script>
 
 <style scoped>
@@ -42,7 +40,7 @@ export default defineComponent({
 
 .button {
   padding: 0.5rem 1rem;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 4px;
