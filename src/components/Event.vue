@@ -143,7 +143,7 @@ const enumeratedChildTypes = computed(() => {
       <p itemprop="description">{{ event.description }}</p>
     </details>
 
-    <details v-if="hasChildren" class="event__children flow flow-m">
+    <details v-if="hasChildren" class="event__children flow flow-xs">
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Accessibility highlights: {{ enumeratedChildTypes }}
