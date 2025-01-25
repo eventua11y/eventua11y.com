@@ -47,10 +47,18 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+  flex-wrap: wrap;
+  max-width: 100%; /* Contain within parent width */
 }
 
 [itemprop='eventAttendanceMode'] > * {
   flex: 0 0 auto;
+}
+
+[itemprop='eventAttendanceMode'] > span {
+  display: inline-block; /* Allow text wrapping within spans */
+  max-width: 100%; /* Ensure spans don't overflow */
+  overflow-wrap: break-word; /* Break long words if needed */
 }
 
 .event__online {
