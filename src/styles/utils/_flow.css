@@ -34,6 +34,10 @@
   --flow-space: var(--p-space-s);
 }
 
+.flow-m > *:not(legend) + * {
+  --flow-space: var(--p-space-m);
+}
+
 .flow-l > *:not(legend) + * {
   --flow-space: var(--p-space-l);
 }
