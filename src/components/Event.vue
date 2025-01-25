@@ -148,7 +148,11 @@ const enumeratedChildTypes = computed(() => {
         <i class="icon fa-solid fa-caret-right"></i>
         Accessibility highlights: {{ enumeratedChildTypes }}
       </summary>
-      <ol role="list" class="flow flow-xs">
+      <ol
+        role="list"
+        class="flow flow-xs"
+        :aria-label="`Accessibility highlights for ${event.title}`"
+      >
         <li v-for="child in event.children" :key="child._id">
           <EventChild :event="child" />
         </li>
