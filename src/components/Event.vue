@@ -148,11 +148,11 @@ const enumeratedChildTypes = computed(() => {
         <i class="icon fa-solid fa-caret-right"></i>
         Accessibility highlights: {{ enumeratedChildTypes }}
       </summary>
-      <EventChild
-        v-for="child in event.children"
-        :key="child._id"
-        :event="child"
-      />
+      <ol role="list" class="flow flow-xs">
+        <li v-for="child in event.children" :key="child._id">
+          <EventChild :event="child" />
+        </li>
+      </ol>
     </details>
     <details v-else-if="event.isParent" class="event__children flow">
       <summary>
