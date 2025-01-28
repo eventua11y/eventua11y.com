@@ -123,3 +123,31 @@ test('reset button clears filters', async ({ page }) => {
   await page.getByTestId('drawer-reset').click({ force: true });
   await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
 });
+
+test('filter drawer handles new filter options', async ({ page }) => {
+  await page.getByRole('button', { name: 'Filter' }).click();
+  const costRadioGroup = page.locator('sl-radio-group[name="cost"]');
+  await expect(costRadioGroup).toBeVisible();
+  const freeRadio = costRadioGroup.locator('sl-radio[value="free"]');
+  await freeRadio.check({ force: true });
+  await expect(freeRadio).toBeChecked();
+  const paidRadio = costRadioGroup.locator('sl-radio[value="paid"]');
+  await paidRadio.check({ force: true });
+  await expect(paidRadio).toBeChecked();
+});
+
+test('filter drawer handles combinations of filters', async ({ page }) => {
+  await page.getByRole('button', { name: 'Filter' }).click();
+  const attendanceRadioGroup = page.locator('sl-radio-group[name="attendance"]');
+  const onlineRadio = attendanceRadioGroup.locator('sl-radio[value="online"]');
+  await onlineRadio.check({ force: true });
+  await expect(onlineRadio).toBeChecked();
+  const costRadioGroup = page.locator('sl-radio-group[name="cost"]');
+  const freeRadio = costRadioGroup.locator('sl-radio[value="free"]');
+  await freeRadio.check({ force: true });
+  await expect(freeRadio).toBeChecked();
+  const cfsRadioGroup = page.locator('sl-radio-group[name="cfs"]');
+  const openRadio = cfsRadioGroup.locator('sl-radio[value="open"]');
+  await openRadio.check({ force: true });
+  await expect(openRadio).toBeChecked();
+});

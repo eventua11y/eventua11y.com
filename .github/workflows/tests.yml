@@ -33,7 +33,10 @@ jobs:
     needs: tests_e2e_netlify_prepare
     name: Run end-to-end tests on Netlify PR preview
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,7 +47,19 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
       - name: Run tests
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.browser }}
         env:
           PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
           DEBUG: pw:api
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: playwright-results
+          path: test-results/
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: playwright-report
+          path: playwright-report/

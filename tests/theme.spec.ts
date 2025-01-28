@@ -110,4 +110,92 @@ test.describe('Theme Switching', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
   });
+
+  test('should switch to dark theme and back to light theme', async ({
+    page,
+  }) => {
+    // Switch to dark theme
+    await page.click('#theme-selector-button');
+    await page.click('#dark-mode');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Dark mode"]')
+    ).toBeVisible();
+
+    // Switch back to light theme
+    await page.click('#theme-selector-button');
+    await page.click('#light-mode');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
+    ).toBeVisible();
+  });
+
+  test('should handle theme switching with multiple tabs', async ({
+    context,
+    page,
+    browser,
+  }) => {
+    // Open a new tab
+    const newPage = await context.newPage();
+    await newPage.goto('/');
+
+    // Switch theme in the first tab
+    await page.click('#theme-selector-button');
+    await page.click('#dark-mode');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Dark mode"]')
+    ).toBeVisible();
+
+    // Verify theme change in the new tab
+    await newPage.reload();
+    await expect(newPage.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(
+      newPage.locator('#theme-selector-button sl-icon[label="Dark mode"]')
+    ).toBeVisible();
+
+    // Switch back to light theme in the new tab
+    await newPage.click('#theme-selector-button');
+    await newPage.click('#light-mode');
+    await expect(newPage.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(
+      newPage.locator('#theme-selector-button sl-icon[label="Light mode"]')
+    ).toBeVisible();
+
+    // Verify theme change in the first tab
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
+    ).toBeVisible();
+  });
+
+  test('should handle theme switching with system preference change', async ({
+    page,
+  }) => {
+    // Switch to system theme
+    await page.click('#theme-selector-button');
+    await page.click('#system-default');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
+    ).toBeVisible();
+
+    // Change system preference to dark
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Dark mode"]')
+    ).toBeVisible();
+
+    // Change system preference back to light
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(
+      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
+    ).toBeVisible();
+  });
 });

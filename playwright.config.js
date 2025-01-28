@@ -25,6 +25,15 @@ export default defineConfig({
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
+
+    // Enable network mocking
+    networkMocking: true,
+
+    // Enable visual comparisons
+    visual: {
+      compare: true,
+      threshold: 0.1,
+    },
   },
   // Configure projects for major browsers.
   projects: [
@@ -39,6 +48,22 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+    {
+      name: 'Tablet Chrome',
+      use: { ...devices['Galaxy Tab S4'] },
+    },
+    {
+      name: 'Tablet Safari',
+      use: { ...devices['iPad Pro 11'] },
     },
   ],
   // Run the local dev server before starting the tests,
