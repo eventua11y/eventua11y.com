@@ -15,17 +15,28 @@ export const prerender = false;
   <Today client:load />
   <FilterBar client:only="vue" />
   <Filters client:only="vue" />
-  <div class="d-flex">
-    <div class="sidebar">
-      <MonthNav client:load contentRegion='[role="region"]' />
-    </div>
-    <div role="region" aria-labelledby="upcoming-events-heading" class="py-l">
+  <div class="container grid">
+    <MonthNav client:load contentRegion='[role="region"]' />
+    <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l main-content">
       <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
       <EventList type="upcoming" client:load />
     </div>
   </div>
-  <!-- End container -->
 </DefaultLayout>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    gap: var(--p-space-xl);
+    align-items: start;
+  }
+
+  .main-content {
+    min-width: 0; /* Prevent content overflow */
+  }
+
+</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -74,32 +85,3 @@ export const prerender = false;
   });
 </script>
 
-<style>
-  .month-nav {
-    position: sticky;
-    top: 2rem;
-  }
-
-  .month-list {
-    list-style: none;
-    padding: 0;
-  }
-
-  .month-list a {
-    display: block;
-    padding: 0.5rem;
-    color: inherit;
-    text-decoration: none;
-    width: 100%;
-    text-align: left;
-  }
-
-  .month-list a:hover {
-    text-decoration: underline;
-  }
-
-  .month-list a.active {
-    font-weight: bold;
-    color: var(--sl-color-primary-600);
-  }
-</style>

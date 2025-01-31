@@ -60,19 +60,21 @@ onMounted(() => {
       // Find the section closest to our target position
       if (visibleSections.size > 0) {
         const closestSection = Array.from(visibleSections.entries())
-          .reduce((closest, current) => {
-            return current[1] < closest[1] ? current : closest;
-          });
+          .reduce((closest, current) => current[1] < closest[1] ? current : closest);
 
-        // Remove active class from all links
+        // Remove active class and aria-current from all links
         document.querySelectorAll('[data-month-link]').forEach(link => {
           link.classList.remove('active');
+          link.removeAttribute('aria-current');
         });
 
-        // Add active class to the closest section's link
+        // Add active class and aria-current to the closest section's link
         const month = closestSection[0].getAttribute('data-month');
         const link = document.querySelector(`[data-month-link="${month}"]`);
-        link?.classList.add('active');
+        if(link){
+          link.classList.add('active');
+          link.setAttribute('aria-current', 'location');
+        }
       }
     }, { 
       threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
@@ -101,8 +103,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav aria-label="Jump to month" class="month-nav">
-    <ul id="month-list" class="month-list">
+  <nav aria-label="Jump to month" class="month-nav pr-xl">
+    <ul role="list" id="month-list" class="month-list">
       <!-- Month links will be populated by JavaScript -->
     </ul>
   </nav>
@@ -110,22 +112,16 @@ onMounted(() => {
 
 <style>
 .month-nav {
+  font-size: var(--p-step--1);
   position: sticky;
-  top: 2rem;
-}
-
-.month-list {
-  list-style: none;
-  padding: 0;
+  top: var(--p-space-3xl);
 }
 
 .month-list a {
   display: block;
-  padding: 0.5rem;
   color: inherit;
   text-decoration: none;
   width: 100%;
-  text-align: left;
 }
 
 .month-list a:hover {
@@ -133,7 +129,9 @@ onMounted(() => {
 }
 
 .month-list a.active {
-  font-weight: bold;
+  transition: all 0.2s ease;
+  text-decoration: underline;
   color: var(--sl-color-primary-600);
 }
+
 </style>
