@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 
 const props = defineProps({
-  contentRegion: { type: String, required: true }
+  contentRegion: { type: String, required: true },
 });
 
 const monthLinks = ref([]);
@@ -27,22 +27,23 @@ function updateMonthNav() {
   tempLinks.push({
     text: 'Today',
     identifier: 'today',
-    href: '#today'
+    href: '#today',
   });
   const monthSections = document.querySelectorAll('[data-month]');
-  monthSections.forEach(section => {
+  monthSections.forEach((section) => {
     const yearMonth = section.getAttribute('data-month');
     const [year, month] = yearMonth.split('-');
     const date = new Date(year, month - 1);
     const formatter = new Intl.DateTimeFormat('default', {
       month: 'long',
-      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+      year:
+        date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
     });
     tempLinks.push({
       text: formatter.format(date),
       identifier: yearMonth,
       href: `#section-${yearMonth}`,
-      sectionEl: section
+      sectionEl: section,
     });
   });
   monthLinks.value = tempLinks;
@@ -61,32 +62,38 @@ function handleLinkClick(e, link) {
 function setupIntersectionObserver() {
   // Disconnect previous observer if exists
   if (observer) observer.disconnect();
-  
+
   const monthSections = document.querySelectorAll('[data-month]');
   const visibleSections = new Map();
-  
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const distance = Math.abs(entry.target.getBoundingClientRect().top - 100);
-        visibleSections.set(entry.target, distance);
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const distance = Math.abs(
+            entry.target.getBoundingClientRect().top - 100
+          );
+          visibleSections.set(entry.target, distance);
+        } else {
+          visibleSections.delete(entry.target);
+        }
+      });
+      if (visibleSections.size > 0) {
+        const [closestSection] = Array.from(visibleSections.entries()).reduce(
+          (a, b) => (a[1] < b[1] ? a : b)
+        );
+        activeLink.value = closestSection.getAttribute('data-month');
       } else {
-        visibleSections.delete(entry.target);
+        activeLink.value = 'today';
       }
-    });
-    if (visibleSections.size > 0) {
-      const [closestSection] = Array.from(visibleSections.entries())
-        .reduce((a, b) => (a[1] < b[1] ? a : b));
-      activeLink.value = closestSection.getAttribute('data-month');
-    } else {
-      activeLink.value = 'today';
+    },
+    {
+      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      rootMargin: '-100px 0px -50% 0px',
     }
-  }, { 
-    threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-    rootMargin: '-100px 0px -50% 0px'
-  });
-  
-  monthSections.forEach(section => observer.observe(section));
+  );
+
+  monthSections.forEach((section) => observer.observe(section));
 }
 
 onMounted(() => {
@@ -104,7 +111,7 @@ onMounted(() => {
   });
   contentObserver.observe(document.querySelector(props.contentRegion), {
     childList: true,
-    subtree: true
+    subtree: true,
   });
 });
 </script>
@@ -113,10 +120,12 @@ onMounted(() => {
   <nav aria-label="Months" class="month-nav pr-xl">
     <ul role="list" class="month-list">
       <li v-for="link in monthLinks" :key="link.identifier">
-        <a :href="link.href" 
-           :data-month-link="link.identifier" 
-           :aria-current="activeLink === link.identifier ? 'location' : null"
-           @click="(e) => handleLinkClick(e, link)">
+        <a
+          :href="link.href"
+          :data-month-link="link.identifier"
+          :aria-current="activeLink === link.identifier ? 'location' : null"
+          @click="(e) => handleLinkClick(e, link)"
+        >
           {{ link.text }}
         </a>
       </li>
@@ -144,7 +153,7 @@ onMounted(() => {
 }
 
 /* Active link styling using aria-current */
-.month-list a[aria-current="location"] {
+.month-list a[aria-current='location'] {
   transition: all 0.2s ease;
   text-decoration: underline;
   color: var(--c-color-link);
