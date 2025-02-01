@@ -116,7 +116,7 @@ const groupEvents = (events) => {
       const [year, month] = yearMonth.split('-').map(Number);
       const groupDate = new Date(year, month - 1);
       if (groupDate < currentMonthDate) {
-        delete sortedGroups[ yearMonth ];
+        delete sortedGroups[yearMonth];
       }
     });
   }
