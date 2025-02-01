@@ -136,6 +136,7 @@ onMounted(() => {
   color: inherit;
   text-decoration: none;
   width: 100%;
+  white-space: nowrap;
 }
 
 .month-list a:hover {
