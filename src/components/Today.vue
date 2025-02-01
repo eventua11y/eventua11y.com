@@ -56,7 +56,12 @@ console.log('Today is:', today.value.format('YYYY-MM-DD'));
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
-  todaysEvents.value = filtersStore.todayEvents;
+  const events = filtersStore.todayEvents;
+  // Reorder theme events to appear first
+  todaysEvents.value = [
+    ...events.filter((event) => event.type === 'theme'),
+    ...events.filter((event) => event.type !== 'theme'),
+  ];
 };
 
 /**

@@ -108,6 +108,19 @@ const groupEvents = (events) => {
     })
   );
 
+  // Filter out past months for upcoming events
+  if (props.type !== 'past') {
+    const now = new Date();
+    const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    Object.keys(sortedGroups).forEach((yearMonth) => {
+      const [year, month] = yearMonth.split('-').map(Number);
+      const groupDate = new Date(year, month - 1);
+      if (groupDate < currentMonthDate) {
+        delete sortedGroups[yearMonth];
+      }
+    });
+  }
+
   groupedEvents.value = sortedGroups;
 };
 
