@@ -13,6 +13,28 @@ onMounted(() => {
   
   function updateMonthNav() {
     monthList.innerHTML = '';
+    // Add a hard-coded "Today" link as the first item
+    const todayLi = document.createElement('li');
+    const todayLink = document.createElement('a');
+    todayLink.textContent = 'Today';
+    todayLink.href = '#today';
+    todayLink.setAttribute('data-month-link', 'today');
+    todayLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const todaySection = document.getElementById('today');
+      if (todaySection) {
+        todaySection.scrollIntoView({ behavior: 'smooth' });
+        if (!todaySection.hasAttribute('tabindex')) {
+          todaySection.setAttribute('tabindex', '-1');
+        }
+        todaySection.focus({ preventScroll: true });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+    todayLi.appendChild(todayLink);
+    monthList.appendChild(todayLi);
+
     const monthSections = document.querySelectorAll('[data-month]');
     
     if (monthSections.length === 0) return;
@@ -79,6 +101,17 @@ onMounted(() => {
         if(link){
           link.classList.add('active');
           link.setAttribute('aria-current', 'location');
+        }
+      } else {
+        // When no dynamic section is visible, mark the Today link as active
+        document.querySelectorAll('[data-month-link]').forEach(link => {
+          link.classList.remove('active');
+          link.removeAttribute('aria-current');
+        });
+        const todayLink = document.querySelector(`[data-month-link="today"]`);
+        if (todayLink) {
+          todayLink.classList.add('active');
+          todayLink.setAttribute('aria-current', 'location');
         }
       }
     }, { 
