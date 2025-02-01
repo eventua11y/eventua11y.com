@@ -84,33 +84,29 @@ onMounted(() => {
         }
       });
 
-      // Find the section closest to our target position
+      // Update aria-current for the link corresponding to the closest section
       if (visibleSections.size > 0) {
         const closestSection = Array.from(visibleSections.entries())
           .reduce((closest, current) => current[1] < closest[1] ? current : closest);
-
-        // Remove active class and aria-current from all links
+  
+        // Remove aria-current from all links
         document.querySelectorAll('[data-month-link]').forEach(link => {
-          link.classList.remove('active');
           link.removeAttribute('aria-current');
         });
 
-        // Add active class and aria-current to the closest section's link
+        // Set aria-current for the closest section's link
         const month = closestSection[0].getAttribute('data-month');
         const link = document.querySelector(`[data-month-link="${month}"]`);
         if(link){
-          link.classList.add('active');
           link.setAttribute('aria-current', 'location');
         }
       } else {
         // When no dynamic section is visible, mark the Today link as active
         document.querySelectorAll('[data-month-link]').forEach(link => {
-          link.classList.remove('active');
           link.removeAttribute('aria-current');
         });
         const todayLink = document.querySelector(`[data-month-link="today"]`);
         if (todayLink) {
-          todayLink.classList.add('active');
           todayLink.setAttribute('aria-current', 'location');
         }
       }
@@ -166,10 +162,10 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-.month-list a.active {
+/* Update: Use aria-current attribute for active link styling */
+.month-list a[aria-current="location"] {
   transition: all 0.2s ease;
   text-decoration: underline;
   color: var(--c-color-link);
 }
-
 </style>
