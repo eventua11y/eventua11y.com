@@ -37,6 +37,11 @@ onMounted(() => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         section.scrollIntoView({ behavior: 'smooth' });
+        // Ensure the target section receives keyboard focus for accessibility
+        if (!section.hasAttribute('tabindex')) {
+          section.setAttribute('tabindex', '-1');
+        }
+        section.focus({ preventScroll: true });
       });
       li.appendChild(link);
       monthList.appendChild(li);
@@ -103,7 +108,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav aria-label="Jump to month" class="month-nav pr-xl">
+  <nav aria-label="Months" class="month-nav pr-xl">
     <ul role="list" id="month-list" class="month-list">
       <!-- Month links will be populated by JavaScript -->
     </ul>
@@ -131,7 +136,7 @@ onMounted(() => {
 .month-list a.active {
   transition: all 0.2s ease;
   text-decoration: underline;
-  color: var(--sl-color-primary-600);
+  color: var(--c-color-link);
 }
 
 </style>
