@@ -119,7 +119,7 @@ onMounted(() => {
 <template>
   <nav aria-label="Months" class="month-nav pr-xl">
     <ul role="list" class="month-list">
-      <li v-for="link in monthLinks" :key="link.identifier">
+      <li v-for="link in monthLinks" :key="link.identifier" class="mb-xs">
         <a
           :href="link.href"
           :data-month-link="link.identifier"
