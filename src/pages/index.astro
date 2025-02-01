@@ -16,7 +16,7 @@ export const prerender = false;
   <FilterBar client:only="vue" />
   <Filters client:only="vue" />
   <div class="container grid">
-    <MonthNav client:load contentRegion='[role="region"]' />
+    <MonthNav client:load contentRegion='#events' />
     <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l main-content">
       <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
       <EventList type="upcoming" client:load />
