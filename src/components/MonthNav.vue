@@ -135,7 +135,9 @@ onMounted(() => {
 
 <style>
 .month-nav {
+  border-left: 1px solid var(--s-color-border);
   font-size: var(--p-step--1);
+  padding-left: var(--p-space-xs);
   position: sticky;
   top: var(--p-space-3xl);
 }
