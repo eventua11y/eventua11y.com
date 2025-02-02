@@ -15,7 +15,12 @@ let observer; // declare mutable observer
  */
 function scrollToSection(target) {
   if (target) {
-    target.scrollIntoView({ behavior: 'smooth' });
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      target.scrollIntoView();
+    } else {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
     if (!target.hasAttribute('tabindex')) {
       target.setAttribute('tabindex', '-1');
     }
