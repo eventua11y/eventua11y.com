@@ -20,12 +20,18 @@ export const prerender = false;
       <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
       <EventList type="upcoming" client:load />
     </div>
-    <MonthNav class="mb-l" client:load contentRegion='#events' />
+    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' />
   </div>
 </DefaultLayout>
 
 <style>
+  #month-nav {
+    display: none;
+  }
   @media (min-width: 769px) {
+    #month-nav {
+      display: block;
+    }
     .grid {
       display: grid;
       grid-template-columns: 3fr 1fr;
