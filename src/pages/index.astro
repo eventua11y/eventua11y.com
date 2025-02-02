@@ -16,20 +16,22 @@ export const prerender = false;
   <FilterBar client:only="vue" />
   <Filters client:only="vue" />
   <div class="container grid">
-    <MonthNav client:load contentRegion='#events' />
-    <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l main-content">
+    <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l readable main-content">
       <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
       <EventList type="upcoming" client:load />
     </div>
+    <MonthNav class="mb-l" client:load contentRegion='#events' />
   </div>
 </DefaultLayout>
 
 <style>
-  .grid {
-    display: grid;
-    grid-template-columns: min-content 1fr;
-    gap: var(--p-space-xl);
-    align-items: start;
+  @media (min-width: 769px) {
+    .grid {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: var(--p-space-l);
+      align-items: start;
+    }
   }
 
   .main-content {
