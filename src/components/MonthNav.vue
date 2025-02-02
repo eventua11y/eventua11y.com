@@ -9,6 +9,10 @@ const monthLinks = ref([]);
 const activeLink = ref('today');
 let observer; // declare mutable observer
 
+/**
+ * Scrolls smoothly to the target section and sets focus
+ * @param {HTMLElement} target - The target element to scroll to
+ */
 function scrollToSection(target) {
   if (target) {
     target.scrollIntoView({ behavior: 'smooth' });
@@ -21,6 +25,9 @@ function scrollToSection(target) {
   }
 }
 
+/**
+ * Updates the month navigation links based on the current sections
+ */
 function updateMonthNav() {
   const tempLinks = [];
   // Add "Today" link
@@ -49,6 +56,11 @@ function updateMonthNav() {
   monthLinks.value = tempLinks;
 }
 
+/**
+ * Handles click events on navigation links
+ * @param {Event} e - The click event
+ * @param {Object} link - The link object containing identifier and section element
+ */
 function handleLinkClick(e, link) {
   e.preventDefault();
   if (link.identifier === 'today') {
@@ -59,6 +71,10 @@ function handleLinkClick(e, link) {
   }
 }
 
+/**
+ * Sets up IntersectionObserver to track month headings in viewport
+ * Updates active state of month navigation links
+ */
 function setupIntersectionObserver() {
   // Disconnect previous observer if exists
   if (observer) observer.disconnect();
@@ -100,6 +116,12 @@ onMounted(() => {
   updateMonthNav();
   setupIntersectionObserver();
 
+  /**
+   * MutationObserver that watches for changes in the content region
+   * When content changes (e.g. new events loaded):
+   * - Updates month navigation links
+   * - Resets intersection observer
+   */
   const contentObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === 'childList') {
@@ -109,6 +131,8 @@ onMounted(() => {
       }
     }
   });
+
+  // Watch content region for DOM changes
   contentObserver.observe(document.querySelector(props.contentRegion), {
     childList: true,
     subtree: true,
