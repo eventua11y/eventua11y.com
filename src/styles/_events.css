@@ -35,6 +35,7 @@
 .event__delivery {
   font-size: var(--p-step--1);
   margin-bottom: var(--p-space-xs);
+  margin-top: var(--p-space-3xs);
   order: 3;
   white-space: pre-wrap;
 }
