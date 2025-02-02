@@ -86,8 +86,8 @@ watch(
 </script>
 
 <style>
-  .events {
-    border-top: 1px solid var(--s-color-border);
-    padding-top: var(--p-space-s);
-  }
+.events {
+  border-top: 1px solid var(--s-color-border);
+  padding-top: var(--p-space-s);
+}
 </style>
