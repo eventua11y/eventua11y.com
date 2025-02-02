@@ -154,7 +154,6 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-/* Active link styling using aria-current */
 .month-list a[aria-current='location'] {
   transition: all 0.2s ease;
   text-decoration: underline;
