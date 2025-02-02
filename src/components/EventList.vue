@@ -289,6 +289,7 @@ watch(
         v-for="(events, yearMonth) in groupedEvents"
         :key="yearMonth"
         :id="'section-' + yearMonth"
+        :data-month="yearMonth"
         class="month flow flow-m"
       >
         <h2 :id="'heading-' + yearMonth" class="month__heading">
