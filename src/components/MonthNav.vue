@@ -15,7 +15,9 @@ let observer; // declare mutable observer
  */
 function scrollToSection(target) {
   if (target) {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
     if (prefersReducedMotion) {
       target.scrollIntoView();
     } else {
