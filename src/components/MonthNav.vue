@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 
 const props = defineProps({
   contentRegion: { type: String, required: true },
+  showTodayLink: { type: Boolean, default: false }, // Add showTodayLink prop
 });
 
 const monthLinks = ref([]);
@@ -37,12 +38,14 @@ function scrollToSection(target) {
  */
 function updateMonthNav() {
   const tempLinks = [];
-  // Add "Today" link
-  tempLinks.push({
-    text: 'Today',
-    identifier: 'today',
-    href: '#today',
-  });
+  // Conditionally add "Today" link
+  if (props.showTodayLink) {
+    tempLinks.push({
+      text: 'Today',
+      identifier: 'today',
+      href: '#today',
+    });
+  }
   const monthSections = document.querySelectorAll('[data-month]');
   monthSections.forEach((section) => {
     const yearMonth = section.getAttribute('data-month');
@@ -168,6 +171,7 @@ onMounted(() => {
 .month-nav {
   border-left: 1px solid var(--s-color-border);
   font-size: var(--p-step--1);
+  margin-top: var(--p-space-xl);
   padding-left: var(--p-space-xs);
   position: sticky;
   top: var(--p-space-3xl);

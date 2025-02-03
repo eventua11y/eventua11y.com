@@ -1,6 +1,7 @@
 ---
 import DefaultLayout from '../layouts/default.astro';
 import EventList from '../components/EventList.vue';
+import MonthNav from '../components/MonthNav.vue';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
@@ -8,10 +9,30 @@ export const prerender = false;
 ---
 
 <DefaultLayout title="Past accessibility events">
-  <div class="container readable py-l">
-    <h1 class="sr-only">Past accessibility events</h1>
-    <EventList type="past" client:load />
+  <div class="container grid">
+    <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l readable main-content">
+      <h1 class="sr-only">Past accessibility events</h1>
+      <EventList type="past" client:load />
+    </div>
+    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' />
   </div>
   <!-- End container -->
 </DefaultLayout>
 
+
+<style>
+    #month-nav {
+    display: none;
+  }
+  @media (min-width: 769px) {
+    #month-nav {
+      display: block;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: var(--p-space-l);
+      align-items: start;
+    }
+  }
+</style>

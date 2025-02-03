@@ -20,7 +20,7 @@ export const prerender = false;
       <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
       <EventList type="upcoming" client:load />
     </div>
-    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' />
+    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' showTodayLink={true} />
   </div>
 </DefaultLayout>
 
