@@ -40,7 +40,7 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
 
     // Add automatic waiting
-    waitForNavigation: 'networkidle'
+    waitForNavigation: 'networkidle',
   },
   // Configure projects for major browsers.
   projects: [

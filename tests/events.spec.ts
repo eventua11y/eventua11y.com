@@ -6,7 +6,7 @@ test.describe('Events page', () => {
   test.beforeEach(async ({ page, baseURL }) => {
     await page.goto(baseURL);
     await page.waitForLoadState('networkidle');
-    
+
     // Clear any open drawers
     const filterDrawer = page.locator('#filter-drawer');
     await filterDrawer.waitFor({ state: 'attached', timeout: 5000 });
@@ -20,7 +20,7 @@ test.describe('Events page', () => {
     await Promise.all([
       page.waitForSelector('#upcoming-events', { state: 'visible' }),
       page.waitForSelector('#global-header', { state: 'visible' }),
-      page.waitForSelector('#global-footer', { state: 'visible' })
+      page.waitForSelector('#global-footer', { state: 'visible' }),
     ]);
   });
 
@@ -49,11 +49,11 @@ test.describe('Events page', () => {
     // Wait for dynamic content to load
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('#upcoming-events .event', { state: 'visible' });
-    
+
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude('#filter-drawer') // Exclude drawer to avoid false positives
       .analyze();
-      
+
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
