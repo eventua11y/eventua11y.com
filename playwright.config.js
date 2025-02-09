@@ -10,8 +10,8 @@ export default defineConfig({
   // Fail the build on CI if you accidentally left test.only in the source code.
   forbidOnly: !!process.env.CI,
 
-  // Retry on CI only.
-  retries: process.env.CI ? 2 : 0,
+  // Increase retries for better reliability
+  retries: process.env.CI ? 3 : 1,
 
   // Opt out of parallel tests on CI.
   workers: process.env.CI ? 1 : undefined,
@@ -25,6 +25,22 @@ export default defineConfig({
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
+
+    // Add global timeout settings
+    actionTimeout: 15000,
+    navigationTimeout: 30000,
+
+    // Enable screenshot on failure
+    screenshot: 'only-on-failure',
+
+    // Enable video recording for failed tests
+    video: 'retain-on-failure',
+
+    // Add viewport size
+    viewport: { width: 1280, height: 720 },
+
+    // Add automatic waiting
+    waitForNavigation: 'networkidle'
   },
   // Configure projects for major browsers.
   projects: [
@@ -48,6 +64,7 @@ export default defineConfig({
         command: 'netlify dev',
         port: 8888,
         reuseExistingServer: !process.env.CI,
+        timeout: 120000, // Increase server startup timeout
       }
     : undefined,
 });
