@@ -52,7 +52,7 @@ jobs:
       - name: Run tests
         env:
           PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
-          DEBUG: "pw:api,pw:browser*,pw:protocol*"
+          DEBUG: 'pw:api,pw:browser*,pw:protocol*'
           CI: 'true'
         run: |
           echo "Starting Playwright tests..."

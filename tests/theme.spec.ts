@@ -11,13 +11,13 @@ test.describe('Theme Switching', () => {
     // Reset system preference and load page
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/');
-    
+
     // Wait for critical components to be ready
     await Promise.all([
       page.waitForLoadState('networkidle'),
       page.waitForLoadState('domcontentloaded'),
       page.waitForSelector('#upcoming-events', { state: 'visible' }),
-      page.waitForSelector('#theme-selector-button', { state: 'visible' })
+      page.waitForSelector('#theme-selector-button', { state: 'visible' }),
     ]);
 
     // Ensure clean state with more reasonable drawer handling

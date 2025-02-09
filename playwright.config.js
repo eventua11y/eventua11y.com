@@ -46,28 +46,38 @@ export default defineConfig({
     waitForNavigation: 'networkidle',
 
     // CI-specific browser launch options
-    launchOptions: process.env.CI ? {
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    } : undefined,
+    launchOptions: process.env.CI
+      ? {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        }
+      : undefined,
 
     // Use persistent context in CI to reduce browser startup overhead
-    contextOptions: process.env.CI ? {
-      acceptDownloads: false,
-      strictSelectors: true,
-    } : undefined,
+    contextOptions: process.env.CI
+      ? {
+          acceptDownloads: false,
+          strictSelectors: true,
+        }
+      : undefined,
   },
   // Configure projects for major browsers.
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Additional chromium-specific settings for CI
-        launchOptions: process.env.CI ? {
-          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
-          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
-          headless: true
-        } : undefined,
+        launchOptions: process.env.CI
+          ? {
+              executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-gpu',
+              ],
+              headless: true,
+            }
+          : undefined,
       },
     },
     {
