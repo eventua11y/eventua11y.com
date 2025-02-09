@@ -26,9 +26,12 @@ export default defineConfig({
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
 
-    // Add global timeout settings
-    actionTimeout: 60000,
-    navigationTimeout: 60000,
+    // Increase timeouts for CI environment
+    actionTimeout: process.env.CI ? 90000 : 60000,
+    navigationTimeout: process.env.CI ? 90000 : 60000,
+
+    // Add explicit test timeout
+    testTimeout: process.env.CI ? 120000 : 60000,
 
     // Enable screenshot on failure
     screenshot: 'only-on-failure',

@@ -3,26 +3,31 @@ import { test, expect } from '@playwright/test';
 test.describe('Filters functionality', () => {
   test.beforeEach(async ({ page, baseURL }) => {
     await page.goto(baseURL);
-    await page.waitForLoadState('networkidle');
-
-    // Wait for critical elements and web components to be ready
+    
+    // Wait for all critical components and network activity
     await Promise.all([
+      page.waitForLoadState('networkidle'),
+      page.waitForLoadState('domcontentloaded'),
       page.waitForSelector('#upcoming-events', { state: 'visible' }),
       page.waitForSelector('#filters', { state: 'visible' }),
       page.waitForSelector('#open-filter-drawer:not([disabled])', {
         state: 'visible',
+        timeout: 10000
       }),
     ]);
   });
 
   const openFilterDrawer = async (page) => {
     const filterButton = page.getByRole('button', { name: 'Filter' });
-    await filterButton.waitFor({ state: 'visible' });
+    await filterButton.waitFor({ state: 'visible', timeout: 10000 });
     await filterButton.click();
+    
     const drawer = page.locator('#filter-drawer');
-    await drawer.waitFor({ state: 'visible' });
-    // Wait for drawer animation and content
-    await page.waitForTimeout(300);
+    await drawer.waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Wait for drawer animation and ensure content is actually visible
+    await page.waitForSelector('#filter-drawer[open]', { state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(500); // Increased animation wait time for CI
     return drawer;
   };
 

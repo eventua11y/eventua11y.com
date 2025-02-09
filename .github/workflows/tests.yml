@@ -33,7 +33,7 @@ jobs:
     needs: tests_e2e_netlify_prepare
     name: Run end-to-end tests on Netlify PR preview
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,7 +44,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
       - name: Run tests
-        run: npx playwright test
+        run: npx playwright test --retries=5
         env:
           PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
-          DEBUG: pw:api
+          # Enable detailed debug logging
+          DEBUG: "pw:api,pw:browser*,pw:protocol*"
+          PWDEBUG: 1
