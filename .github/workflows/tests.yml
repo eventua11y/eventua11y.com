@@ -39,12 +39,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb fonts-liberation fonts-noto-color-emoji libfontconfig1 libfreetype6
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+      - name: Show environment info
+        run: |
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "Display: $DISPLAY"
+          echo "XDG_RUNTIME_DIR: $XDG_RUNTIME_DIR"
+          xvfb-run --auto-servernum ls -l /tmp/.X*
       - name: Run tests
-        run: npx playwright test --retries=5
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" npx playwright test --retries=5
         env:
           PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
           # Enable detailed debug logging
