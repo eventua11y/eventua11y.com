@@ -20,13 +20,13 @@ test.describe('Theme Switching', () => {
       page.waitForSelector('#theme-selector-button', { state: 'visible' })
     ]);
 
-    // Ensure clean state with more reliable drawer handling
+    // Ensure clean state with more reasonable drawer handling
     const filterDrawer = page.locator('#filter-drawer');
     try {
-      await filterDrawer.waitFor({ state: 'attached', timeout: 10000 });
+      await filterDrawer.waitFor({ state: 'attached', timeout: 5000 });
       if (await filterDrawer.isVisible()) {
         await page.keyboard.press('Escape');
-        await filterDrawer.waitFor({ state: 'hidden', timeout: 5000 });
+        await filterDrawer.waitFor({ state: 'hidden', timeout: 2000 });
       }
     } catch (e) {
       // If drawer timeout occurs, it's likely already hidden

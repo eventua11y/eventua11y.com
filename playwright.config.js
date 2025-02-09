@@ -26,12 +26,12 @@ export default defineConfig({
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
 
-    // Increase timeouts for CI environment
-    actionTimeout: process.env.CI ? 90000 : 60000,
-    navigationTimeout: process.env.CI ? 90000 : 60000,
+    // More reasonable timeouts for CI
+    actionTimeout: process.env.CI ? 45000 : 30000,
+    navigationTimeout: process.env.CI ? 45000 : 30000,
 
     // Add explicit test timeout
-    testTimeout: process.env.CI ? 120000 : 60000,
+    testTimeout: process.env.CI ? 90000 : 60000,
 
     // Enable screenshot on failure
     screenshot: 'only-on-failure',
@@ -44,12 +44,31 @@ export default defineConfig({
 
     // Add automatic waiting
     waitForNavigation: 'networkidle',
+
+    // CI-specific browser launch options
+    launchOptions: process.env.CI ? {
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    } : undefined,
+
+    // Use persistent context in CI to reduce browser startup overhead
+    contextOptions: process.env.CI ? {
+      acceptDownloads: false,
+      strictSelectors: true,
+    } : undefined,
   },
   // Configure projects for major browsers.
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Additional chromium-specific settings for CI
+        launchOptions: process.env.CI ? {
+          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+          headless: true
+        } : undefined,
+      },
     },
     {
       name: 'firefox',
@@ -67,7 +86,7 @@ export default defineConfig({
         command: 'netlify dev',
         port: 8888,
         reuseExistingServer: !process.env.CI,
-        timeout: 120000, // Increase server startup timeout
+        timeout: 60000, // Reduced server startup timeout
       }
     : undefined,
 });
