@@ -8,6 +8,9 @@
     color: var(--s-color-on-background);
     padding: 0;
   }
+  .event--deadline {
+    padding: 0;
+  }
 }
 
 #today-heading {
