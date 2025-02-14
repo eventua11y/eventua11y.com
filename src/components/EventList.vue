@@ -301,7 +301,11 @@ watch(
           :aria-labelledby="'heading-' + yearMonth"
         >
           <li v-for="event in events" :key="event._id">
-            <EventBook v-if="event._type === 'book'" :book="event" client:visible />
+            <EventBook
+              v-if="event._type === 'book'"
+              :book="event"
+              client:visible
+            />
             <Event v-else :event="event" client:visible />
           </li>
         </ol>
