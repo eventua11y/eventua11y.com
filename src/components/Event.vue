@@ -72,18 +72,21 @@ const eventSpeakers = computed(() => {
   // If event has children, collect and deduplicate speakers from all child events
   if (Array.isArray(props.event.children) && props.event.children.length > 0) {
     return props.event.children
-      .flatMap(child => Array.isArray(child?.speakers) ? child.speakers : [])
-      .filter(speaker => speaker?.name && speaker?._id)
-      .filter((speaker, index, self) => 
-        // Remove duplicates by _id
-        index === self.findIndex(s => s?._id === speaker?._id)
+      .flatMap((child) =>
+        Array.isArray(child?.speakers) ? child.speakers : []
+      )
+      .filter((speaker) => speaker?.name && speaker?._id)
+      .filter(
+        (speaker, index, self) =>
+          // Remove duplicates by _id
+          index === self.findIndex((s) => s?._id === speaker?._id)
       );
   }
-  
+
   // Otherwise return the event's own speakers (if any)
-  return Array.isArray(props.event.speakers) ? 
-    props.event.speakers.filter(speaker => speaker?.name && speaker?._id) : 
-    [];
+  return Array.isArray(props.event.speakers)
+    ? props.event.speakers.filter((speaker) => speaker?.name && speaker?._id)
+    : [];
 });
 
 /**
@@ -93,31 +96,37 @@ const eventSpeakers = computed(() => {
  */
 const speakerDisplay = computed(() => {
   if (!eventSpeakers.value) return '';
-  const speakers = eventSpeakers.value.filter(s => s && typeof s === 'object' && s.name);
+  const speakers = eventSpeakers.value.filter(
+    (s) => s && typeof s === 'object' && s.name
+  );
   if (speakers.length === 0) return '';
-  
+
   if (speakers.length === 2) {
     return speakers
-      .map(speaker => 
-        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+      .map(
+        (speaker) =>
+          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
       )
       .join(' and ');
   }
-  
+
   if (speakers.length <= 2) {
     return speakers
-      .map(speaker => 
-        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+      .map(
+        (speaker) =>
+          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
       )
       .join(', ');
   }
-  
-  const firstTwo = speakers.slice(0, 2)
-    .map(speaker => 
-      `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+
+  const firstTwo = speakers
+    .slice(0, 2)
+    .map(
+      (speaker) =>
+        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
     )
     .join(', ');
-    
+
   return `${firstTwo}, and ${speakers.length - 2} other speaker${speakers.length - 2 > 1 ? 's' : ''}`;
 });
 </script>
@@ -178,7 +187,10 @@ const speakerDisplay = computed(() => {
       <p itemprop="description">{{ event.description }}</p>
     </details>
 
-    <details v-if="hasChildren && event.type !== 'theme'" class="event__children flow flow-xs">
+    <details
+      v-if="hasChildren && event.type !== 'theme'"
+      class="event__children flow flow-xs"
+    >
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Accessibility highlights: {{ enumeratedChildTypes }}
@@ -193,7 +205,10 @@ const speakerDisplay = computed(() => {
         </li>
       </ol>
     </details>
-    <details v-else-if="event.parent === undefined && event.type !== 'theme'" class="event__children flow">
+    <details
+      v-else-if="event.parent === undefined && event.type !== 'theme'"
+      class="event__children flow"
+    >
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Schedule not yet announced
@@ -224,9 +239,7 @@ const speakerDisplay = computed(() => {
       >
     </div>
   </article>
-  <div v-else class="event event--loading">
-    Loading...
-  </div>
+  <div v-else class="event event--loading">Loading...</div>
 </template>
 
 <style scoped>
