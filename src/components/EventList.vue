@@ -65,9 +65,10 @@ const formatDate = (yearMonth) => {
  */
 const groupEvents = (events) => {
   // Filter out deadline events from past events
-  const filteredEvents = props.type === 'past' 
-    ? events.filter(event => event.type !== 'deadline')
-    : events;
+  const filteredEvents =
+    props.type === 'past'
+      ? events.filter((event) => event.type !== 'deadline')
+      : events;
 
   // Sort events based on type (past events in reverse chronological order)
   const sortedEvents = [...filteredEvents].sort((a, b) => {
