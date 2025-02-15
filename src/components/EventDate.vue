@@ -1,5 +1,5 @@
 <template>
-  <div class="event__dates text-muted">
+  <div class="event__dates">
     <span class="event__dateStart">
       <span class="sr-only">Starts</span>
       <time
