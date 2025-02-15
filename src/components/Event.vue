@@ -154,8 +154,8 @@ const speakerDisplay = computed(() => {
       v-if="event.type !== 'deadline'"
     />
 
-    <div v-if="speakerDisplay" class="event__speakers text-muted text-small">
-      <span>with </span><span v-html="speakerDisplay"></span>
+    <div v-if="speakerDisplay" class="event__speakers text-small">
+      <span>featuring </span><span v-html="speakerDisplay"></span>
     </div>
 
     <details
@@ -169,7 +169,7 @@ const speakerDisplay = computed(() => {
       <p itemprop="description">{{ event.description }}</p>
     </details>
 
-    <details v-if="hasChildren" class="event__children flow flow-xs">
+    <details v-if="hasChildren && event.type !== 'theme'" class="event__children flow flow-xs">
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Accessibility highlights: {{ enumeratedChildTypes }}
@@ -184,7 +184,7 @@ const speakerDisplay = computed(() => {
         </li>
       </ol>
     </details>
-    <details v-else-if="event.parent === undefined" class="event__children flow">
+    <details v-else-if="event.parent === undefined && event.type !== 'theme'" class="event__children flow">
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Schedule not yet announced
