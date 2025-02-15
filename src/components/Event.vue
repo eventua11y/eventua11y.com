@@ -29,15 +29,7 @@ const props = defineProps({
  * @returns {boolean} True if event has children
  */
 const hasChildren = computed(
-  () => props.event.children && props.event.children.length > 0
-);
-
-/**
- * Gets count of child events
- * @returns {number} Number of child events or 0 if none
- */
-const childrenCount = computed(() =>
-  hasChildren.value ? props.event.children.length : 0
+  () => Array.isArray(props.event.children) && props.event.children.length > 0
 );
 
 /**
@@ -54,32 +46,11 @@ const isCallForSpeakersOpen = computed(() => {
 });
 
 /**
- * Formats a date string to readable format (e.g., "January 1")
- * Used for call for speakers closing date display
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date or error message if invalid
- */
-const formatDate = (dateString) => {
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      throw new Error('Invalid date');
-    }
-    return date.toLocaleDateString('en-GB', {
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
-    console.error('Date formatting error:', error);
-    return 'Date unavailable';
-  }
-};
-
-/**
  * Enumerates child event types and their counts
  * @returns {string} Formatted string of child event types and counts
  */
 const enumeratedChildTypes = computed(() => {
+  if (!props.event.children) return '';
   const counts = {};
   props.event.children.forEach((child) => {
     if (!child.format) return;
@@ -90,10 +61,78 @@ const enumeratedChildTypes = computed(() => {
     .map(([format, count]) => `${count} ${format}${count > 1 ? 's' : ''}`)
     .join(', ');
 });
+
+/**
+ * Gets all speakers from child events or the event itself
+ * @returns {Array} Combined array of speakers from child events or the event itself
+ */
+const eventSpeakers = computed(() => {
+  if (!props.event?.type) return [];
+
+  // If event has children, collect and deduplicate speakers from all child events
+  if (Array.isArray(props.event.children) && props.event.children.length > 0) {
+    return props.event.children
+      .flatMap((child) =>
+        Array.isArray(child?.speakers) ? child.speakers : []
+      )
+      .filter((speaker) => speaker?.name && speaker?._id)
+      .filter(
+        (speaker, index, self) =>
+          // Remove duplicates by _id
+          index === self.findIndex((s) => s?._id === speaker?._id)
+      );
+  }
+
+  // Otherwise return the event's own speakers (if any)
+  return Array.isArray(props.event.speakers)
+    ? props.event.speakers.filter((speaker) => speaker?.name && speaker?._id)
+    : [];
+});
+
+/**
+ * Formats speaker list for display
+ * If more than 2 speakers, shows first 2 and count of remaining
+ * @returns {string} Formatted speaker list with HTML
+ */
+const speakerDisplay = computed(() => {
+  if (!eventSpeakers.value) return '';
+  const speakers = eventSpeakers.value.filter(
+    (s) => s && typeof s === 'object' && s.name
+  );
+  if (speakers.length === 0) return '';
+
+  if (speakers.length === 2) {
+    return speakers
+      .map(
+        (speaker) =>
+          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+      )
+      .join(' and ');
+  }
+
+  if (speakers.length <= 2) {
+    return speakers
+      .map(
+        (speaker) =>
+          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+      )
+      .join(', ');
+  }
+
+  const firstTwo = speakers
+    .slice(0, 2)
+    .map(
+      (speaker) =>
+        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+    )
+    .join(', ');
+
+  return `${firstTwo}, and ${speakers.length - 2} other speaker${speakers.length - 2 > 1 ? 's' : ''}`;
+});
 </script>
 
 <template>
-  <div v-if="event.type === 'deadline'" class="event event--deadline">
+  <div v-if="event && event.type === 'deadline'" class="event event--deadline">
     <EventDate
       v-if="showDate"
       :dateStart="event.dateStart"
@@ -105,7 +144,7 @@ const enumeratedChildTypes = computed(() => {
     >
   </div>
   <article
-    v-else
+    v-else-if="event && event.type"
     :class="`event event--${event.type}`"
     itemscope
     itemtype="https://schema.org/Event"
@@ -126,6 +165,11 @@ const enumeratedChildTypes = computed(() => {
       :day="event.day"
       :type="event.type"
     />
+
+    <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
+      featuring <span v-html="speakerDisplay"></span>
+    </div>
+
     <EventDelivery
       :attendanceMode="event.attendanceMode"
       :location="event.location"
@@ -143,7 +187,10 @@ const enumeratedChildTypes = computed(() => {
       <p itemprop="description">{{ event.description }}</p>
     </details>
 
-    <details v-if="hasChildren" class="event__children flow flow-xs">
+    <details
+      v-if="hasChildren && event.type !== 'theme'"
+      class="event__children flow flow-xs"
+    >
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Accessibility highlights: {{ enumeratedChildTypes }}
@@ -158,7 +205,10 @@ const enumeratedChildTypes = computed(() => {
         </li>
       </ol>
     </details>
-    <details v-else-if="event.isParent" class="event__children flow">
+    <details
+      v-else-if="event.parent === undefined && event.type !== 'theme'"
+      class="event__children flow"
+    >
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Schedule not yet announced
@@ -174,14 +224,14 @@ const enumeratedChildTypes = computed(() => {
     <div
       class="event__badges"
       v-if="
-        (!event.isParent && !event.hasChildren && event.type !== 'theme') ||
+        (!event.parent && !hasChildren && event.type !== 'theme') ||
         isCallForSpeakersOpen
       "
     >
       <sl-badge
         pill
         variant="neutral"
-        v-if="!event.isParent && !event.hasChildren && event.type !== 'theme'"
+        v-if="!event.parent && !hasChildren && event.type !== 'theme'"
         >Dedicated to accessibility</sl-badge
       >
       <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
@@ -189,6 +239,7 @@ const enumeratedChildTypes = computed(() => {
       >
     </div>
   </article>
+  <div v-else class="event event--loading">Loading...</div>
 </template>
 
 <style scoped>

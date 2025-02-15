@@ -11,7 +11,7 @@
 .event__title {
   font-size: var(--p-step-2);
   margin-bottom: var(--p-space-3xs);
-  order: 3;
+  order: 2;
   text-wrap: balance;
 }
 
@@ -25,6 +25,11 @@
   }
 }
 
+.event__speakers {
+  margin-top: var(--p-space-3xs);
+  order: 3;
+}
+
 .event__meta {
   font-size: var(--p-step--1);
   display: flex;
@@ -36,7 +41,7 @@
   font-size: var(--p-step--1);
   margin-bottom: var(--p-space-xs);
   margin-top: var(--p-space-3xs);
-  order: 3;
+  order: 4;
   white-space: pre-wrap;
 }
 
@@ -105,7 +110,6 @@
     order: 2;
   }
   .event__dates {
-    order: 1;
     font-size: var(--p-step--1);
   }
   .event__location {
