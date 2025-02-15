@@ -148,6 +148,11 @@ const speakerDisplay = computed(() => {
       :day="event.day"
       :type="event.type"
     />
+
+    <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
+      featuring <span v-html="speakerDisplay"></span>
+    </div>
+
     <EventDelivery
       :attendanceMode="event.attendanceMode"
       :location="event.location"
