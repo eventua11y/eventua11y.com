@@ -227,16 +227,4 @@ const speakerDisplay = computed(() => {
   column-gap: var(--p-space-3xs);
   row-gap: var(--p-space-3xs);
 }
-
-.event__speakers {
-  order: 4;
-  margin-bottom: var(--p-space-xs);
-}
-
-.event--loading {
-  border: 1px solid var(--s-color-border);
-  border-radius: var(--s-border-radius);
-  padding: var(--p-space-xs-m);
-  color: var(--s-color-fg-muted);
-}
 </style>
