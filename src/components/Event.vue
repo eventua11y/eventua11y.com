@@ -92,6 +92,18 @@ const eventSpeakers = computed(() => {
 const MAX_DISPLAYED_SPEAKERS = 3;
 
 /**
+ * Determines if an event is dedicated to accessibility
+ * True if event is not marked as a parent and is not a child event
+ */
+const isDedicatedToAccessibility = computed(() => {
+  return (
+    !props.event.isParent &&
+    props.event.parent === undefined &&
+    props.event.type !== 'theme'
+  );
+});
+
+/**
  * Formats speaker list for display
  * If more than 3 speakers, shows first 3 and count of remaining
  * @returns {string} Formatted speaker list with HTML
@@ -186,60 +198,52 @@ const speakerDisplay = computed(() => {
 
     <details
       v-if="event.description && event.type !== 'theme'"
-      class="event__description flow"
+      class="event__children flow"
     >
       <summary>
         <i class="icon fa-solid fa-caret-right"></i>
         Description
       </summary>
-      <p itemprop="description">{{ event.description }}</p>
-    </details>
-
-    <details
-      v-if="hasChildren && event.type !== 'theme'"
-      class="event__children flow flow-xs"
-    >
-      <summary>
-        <i class="icon fa-solid fa-caret-right"></i>
-        Accessibility highlights: {{ enumeratedChildTypes }}
-      </summary>
-      <ol
-        role="list"
-        class="flow flow-xs"
-        :aria-label="`Accessibility highlights for ${event.title}`"
-      >
-        <li v-for="child in event.children" :key="child._id">
-          <EventChild :event="child" />
-        </li>
-      </ol>
-    </details>
-    <details
-      v-else-if="event.parent === undefined && event.type !== 'theme'"
-      class="event__children flow"
-    >
-      <summary>
-        <i class="icon fa-solid fa-caret-right"></i>
-        Schedule not yet announced
-      </summary>
-      <p>
-        {{ event.title }} is expected to include one or more
-        accessibility-themed sessions but the full schedule has not yet been
-        announced. Details will be published here closer to the date of the
-        event.
+      <p class="event__description" itemprop="description">
+        {{ event.description }}
       </p>
     </details>
 
+    <template v-if="!isDedicatedToAccessibility">
+      <details v-if="hasChildren" class="event__children flow flow-xs">
+        <summary>
+          <i class="icon fa-solid fa-caret-right"></i>
+          Accessibility highlights: {{ enumeratedChildTypes }}
+        </summary>
+        <ol
+          role="list"
+          class="flow flow-xs"
+          :aria-label="`Accessibility highlights for ${event.title}`"
+        >
+          <li v-for="child in event.children" :key="child._id">
+            <EventChild :event="child" />
+          </li>
+        </ol>
+      </details>
+      <details v-else-if="event.isParent" class="event__children flow">
+        <summary>
+          <i class="icon fa-solid fa-caret-right"></i>
+          Schedule not yet announced
+        </summary>
+        <p>
+          {{ event.title }} is expected to include one or more
+          accessibility-themed sessions but the full schedule has not yet been
+          announced. Details will be published here closer to the date of the
+          event.
+        </p>
+      </details>
+    </template>
+
     <div
       class="event__badges"
-      v-if="
-        (!event.parent && !hasChildren && event.type !== 'theme') ||
-        isCallForSpeakersOpen
-      "
+      v-if="isDedicatedToAccessibility || isCallForSpeakersOpen"
     >
-      <sl-badge
-        pill
-        variant="neutral"
-        v-if="!event.parent && !hasChildren && event.type !== 'theme'"
+      <sl-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
         >Dedicated to accessibility</sl-badge
       >
       <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
