@@ -89,9 +89,11 @@ const eventSpeakers = computed(() => {
     : [];
 });
 
+const MAX_DISPLAYED_SPEAKERS = 3;
+
 /**
  * Formats speaker list for display
- * If more than 2 speakers, shows first 2 and count of remaining
+ * If more than 3 speakers, shows first 3 and count of remaining
  * @returns {string} Formatted speaker list with HTML
  */
 const speakerDisplay = computed(() => {
@@ -100,6 +102,10 @@ const speakerDisplay = computed(() => {
     (s) => s && typeof s === 'object' && s.name
   );
   if (speakers.length === 0) return '';
+
+  if (speakers.length === 1) {
+    return `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speakers[0].name}</span></span>`;
+  }
 
   if (speakers.length === 2) {
     return speakers
@@ -110,24 +116,23 @@ const speakerDisplay = computed(() => {
       .join(' and ');
   }
 
-  if (speakers.length <= 2) {
-    return speakers
-      .map(
-        (speaker) =>
-          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
-      )
-      .join(', ');
+  if (speakers.length === MAX_DISPLAYED_SPEAKERS) {
+    const first = speakers.slice(0, MAX_DISPLAYED_SPEAKERS - 1).map(
+      (speaker) =>
+        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+    ).join(', ');
+    return `${first} and <span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}</span></span>`;
   }
 
-  const firstTwo = speakers
-    .slice(0, 2)
+  const firstSpeakers = speakers
+    .slice(0, MAX_DISPLAYED_SPEAKERS)
     .map(
       (speaker) =>
         `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
     )
     .join(', ');
 
-  return `${firstTwo}, and ${speakers.length - 2} other speaker${speakers.length - 2 > 1 ? 's' : ''}`;
+  return `${firstSpeakers}, and ${speakers.length - MAX_DISPLAYED_SPEAKERS} other speaker${speakers.length - MAX_DISPLAYED_SPEAKERS > 1 ? 's' : ''}`;
 });
 </script>
 
