@@ -154,10 +154,6 @@ const speakerDisplay = computed(() => {
       v-if="event.type !== 'deadline'"
     />
 
-    <div v-if="speakerDisplay" class="event__speakers text-small">
-      <span>featuring </span><span v-html="speakerDisplay"></span>
-    </div>
-
     <details
       v-if="event.description && event.type !== 'theme'"
       class="event__description flow"
