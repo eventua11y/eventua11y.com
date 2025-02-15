@@ -64,8 +64,13 @@ const formatDate = (yearMonth) => {
  * @param {Array} events - Array of event and book objects
  */
 const groupEvents = (events) => {
+  // Filter out deadline events from past events
+  const filteredEvents = props.type === 'past' 
+    ? events.filter(event => event.type !== 'deadline')
+    : events;
+
   // Sort events based on type (past events in reverse chronological order)
-  const sortedEvents = [...events].sort((a, b) => {
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
     const comparison =
       new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
     return props.type === 'past' ? -comparison : comparison;
