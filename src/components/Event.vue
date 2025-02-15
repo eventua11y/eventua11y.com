@@ -96,6 +96,14 @@ const speakerDisplay = computed(() => {
   const speakers = eventSpeakers.value.filter(s => s && typeof s === 'object' && s.name);
   if (speakers.length === 0) return '';
   
+  if (speakers.length === 2) {
+    return speakers
+      .map(speaker => 
+        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+      )
+      .join(' and ');
+  }
+  
   if (speakers.length <= 2) {
     return speakers
       .map(speaker => 
