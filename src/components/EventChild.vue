@@ -83,7 +83,7 @@ const speakersList = computed(() => {
       <span v-else>{{ event.title }}</span>
     </span>
 
-    <div class="event__speakers text-muted text-small">
+    <div class="event__speakers text-small">
       {{ displayFormat }}
       <template v-if="event.speakers?.length">
         {{ formatPreposition }}
@@ -91,7 +91,7 @@ const speakersList = computed(() => {
       </template>
     </div>
 
-    <div class="event__meta text-muted">
+    <div class="event__meta">
       <template v-if="event.scheduled">
         <EventDate
           :dateStart="event.dateStart"
