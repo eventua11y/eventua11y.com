@@ -117,10 +117,13 @@ const speakerDisplay = computed(() => {
   }
 
   if (speakers.length === MAX_DISPLAYED_SPEAKERS) {
-    const first = speakers.slice(0, MAX_DISPLAYED_SPEAKERS - 1).map(
-      (speaker) =>
-        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
-    ).join(', ');
+    const first = speakers
+      .slice(0, MAX_DISPLAYED_SPEAKERS - 1)
+      .map(
+        (speaker) =>
+          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
+      )
+      .join(', ');
     return `${first} and <span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}</span></span>`;
   }
 
