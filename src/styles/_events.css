@@ -19,7 +19,6 @@
   display: flex;
   flex-wrap: wrap;
   font-size: var(--p-step--1);
-  order: 1;
   /* gap: 0.2rem; */
   .fa-arrow-right-long {
     margin: 0 0.3rem;
@@ -111,7 +110,6 @@
     order: 2;
   }
   .event__dates {
-    order: 1;
     font-size: var(--p-step--1);
   }
   .event__location {
