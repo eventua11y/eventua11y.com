@@ -188,7 +188,7 @@ function getStartDateFormat() {
  */
 function getEndDateFormat() {
   if (props.day) return 'LL';
-  if (isSameDay(props.dateStart, props.dateEnd)) return 'h:mma';
+  if (isSameDay(props.dateStart, props.dateEnd)) return 'LT';
   return 'LLL';
 }
 
