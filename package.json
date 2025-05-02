@@ -35,7 +35,7 @@
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.10.2",
     "@typescript-eslint/parser": "^8.25.0",
-    "astro": "^5.3.0",
+    "astro": "^5.7.10",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",
     "cssnano": "^7.0.6",
@@ -55,8 +55,8 @@
     "typescript-eslint": "^8.18.2"
   },
   "dependencies": {
-    "@astrojs/netlify": "^6.2.0",
-    "@astrojs/vue": "^5.0.6",
+    "@astrojs/netlify": "^6.3.2",
+    "@astrojs/vue": "^5.0.13",
     "@sanity/client": "^6.28.0",
     "@sanity/image-url": "^1.1.0",
     "@sentry/astro": "^8.47.0",
