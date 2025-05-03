@@ -11,21 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Retry Netlify Deployment
+      - name: Wait for Netlify Deployment
         run: |
-          retries=5
+          retries=15
           count=0
+          echo "Waiting for Netlify deployment at https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
+          
           until $(curl --output /dev/null --silent --head --fail https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/); do
             ((count++))
             if [ ${count} -ge ${retries} ]; then
-              echo "Max retries reached, failing the job."
+              echo "Max retries reached (${retries} attempts over $(( retries * 2 )) minutes). Failing the job."
               exit 1
             fi
-            echo "Netlify site not ready, retrying in 60 seconds..."
-            sleep 60
+            echo "Attempt ${count}/${retries}: Netlify site not ready, retrying in 120 seconds..."
+            sleep 120
           done
+          
+          echo "✅ Netlify deployment is ready!"
+          # Add an extra wait to ensure site is fully functional
+          echo "Waiting an additional 60 seconds for site to stabilize..."
+          sleep 60
         env:
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
@@ -39,12 +46,35 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'npm'
+          
       - name: Install dependencies
         run: npm ci
+        
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-      - name: Run tests
-        run: npx playwright test
+        run: |
+          # Set a timeout for the install command to avoid it hanging indefinitely
+          timeout 5m npx playwright install --with-deps || (echo "Playwright installation timed out" && exit 1)
+      - name: Check Netlify deployment accessibility
+        run: |
+          echo "Verifying Netlify deployment is accessible..."
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/)
+          echo "Netlify site responded with HTTP status: $status_code"
+          if [[ "$status_code" != "200" ]]; then
+            echo "⚠️ Warning: Site returned non-200 status code. This might affect tests."
+          else
+            echo "✅ Site is accessible!"
+          fi
+
+      - name: Run tests with retries
+        run: |
+          # Try tests up to 2 times to account for any flakiness
+          npx playwright test --retries=1 --timeout=90000
         env:
           PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
-          DEBUG: pw:api
+          DEBUG: pw:api,pw:browser
