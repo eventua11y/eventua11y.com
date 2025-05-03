@@ -116,8 +116,9 @@ test('reset button appears when filters are applied', async ({ page }) => {
 
 // Reset button clears filters
 test('reset button clears filters', async ({ page }) => {
-  // Open the filter drawer
-  await page.getByRole('button', { name: 'Filter' }).click();
+  // Open the filter drawer with a more specific selector
+  const filterButton = page.locator('#open-filter-drawer');
+  await filterButton.click();
 
   // Wait for drawer to be fully visible
   const drawer = page.locator('#filter-drawer');
@@ -154,7 +155,7 @@ test('reset button clears filters', async ({ page }) => {
   await expect(drawer).not.toBeVisible({ timeout: 5000 });
 
   // Reopen the drawer to verify reset worked
-  await page.getByRole('button', { name: 'Filter' }).click();
+  await filterButton.click();
   await expect(drawer).toBeVisible();
 
   // Verify the reset button is not visible in the reopened drawer
