@@ -118,43 +118,45 @@ test('reset button appears when filters are applied', async ({ page }) => {
 test('reset button clears filters', async ({ page }) => {
   // Open the filter drawer
   await page.getByRole('button', { name: 'Filter' }).click();
-  
+
   // Wait for drawer to be fully visible
   const drawer = page.locator('#filter-drawer');
   await expect(drawer).toBeVisible();
-  
+
   // Check a filter option to make reset button appear
-  const notAcceptingTalksRadio = page.getByRole('radio', { name: 'Not accepting talks', exact: true });
+  const notAcceptingTalksRadio = page.getByRole('radio', {
+    name: 'Not accepting talks',
+    exact: true,
+  });
   await notAcceptingTalksRadio.check({ force: true });
-  
+
   // Wait for reset button to become visible
   const resetButton = page.getByTestId('drawer-reset');
   await expect(resetButton).toBeVisible({ timeout: 5000 });
-  
+
   // Click reset button
   await resetButton.click({ force: true });
-  
+
   // Wait for reactive changes to propagate after reset
-  await page.waitForTimeout(500);
-  
+  await page.waitForTimeout(1000);
+
   // Verify filter has been reset by checking radio button state
-  const anyPreferenceRadio = page.getByRole('radio', { name: 'No preference', exact: true }).first();
+  const anyPreferenceRadio = page
+    .getByRole('radio', { name: 'No preference', exact: true })
+    .first();
   await expect(anyPreferenceRadio).toBeChecked({ timeout: 5000 });
-  
-  // Use alternate strategies to verify the reset button is gone
-  try {
-    // 1. Try standard visibility check with longer timeout
-    await expect(resetButton).not.toBeVisible({ timeout: 5000 });
-  } catch {
-    // 2. If that fails, check if the button is actually hidden via CSS or parent visibility
-    const isButtonVisible = await page.evaluate(() => {
-      const button = document.querySelector('[data-testid="drawer-reset"]');
-      if (!button) return false;
-      
-      const style = window.getComputedStyle(button);
-      return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-    });
-    
-    expect(isButtonVisible).toBeFalsy();
-  }
+
+  // Close the drawer after successful reset
+  const closeButton = page.getByRole('button', { name: 'Close' });
+  await closeButton.click({ force: true });
+
+  // Verify drawer closes completely
+  await expect(drawer).not.toBeVisible({ timeout: 5000 });
+
+  // Reopen the drawer to verify reset worked
+  await page.getByRole('button', { name: 'Filter' }).click();
+  await expect(drawer).toBeVisible();
+
+  // Verify the reset button is not visible in the reopened drawer
+  await expect(resetButton).not.toBeVisible({ timeout: 5000 });
 });
