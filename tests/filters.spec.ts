@@ -116,10 +116,28 @@ test('reset button appears when filters are applied', async ({ page }) => {
 
 // Reset button clears filters
 test('reset button clears filters', async ({ page }) => {
+  // Open the filter drawer
   await page.getByRole('button', { name: 'Filter' }).click();
+  
+  // Wait for drawer to be fully visible
+  const drawer = page.locator('#filter-drawer');
+  await expect(drawer).toBeVisible();
+  
+  // Check a filter option to make reset button appear
   await page
     .getByRole('radio', { name: 'Not accepting talks', exact: true })
     .check({ force: true });
-  await page.getByTestId('drawer-reset').click({ force: true });
-  await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
+  
+  // Wait for reset button to become visible
+  const resetButton = page.getByTestId('drawer-reset');
+  await expect(resetButton).toBeVisible({ timeout: 2000 });
+  
+  // Click reset button
+  await resetButton.click({ force: true });
+  
+  // Wait for reactive changes to propagate after reset
+  await page.waitForTimeout(300);
+  
+  // Verify reset button is no longer visible
+  await expect(resetButton).not.toBeVisible({ timeout: 2000 });
 });
