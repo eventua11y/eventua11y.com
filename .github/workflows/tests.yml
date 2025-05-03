@@ -4,6 +4,7 @@ on: [pull_request]
 
 env:
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+  NETLIFY_URL: https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/
 
 jobs:
   tests_e2e_netlify_prepare:
@@ -11,21 +12,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Retry Netlify Deployment
+      - name: Wait for Netlify Deployment
         run: |
-          retries=5
+          retries=30
           count=0
-          until $(curl --output /dev/null --silent --head --fail https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/); do
+          NETLIFY_URL="https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
+          echo "Waiting for Netlify deployment at $NETLIFY_URL"
+
+          # Initial wait to give Netlify time to register the deployment
+          echo "Initial wait for Netlify build to start (60 seconds)..."
+          sleep 60
+
+          # Check if site is accessible
+          until curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL" | grep -q "200"; do
             ((count++))
             if [ ${count} -ge ${retries} ]; then
-              echo "Max retries reached, failing the job."
+              echo "Max retries reached (${retries} attempts over $(( retries * 5 )) minutes). Failing the job."
               exit 1
             fi
-            echo "Netlify site not ready, retrying in 60 seconds..."
-            sleep 60
+            echo "Attempt ${count}/${retries}: Netlify site not ready, retrying in 30 seconds..."
+            sleep 30
           done
+
+          echo "✅ Netlify deployment is ready!"
+          # Add an extra wait to ensure site is fully functional
+          echo "Waiting an additional 30 seconds for site to stabilize..."
+          sleep 30
+
+          # Set the Netlify URL as an environment variable for later steps
+          echo "NETLIFY_URL=$NETLIFY_URL" >> $GITHUB_ENV
         env:
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
@@ -33,18 +50,62 @@ jobs:
     needs: tests_e2e_netlify_prepare
     name: Run end-to-end tests on Netlify PR preview
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-      - name: Run tests
-        run: npx playwright test
+        run: |
+          # Set a timeout for the install command to avoid it hanging indefinitely
+          timeout 5m npx playwright install --with-deps || (echo "Playwright installation timed out" && exit 1)
+      - name: Check Netlify deployment accessibility
+        run: |
+          # Define the Netlify URL if not already set
+          if [ -z "$NETLIFY_URL" ]; then
+            NETLIFY_URL="https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
+            echo "NETLIFY_URL=$NETLIFY_URL" >> $GITHUB_ENV
+          fi
+
+          echo "Verifying Netlify deployment is accessible at: $NETLIFY_URL"
+
+          # Final verification to ensure the site is accessible
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL")
+          echo "Netlify site responded with HTTP status: $status_code"
+            
+          if [[ "$status_code" == "200" ]]; then
+            echo "✅ Site is accessible and ready for testing!"
+          else
+            echo "⚠️ Warning: Site returned non-200 status code ($status_code). Tests may be unstable."
+          fi
+
+      - name: Run tests with retries
+        run: |
+          # Echo out the test URL
+          echo "Running tests against: ${NETLIFY_URL}"
+
+          # Try tests up to 2 times to account for any flakiness
+          npx playwright test --retries=1 --timeout=90000
         env:
-          PLAYWRIGHT_TEST_BASE_URL: 'https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/'
-          DEBUG: pw:api
+          # Use the PR number directly to construct the URL to avoid environment variable issues
+          PLAYWRIGHT_TEST_BASE_URL: https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/
+          DEBUG: pw:api,pw:browser
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
