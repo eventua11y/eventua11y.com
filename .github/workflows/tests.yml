@@ -4,6 +4,7 @@ on: [pull_request]
 
 env:
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+  NETLIFY_URL: https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/
 
 jobs:
   tests_e2e_netlify_prepare:
@@ -15,24 +16,33 @@ jobs:
 
       - name: Wait for Netlify Deployment
         run: |
-          retries=15
+          retries=30
           count=0
-          echo "Waiting for Netlify deployment at https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
+          NETLIFY_URL="https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
+          echo "Waiting for Netlify deployment at $NETLIFY_URL"
 
-          until $(curl --output /dev/null --silent --head --fail https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/); do
+          # Initial wait to give Netlify time to register the deployment
+          echo "Initial wait for Netlify build to start (60 seconds)..."
+          sleep 60
+
+          # Check if site is accessible
+          until curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL" | grep -q "200"; do
             ((count++))
             if [ ${count} -ge ${retries} ]; then
-              echo "Max retries reached (${retries} attempts over $(( retries * 2 )) minutes). Failing the job."
+              echo "Max retries reached (${retries} attempts over $(( retries * 5 )) minutes). Failing the job."
               exit 1
             fi
-            echo "Attempt ${count}/${retries}: Netlify site not ready, retrying in 120 seconds..."
-            sleep 120
+            echo "Attempt ${count}/${retries}: Netlify site not ready, retrying in 30 seconds..."
+            sleep 30
           done
 
           echo "✅ Netlify deployment is ready!"
           # Add an extra wait to ensure site is fully functional
-          echo "Waiting an additional 60 seconds for site to stabilize..."
-          sleep 60
+          echo "Waiting an additional 30 seconds for site to stabilize..."
+          sleep 30
+
+          # Set the Netlify URL as an environment variable for later steps
+          echo "NETLIFY_URL=$NETLIFY_URL" >> $GITHUB_ENV
         env:
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
@@ -62,31 +72,23 @@ jobs:
           timeout 5m npx playwright install --with-deps || (echo "Playwright installation timed out" && exit 1)
       - name: Check Netlify deployment accessibility
         run: |
-          # Define the Netlify URL
-          NETLIFY_URL="https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/"
+          # Define the Netlify URL if not already set
+          if [ -z "$NETLIFY_URL" ]; then
+            NETLIFY_URL="https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
+            echo "NETLIFY_URL=$NETLIFY_URL" >> $GITHUB_ENV
+          fi
+
           echo "Verifying Netlify deployment is accessible at: $NETLIFY_URL"
 
-          # Try multiple times in case of transient network issues
-          for i in {1..3}; do
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL")
-            echo "Netlify site responded with HTTP status: $status_code"
+          # Final verification to ensure the site is accessible
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL")
+          echo "Netlify site responded with HTTP status: $status_code"
             
-            if [[ "$status_code" == "200" ]]; then
-              echo "✅ Site is accessible!"
-              break
-            else
-              echo "⚠️ Warning: Site returned non-200 status code ($status_code)."
-              if [[ $i < 3 ]]; then
-                echo "Retrying in 10 seconds... (Attempt $i/3)"
-                sleep 10
-              else
-                echo "⚠️ Site continues to return error status. Tests may fail."
-              fi
-            fi
-          done
-
-          # Output the URL for debugging
-          echo "NETLIFY_URL=$NETLIFY_URL" >> $GITHUB_ENV
+          if [[ "$status_code" == "200" ]]; then
+            echo "✅ Site is accessible and ready for testing!"
+          else
+            echo "⚠️ Warning: Site returned non-200 status code ($status_code). Tests may be unstable."
+          fi
 
       - name: Run tests with retries
         run: |
@@ -96,7 +98,8 @@ jobs:
           # Try tests up to 2 times to account for any flakiness
           npx playwright test --retries=1 --timeout=90000
         env:
-          PLAYWRIGHT_TEST_BASE_URL: ${{ env.NETLIFY_URL }}
+          # Use the PR number directly to construct the URL to avoid environment variable issues
+          PLAYWRIGHT_TEST_BASE_URL: https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/
           DEBUG: pw:api,pw:browser
 
       - name: Upload test results
