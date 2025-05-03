@@ -141,23 +141,32 @@ test('reset button clears filters', async ({ page }) => {
   // Wait for reactive changes to propagate after reset
   await page.waitForTimeout(1000);
 
-  // Verify filter has been reset by checking radio button state
-  const anyPreferenceRadio = page
-    .getByRole('radio', { name: 'No preference', exact: true })
-    .first();
-  await expect(anyPreferenceRadio).toBeChecked({ timeout: 5000 });
+  // Verify filters have been reset by checking multiple UI indicators
 
-  // Close the drawer after successful reset
+  // 1. Check that "No preference" is selected for each radio group
+  const cfsPrefRadio = page
+    .getByRole('radio', { name: 'No preference', exact: true })
+    .nth(0);
+  const attendancePrefRadio = page
+    .getByRole('radio', { name: 'No preference', exact: true })
+    .nth(1);
+  const costPrefRadio = page
+    .getByRole('radio', { name: 'No preference', exact: true })
+    .nth(2);
+
+  await expect(cfsPrefRadio).toBeChecked({ timeout: 5000 });
+  await expect(attendancePrefRadio).toBeChecked({ timeout: 5000 });
+  await expect(costPrefRadio).toBeChecked({ timeout: 5000 });
+
+  // 2. Check filter status text shows "all events" (indicating no filters)
+  const filterStatus = page.locator('.filters__count');
+  const statusText = await filterStatus.innerText();
+  expect(statusText.includes('all')).toBeTruthy();
+
+  // Close the drawer after verifying reset worked
   const closeButton = page.getByRole('button', { name: 'Close' });
   await closeButton.click({ force: true });
 
   // Verify drawer closes completely
   await expect(drawer).not.toBeVisible({ timeout: 5000 });
-
-  // Reopen the drawer to verify reset worked
-  await filterButton.click();
-  await expect(drawer).toBeVisible();
-
-  // Verify the reset button is not visible in the reopened drawer
-  await expect(resetButton).not.toBeVisible({ timeout: 5000 });
 });
