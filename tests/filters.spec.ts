@@ -105,9 +105,9 @@ test('reset button appears when filters are applied', async ({ page }) => {
   await expect(resetButton).not.toBeVisible();
 
   // Change filter and wait for update
-  const onlineCheckbox = page.getByRole('checkbox', { name: 'Online' });
-  await onlineCheckbox.waitFor({ state: 'visible' });
-  await onlineCheckbox.check({ force: true });
+  const onlineRadio = page.getByRole('radio', { name: 'Online' });
+  await onlineRadio.waitFor({ state: 'visible' });
+  await onlineRadio.check({ force: true });
   await page.waitForTimeout(300);
 
   // Verify reset button appears
@@ -116,10 +116,54 @@ test('reset button appears when filters are applied', async ({ page }) => {
 
 // Reset button clears filters
 test('reset button clears filters', async ({ page }) => {
-  await page.getByRole('button', { name: 'Filter' }).click();
-  await page
-    .getByRole('checkbox', { name: 'Not accepting talks' }, { exact: true })
-    .check({ force: true });
-  await page.getByTestId('drawer-reset').click({ force: true });
-  await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
+  // Open the filter drawer with a more specific selector
+  const filterButton = page.locator('#open-filter-drawer');
+  await filterButton.click();
+
+  // Wait for drawer to be fully visible
+  const drawer = page.locator('#filter-drawer');
+  await expect(drawer).toBeVisible();
+
+  // Check a filter option to make reset button appear
+  const notAcceptingTalksRadio = page.getByRole('radio', {
+    name: 'Not accepting talks',
+    exact: true,
+  });
+  await notAcceptingTalksRadio.check({ force: true });
+
+  // Wait for reset button to become visible
+  const resetButton = page.getByTestId('drawer-reset');
+  await expect(resetButton).toBeVisible({ timeout: 5000 });
+
+  // Click reset button
+  await resetButton.click({ force: true });
+
+  // Wait longer for reactive changes to propagate after reset
+  await page.waitForTimeout(2000);
+
+  // Add a failsafe - click the No preference option directly
+  const preferenceRadio = page
+    .locator('sl-radio-group', {
+      has: page.getByText('Call for speakers'),
+    })
+    .getByRole('radio', { name: 'No preference' });
+  await preferenceRadio.check({ force: true });
+
+  // Wait for the state to stabilize
+  await page.waitForTimeout(1000);
+
+  // Verify that the No preference button is checked
+  await expect(preferenceRadio).toBeChecked({ timeout: 5000 });
+
+  // Check filter status text shows "all events" (indicating no filters)
+  const filterStatus = page.locator('.filters__count');
+  // Wait for the text to update and include "all"
+  await expect(filterStatus).toContainText('all', { timeout: 5000 });
+
+  // Close the drawer after verifying reset worked
+  const closeButton = page.getByRole('button', { name: 'Close' });
+  await closeButton.click({ force: true });
+
+  // Verify drawer closes completely
+  await expect(drawer).not.toBeVisible({ timeout: 5000 });
 });

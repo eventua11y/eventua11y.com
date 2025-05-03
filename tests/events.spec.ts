@@ -36,6 +36,9 @@ test('has no accessibility violations', async ({ page }) => {
 });
 
 test('has at least one upcoming event', async ({ page }) => {
+  // Wait for events to be loaded from the API
+  await page.waitForSelector('.event', { timeout: 10000 }); // Adding a longer timeout to ensure events load
+
   const upcomingEvents = page.locator('.event');
   const countOfEvents = await upcomingEvents.count();
   await expect(countOfEvents).toBeGreaterThan(0);
