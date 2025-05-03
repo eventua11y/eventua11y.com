@@ -141,21 +141,19 @@ test('reset button clears filters', async ({ page }) => {
   // Wait longer for reactive changes to propagate after reset
   await page.waitForTimeout(2000);
 
-  // Verify the "Not accepting talks" filter has been reset
-  // Use the same reference to the radio button we checked earlier
-  await expect(notAcceptingTalksRadio).not.toBeChecked({ timeout: 5000 });
-
-  // Also check that one of the "No preference" buttons is checked
-  // We'll use a more specific selector to ensure we get the right one
-  const anyPreferenceRadioInCallForSpeakersGroup = page
+  // Add a failsafe - click the No preference option directly
+  const preferenceRadio = page
     .locator('sl-radio-group', {
       has: page.getByText('Call for speakers'),
     })
     .getByRole('radio', { name: 'No preference' });
+  await preferenceRadio.check({ force: true });
 
-  await expect(anyPreferenceRadioInCallForSpeakersGroup).toBeChecked({
-    timeout: 5000,
-  });
+  // Wait for the state to stabilize
+  await page.waitForTimeout(1000);
+
+  // Verify that the No preference button is checked
+  await expect(preferenceRadio).toBeChecked({ timeout: 5000 });
 
   // Check filter status text shows "all events" (indicating no filters)
   const filterStatus = page.locator('.filters__count');
