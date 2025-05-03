@@ -18,7 +18,7 @@ jobs:
           retries=15
           count=0
           echo "Waiting for Netlify deployment at https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/"
-          
+
           until $(curl --output /dev/null --silent --head --fail https://deploy-preview-${{ github.event.pull_request.number }}--eventua11y.netlify.app/); do
             ((count++))
             if [ ${count} -ge ${retries} ]; then
@@ -28,7 +28,7 @@ jobs:
             echo "Attempt ${count}/${retries}: Netlify site not ready, retrying in 120 seconds..."
             sleep 120
           done
-          
+
           echo "✅ Netlify deployment is ready!"
           # Add an extra wait to ensure site is fully functional
           echo "Waiting an additional 60 seconds for site to stabilize..."
@@ -47,10 +47,10 @@ jobs:
         with:
           node-version: lts/*
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -65,7 +65,7 @@ jobs:
           # Define the Netlify URL
           NETLIFY_URL="https://deploy-preview-${{ env.GITHUB_PR_NUMBER }}--eventua11y.netlify.app/"
           echo "Verifying Netlify deployment is accessible at: $NETLIFY_URL"
-          
+
           # Try multiple times in case of transient network issues
           for i in {1..3}; do
             status_code=$(curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL")
@@ -84,7 +84,7 @@ jobs:
               fi
             fi
           done
-          
+
           # Output the URL for debugging
           echo "NETLIFY_URL=$NETLIFY_URL" >> $GITHUB_ENV
 
@@ -92,13 +92,13 @@ jobs:
         run: |
           # Echo out the test URL
           echo "Running tests against: ${NETLIFY_URL}"
-          
+
           # Try tests up to 2 times to account for any flakiness
           npx playwright test --retries=1 --timeout=90000
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ env.NETLIFY_URL }}
           DEBUG: pw:api,pw:browser
-          
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
