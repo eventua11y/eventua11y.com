@@ -105,9 +105,9 @@ test('reset button appears when filters are applied', async ({ page }) => {
   await expect(resetButton).not.toBeVisible();
 
   // Change filter and wait for update
-  const onlineCheckbox = page.getByRole('checkbox', { name: 'Online' });
-  await onlineCheckbox.waitFor({ state: 'visible' });
-  await onlineCheckbox.check({ force: true });
+  const onlineRadio = page.getByRole('radio', { name: 'Online' });
+  await onlineRadio.waitFor({ state: 'visible' });
+  await onlineRadio.check({ force: true });
   await page.waitForTimeout(300);
 
   // Verify reset button appears
@@ -118,7 +118,7 @@ test('reset button appears when filters are applied', async ({ page }) => {
 test('reset button clears filters', async ({ page }) => {
   await page.getByRole('button', { name: 'Filter' }).click();
   await page
-    .getByRole('checkbox', { name: 'Not accepting talks' }, { exact: true })
+    .getByRole('radio', { name: 'Not accepting talks', exact: true })
     .check({ force: true });
   await page.getByTestId('drawer-reset').click({ force: true });
   await expect(page.getByTestId('drawer-reset')).not.toBeVisible();
