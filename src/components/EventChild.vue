@@ -94,6 +94,7 @@ const speakersList = computed(() => {
     <div class="event__meta">
       <template v-if="event.scheduled">
         <EventDate
+          v-if="event.dateStart"
           :dateStart="event.dateStart"
           :dateEnd="event.dateEnd"
           :timezone="event.timezone"

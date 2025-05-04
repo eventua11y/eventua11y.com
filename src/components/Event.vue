@@ -154,7 +154,7 @@ const speakerDisplay = computed(() => {
 <template>
   <div v-if="event && event.type === 'deadline'" class="event event--deadline">
     <EventDate
-      v-if="showDate"
+      v-if="showDate && event.dateStart"
       :dateStart="event.dateStart"
       :timezone="event.timezone"
       :isDeadline="true"
@@ -178,7 +178,7 @@ const speakerDisplay = computed(() => {
     </h3>
 
     <EventDate
-      v-if="showDate"
+      v-if="showDate && event.dateStart"
       :dateStart="event.dateStart"
       :dateEnd="event.dateEnd"
       :timezone="event.timezone"
