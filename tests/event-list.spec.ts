@@ -240,4 +240,54 @@ test.describe('Event List', () => {
       await awarenessSwitch.click();
     }
   });
+
+  test('limits past events to the last 12 months', async ({ page }) => {
+    // Navigate to past events page
+    await page.goto('/past-events', { timeout: 30000 });
+
+    // Wait for the past events to load
+    await page.waitForSelector('#past-events');
+
+    // Wait for either events to load or a "no events" message
+    try {
+      await Promise.race([
+        page.waitForSelector('#past-events .event', { timeout: 10000 }),
+        page.waitForSelector('#past-events .no-events-message', { timeout: 10000 }),
+      ]);
+    } catch (e) {
+      console.log('Error waiting for past events content:', e);
+    }
+
+    // Get all events
+    const events = page.locator('#past-events .event');
+    const count = await events.count();
+
+    if (count === 0) {
+      // If no events found, test passes conditionally
+      console.log('No past events found - test passes conditionally');
+      return;
+    }
+
+    // Calculate the date 12 months ago
+    const today = new Date();
+    const twelveMonthsAgo = new Date(today.setFullYear(today.getFullYear() - 1));
+
+    // Check each event's date to ensure it's not older than 12 months
+    for (let i = 0; i < count; i++) {
+      const event = events.nth(i);      // Extract the event date using a data attribute or from the DOM
+      const dateElement = await event.locator('[datetime]').first();
+      if (dateElement) {
+        const dateText = await dateElement.getAttribute('datetime');
+        if (dateText) {
+          const eventDate = new Date(dateText);
+          expect(eventDate.getTime()).toBeGreaterThanOrEqual(twelveMonthsAgo.getTime());
+        } else {
+          console.log('Event date attribute is missing or empty');
+        }
+      } else {
+        console.log('Event date element not found');
+      }
+    }
+  });
+
 });

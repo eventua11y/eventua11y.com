@@ -306,13 +306,17 @@ async function fetchEventsFromSanity(
       })
     );
 
+    // Calculate the date 12 months ago from today
+    const twelveMonthsAgo = todayStart.subtract(12, 'month');
+    
     const past = flattenedEvents.filter((event) => {
-      if (!event.parent) {
+      if (!event.parent && event.dateStart) {
         const eventEnd = getEventTimeInUserTz(
           event.dateEnd || event.dateStart,
           event.timezone
         );
-        return eventEnd.isBefore(todayStart);
+        // Only include events from the last 12 months
+        return eventEnd.isBefore(todayStart) && eventEnd.isAfter(twelveMonthsAgo);
       }
       return false;
     });
