@@ -45,7 +45,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-playwright": "^2.1.0",
     "eslint-plugin-vue": "^9.32.0",
-    "globals": "^15.14.0",
+    "globals": "^16.1.0",
     "netlify-cli": "^20.1.1",
     "playwright-chromium": "^1.49.1",
     "postcss-html": "^1.7.0",
