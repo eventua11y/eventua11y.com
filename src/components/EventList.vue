@@ -70,10 +70,15 @@ const groupEvents = (events) => {
       ? events.filter((event) => event.type !== 'deadline')
       : events;
 
-  // Sort events based on type (past events in reverse chronological order)
+  // Initial sort of all events before grouping by month
+  // This ensures events appear in the correct order when first grouped
   const sortedEvents = [...filteredEvents].sort((a, b) => {
+    // Compare event dates (chronological order)
     const comparison =
       new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+
+    // For past events: reverse chronological order (newest first)
+    // For upcoming events: chronological order (oldest first)
     return props.type === 'past' ? -comparison : comparison;
   });
 
@@ -90,26 +95,36 @@ const groupEvents = (events) => {
     return groups;
   }, {});
 
-  // Sort each month's events: books first, then events in chronological order
+  // Sort each month's events: books first, then events by date
   Object.keys(groups).forEach((yearMonth) => {
     groups[yearMonth].sort((a, b) => {
-      // If both are same type, maintain date order
+      // If both items are the same type (both books or both events)
       if ((a._type === 'book') === (b._type === 'book')) {
-        return (
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-        );
+        // Calculate chronological comparison (earlier date comes first)
+        const comparison =
+          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+
+        // For past events: reverse chronological order (newest first)
+        // For upcoming events: chronological order (oldest first)
+        return props.type === 'past' ? -comparison : comparison;
       }
-      // Books go first
+      // Different types: Books always go first within their month
       return a._type === 'book' ? -1 : 1;
     });
   });
 
-  // Sort months (reverse for past events)
+  // Sort the month groups themselves
   const sortedGroups = Object.fromEntries(
     Object.entries(groups).sort((a, b) => {
+      // Extract year and month from month keys
       const [yearA, monthA] = a[0].split('-').map(Number);
       const [yearB, monthB] = b[0].split('-').map(Number);
+
+      // First compare years, then months if years are the same
       const comparison = yearA - yearB || monthA - monthB;
+
+      // For past events: reverse chronological order (newest month first)
+      // For upcoming events: chronological order (oldest month first)
       return props.type === 'past' ? -comparison : comparison;
     })
   );
