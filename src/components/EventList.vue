@@ -76,7 +76,7 @@ const groupEvents = (events) => {
     // Compare event dates (chronological order)
     const comparison =
       new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-    
+
     // For past events: reverse chronological order (newest first)
     // For upcoming events: chronological order (oldest first)
     return props.type === 'past' ? -comparison : comparison;
@@ -103,7 +103,7 @@ const groupEvents = (events) => {
         // Calculate chronological comparison (earlier date comes first)
         const comparison =
           new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-        
+
         // For past events: reverse chronological order (newest first)
         // For upcoming events: chronological order (oldest first)
         return props.type === 'past' ? -comparison : comparison;
@@ -119,10 +119,10 @@ const groupEvents = (events) => {
       // Extract year and month from month keys
       const [yearA, monthA] = a[0].split('-').map(Number);
       const [yearB, monthB] = b[0].split('-').map(Number);
-      
+
       // First compare years, then months if years are the same
       const comparison = yearA - yearB || monthA - monthB;
-      
+
       // For past events: reverse chronological order (newest month first)
       // For upcoming events: chronological order (oldest month first)
       return props.type === 'past' ? -comparison : comparison;
