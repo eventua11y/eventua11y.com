@@ -93,11 +93,11 @@ const groupEvents = (events) => {
   // Sort each month's events: books first, then events in chronological order
   Object.keys(groups).forEach((yearMonth) => {
     groups[yearMonth].sort((a, b) => {
-      // If both are same type, maintain date order
+      // If both are same type, maintain date order (with proper sorting direction)
       if ((a._type === 'book') === (b._type === 'book')) {
-        return (
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-        );
+        const comparison =
+          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+        return props.type === 'past' ? -comparison : comparison;
       }
       // Books go first
       return a._type === 'book' ? -1 : 1;
