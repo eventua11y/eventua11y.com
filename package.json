@@ -48,7 +48,7 @@
     "globals": "^16.1.0",
     "netlify-cli": "^21.5.0",
     "playwright-chromium": "^1.49.1",
-    "postcss-html": "^1.7.0",
+    "postcss-html": "^1.8.0",
     "prettier": "^3.4.2",
     "prettier-plugin-astro": "^0.14.1",
     "stylelint-config-html": "^1.1.0",
