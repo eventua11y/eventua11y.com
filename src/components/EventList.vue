@@ -146,35 +146,6 @@ const groupEvents = (events) => {
 };
 
 /**
- * Fetches books from the API endpoint
- * @returns {Promise<Array>} Array of book objects or empty array on error
- */
-async function fetchBooks() {
-  try {
-    const response = await fetch('/api/get-books');
-    if (!response.ok) throw new Error('Failed to fetch books');
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching books:', error);
-    return [];
-  }
-}
-
-/**
- * Normalizes a date string to ISO format
- * @param {string} dateString - Date string from various sources
- * @returns {string|null} ISO date string or null if invalid
- */
-const normalizeDate = (dateString) => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    console.warn('Invalid date:', dateString);
-    return null;
-  }
-  return date.toISOString();
-};
-
-/**
  * Lifecycle hook: initializes component data
  * - Fetches and sets user info if needed
  * - Gets events from store
@@ -287,8 +258,8 @@ watch(
     <!-- Error state -->
     <sl-alert v-else-if="error" open variant="danger" class="my-xl">
       <template v-slot:icon>
-<sl-icon  name="exclamation-octagon"></sl-icon>
-</template>
+        <sl-icon name="exclamation-octagon"></sl-icon>
+      </template>
       {{ error }}
     </sl-alert>
 
@@ -299,8 +270,8 @@ watch(
       class="my-xl"
     >
       <template v-slot:icon>
-<sl-icon  name="info-circle"></sl-icon>
-</template>
+        <sl-icon name="info-circle"></sl-icon>
+      </template>
       {{
         type === 'past'
           ? 'There are no past events to display.'
