@@ -78,9 +78,6 @@ const isCallForSpeakersOpen = (event: Event): boolean => {
   return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
 };
 
-// Create a reactive reference to defaultFilters
-const initialFilters = reactive({ ...defaultFilters });
-
 /**
  * Loads filters from localStorage.
  * @returns The stored filters or the default filters if none are stored.
