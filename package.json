@@ -59,7 +59,7 @@
     "@astrojs/vue": "^5.0.13",
     "@sanity/client": "^7.0.0",
     "@sanity/image-url": "^1.1.0",
-    "@sentry/astro": "^9.15.0",
+    "@sentry/astro": "^9.38.0",
     "@sentry/cli": "^2.46.0",
     "@sentry/profiling-node": "^9.15.0",
     "@sentry/vue": "^9.15.0",
