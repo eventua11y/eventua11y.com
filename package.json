@@ -34,7 +34,7 @@
     "@eslint/js": "^9.28.0",
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.15.19",
-    "@typescript-eslint/parser": "^8.25.0",
+    "@typescript-eslint/parser": "^8.36.0",
     "astro": "^5.8.1",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",
