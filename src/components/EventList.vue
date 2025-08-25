@@ -174,17 +174,20 @@ if (props.initialEvents) {
 
   // Add books to the events list (only for upcoming events)
   const booksWithType =
-    props.type === 'upcoming' && props.initialBooks?.map((book) => ({
-      ...book,
-      _type: 'book',
-      dateStart: book.date,
-    })) || [];
+    (props.type === 'upcoming' &&
+      props.initialBooks?.map((book) => ({
+        ...book,
+        _type: 'book',
+        dateStart: book.date,
+      }))) ||
+    [];
 
   // Group events immediately for SSR
   if (eventsToProcess.length > 0 || booksWithType.length > 0) {
-    const allEvents = props.type === 'past' 
-      ? eventsToProcess 
-      : [...eventsToProcess, ...booksWithType];
+    const allEvents =
+      props.type === 'past'
+        ? eventsToProcess
+        : [...eventsToProcess, ...booksWithType];
     groupEvents(allEvents);
     loading.value = false;
   }
@@ -225,7 +228,7 @@ const normalizeDate = (dateString) => {
  */
 onMounted(async () => {
   error.value = null;
-  
+
   // Remove static server-rendered content to prevent duplicates
   const staticContainer = document.getElementById('static-events-container');
   if (staticContainer) {
