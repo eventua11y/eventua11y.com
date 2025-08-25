@@ -82,6 +82,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Located in `netlify/edge-functions/`:
 
 - `get-events.ts`: Fetches and processes events from Sanity
+  - Creates synthetic "Call for Speakers" deadline events from CFS dates
+  - Implements 5-minute caching to reduce API calls
+  - Handles timezone conversion for international vs. local events
 - `get-books.ts`: Fetches book releases
 - `get-user-info.ts`: User location/timezone detection
 
@@ -116,3 +119,24 @@ Located in `netlify/edge-functions/`:
 - All pages must conform to WCAG 2.2 Level AA
 - Regular accessibility testing with automated and manual methods
 - Skip link implementation and proper semantic markup
+
+## Important Project Specifics
+
+### Event Processing Logic
+
+- International events (with `internationalEvent: true`) use timezone-agnostic time display
+- Local events show times converted to user's selected timezone
+- "Call for Speakers" deadlines are automatically generated from CFS dates on events
+
+### Filter State Persistence
+
+- Filter selections persist in localStorage under `eventua11y-filters`
+- User preferences (theme, timezone) stored separately in `eventua11y-user`
+- Filter state includes: CFS status, attendance mode, cost filters, content type toggles
+
+### Development Workflow
+
+1. Use `netlify dev` when testing edge functions or full functionality
+2. Run `npm run check` before committing to ensure formatting compliance
+3. Test timezone functionality by changing browser timezone or using UI selector
+4. Verify accessibility with Playwright tests that include axe-core checks
