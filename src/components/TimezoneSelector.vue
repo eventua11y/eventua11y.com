@@ -90,8 +90,22 @@ function updateTimezone(event) {
 /**
  * Initialize timezone on component mount
  * Sets user's detected timezone if useLocalTimezone is true
+ * Fetches user info if it hasn't been fetched yet
  */
-onMounted(() => {
+onMounted(async () => {
+  // If user info hasn't been fetched yet, fetch it
+  if (!userStore.userInfoFetched) {
+    try {
+      const response = await fetch('/api/get-user-info');
+      if (response.ok) {
+        const data = await response.json();
+        userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+      }
+    } catch (error) {
+      console.error('Error fetching user info in TimezoneSelector:', error);
+    }
+  }
+
   if (userStore.useLocalTimezone && userStore.geo?.timezone) {
     userStore.setTimezone(userTimezone.value, true);
   }

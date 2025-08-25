@@ -32,6 +32,13 @@ test.describe('Timezone Selector', () => {
   test('timezone can be changed between local and event times', async ({
     page,
   }) => {
+    // Wait for page to be fully loaded including API calls
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for timezone to load (no longer shows "Loading timezone...")
+    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    await expect(triggerButton).not.toContainText('Loading timezone...', { timeout: 15000 });
+
     // Open dropdown
     const dropdown = page.locator('#timezone-dropdown');
     await dropdown.click();
@@ -41,7 +48,6 @@ test.describe('Timezone Selector', () => {
     await expect(menu).toBeVisible({ timeout: 5000 });
 
     // Get initial selection text
-    const triggerButton = page.locator('#timezone-dropdown sl-button');
     const initialText = await triggerButton.textContent();
 
     // Find which option is not selected and click it
@@ -103,6 +109,13 @@ test.describe('Timezone Selector', () => {
   });
 
   test('timezone selection persists after page reload', async ({ page }) => {
+    // Wait for page to be fully loaded including API calls
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for timezone to load (no longer shows "Loading timezone...")
+    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    await expect(triggerButton).not.toContainText('Loading timezone...', { timeout: 15000 });
+
     // Open dropdown
     const dropdown = page.locator('#timezone-dropdown');
     await expect(dropdown).toBeVisible({ timeout: 5000 });
@@ -181,20 +194,20 @@ test.describe('Timezone Selector', () => {
     await page.waitForTimeout(2000);
 
     // Get the current selection text
-    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    const buttonElement = page.locator('#timezone-dropdown sl-button');
 
     // Make sure the dropdown has closed and the button is visible
-    await expect(triggerButton).toBeVisible({ timeout: 5000 });
+    await expect(buttonElement).toBeVisible({ timeout: 5000 });
 
     // Check button text and retry if it's still loading
-    let selectedText = await triggerButton.textContent();
+    let selectedText = await buttonElement.textContent();
     console.log(`Initial button text after selection: "${selectedText}"`);
 
     // If text shows "Loading", wait a bit more and retry
     if (selectedText?.includes('Loading')) {
       console.log('Still loading timezone, waiting more time...');
       await page.waitForTimeout(3000);
-      selectedText = await triggerButton.textContent();
+      selectedText = await buttonElement.textContent();
       console.log(`Button text after additional wait: "${selectedText}"`);
     }
     console.log(`Selected timezone before reload: "${selectedText}"`);

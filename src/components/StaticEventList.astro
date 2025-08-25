@@ -133,7 +133,7 @@ const groupedEvents = groupEventsByMonth(itemsToGroup, []);
   </div>
 
   <!-- Events list (server-rendered, always visible) -->
-  <div id={`${type}-events`} class="flow flow-2xl">
+  <div id={`static-${type}-events`} class="flow flow-2xl">
     {Object.entries(groupedEvents).map(([yearMonth, events]) => (
       <section
         id={`section-${yearMonth}`}
