@@ -34,10 +34,12 @@ test.describe('Timezone Selector', () => {
   }) => {
     // Wait for page to be fully loaded including API calls
     await page.waitForLoadState('networkidle');
-    
+
     // Wait for timezone to load (no longer shows "Loading timezone...")
     const triggerButton = page.locator('#timezone-dropdown sl-button');
-    await expect(triggerButton).not.toContainText('Loading timezone...', { timeout: 15000 });
+    await expect(triggerButton).not.toContainText('Loading timezone...', {
+      timeout: 15000,
+    });
 
     // Open dropdown
     const dropdown = page.locator('#timezone-dropdown');
@@ -111,10 +113,12 @@ test.describe('Timezone Selector', () => {
   test('timezone selection persists after page reload', async ({ page }) => {
     // Wait for page to be fully loaded including API calls
     await page.waitForLoadState('networkidle');
-    
+
     // Wait for timezone to load (no longer shows "Loading timezone...")
     const triggerButton = page.locator('#timezone-dropdown sl-button');
-    await expect(triggerButton).not.toContainText('Loading timezone...', { timeout: 15000 });
+    await expect(triggerButton).not.toContainText('Loading timezone...', {
+      timeout: 15000,
+    });
 
     // Open dropdown
     const dropdown = page.locator('#timezone-dropdown');
