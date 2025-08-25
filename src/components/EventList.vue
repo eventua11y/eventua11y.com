@@ -223,6 +223,12 @@ const normalizeDate = (dateString) => {
  */
 onMounted(async () => {
   error.value = null;
+  
+  // Remove static server-rendered content to prevent duplicates
+  const staticContainer = document.getElementById('static-events-container');
+  if (staticContainer) {
+    staticContainer.remove();
+  }
 
   try {
     // If we have initial SSR data and stores are empty, populate them

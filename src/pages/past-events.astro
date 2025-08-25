@@ -1,7 +1,7 @@
 ---
 import DefaultLayout from '../layouts/default.astro';
 import StaticEventList from '../components/StaticEventList.astro';
-// import EventList from '../components/EventList.vue'; // TODO: Re-enable for progressive enhancement
+import EventList from '../components/EventList.vue';
 import MonthNav from '../components/MonthNav.vue';
 
 // Disable prerendering to enable SSR
@@ -40,25 +40,24 @@ try {
   <div class="container grid">
     <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l readable main-content">
       <h1 class="sr-only">Past accessibility events</h1>
-      <!-- Static server-rendered content -->
-      <StaticEventList 
-        type="past"
-        initialEvents={eventsData}
-        initialBooks={booksData}
-        initialUserInfo={userInfo}
-      />
+      <!-- Server-rendered content for no-JS users -->
+      <div id="static-events-container">
+        <StaticEventList 
+          type="past"
+          initialEvents={eventsData}
+          initialBooks={booksData}
+          initialUserInfo={userInfo}
+        />
+      </div>
       
-      <!-- TODO: Add progressive enhancement back once TypeScript errors are resolved -->
-      <!-- 
+      <!-- Progressive enhancement replaces static content -->
       <EventList 
         type="past" 
-        client:idle
+        client:load
         initialEvents={eventsData}
         initialBooks={booksData}
         initialUserInfo={userInfo}
-        style="display: none;"
       />
-      -->
     </div>
     <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' />
   </div>

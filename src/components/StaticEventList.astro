@@ -30,7 +30,7 @@ function groupEventsByMonth(events: any[], books: any[]) {
     grouped[yearMonth].push(item);
   }
   
-  // Sort months and events within each month
+  // Sort months
   const sortedEntries = Object.entries(grouped).sort((a, b) => {
     const [yearA, monthA] = a[0].split('-').map(Number);
     const [yearB, monthB] = b[0].split('-').map(Number);
@@ -38,6 +38,23 @@ function groupEventsByMonth(events: any[], books: any[]) {
     const dateB = new Date(yearB, monthB - 1);
     
     return type === 'past' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+  });
+  
+  // Sort events within each month
+  sortedEntries.forEach(([yearMonth, events]) => {
+    events.sort((a, b) => {
+      // If both items are the same type (both books or both events)
+      if ((a._type === 'book') === (b._type === 'book')) {
+        // Calculate chronological comparison (earlier date comes first)
+        const comparison = new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+        
+        // For past events: reverse chronological order (newest first)
+        // For upcoming events: chronological order (oldest first)
+        return type === 'past' ? -comparison : comparison;
+      }
+      // Different types: Books always go first within their month
+      return a._type === 'book' ? -1 : 1;
+    });
   });
   
   return Object.fromEntries(sortedEntries);
@@ -105,7 +122,7 @@ const groupedEvents = groupEventsByMonth(itemsToGroup, []);
           aria-labelledby={`heading-${yearMonth}`}
         >
           {events.map((event) => (
-            <li key={event._id}>
+            <li>
               {event._type === 'book' ? (
                 <EventBook book={event} />
               ) : (

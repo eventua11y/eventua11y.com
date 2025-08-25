@@ -2,7 +2,7 @@
 import DefaultLayout from '../layouts/default.astro';
 import Today from '../components/Today.vue';
 import StaticEventList from '../components/StaticEventList.astro';
-// import EventList from '../components/EventList.vue'; // TODO: Re-enable for progressive enhancement
+import EventList from '../components/EventList.vue';
 import FilterBar from '../components/FilterBar.vue';
 import Filters from '../components/Filters.vue';
 import MonthNav from '../components/MonthNav.vue';
@@ -46,25 +46,24 @@ try {
   <div class="container grid">
     <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l readable main-content">
       <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
-      <!-- Static server-rendered content -->
-      <StaticEventList 
-        type="upcoming"
-        initialEvents={eventsData}
-        initialBooks={booksData}
-        initialUserInfo={userInfo}
-      />
+      <!-- Server-rendered content for no-JS users -->
+      <div id="static-events-container">
+        <StaticEventList 
+          type="upcoming"
+          initialEvents={eventsData}
+          initialBooks={booksData}
+          initialUserInfo={userInfo}
+        />
+      </div>
       
-      <!-- TODO: Add progressive enhancement back once TypeScript errors are resolved -->
-      <!-- 
+      <!-- Progressive enhancement replaces static content -->
       <EventList 
         type="upcoming" 
-        client:idle
+        client:load
         initialEvents={eventsData}
         initialBooks={booksData}
         initialUserInfo={userInfo}
-        style="display: none;"
       />
-      -->
     </div>
     <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' showTodayLink={true} />
   </div>
