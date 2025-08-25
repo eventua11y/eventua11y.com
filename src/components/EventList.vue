@@ -14,6 +14,9 @@ import filtersStore from '../store/filtersStore';
 
 /**
  * @prop {string} type - Type of events to display ('past' or 'upcoming')
+ * @prop {Object} initialEvents - Initial events data from SSR
+ * @prop {Array} initialBooks - Initial books data from SSR
+ * @prop {Object} initialUserInfo - Initial user info from SSR
  */
 const props = defineProps({
   // 'past' or 'upcoming'
@@ -21,6 +24,18 @@ const props = defineProps({
     type: String,
     required: true,
     validator: (value) => ['past', 'upcoming'].includes(value),
+  },
+  initialEvents: {
+    type: Object,
+    default: null,
+  },
+  initialBooks: {
+    type: Array,
+    default: () => [],
+  },
+  initialUserInfo: {
+    type: Object,
+    default: null,
   },
 });
 
@@ -145,6 +160,34 @@ const groupEvents = (events) => {
   groupedEvents.value = sortedGroups;
 };
 
+// Initialize immediately for SSR
+// This runs during server-side rendering
+if (props.initialEvents) {
+  // Process initial events for SSR
+  const eventsToProcess =
+    props.type === 'past'
+      ? props.initialEvents.past || []
+      : [
+          ...(props.initialEvents.future || []),
+          ...(props.initialEvents.today || []),
+        ];
+
+  // Add books to the events list
+  const booksWithType =
+    props.initialBooks?.map((book) => ({
+      ...book,
+      _type: 'book',
+      dateStart: book.date,
+    })) || [];
+
+  // Group events immediately for SSR
+  if (eventsToProcess.length > 0 || booksWithType.length > 0) {
+    const allEvents = [...eventsToProcess, ...booksWithType];
+    groupEvents(allEvents);
+    loading.value = false;
+  }
+}
+
 /**
  * Fetches books from the API endpoint
  * @returns {Promise<Array>} Array of book objects or empty array on error
@@ -175,51 +218,67 @@ const normalizeDate = (dateString) => {
 };
 
 /**
- * Lifecycle hook: initializes component data
- * - Fetches and sets user info if needed
- * - Gets events from store
- * - Fetches and merges books with events
- * - Groups combined items by month
+ * Client-side initialization
+ * Syncs SSR data with stores and handles client-side fetching
  */
 onMounted(async () => {
-  loading.value = true;
   error.value = null;
 
   try {
-    if (!userStore.userInfoFetched) {
-      const response = await fetch('/api/get-user-info');
-      if (!response.ok) throw new Error('Failed to fetch user info');
-      const data = await response.json();
-      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+    // If we have initial SSR data and stores are empty, populate them
+    if (props.initialEvents && !filtersStore.events.length) {
+      // Set user info from SSR
+      if (props.initialUserInfo && !userStore.userInfoFetched) {
+        userStore.setUserInfo(
+          props.initialUserInfo.timezone,
+          props.initialUserInfo.acceptLanguage,
+          props.initialUserInfo.geo
+        );
+      }
+
+      // Set events from SSR
+      filtersStore.setEvents(
+        props.initialEvents.future || [],
+        props.initialEvents.today || [],
+        props.initialEvents.past || []
+      );
+
+      // Set books from SSR
+      if (props.initialBooks && props.initialBooks.length > 0) {
+        filtersStore.books = props.initialBooks.map((book) => ({
+          ...book,
+          _type: 'book',
+          dateStart: book.date,
+        }));
+      }
+    } else if (!filtersStore.events.length && !props.initialEvents) {
+      // No SSR data and no store data - fetch from API
+      loading.value = true;
+      await filtersStore.fetchEvents();
+
+      // Get user info if not already fetched
+      if (!userStore.userInfoFetched) {
+        const response = await fetch('/api/get-user-info');
+        if (response.ok) {
+          const data = await response.json();
+          userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+        }
+      }
     }
 
-    // Get events from the store
-    let events =
+    // Update grouped events from store
+    const events =
       props.type === 'past'
         ? filtersStore.pastEvents
         : filtersStore.filteredEvents;
 
-    // Process events if we have them
-    if (events && events.length > 0) {
+    if (events) {
       groupEvents(events);
     }
+    loading.value = false;
   } catch (e) {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
-  } finally {
-    if (error.value || Object.keys(groupedEvents.value).length > 0) {
-      loading.value = false;
-    }
-  }
-});
-
-onMounted(() => {
-  const events =
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents;
-  if (events !== undefined) {
-    groupEvents(events);
     loading.value = false;
   }
 });
