@@ -22,7 +22,10 @@ function groupEventsByMonth(events: any[], books: any[]) {
     const date = new Date(item.dateStart);
     if (isNaN(date.getTime())) continue; // Skip invalid dates
     
-    const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    // Use UTC methods for books since their dates are in UTC
+    const yearMonth = item._type === 'book'
+      ? `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`
+      : `${date.getFullYear()}-${date.getMonth() + 1}`;
     
     if (!grouped[yearMonth]) {
       grouped[yearMonth] = [];
@@ -57,7 +60,18 @@ function groupEventsByMonth(events: any[], books: any[]) {
     });
   });
   
-  return Object.fromEntries(sortedEntries);
+  // Filter out past months for upcoming events
+  const filteredEntries = type !== 'past' 
+    ? sortedEntries.filter(([yearMonth]) => {
+        const [year, month] = yearMonth.split('-').map(Number);
+        const groupDate = new Date(year, month - 1);
+        const now = new Date();
+        const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        return groupDate >= currentMonthDate;
+      })
+    : sortedEntries;
+  
+  return Object.fromEntries(filteredEntries);
 }
 
 function formatMonthHeading(yearMonth: string) {
@@ -69,7 +83,12 @@ function formatMonthHeading(yearMonth: string) {
     return 'This month';
   }
   
-  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const formatter = new Intl.DateTimeFormat('default', {
+    month: 'long',
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+  });
+  
+  return formatter.format(date);
 }
 
 // Use pre-filtered data from the API
@@ -77,9 +96,17 @@ const filteredEvents = type === 'upcoming'
   ? [...(initialEvents.future || []), ...(initialEvents.today || [])]
   : (initialEvents.past || []).filter(event => event.type !== 'deadline');
 
-// Add books only to upcoming events
+// Add books only to upcoming events (transform book.date to dateStart)
+const booksWithType = type === 'upcoming' 
+  ? (initialBooks || []).map(book => ({
+      ...book,
+      _type: 'book',
+      dateStart: book.date,
+    }))
+  : [];
+
 const itemsToGroup = type === 'upcoming' 
-  ? [...filteredEvents, ...(initialBooks || [])]
+  ? [...filteredEvents, ...booksWithType]
   : filteredEvents;
 
 const groupedEvents = groupEventsByMonth(itemsToGroup, []);
