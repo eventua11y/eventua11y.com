@@ -54,6 +54,12 @@ main {
   display: none;
 }
 
+/* Override :not(:defined) rule to ensure astro-island elements are visible without JavaScript */
+astro-island:not(:defined) {
+  display: contents !important;
+  visibility: visible !important;
+}
+
 /* Adds a top margin to elements with an id attribute when scrolled into view */
 [id] {
   scroll-margin-top: 7rem;
