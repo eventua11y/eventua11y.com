@@ -172,9 +172,9 @@ if (props.initialEvents) {
           ...(props.initialEvents.today || []),
         ];
 
-  // Add books to the events list
+  // Add books to the events list (only for upcoming events)
   const booksWithType =
-    props.initialBooks?.map((book) => ({
+    props.type === 'upcoming' && props.initialBooks?.map((book) => ({
       ...book,
       _type: 'book',
       dateStart: book.date,
@@ -182,7 +182,9 @@ if (props.initialEvents) {
 
   // Group events immediately for SSR
   if (eventsToProcess.length > 0 || booksWithType.length > 0) {
-    const allEvents = [...eventsToProcess, ...booksWithType];
+    const allEvents = props.type === 'past' 
+      ? eventsToProcess 
+      : [...eventsToProcess, ...booksWithType];
     groupEvents(allEvents);
     loading.value = false;
   }

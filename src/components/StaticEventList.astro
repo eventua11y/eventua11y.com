@@ -75,7 +75,7 @@ function formatMonthHeading(yearMonth: string) {
 // Use pre-filtered data from the API
 const filteredEvents = type === 'upcoming' 
   ? [...(initialEvents.future || []), ...(initialEvents.today || [])]
-  : (initialEvents.past || []);
+  : (initialEvents.past || []).filter(event => event.type !== 'deadline');
 
 // Add books only to upcoming events
 const itemsToGroup = type === 'upcoming' 
@@ -110,7 +110,7 @@ const groupedEvents = groupEventsByMonth(itemsToGroup, []);
     {Object.entries(groupedEvents).map(([yearMonth, events]) => (
       <section
         id={`section-${yearMonth}`}
-        data-month={yearMonth}
+        data-static-month={yearMonth}
         class="month flow flow-m"
       >
         <h2 id={`heading-${yearMonth}`} class="month__heading">
