@@ -1,0 +1,170 @@
+---
+import Event from './Event.vue';
+import EventBook from './EventBook.vue';
+
+interface Props {
+  type: 'upcoming' | 'past';
+  initialEvents: any;
+  initialBooks: any[];
+  initialUserInfo: any;
+}
+
+const { type, initialEvents, initialBooks, initialUserInfo } = Astro.props;
+
+// Process and group events by month (server-side)
+function groupEventsByMonth(events: any[], books: any[]) {
+  const allItems = [...events, ...books];
+  const grouped: Record<string, any[]> = {};
+  
+  for (const item of allItems) {
+    if (!item.dateStart) continue;
+    
+    const date = new Date(item.dateStart);
+    if (isNaN(date.getTime())) continue; // Skip invalid dates
+    
+    // Use UTC methods for books since their dates are in UTC
+    const yearMonth = item._type === 'book'
+      ? `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`
+      : `${date.getFullYear()}-${date.getMonth() + 1}`;
+    
+    if (!grouped[yearMonth]) {
+      grouped[yearMonth] = [];
+    }
+    grouped[yearMonth].push(item);
+  }
+  
+  // Sort months
+  const sortedEntries = Object.entries(grouped).sort((a, b) => {
+    const [yearA, monthA] = a[0].split('-').map(Number);
+    const [yearB, monthB] = b[0].split('-').map(Number);
+    const dateA = new Date(yearA, monthA - 1);
+    const dateB = new Date(yearB, monthB - 1);
+    
+    return type === 'past' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+  });
+  
+  // Sort events within each month
+  sortedEntries.forEach(([yearMonth, events]) => {
+    events.sort((a, b) => {
+      // If both items are the same type (both books or both events)
+      if ((a._type === 'book') === (b._type === 'book')) {
+        // Calculate chronological comparison (earlier date comes first)
+        const comparison = new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+        
+        // For past events: reverse chronological order (newest first)
+        // For upcoming events: chronological order (oldest first)
+        return type === 'past' ? -comparison : comparison;
+      }
+      // Different types: Books always go first within their month
+      return a._type === 'book' ? -1 : 1;
+    });
+  });
+  
+  // Filter out past months for upcoming events
+  const filteredEntries = type !== 'past' 
+    ? sortedEntries.filter(([yearMonth]) => {
+        const [year, month] = yearMonth.split('-').map(Number);
+        const groupDate = new Date(year, month - 1);
+        const now = new Date();
+        const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        return groupDate >= currentMonthDate;
+      })
+    : sortedEntries;
+  
+  return Object.fromEntries(filteredEntries);
+}
+
+function formatMonthHeading(yearMonth: string) {
+  const [year, month] = yearMonth.split('-');
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  const now = new Date();
+  
+  if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
+    return 'This month';
+  }
+  
+  const formatter = new Intl.DateTimeFormat('default', {
+    month: 'long',
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+  });
+  
+  return formatter.format(date);
+}
+
+// Use pre-filtered data from the API
+const filteredEvents = type === 'upcoming' 
+  ? [...(initialEvents.future || []), ...(initialEvents.today || [])]
+  : (initialEvents.past || []).filter(event => event.type !== 'deadline');
+
+// Add books only to upcoming events (transform book.date to dateStart)
+const booksWithType = type === 'upcoming' 
+  ? (initialBooks || []).map(book => ({
+      ...book,
+      _type: 'book',
+      dateStart: book.date,
+    }))
+  : [];
+
+const itemsToGroup = type === 'upcoming' 
+  ? [...filteredEvents, ...booksWithType]
+  : filteredEvents;
+
+const groupedEvents = groupEventsByMonth(itemsToGroup, []);
+---
+
+<div>
+  <!-- Loading state (hidden by default, shown by Vue when needed) -->
+  <div class="loading-state" style="display: none;">
+    <sl-skeleton effect="sheen"></sl-skeleton>
+    <sl-skeleton effect="sheen"></sl-skeleton>
+    <sl-skeleton effect="sheen"></sl-skeleton>
+    <sl-skeleton effect="sheen"></sl-skeleton>
+  </div>
+
+  <!-- No events state (hidden by default, shown by Vue when needed) -->
+  <div class="no-events-state" style="display: none;">
+    <sl-alert open class="my-xl">
+      <sl-icon slot="icon" name="info-circle"></sl-icon>
+      {type === 'past' 
+        ? 'There are no past events to display.' 
+        : 'There are no upcoming events to display.'
+      }
+    </sl-alert>
+  </div>
+
+  <!-- Events list (server-rendered, always visible) -->
+  <div id={`static-${type}-events`} class="flow flow-2xl">
+    {Object.entries(groupedEvents).map(([yearMonth, events]) => (
+      <section
+        id={`section-${yearMonth}`}
+        data-static-month={yearMonth}
+        class="month flow flow-m"
+      >
+        <h2 id={`heading-${yearMonth}`} class="month__heading">
+          {formatMonthHeading(yearMonth)}
+        </h2>
+        <ol
+          role="list"
+          class="flow flow-l"
+          aria-labelledby={`heading-${yearMonth}`}
+        >
+          {events.map((event) => (
+            <li>
+              {event._type === 'book' ? (
+                <EventBook book={event} />
+              ) : (
+                <Event event={event} />
+              )}
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+</div>
+
+<style>
+h2 {
+  font-size: var(--p-step-4);
+}
+</style>
