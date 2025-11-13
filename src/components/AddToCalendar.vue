@@ -4,7 +4,6 @@ import {
   downloadEventAsICS,
   canExportToCalendar,
 } from '../scripts/calendarUtils';
-import userStore from '../store/userStore';
 
 /**
  * AddToCalendar component
@@ -34,7 +33,7 @@ async function handleDownload() {
   showError.value = false;
 
   try {
-    const success = await downloadEventAsICS(props.event, userStore.timezone);
+    const success = await downloadEventAsICS(props.event);
     if (!success) {
       showError.value = true;
     }
@@ -69,7 +68,9 @@ const canExport = canExportToCalendar(props.event);
       outline
       :aria-label="`Add ${event.title} to calendar`"
     >
-      <sl-icon slot="prefix" name="calendar-plus"></sl-icon>
+      <template v-slot:prefix>
+        <sl-icon name="calendar-plus"></sl-icon>
+      </template>
       <span v-if="isDownloading">Adding...</span>
       <span v-else>Add to calendar</span>
     </sl-button>
@@ -82,7 +83,9 @@ const canExport = canExportToCalendar(props.event);
       open
       class="add-to-calendar__error"
     >
-      <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+      <template v-slot:icon>
+        <sl-icon name="exclamation-triangle"></sl-icon>
+      </template>
       <strong>Unable to add to calendar</strong><br />
       Please try again or contact support if the problem persists.
     </sl-alert>

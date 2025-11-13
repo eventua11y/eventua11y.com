@@ -78,13 +78,9 @@ function generateLocationString(
 /**
  * Generates an ICS file from event data and triggers download
  * @param event - Event data object
- * @param userTimezone - User's current timezone for conversions
  * @returns Promise that resolves to true on success, false on error
  */
-export async function downloadEventAsICS(
-  event: EventData,
-  userTimezone?: string
-): Promise<boolean> {
+export async function downloadEventAsICS(event: EventData): Promise<boolean> {
   try {
     // Prepare event attributes for ICS creation
     const eventAttributes: EventAttributes = {
