@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
+import AddToCalendar from './AddToCalendar.vue';
 
 /**
  * Event component displays a single event with its details
@@ -250,6 +251,8 @@ const speakerDisplay = computed(() => {
         >Call for speakers</sl-badge
       >
     </div>
+
+    <AddToCalendar :event="event" />
   </article>
   <div v-else class="event event--loading">Loading...</div>
 </template>
