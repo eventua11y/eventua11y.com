@@ -10,7 +10,7 @@
     "start": "astro dev",
     "build": "npm run check && astro build && npm run sentry:sourcemaps",
     "preview": "astro preview",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org matt-obee --project eventua11y ./dist && sentry-cli sourcemaps upload --org matt-obee --project eventua11y ./dist",
+    "sentry:sourcemaps": "bash -c 'if [ -n \"$SENTRY_AUTH_TOKEN\" ]; then sentry-cli sourcemaps inject --org matt-obee --project eventua11y ./dist && sentry-cli sourcemaps upload --org matt-obee --project eventua11y ./dist; else echo \"Skipping Sentry sourcemaps upload (no auth token)\"; fi'",
     "check": "prettier --check .",
     "check:watch": "concurrently \"prettier --watch . --write\" \"eslint . --fix --watch\"",
     "format": "prettier --write .",

@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
+import { downloadICalendar } from '../scripts/calendar';
 
 /**
  * Event component displays a single event with its details
@@ -149,6 +150,33 @@ const speakerDisplay = computed(() => {
 
   return `${firstSpeakers}, and ${speakers.length - MAX_DISPLAYED_SPEAKERS} other speaker${speakers.length - MAX_DISPLAYED_SPEAKERS > 1 ? 's' : ''}`;
 });
+
+/**
+ * Checks if event should show add to calendar button
+ * Don't show for deadline events or theme events
+ * @returns {boolean} True if add to calendar should be shown
+ */
+const shouldShowAddToCalendar = computed(() => {
+  return props.event.type !== 'deadline' && props.event.type !== 'theme';
+});
+
+/**
+ * Handles adding event to calendar
+ * Downloads an .ics file for the event
+ */
+const handleAddToCalendar = () => {
+  if (!props.event) return;
+
+  downloadICalendar({
+    title: props.event.title,
+    dateStart: props.event.dateStart,
+    dateEnd: props.event.dateEnd,
+    description: props.event.description,
+    location: props.event.location,
+    website: props.event.website,
+    timezone: props.event.timezone,
+  });
+};
 </script>
 
 <template>
@@ -250,6 +278,18 @@ const speakerDisplay = computed(() => {
         >Call for speakers</sl-badge
       >
     </div>
+
+    <div v-if="shouldShowAddToCalendar" class="event__actions">
+      <sl-button
+        size="small"
+        variant="default"
+        @click="handleAddToCalendar"
+        aria-label="Add to calendar"
+      >
+        <sl-icon slot="prefix" name="calendar-plus"></sl-icon>
+        Add to Calendar
+      </sl-button>
+    </div>
   </article>
   <div v-else class="event event--loading">Loading...</div>
 </template>
@@ -260,5 +300,9 @@ const speakerDisplay = computed(() => {
   flex-wrap: wrap;
   column-gap: var(--p-space-3xs);
   row-gap: var(--p-space-3xs);
+}
+
+.event__actions {
+  margin-top: var(--p-space-s);
 }
 </style>
