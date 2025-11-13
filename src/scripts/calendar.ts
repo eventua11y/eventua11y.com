@@ -16,13 +16,11 @@ interface CalendarEvent {
  * Formats a date string to iCalendar format (YYYYMMDDTHHMMSSZ or YYYYMMDD for all-day events)
  * @param dateString - ISO date string
  * @param isInternational - Whether the event is international (uses UTC)
- * @param timezone - Event timezone
  * @returns Formatted date string for iCalendar
  */
 function formatICalDate(
   dateString: string,
-  isInternational: boolean = false,
-  timezone?: string
+  isInternational: boolean = false
 ): string {
   const date = new Date(dateString);
 
@@ -86,13 +84,9 @@ export function generateICalendar(event: CalendarEvent): string {
   const isAllDay = !event.dateStart.includes('T');
   const isInternational = !!event.timezone;
 
-  const dtstart = formatICalDate(
-    event.dateStart,
-    isInternational,
-    event.timezone
-  );
+  const dtstart = formatICalDate(event.dateStart, isInternational);
   const dtend = event.dateEnd
-    ? formatICalDate(event.dateEnd, isInternational, event.timezone)
+    ? formatICalDate(event.dateEnd, isInternational)
     : dtstart;
 
   // Build description
