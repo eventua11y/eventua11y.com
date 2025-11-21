@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mattobee/eventua11y.git"
+    "url": "git+https://github.com/eventua11y/eventua11y.com.git"
   },
   "author": "Matt Obee",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mattobee/eventua11y/issues"
+    "url": "https://github.com/eventua11y/eventua11y.com/issues"
   },
-  "homepage": "https://github.com/mattobee/eventua11y#readme",
+  "homepage": "https://github.com/eventua11y/eventua11y.com#readme",
   "resolutions": {
     "astro": "^5.13.3"
   },

@@ -8,13 +8,20 @@
 
 import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
 
+interface Book {
+  _id: string;
+  title: string;
+  link: string;
+  date: string;
+}
+
 /**
  * Cache configuration to reduce Sanity API calls
  * - Stores processed book data for 5 minutes
  * - Includes timestamp for TTL calculation
  */
 const cache = {
-  data: null as any | null,
+  data: null as Book[] | null,
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };

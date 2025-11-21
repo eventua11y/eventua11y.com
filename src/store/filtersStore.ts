@@ -8,6 +8,7 @@ interface Event {
   attendanceMode: string;
   _type?: string;
   dateStart: string;
+  isFree?: boolean;
 }
 
 /**
@@ -77,9 +78,6 @@ const isCallForSpeakersOpen = (event: Event): boolean => {
   if (!event.callForSpeakersClosingDate) return true;
   return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
 };
-
-// Create a reactive reference to defaultFilters
-const initialFilters = reactive({ ...defaultFilters });
 
 /**
  * Loads filters from localStorage.

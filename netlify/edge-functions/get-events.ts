@@ -44,6 +44,13 @@ interface Event {
  * Response structure for the events API
  * Includes processed event lists and optional debug information
  */
+interface GeoInfo {
+  country?: string;
+  region?: string;
+  city?: string;
+  timezone?: string;
+}
+
 interface EventsResponse {
   events: Event[];
   future: Event[];
@@ -53,7 +60,7 @@ interface EventsResponse {
     timezone?: {
       userInfoTimezone: string;
       resolvedTimezone: string;
-      geo: any;
+      geo: GeoInfo;
       headers: Record<string, string>;
     };
     events?: Array<{
@@ -134,7 +141,7 @@ async function fetchEventsFromSanity(
   client: SanityClient,
   userTimezone: string
 ): Promise<EventsResponse> {
-  const debugLogs: Array<Record<string, any>> = [];
+  const debugLogs: Array<Record<string, unknown>> = [];
 
   try {
     // Fetch all non-draft events

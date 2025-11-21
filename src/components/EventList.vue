@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Event from './Event.vue';
 import EventBook from './EventBook.vue';
 import Skeleton from './Skeleton.vue';
-import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 
 /**
@@ -146,132 +145,37 @@ const groupEvents = (events) => {
 };
 
 /**
- * Fetches books from the API endpoint
- * @returns {Promise<Array>} Array of book objects or empty array on error
+ * Computed reference to the current events based on type
+ * @returns {Array} Array of events (past or filtered)
  */
-async function fetchBooks() {
-  try {
-    const response = await fetch('/api/get-books');
-    if (!response.ok) throw new Error('Failed to fetch books');
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching books:', error);
-    return [];
-  }
-}
-
-/**
- * Normalizes a date string to ISO format
- * @param {string} dateString - Date string from various sources
- * @returns {string|null} ISO date string or null if invalid
- */
-const normalizeDate = (dateString) => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    console.warn('Invalid date:', dateString);
-    return null;
-  }
-  return date.toISOString();
-};
-
-/**
- * Lifecycle hook: initializes component data
- * - Fetches and sets user info if needed
- * - Gets events from store
- * - Fetches and merges books with events
- * - Groups combined items by month
- */
-onMounted(async () => {
-  loading.value = true;
-  error.value = null;
-
-  try {
-    if (!userStore.userInfoFetched) {
-      const response = await fetch('/api/get-user-info');
-      if (!response.ok) throw new Error('Failed to fetch user info');
-      const data = await response.json();
-      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
-    }
-
-    // Get events from the store
-    let events =
-      props.type === 'past'
-        ? filtersStore.pastEvents
-        : filtersStore.filteredEvents;
-
-    // Process events if we have them
-    if (events && events.length > 0) {
-      groupEvents(events);
-    }
-  } catch (e) {
-    error.value = `Unable to load ${props.type} events. Please try again later.`;
-    console.error('Error:', e);
-  } finally {
-    if (error.value || Object.keys(groupedEvents.value).length > 0) {
-      loading.value = false;
-    }
-  }
-});
-
-onMounted(() => {
-  const events =
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents;
-  if (events !== undefined) {
-    groupEvents(events);
-    loading.value = false;
-  }
-});
+const eventsRef = computed(() =>
+  props.type === 'past' ? filtersStore.pastEvents : filtersStore.filteredEvents
+);
 
 /**
  * Watch handler: updates grouped events when filters change
- * - Maintains books at top of each month group
- * - Preserves past/upcoming sort order
+ * - Runs immediately on mount to initialize data
+ * - Updates when events change
+ * - Handles loading and error states
  */
 watch(
-  () =>
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents,
+  eventsRef,
   (newEvents) => {
-    if (!loading.value) loading.value = true;
-    error.value = null;
-
-    try {
-      if (newEvents) {
-        // Remove length check to handle empty arrays
-        groupEvents(newEvents);
-        loading.value = false; // Always set loading to false when we have a response
-      }
-    } catch (e) {
-      error.value = `Error updating ${props.type} events.`;
-      console.error('Error:', e);
-      loading.value = false;
-    }
-  }
-);
-
-watch(
-  () =>
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents,
-  (newEvents) => {
-    if (!loading.value) loading.value = true;
+    loading.value = true;
     error.value = null;
 
     try {
       if (newEvents !== undefined) {
         groupEvents(newEvents);
-        loading.value = false;
       }
     } catch (e) {
       error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
+    } finally {
       loading.value = false;
     }
-  }
+  },
+  { immediate: true }
 );
 </script>
 
@@ -286,7 +190,9 @@ watch(
 
     <!-- Error state -->
     <sl-alert v-else-if="error" open variant="danger" class="my-xl">
-      <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
+      <template v-slot:icon>
+        <sl-icon name="exclamation-octagon"></sl-icon>
+      </template>
       {{ error }}
     </sl-alert>
 
@@ -296,7 +202,9 @@ watch(
       open
       class="my-xl"
     >
-      <sl-icon slot="icon" name="info-circle"></sl-icon>
+      <template v-slot:icon>
+        <sl-icon name="info-circle"></sl-icon>
+      </template>
       {{
         type === 'past'
           ? 'There are no past events to display.'
