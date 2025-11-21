@@ -12,6 +12,7 @@ export default [
     ignores: [
       'dist/**',
       '.astro/**',
+      '.netlify/**',
       'coverage/**',
       'playwright-report/**',
       'test-results/**',
@@ -29,6 +30,7 @@ export default [
       'vue/multi-word-component-names': 'off',
       'vue/require-default-prop': 'error',
       'vue/component-api-style': ['error', ['script-setup']],
+      'vue/no-deprecated-slot-attribute': 'off',
     },
   },
   {
