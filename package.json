@@ -71,11 +71,11 @@
     "@sentry/vue": "^10.27.0",
     "@shoelace-style/shoelace": "^2.20.1",
     "@types/react": "^18.3.27",
-    "@types/react-dom": "^18.3.7",
+    "@types/react-dom": "^19.2.3",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.2.0",
     "sanity": "^4.19.0",
     "vue": "^3.5.25"
   }
