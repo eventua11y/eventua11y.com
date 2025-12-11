@@ -146,35 +146,6 @@ const groupEvents = (events) => {
 };
 
 /**
- * Fetches books from the API endpoint
- * @returns {Promise<Array>} Array of book objects or empty array on error
- */
-async function fetchBooks() {
-  try {
-    const response = await fetch('/api/get-books');
-    if (!response.ok) throw new Error('Failed to fetch books');
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching books:', error);
-    return [];
-  }
-}
-
-/**
- * Normalizes a date string to ISO format
- * @param {string} dateString - Date string from various sources
- * @returns {string|null} ISO date string or null if invalid
- */
-const normalizeDate = (dateString) => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    console.warn('Invalid date:', dateString);
-    return null;
-  }
-  return date.toISOString();
-};
-
-/**
  * Lifecycle hook: initializes component data
  * - Fetches and sets user info if needed
  * - Gets events from store
@@ -213,45 +184,11 @@ onMounted(async () => {
   }
 });
 
-onMounted(() => {
-  const events =
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents;
-  if (events !== undefined) {
-    groupEvents(events);
-    loading.value = false;
-  }
-});
-
 /**
  * Watch handler: updates grouped events when filters change
  * - Maintains books at top of each month group
  * - Preserves past/upcoming sort order
  */
-watch(
-  () =>
-    props.type === 'past'
-      ? filtersStore.pastEvents
-      : filtersStore.filteredEvents,
-  (newEvents) => {
-    if (!loading.value) loading.value = true;
-    error.value = null;
-
-    try {
-      if (newEvents) {
-        // Remove length check to handle empty arrays
-        groupEvents(newEvents);
-        loading.value = false; // Always set loading to false when we have a response
-      }
-    } catch (e) {
-      error.value = `Error updating ${props.type} events.`;
-      console.error('Error:', e);
-      loading.value = false;
-    }
-  }
-);
-
 watch(
   () =>
     props.type === 'past'
