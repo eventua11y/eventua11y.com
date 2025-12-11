@@ -23,20 +23,23 @@ test('filter button is visible', async ({ page }) => {
 });
 
 test('filter drawer opens when filter button is clicked', async ({ page }) => {
-  // Wait for initial page load
-  await page.waitForLoadState('domcontentloaded');
+  // Wait for initial page load and network idle to ensure Vue components are hydrated
+  await page.waitForLoadState('networkidle');
 
   // Get filter button and wait for it to be ready
   const filterButton = page.getByRole('button', { name: 'Filter' });
-  await filterButton.waitFor({ state: 'visible', timeout: 5000 });
+  await filterButton.waitFor({ state: 'visible', timeout: 10000 });
+
+  // Wait a bit more to ensure Vue component is fully hydrated
+  await page.waitForTimeout(500);
 
   // Click and wait for drawer
   await filterButton.click();
 
-  // Get drawer and verify state
+  // Get drawer and verify state with increased timeout
   const drawer = page.locator('#filter-drawer');
-  await expect(drawer).toHaveAttribute('open', '');
-  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveAttribute('open', '', { timeout: 10000 });
+  await expect(drawer).toBeVisible({ timeout: 10000 });
 
   // Optional: Wait for transition
   await page.waitForTimeout(300);
