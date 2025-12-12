@@ -11,17 +11,17 @@
         {{ selectedTimezoneLabel }}
       </wa-button>
       <wa-dropdown-item
+        ref="localTimezoneItem"
         type="checkbox"
         name="timezone"
         :value="userTimezone"
-        :checked="isLocalTimezone"
         >{{ userTimezoneLabel }}</wa-dropdown-item
       >
       <wa-dropdown-item
+        ref="eventTimezoneItem"
         type="checkbox"
         name="timezone"
         value="event"
-        :checked="!isLocalTimezone"
         >Event local times</wa-dropdown-item
       >
     </wa-dropdown>
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref, watch, nextTick } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -47,6 +47,10 @@ dayjs.extend(timezone);
 
 // Default timezone if user's timezone cannot be detected
 const defaultTimezone = 'UTC';
+
+// Refs for dropdown items
+const localTimezoneItem = ref(null);
+const eventTimezoneItem = ref(null);
 
 /**
  * Gets user's timezone from store or falls back to UTC
@@ -78,17 +82,43 @@ const selectedTimezoneLabel = computed(() => {
 });
 
 /**
+ * Determines which timezone option is active
+ * Only one option should be checked at a time
+ * @returns {boolean} True if using local timezone
+ */
+const isLocalTimezone = computed(() => userStore.useLocalTimezone === true);
+
+/**
+ * Updates the checked state of dropdown items
+ * Ensures only one item is checked at a time (radio-like behavior)
+ */
+function updateCheckedState() {
+  nextTick(() => {
+    if (localTimezoneItem.value && eventTimezoneItem.value) {
+      localTimezoneItem.value.checked = isLocalTimezone.value;
+      eventTimezoneItem.value.checked = !isLocalTimezone.value;
+    }
+  });
+}
+
+/**
  * Updates timezone preference when user selects an option
  * @param {CustomEvent} event - Menu select event
  */
 function updateTimezone(event) {
   if (!userStore.geo?.timezone) return;
-  const isLocalTimezone = event.detail.item.value === userTimezone.value;
+  const selectedIsLocal = event.detail.item.value === userTimezone.value;
   userStore.setTimezone(
-    isLocalTimezone ? userTimezone.value : 'event',
-    isLocalTimezone
+    selectedIsLocal ? userTimezone.value : 'event',
+    selectedIsLocal
   );
+  updateCheckedState();
 }
+
+// Watch for changes in the store and update checked state
+watch(isLocalTimezone, () => {
+  updateCheckedState();
+});
 
 /**
  * Initialize timezone on component mount
@@ -98,12 +128,9 @@ onMounted(() => {
   if (userStore.useLocalTimezone && userStore.geo?.timezone) {
     userStore.setTimezone(userTimezone.value, true);
   }
+  // Set initial checked state after component is mounted
+  setTimeout(() => {
+    updateCheckedState();
+  }, 100);
 });
-
-/**
- * Determines which timezone option is active
- * Only one option should be checked at a time
- * @returns {boolean} True if using local timezone
- */
-const isLocalTimezone = computed(() => userStore.useLocalTimezone === true);
 </script>
