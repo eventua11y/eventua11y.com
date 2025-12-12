@@ -21,6 +21,11 @@
     margin-bottom: var(--p-space-s-m);
   }
 
+  .social li {
+    margin: 0;
+    padding: 0;
+  }
+
   .social a {
     color: var(--p-color-white);
     display: flex;
