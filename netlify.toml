@@ -1,15 +1,6 @@
 [dev]
   targetPort = 4321
 
-[[edge_functions]]
-  path = "/api/hello"
-  function = "hello"
-
-[[edge_functions]]
-  path = "/api/get-events"
-  function = "get-events"
-
-
-[[edge_functions]]
-  path = "/api/debug"
-  function = "debug"
+# Edge functions are auto-discovered from netlify/edge-functions/
+# Each function exports its own config with the path, so no explicit
+# [[edge_functions]] entries are needed here.
