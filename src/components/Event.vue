@@ -202,6 +202,7 @@ const speakerDisplay = computed(() => {
       summary="Description"
       appearance="outlined"
       icon-placement="start"
+      :name="`event-${event._id}`"
     >
       <p class="event__description" itemprop="description">
         {{ event.description }}
@@ -215,6 +216,7 @@ const speakerDisplay = computed(() => {
         :summary="`Accessibility highlights: ${enumeratedChildTypes}`"
         appearance="outlined"
         icon-placement="start"
+        :name="`event-${event._id}`"
       >
         <ol
           role="list"
@@ -232,6 +234,7 @@ const speakerDisplay = computed(() => {
         summary="Schedule not yet announced"
         appearance="outlined"
         icon-placement="start"
+        :name="`event-${event._id}`"
       >
         <p>
           {{ event.title }} is expected to include one or more
