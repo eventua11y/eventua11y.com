@@ -46,50 +46,5 @@ export const prerender = false;
 
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    let drawer = document.querySelector('wa-drawer');
-    let retries = 0;
-    const maxRetries = 5;
-
-    // If drawer not found, retry with delay
-    function initDrawer() {
-      if (!drawer && retries < maxRetries) {
-        setTimeout(() => {
-          drawer = document.querySelector('wa-drawer');
-          if (drawer) {
-            setupEventListeners();
-          } else {
-            retries++;
-            initDrawer();
-          }
-        }, 100);
-      } else if (drawer) {
-        setupEventListeners();
-      } else {
-        console.error('Drawer not found after retries');
-      }
-    }
-
-    function setupEventListeners() {
-      document.addEventListener('filters:open', () => {
-        try {
-          drawer.show();
-        } catch (e) {
-          console.error('Error showing drawer:', e);
-        }
-      });
-
-      document.addEventListener('filters:close', () => {
-        try {
-          drawer.hide();
-        } catch (e) {
-          console.error('Error hiding drawer:', e);
-        }
-      });
-    }
-
-    initDrawer();
-  });
-</script>
+<!-- Drawer open/close is handled declaratively by Web Awesome via data-drawer attributes -->
 

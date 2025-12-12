@@ -34,7 +34,7 @@
           >Awareness days</wa-switch
         >
         <div class="group">
-          <wa-button id="open-filter-drawer" @click="handleFilterClick">
+          <wa-button id="open-filter-drawer" data-drawer="open filter-drawer">
             <i class="fa-solid fa-filter"></i> Filter
           </wa-button>
           <TimezoneSelector />
@@ -92,15 +92,6 @@ watch(
  */
 function resetFilters() {
   filtersStore.resetFilters();
-}
-
-/**
- * Handles filter button click
- * Dispatches custom event to open filter drawer
- */
-function handleFilterClick() {
-  const event = new CustomEvent('filters:open');
-  document.dispatchEvent(event);
 }
 
 /**

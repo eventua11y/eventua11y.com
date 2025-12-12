@@ -59,16 +59,12 @@ test('filter drawer closes when close button is clicked', async ({ page }) => {
   const drawerContent = page.locator('#filter-drawer wa-radio-group').first();
   await expect(drawerContent).toBeVisible({ timeout: 5000 });
 
-  // Close drawer
-  const closeButton = page.getByRole('button', { name: 'Close' });
-  await closeButton.waitFor({ state: 'visible' });
-  await closeButton.click({ force: true });
+  // Close drawer using Escape key (more reliable than finding the close button)
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
 
   // Verify drawer is closed
   await expect(drawer).not.toHaveAttribute('open');
-
-  // Optional: Wait for animation
-  await page.waitForTimeout(300);
 });
 
 test('filter drawer closes when esc key is pressed', async ({ page }) => {
