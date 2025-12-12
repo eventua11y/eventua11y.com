@@ -89,6 +89,10 @@
   order: 5;
 }
 
+.event__details {
+  order: 5;
+}
+
 .event__badges {
   order: 6;
 }
