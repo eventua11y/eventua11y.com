@@ -140,6 +140,9 @@
   padding-top: 0;
 }
 
-.month__heading {
-  padding: 0 var(--p-space-xs-m);
+h2.month__heading {
+  padding-left: var(--p-space-xs-m);
+  padding-right: var(--p-space-xs-m);
+  margin-left: 0;
+  margin-right: 0;
 }
