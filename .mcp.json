@@ -3,6 +3,16 @@
     "netlify": {
       "command": "npx",
       "args": ["-y", "@netlify/mcp"]
+    },
+    "sanity": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.sanity.io",
+        "--transport",
+        "http-only"
+      ]
     }
   }
 }
