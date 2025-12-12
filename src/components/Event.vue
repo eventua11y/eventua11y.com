@@ -196,25 +196,26 @@ const speakerDisplay = computed(() => {
       v-if="event.type !== 'deadline'"
     />
 
-    <details
+    <wa-details
       v-if="event.description && event.type !== 'theme'"
-      class="event__children flow"
+      class="event__details"
+      summary="Description"
+      appearance="outlined"
+      icon-placement="start"
     >
-      <summary>
-        <i class="icon fa-solid fa-caret-right"></i>
-        Description
-      </summary>
       <p class="event__description" itemprop="description">
         {{ event.description }}
       </p>
-    </details>
+    </wa-details>
 
     <template v-if="!isDedicatedToAccessibility">
-      <details v-if="hasChildren" class="event__children flow flow-xs">
-        <summary>
-          <i class="icon fa-solid fa-caret-right"></i>
-          Accessibility highlights: {{ enumeratedChildTypes }}
-        </summary>
+      <wa-details
+        v-if="hasChildren"
+        class="event__details"
+        :summary="`Accessibility highlights: ${enumeratedChildTypes}`"
+        appearance="outlined"
+        icon-placement="start"
+      >
         <ol
           role="list"
           class="flow flow-xs"
@@ -224,19 +225,21 @@ const speakerDisplay = computed(() => {
             <EventChild :event="child" />
           </li>
         </ol>
-      </details>
-      <details v-else-if="event.isParent" class="event__children flow">
-        <summary>
-          <i class="icon fa-solid fa-caret-right"></i>
-          Schedule not yet announced
-        </summary>
+      </wa-details>
+      <wa-details
+        v-else-if="event.isParent"
+        class="event__details"
+        summary="Schedule not yet announced"
+        appearance="outlined"
+        icon-placement="start"
+      >
         <p>
           {{ event.title }} is expected to include one or more
           accessibility-themed sessions but the full schedule has not yet been
           announced. Details will be published here closer to the date of the
           event.
         </p>
-      </details>
+      </wa-details>
     </template>
 
     <div
