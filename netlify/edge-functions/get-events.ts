@@ -70,11 +70,18 @@ interface EventsResponse {
 
 /**
  * Cache configuration to reduce Sanity API calls
- * - Stores processed event data for 5 minutes
+ * - Stores raw event data (before timezone processing) for 5 minutes
+ * - Timezone processing happens per-request to ensure correct user timezone
  * - Includes timestamp for TTL calculation
  */
-const cache = {
-  data: null as EventsResponse | null,
+interface RawEventsCache {
+  events: Event[];
+  timestamp: number;
+  ttl: number;
+}
+
+const cache: RawEventsCache = {
+  events: [],
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };
@@ -124,71 +131,20 @@ function sortEventsByDate(events: Event[]): Event[] {
 }
 
 /**
- * Processes events from Sanity and categorizes them
- * - Fetches events and their child events
- * - Creates CFS deadline events from parent events
+ * Processes raw events for a specific user timezone
  * - Converts dates to user's timezone
  * - Categorizes events as today/future/past
+ * @param {Event[]} events - Raw events from cache or Sanity
+ * @param {string} userTimezone - User's timezone
+ * @returns {EventsResponse} Processed events categorized by time
  */
-async function fetchEventsFromSanity(
-  client: SanityClient,
+function processEventsForTimezone(
+  events: Event[],
   userTimezone: string
-): Promise<EventsResponse> {
+): EventsResponse {
   const debugLogs: Array<Record<string, any>> = [];
 
   try {
-    // Fetch all non-draft events
-    const events: Event[] = await client.fetch(`
-      *[_type == "event" && !(_id in path("drafts.**"))] {
-        ...,
-        "speakers": speakers[]->{ _id, name }
-      }
-    `);
-
-    // Fetch children for each event and add CFS deadline events
-    const eventsWithChildrenAndDeadlines = await Promise.all(
-      events.map(async (event) => {
-        // Fetch child events for each parent event
-        const children: Event[] = await client.fetch(
-          `
-        *[_type == "event" && parent._ref == $eventId] {
-          ...,
-          "speakers": speakers[]->{ _id, name }
-        } | order(dateStart asc)
-      `,
-          { eventId: event._id }
-        );
-
-        // Add children to the event if any
-        const eventWithChildren = {
-          ...event,
-          children: children.length > 0 ? children : undefined,
-        };
-
-        // Add CFS (Call for Speakers) deadline event if applicable
-        const cfsDeadlineEvents: Event[] = [];
-        if (event.callForSpeakersClosingDate) {
-          cfsDeadlineEvents.push({
-            _id: `${event._id}-cfs-deadline`,
-            _type: 'event',
-            type: 'deadline',
-            title: `${event.title}`,
-            dateStart: event.callForSpeakersClosingDate,
-            timezone: event.timezone,
-            website: event.website,
-            attendanceMode: event.attendanceMode,
-            callForSpeakers: event.callForSpeakers,
-          });
-        }
-
-        // Return the event with children and CFS deadline events
-        return [eventWithChildren, ...cfsDeadlineEvents];
-      })
-    );
-
-    // Flatten the array of events
-    const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
-
     // Use user's timezone for base calculations
     const now = dayjs().tz(userTimezone);
     const todayStart = now.startOf('day');
@@ -290,11 +246,11 @@ async function fetchEventsFromSanity(
     };
 
     const today = sortEventsByDate(
-      flattenedEvents.filter((event) => !event.parent && isEventToday(event))
+      events.filter((event) => !event.parent && isEventToday(event))
     );
 
     const future = sortEventsByDate(
-      flattenedEvents.filter((event) => {
+      events.filter((event) => {
         if (!event.parent) {
           const eventStart = getEventTimeInUserTz(
             event.dateStart,
@@ -309,7 +265,7 @@ async function fetchEventsFromSanity(
     // Calculate the date 12 months ago from today
     const twelveMonthsAgo = todayStart.subtract(12, 'month');
 
-    const past = flattenedEvents.filter((event) => {
+    const past = events.filter((event) => {
       if (!event.parent && event.dateStart) {
         const eventEnd = getEventTimeInUserTz(
           event.dateEnd || event.dateStart,
@@ -324,7 +280,7 @@ async function fetchEventsFromSanity(
     });
 
     return {
-      events: flattenedEvents,
+      events,
       future,
       past,
       today,
@@ -332,46 +288,109 @@ async function fetchEventsFromSanity(
     };
   } catch (error) {
     console.error(
-      '[fetchEventsFromSanity] Failed:',
+      '[processEventsForTimezone] Failed:',
       (error as unknown as { message?: string })?.message || error
     );
-    throw new Error('Failed to fetch events from Sanity');
+    throw new Error('Failed to process events for timezone');
   }
 }
 
 /**
- * Gets events with caching
- * Returns cached data if valid, otherwise fetches fresh data
+ * Fetches raw events from Sanity with caching
+ * Returns cached raw events if valid, otherwise fetches fresh data
+ * Raw events are not yet processed for timezone
+ */
+async function getRawEvents(client: SanityClient): Promise<Event[]> {
+  // Check cache
+  if (cache.events.length > 0 && Date.now() - cache.timestamp < cache.ttl) {
+    console.log('[getRawEvents] Returning cached raw events');
+    console.log(
+      '[getRawEvents] Cache timestamp:',
+      new Date(cache.timestamp).toISOString()
+    );
+    return cache.events;
+  }
+
+  console.log('[getRawEvents] Fetching fresh data from Sanity');
+
+  // Fetch all non-draft events
+  const events: Event[] = await client.fetch(`
+    *[_type == "event" && !(_id in path("drafts.**"))] {
+      ...,
+      "speakers": speakers[]->{ _id, name }
+    }
+  `);
+
+  // Fetch children for each event and add CFS deadline events
+  const eventsWithChildrenAndDeadlines = await Promise.all(
+    events.map(async (event) => {
+      // Fetch child events for each parent event
+      const children: Event[] = await client.fetch(
+        `
+      *[_type == "event" && parent._ref == $eventId] {
+        ...,
+        "speakers": speakers[]->{ _id, name }
+      } | order(dateStart asc)
+    `,
+        { eventId: event._id }
+      );
+
+      // Add children to the event if any
+      const eventWithChildren = {
+        ...event,
+        children: children.length > 0 ? children : undefined,
+      };
+
+      // Add CFS (Call for Speakers) deadline event if applicable
+      const cfsDeadlineEvents: Event[] = [];
+      if (event.callForSpeakersClosingDate) {
+        cfsDeadlineEvents.push({
+          _id: `${event._id}-cfs-deadline`,
+          _type: 'event',
+          type: 'deadline',
+          title: `${event.title}`,
+          dateStart: event.callForSpeakersClosingDate,
+          timezone: event.timezone,
+          website: event.website,
+          attendanceMode: event.attendanceMode,
+          callForSpeakers: event.callForSpeakers,
+        });
+      }
+
+      // Return the event with children and CFS deadline events
+      return [eventWithChildren, ...cfsDeadlineEvents];
+    })
+  );
+
+  // Flatten the array of events
+  const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
+
+  // Update cache with raw events
+  cache.events = flattenedEvents;
+  cache.timestamp = Date.now();
+  console.log(
+    '[getRawEvents] Cache updated at:',
+    new Date(cache.timestamp).toISOString()
+  );
+
+  return flattenedEvents;
+}
+
+/**
+ * Gets events with caching and processes them for the user's timezone
+ * Raw events are cached, but timezone processing happens per-request
  * @param {string} userTimezone - User's timezone
  * @returns {EventsResponse} Events object
  */
 async function getEvents(userTimezone: string): Promise<EventsResponse> {
   const client = createSanityClient();
 
-  // Check cache
-  if (cache.data && Date.now() - cache.timestamp < cache.ttl) {
-    console.log('[getEvents] Returning cached data');
-    console.log(
-      '[getEvents] Cache timestamp:',
-      new Date(cache.timestamp).toISOString()
-    );
-    console.log('[getEvents] Cache TTL (ms):', cache.ttl);
-    return cache.data;
-  }
+  // Get raw events (cached or fresh)
+  const rawEvents = await getRawEvents(client);
 
-  // Fetch from Sanity
-  console.log('[getEvents] Fetching fresh data from Sanity');
-  const events = await fetchEventsFromSanity(client, userTimezone);
-
-  // Update cache
-  cache.data = events;
-  cache.timestamp = Date.now();
-  console.log(
-    '[getEvents] Cache updated at:',
-    new Date(cache.timestamp).toISOString()
-  );
-
-  return events;
+  // Process events for user's timezone (always done per-request)
+  console.log('[getEvents] Processing events for timezone:', userTimezone);
+  return processEventsForTimezone(rawEvents, userTimezone);
 }
 
 /**
