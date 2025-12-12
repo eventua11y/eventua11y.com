@@ -3,7 +3,7 @@ import Logo from '../images/eventua11y_logo_wordmark_white.svg';
 ---
 <footer id="global-footer" role="contentinfo">
     <div class="container">
-        <a href="/" class="d-inline-block"><Logo class="logo" aria-label="Eventua11y" /></a>
+        <a href="/" class="footer-logo"><Logo class="logo" aria-label="Eventua11y" /></a>
         <div class="footer-grid mb-l">
             <div class="panel">
                 <p class="text-small">Eventua11y helps you find accessibility conferences, workshops, and events, both online and in-person. From technical workshops that delve into the nitty-gritty of coding for accessibility, to broader conferences discussing policy, advocacy, and inclusive design principles, there's something for everyone.</p>
@@ -69,6 +69,10 @@ import Logo from '../images/eventua11y_logo_wordmark_white.svg';
 </footer>
 
 <style>
+    .footer-logo {
+        display: block;
+        margin-bottom: var(--p-space-s);
+    }
     .logo {
         display: inline-block;
         max-width: 10rem;
