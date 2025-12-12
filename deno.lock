@@ -255,7 +255,6 @@
         "npm:@sentry/cli@^2.58.3",
         "npm:@sentry/profiling-node@^10.30.0",
         "npm:@sentry/vue@^10.30.0",
-        "npm:@shoelace-style/shoelace@^2.20.1",
         "npm:@types/node@25",
         "npm:@types/react-dom@^19.2.3",
         "npm:@types/react@^19.2.7",

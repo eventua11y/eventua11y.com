@@ -1,26 +1,26 @@
 <template>
   <div class="skeleton-paragraphs">
-    <sl-skeleton effect="sheen"></sl-skeleton>
-    <sl-skeleton effect="sheen"></sl-skeleton>
-    <sl-skeleton effect="sheen"></sl-skeleton>
-    <sl-skeleton effect="sheen"></sl-skeleton>
+    <wa-skeleton effect="sheen"></wa-skeleton>
+    <wa-skeleton effect="sheen"></wa-skeleton>
+    <wa-skeleton effect="sheen"></wa-skeleton>
+    <wa-skeleton effect="sheen"></wa-skeleton>
   </div>
 </template>
 
 <style>
-.skeleton-paragraphs sl-skeleton {
+.skeleton-paragraphs wa-skeleton {
   margin-bottom: 1rem;
 }
 
-.skeleton-paragraphs sl-skeleton:nth-child(2) {
+.skeleton-paragraphs wa-skeleton:nth-child(2) {
   width: 95%;
 }
 
-.skeleton-paragraphs sl-skeleton:nth-child(4) {
+.skeleton-paragraphs wa-skeleton:nth-child(4) {
   width: 90%;
 }
 
-.skeleton-paragraphs sl-skeleton:last-child {
+.skeleton-paragraphs wa-skeleton:last-child {
   width: 50%;
 }
 </style>

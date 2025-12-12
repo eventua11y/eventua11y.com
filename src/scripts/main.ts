@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Theme selection functionality
   const LIGHT_MODE_ICON =
-    '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
+    '<wa-icon label="Light mode" name="sun-bright" variant="solid"></wa-icon>';
   const DARK_MODE_ICON =
-    '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
+    '<wa-icon label="Dark mode" name="moon" variant="solid"></wa-icon>';
 
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -29,21 +29,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.classList.remove('sl-theme-dark');
+      document.documentElement.classList.remove('wa-dark');
       localStorage.setItem('theme', 'light');
       themeSelectorButton.innerHTML = LIGHT_MODE_ICON;
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('sl-theme-dark');
+      document.documentElement.classList.add('wa-dark');
       localStorage.setItem('theme', 'dark');
       themeSelectorButton.innerHTML = DARK_MODE_ICON;
     } else {
       document.documentElement.removeAttribute('data-theme');
-      document.documentElement.classList.remove('sl-theme-dark');
+      document.documentElement.classList.remove('wa-dark');
       localStorage.removeItem('theme');
       if (prefersDarkScheme.matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.classList.add('sl-theme-dark');
+        document.documentElement.classList.add('wa-dark');
         themeSelectorButton.innerHTML = DARK_MODE_ICON;
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
@@ -88,13 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Add event listener for theme selection changes
-  const menu = document.querySelector('sl-menu');
-  if (menu) {
-    menu.addEventListener('sl-select', (event: CustomEvent) => {
+  const dropdown = document.querySelector('#theme-selector');
+  if (dropdown) {
+    dropdown.addEventListener('wa-select', ((event: CustomEvent) => {
       const selectedTheme = event.detail.item.value;
       applyTheme(selectedTheme);
       updateSelection(selectedTheme);
-    });
+    }) as EventListener);
   }
 
   // Listen for changes to the user's system preference and update the theme accordingly

@@ -222,24 +222,27 @@ watch(
     </div>
 
     <!-- Error state -->
-    <sl-alert v-else-if="error" open variant="danger" class="my-xl">
-      <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
+    <wa-callout v-else-if="error" variant="danger" class="my-xl">
+      <wa-icon
+        slot="icon"
+        name="octagon-exclamation"
+        variant="regular"
+      ></wa-icon>
       {{ error }}
-    </sl-alert>
+    </wa-callout>
 
     <!-- No events state -->
-    <sl-alert
+    <wa-callout
       v-else-if="!loading && Object.keys(groupedEvents).length === 0"
-      open
       class="my-xl"
     >
-      <sl-icon slot="icon" name="info-circle"></sl-icon>
+      <wa-icon slot="icon" name="circle-info" variant="regular"></wa-icon>
       {{
         type === 'past'
           ? 'There are no past events to display.'
           : 'There are no upcoming events to display.'
       }}
-    </sl-alert>
+    </wa-callout>
 
     <!-- Events list -->
     <div :id="`${type}-events`" v-else class="flow flow-2xl">

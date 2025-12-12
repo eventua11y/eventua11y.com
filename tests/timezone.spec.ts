@@ -23,10 +23,8 @@ test.describe('Timezone Selector', () => {
     // Click dropdown to open it
     await dropdown.click();
 
-    // Menu should be visible - use a more specific selector
-    // Select the menu that's inside the timezone dropdown
-    const menu = page.locator('#timezone-dropdown sl-menu');
-    await expect(menu).toBeVisible();
+    // Dropdown should be open - check for open attribute on wa-dropdown
+    await expect(dropdown).toHaveAttribute('open', '');
   });
 
   test('timezone can be changed between local and event times', async ({
@@ -36,12 +34,11 @@ test.describe('Timezone Selector', () => {
     const dropdown = page.locator('#timezone-dropdown');
     await dropdown.click();
 
-    // Wait for dropdown menu to fully appear
-    const menu = page.locator('#timezone-dropdown sl-menu');
-    await expect(menu).toBeVisible({ timeout: 5000 });
+    // Wait for dropdown to be open
+    await expect(dropdown).toHaveAttribute('open', '', { timeout: 5000 });
 
     // Get initial selection text
-    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    const triggerButton = page.locator('#timezone-dropdown wa-button');
     const initialText = await triggerButton.textContent();
 
     // Find which option is not selected and click it
@@ -49,19 +46,19 @@ test.describe('Timezone Selector', () => {
     console.log(`Initial timezone text: "${initialText}"`);
     console.log(`Is "Event local times" selected?: ${isEventTimesSelected}`);
 
-    // Get all menu items
-    const menuItems = page.locator('#timezone-dropdown sl-menu sl-menu-item');
+    // Get all dropdown items
+    const dropdownItems = page.locator('#timezone-dropdown wa-dropdown-item');
 
-    // Count the menu items to verify we can access them
-    const menuItemCount = await menuItems.count();
-    console.log(`Found ${menuItemCount} timezone menu items`);
+    // Count the dropdown items to verify we can access them
+    const dropdownItemCount = await dropdownItems.count();
+    console.log(`Found ${dropdownItemCount} timezone dropdown items`);
 
     // Instead of using positional selectors, use text content which is more stable
     if (isEventTimesSelected) {
       console.log('Clicking user local timezone option');
       // Find the option that is not "Event local times"
       const userTimezoneOption = page
-        .locator('#timezone-dropdown sl-menu sl-menu-item')
+        .locator('#timezone-dropdown wa-dropdown-item')
         .filter({ hasNotText: 'Event local times' })
         .first();
 
@@ -108,24 +105,23 @@ test.describe('Timezone Selector', () => {
     await expect(dropdown).toBeVisible({ timeout: 5000 });
     await dropdown.click();
 
-    // Wait for menu to be visible
-    const menu = page.locator('#timezone-dropdown sl-menu');
-    await expect(menu).toBeVisible({ timeout: 5000 });
+    // Wait for dropdown to be open
+    await expect(dropdown).toHaveAttribute('open', '', { timeout: 5000 });
 
-    // Debug: check what menu items are available
-    const allMenuItems = page.locator(
-      '#timezone-dropdown sl-menu sl-menu-item'
+    // Debug: check what dropdown items are available
+    const allDropdownItems = page.locator(
+      '#timezone-dropdown wa-dropdown-item'
     );
-    const count = await allMenuItems.count();
-    console.log(`Found ${count} menu items in timezone dropdown`);
+    const count = await allDropdownItems.count();
+    console.log(`Found ${count} dropdown items in timezone dropdown`);
 
-    // Get the text of all menu items for debugging
+    // Get the text of all dropdown items for debugging
     for (let i = 0; i < count; i++) {
-      const text = await allMenuItems.nth(i).textContent();
-      console.log(`Menu item ${i}: "${text}"`);
+      const text = await allDropdownItems.nth(i).textContent();
+      console.log(`Dropdown item ${i}: "${text}"`);
     }
 
-    // We need a more reliable approach to finding and clicking the menu item
+    // We need a more reliable approach to finding and clicking the dropdown item
     // Try multiple selectors to ensure we find the right element
     console.log('Attempting to click "Event local times" option');
 
@@ -138,24 +134,24 @@ test.describe('Timezone Selector', () => {
         console.log('Found "Event local times" by exact text match');
         await eventLocalByText.click({ force: true, timeout: 3000 });
       } else {
-        // Second attempt: Using menu item with value="event"
+        // Second attempt: Using dropdown item with value="event"
         console.log('Trying alternative selector with value attribute');
-        const menuItems = page.locator(
-          '#timezone-dropdown sl-menu sl-menu-item'
+        const dropdownItems = page.locator(
+          '#timezone-dropdown wa-dropdown-item'
         );
-        const count = await menuItems.count();
+        const count = await dropdownItems.count();
 
         // Try clicking the second item (usually "Event local times")
         if (count >= 2) {
-          console.log('Clicking second menu item');
-          await menuItems.nth(1).click({ force: true, timeout: 3000 });
+          console.log('Clicking second dropdown item');
+          await dropdownItems.nth(1).click({ force: true, timeout: 3000 });
         } else {
           // Last resort: Click by JavaScript
           console.log('Using JavaScript evaluation as last resort');
           await page.evaluate(() => {
             // In JS, we need to use HTMLElement.click() method
             const eventItem = document.querySelector(
-              'sl-menu-item[value="event"]'
+              'wa-dropdown-item[value="event"]'
             );
             if (eventItem && eventItem instanceof HTMLElement)
               eventItem.click();
@@ -164,12 +160,12 @@ test.describe('Timezone Selector', () => {
         }
       }
     } catch (e) {
-      console.log('Error while trying to click menu item:', e);
+      console.log('Error while trying to click dropdown item:', e);
       // Try a different approach using JavaScript as a last resort
       await page.evaluate(() => {
-        // Just select the second menu item which should be "Event local times"
+        // Just select the second dropdown item which should be "Event local times"
         const items = document.querySelectorAll(
-          '#timezone-dropdown sl-menu sl-menu-item'
+          '#timezone-dropdown wa-dropdown-item'
         );
         if (items.length > 1 && items[1] instanceof HTMLElement) {
           (items[1] as HTMLElement).click();
@@ -181,7 +177,7 @@ test.describe('Timezone Selector', () => {
     await page.waitForTimeout(2000);
 
     // Get the current selection text
-    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    const triggerButton = page.locator('#timezone-dropdown wa-button');
 
     // Make sure the dropdown has closed and the button is visible
     await expect(triggerButton).toBeVisible({ timeout: 5000 });
@@ -221,7 +217,7 @@ test.describe('Timezone Selector', () => {
     await page.waitForTimeout(2000);
 
     // Check that selection is preserved
-    const dropdownButton = page.locator('#timezone-dropdown sl-button');
+    const dropdownButton = page.locator('#timezone-dropdown wa-button');
     await expect(dropdownButton).toBeVisible({ timeout: 5000 });
 
     // Get text with retry logic

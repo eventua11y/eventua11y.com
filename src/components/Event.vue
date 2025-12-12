@@ -196,58 +196,69 @@ const speakerDisplay = computed(() => {
       v-if="event.type !== 'deadline'"
     />
 
-    <details
-      v-if="event.description && event.type !== 'theme'"
-      class="event__children flow"
+    <div
+      v-if="
+        event.description ||
+        (!isDedicatedToAccessibility && (hasChildren || event.isParent))
+      "
+      class="event__details flow flow-xs"
     >
-      <summary>
-        <i class="icon fa-solid fa-caret-right"></i>
-        Description
-      </summary>
-      <p class="event__description" itemprop="description">
-        {{ event.description }}
-      </p>
-    </details>
-
-    <template v-if="!isDedicatedToAccessibility">
-      <details v-if="hasChildren" class="event__children flow flow-xs">
-        <summary>
-          <i class="icon fa-solid fa-caret-right"></i>
-          Accessibility highlights: {{ enumeratedChildTypes }}
-        </summary>
-        <ol
-          role="list"
-          class="flow flow-xs"
-          :aria-label="`Accessibility highlights for ${event.title}`"
-        >
-          <li v-for="child in event.children" :key="child._id">
-            <EventChild :event="child" />
-          </li>
-        </ol>
-      </details>
-      <details v-else-if="event.isParent" class="event__children flow">
-        <summary>
-          <i class="icon fa-solid fa-caret-right"></i>
-          Schedule not yet announced
-        </summary>
-        <p>
-          {{ event.title }} is expected to include one or more
-          accessibility-themed sessions but the full schedule has not yet been
-          announced. Details will be published here closer to the date of the
-          event.
+      <wa-details
+        v-if="event.description && event.type !== 'theme'"
+        summary="Description"
+        appearance="outlined"
+        icon-placement="start"
+        :name="`event-${event._id}`"
+      >
+        <p class="event__description" itemprop="description">
+          {{ event.description }}
         </p>
-      </details>
-    </template>
+      </wa-details>
+
+      <template v-if="!isDedicatedToAccessibility">
+        <wa-details
+          v-if="hasChildren"
+          :summary="`Accessibility highlights: ${enumeratedChildTypes}`"
+          appearance="outlined"
+          icon-placement="start"
+          :name="`event-${event._id}`"
+        >
+          <ol
+            role="list"
+            class="flow flow-xs"
+            :aria-label="`Accessibility highlights for ${event.title}`"
+          >
+            <li v-for="child in event.children" :key="child._id">
+              <EventChild :event="child" />
+            </li>
+          </ol>
+        </wa-details>
+        <wa-details
+          v-else-if="event.isParent"
+          summary="Schedule not yet announced"
+          appearance="outlined"
+          icon-placement="start"
+          :name="`event-${event._id}`"
+        >
+          <p>
+            {{ event.title }} is expected to include one or more
+            accessibility-themed sessions but the full schedule has not yet been
+            announced. Details will be published here closer to the date of the
+            event.
+          </p>
+        </wa-details>
+      </template>
+    </div>
 
     <div
       class="event__badges"
       v-if="isDedicatedToAccessibility || isCallForSpeakersOpen"
     >
-      <sl-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
-        >Dedicated to accessibility</sl-badge
+      <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
+        >Dedicated to accessibility</wa-badge
       >
-      <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
-        >Call for speakers</sl-badge
+      <wa-badge variant="success" pill v-if="isCallForSpeakersOpen"
+        >Call for speakers</wa-badge
       >
     </div>
   </article>

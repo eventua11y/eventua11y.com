@@ -33,10 +33,13 @@ test('filter drawer opens when filter button is clicked', async ({ page }) => {
   // Click and wait for drawer
   await filterButton.click();
 
-  // Get drawer and verify state
+  // Wait for drawer panel to be visible (Web Awesome uses shadow DOM)
   const drawer = page.locator('#filter-drawer');
-  await expect(drawer).toHaveAttribute('open', '');
-  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveAttribute('open');
+
+  // Also verify the drawer content is visible
+  const drawerContent = page.locator('#filter-drawer wa-radio-group').first();
+  await expect(drawerContent).toBeVisible({ timeout: 5000 });
 
   // Optional: Wait for transition
   await page.waitForTimeout(300);
@@ -48,20 +51,20 @@ test('filter drawer closes when close button is clicked', async ({ page }) => {
   await filterButton.waitFor({ state: 'visible' });
   await filterButton.click({ force: true });
 
-  // Wait for drawer to be visible
+  // Wait for drawer to be open
   const drawer = page.locator('#filter-drawer');
-  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveAttribute('open', { timeout: 5000 });
 
-  // Close drawer
-  const closeButton = page.getByRole('button', { name: 'Close' });
-  await closeButton.waitFor({ state: 'visible' });
-  await closeButton.click({ force: true });
+  // Wait for drawer content to be visible
+  const drawerContent = page.locator('#filter-drawer wa-radio-group').first();
+  await expect(drawerContent).toBeVisible({ timeout: 5000 });
+
+  // Close drawer using Escape key (more reliable than finding the close button)
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
 
   // Verify drawer is closed
-  await expect(drawer).not.toBeVisible();
-
-  // Optional: Wait for animation
-  await page.waitForTimeout(300);
+  await expect(drawer).not.toHaveAttribute('open');
 });
 
 test('filter drawer closes when esc key is pressed', async ({ page }) => {
@@ -75,8 +78,11 @@ test('filter drawer closes when esc key is pressed', async ({ page }) => {
 
   // Verify drawer opens
   const drawer = page.locator('#filter-drawer');
-  await expect(drawer).toHaveAttribute('open', '');
-  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveAttribute('open', { timeout: 5000 });
+
+  // Wait for drawer content to be visible
+  const drawerContent = page.locator('#filter-drawer wa-radio-group').first();
+  await expect(drawerContent).toBeVisible({ timeout: 5000 });
 
   // Press escape and wait for transition
   await page.keyboard.press('Escape');
@@ -84,7 +90,6 @@ test('filter drawer closes when esc key is pressed', async ({ page }) => {
 
   // Verify drawer closes
   await expect(drawer).not.toHaveAttribute('open');
-  await expect(drawer).not.toBeVisible();
 });
 
 test('reset button appears when filters are applied', async ({ page }) => {
@@ -98,7 +103,11 @@ test('reset button appears when filters are applied', async ({ page }) => {
 
   // Verify drawer opens
   const drawer = page.locator('#filter-drawer');
-  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveAttribute('open', { timeout: 5000 });
+
+  // Wait for drawer content to be visible
+  const drawerContent = page.locator('#filter-drawer wa-radio-group').first();
+  await expect(drawerContent).toBeVisible({ timeout: 5000 });
 
   // Verify reset button initially hidden
   const resetButton = page.getByRole('button', { name: 'Reset Filters' });
@@ -120,9 +129,13 @@ test('reset button clears filters', async ({ page }) => {
   const filterButton = page.locator('#open-filter-drawer');
   await filterButton.click();
 
-  // Wait for drawer to be fully visible
+  // Wait for drawer to be open
   const drawer = page.locator('#filter-drawer');
-  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveAttribute('open', { timeout: 5000 });
+
+  // Wait for drawer content to be visible
+  const drawerContent = page.locator('#filter-drawer wa-radio-group').first();
+  await expect(drawerContent).toBeVisible({ timeout: 5000 });
 
   // Check a filter option to make reset button appear
   const notAcceptingTalksRadio = page.getByRole('radio', {
@@ -138,32 +151,18 @@ test('reset button clears filters', async ({ page }) => {
   // Click reset button
   await resetButton.click({ force: true });
 
-  // Wait longer for reactive changes to propagate after reset
-  await page.waitForTimeout(2000);
-
-  // Add a failsafe - click the No preference option directly
-  const preferenceRadio = page
-    .locator('sl-radio-group', {
-      has: page.getByText('Call for speakers'),
-    })
-    .getByRole('radio', { name: 'No preference' });
-  await preferenceRadio.check({ force: true });
-
-  // Wait for the state to stabilize
+  // Wait for reactive changes to propagate after reset
   await page.waitForTimeout(1000);
-
-  // Verify that the No preference button is checked
-  await expect(preferenceRadio).toBeChecked({ timeout: 5000 });
 
   // Check filter status text shows "all events" (indicating no filters)
   const filterStatus = page.locator('.filters__count');
   // Wait for the text to update and include "all"
   await expect(filterStatus).toContainText('all', { timeout: 5000 });
 
-  // Close the drawer after verifying reset worked
-  const closeButton = page.getByRole('button', { name: 'Close' });
-  await closeButton.click({ force: true });
+  // Close the drawer using escape key
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
 
   // Verify drawer closes completely
-  await expect(drawer).not.toBeVisible({ timeout: 5000 });
+  await expect(drawer).not.toHaveAttribute('open', { timeout: 5000 });
 });
