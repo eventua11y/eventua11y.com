@@ -48,7 +48,7 @@ export const prerender = false;
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    let drawer = document.querySelector('sl-drawer');
+    let drawer = document.querySelector('wa-drawer');
     let retries = 0;
     const maxRetries = 5;
 
@@ -56,7 +56,7 @@ export const prerender = false;
     function initDrawer() {
       if (!drawer && retries < maxRetries) {
         setTimeout(() => {
-          drawer = document.querySelector('sl-drawer');
+          drawer = document.querySelector('wa-drawer');
           if (drawer) {
             setupEventListeners();
           } else {

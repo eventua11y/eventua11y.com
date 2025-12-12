@@ -16,28 +16,27 @@
             {{ filtersStore.nonDeadlineFutureCount }} upcoming events
           </small>
         </p>
-        <sl-button
+        <wa-button
           v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
-          type="primary"
           name="filter-reset"
         >
           <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
-        </sl-button>
+        </wa-button>
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
-        <sl-switch
+        <wa-switch
           ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
-          @sl-change="toggleAwarenessDays"
+          @change="toggleAwarenessDays"
           id="filter-show-awareness-days-bar"
-          >Awareness days</sl-switch
+          >Awareness days</wa-switch
         >
         <div class="group">
-          <sl-button id="open-filter-drawer" @click="handleFilterClick">
+          <wa-button id="open-filter-drawer" @click="handleFilterClick">
             <i class="fa-solid fa-filter"></i> Filter
-          </sl-button>
+          </wa-button>
           <TimezoneSelector />
         </div>
       </div>

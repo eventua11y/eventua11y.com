@@ -61,8 +61,3 @@
   outline-offset: -0.2em;
   text-decoration: none;
 }
-
-/* Ensure Shoelace components inside .masthead use the focus ring color */
-.masthead sl-button::part(base):focus-visible {
-  outline-color: var(--c-focus-ring-color);
-}

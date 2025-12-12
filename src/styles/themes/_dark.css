@@ -48,8 +48,3 @@ html[data-theme='dark'] {
   --page-header-color-fg: var(--color-fg);
   --page-header-accent-color: var(--color-fg); */
 }
-
-/* Shoelace */
-.sl-theme-dark {
-  /* --sl-focus-ring-color: var(--c-color-focus-ring); */
-}

@@ -24,7 +24,7 @@ test.describe('Theme Switching', () => {
   test('should start with system theme', async ({ page }) => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await expect(
-      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
+      page.locator('#theme-selector-button wa-icon[label="Light mode"]')
     ).toBeVisible();
   });
 
@@ -39,7 +39,7 @@ test.describe('Theme Switching', () => {
     // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await expect(
-      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
+      page.locator('#theme-selector-button wa-icon[label="Light mode"]')
     ).toBeVisible();
 
     // Verify persistence
@@ -63,7 +63,7 @@ test.describe('Theme Switching', () => {
     // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(
-      page.locator('#theme-selector-button sl-icon[label="Dark mode"]')
+      page.locator('#theme-selector-button wa-icon[label="Dark mode"]')
     ).toBeVisible();
 
     // Get storage state
@@ -98,16 +98,16 @@ test.describe('Theme Switching', () => {
   }) => {
     // Test menu opening
     await page.click('#theme-selector-button');
-    await expect(page.locator('#theme-selector sl-menu')).toBeVisible();
+    await expect(page.locator('#theme-selector')).toHaveAttribute('open', '');
 
     // Test click outside
     await page.click('body');
-    await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
+    await expect(page.locator('#theme-selector')).not.toHaveAttribute('open');
 
     // Test keyboard interaction
     await page.click('#theme-selector-button');
-    await expect(page.locator('#theme-selector sl-menu')).toBeVisible();
+    await expect(page.locator('#theme-selector')).toHaveAttribute('open', '');
     await page.keyboard.press('Escape');
-    await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
+    await expect(page.locator('#theme-selector')).not.toHaveAttribute('open');
   });
 });

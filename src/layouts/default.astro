@@ -1,6 +1,4 @@
 ---
-import '@shoelace-style/shoelace/dist/themes/light.css';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '../styles/styles.css';
 import TheFooter from '../components/TheFooter.astro';
 import TheHeader from '../components/TheHeader.astro';
@@ -76,6 +74,9 @@ const { title } = Astro.props.frontmatter || Astro.props;
       defer
       src="https://kit.fontawesome.com/6fc2948f48.js"
       crossorigin="anonymous"></script>
+    <script
+      src="https://kit.webawesome.com/a3215c5a9f914bc8.js"
+      crossorigin="anonymous"></script>
   </head>
   <body>
     <a href="#main" class="skip">
@@ -98,24 +99,7 @@ const { title } = Astro.props.frontmatter || Astro.props;
 </html>
 
 <script>
-  // Import Shoelace components after hydration
-  import '@shoelace-style/shoelace/dist/components/button/button.js';
-  import '@shoelace-style/shoelace/dist/components/badge/badge.js';
-  import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-  import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
-  import '@shoelace-style/shoelace/dist/components/menu/menu.js';
-  import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
-  import '@shoelace-style/shoelace/dist/components/alert/alert.js';
-  import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
-  import '@shoelace-style/shoelace/dist/components/switch/switch.js';
-  import '@shoelace-style/shoelace/dist/components/skeleton/skeleton.js';
-  import '@shoelace-style/shoelace/dist/components/radio/radio.js';
-  import '@shoelace-style/shoelace/dist/components/radio-group/radio-group.js';
-
-  // Set base path for Shoelace assets
-  import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-  setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/');
-
+  // Web Awesome components are autoloaded via the project script in <head>
   import '../scripts/main.ts';
 
   // Initialize Sentry
@@ -126,5 +110,4 @@ const { title } = Astro.props.frontmatter || Astro.props;
     integrations: [],
     enabled: import.meta.env.PROD
   });
-  
 </script>
