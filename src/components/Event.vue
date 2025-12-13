@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import dayjs from 'dayjs';
+import { isCallForSpeakersOpen } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
@@ -34,16 +34,9 @@ const hasChildren = computed(
 
 /**
  * Checks if call for speakers is currently open
- * Returns true if:
- * - Event has call for speakers enabled AND
- * - Either no closing date is set OR current date is before closing date
  * @returns {boolean} True if call for speakers is open
  */
-const isCallForSpeakersOpen = computed(() => {
-  if (!props.event.callForSpeakers) return false;
-  if (!props.event.callForSpeakersClosingDate) return true;
-  return dayjs().isBefore(dayjs(props.event.callForSpeakersClosingDate));
-});
+const callForSpeakersOpen = computed(() => isCallForSpeakersOpen(props.event));
 
 /**
  * Enumerates child event types and their counts
@@ -241,12 +234,12 @@ const speakerDisplay = computed(() => {
 
     <div
       class="event__badges"
-      v-if="isDedicatedToAccessibility || isCallForSpeakersOpen"
+      v-if="isDedicatedToAccessibility || callForSpeakersOpen"
     >
       <sl-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
         >Dedicated to accessibility</sl-badge
       >
-      <sl-badge variant="success" pill v-if="isCallForSpeakersOpen"
+      <sl-badge variant="success" pill v-if="callForSpeakersOpen"
         >Call for speakers</sl-badge
       >
     </div>
