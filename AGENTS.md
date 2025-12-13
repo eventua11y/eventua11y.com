@@ -52,7 +52,9 @@ When AI agents work with this repository, they should:
 ### Development Workflow for Agents
 
 1. **Setup**: Run `npm install` to install dependencies
-2. **Development**: Use `netlify dev` to test edge functions locally
+2. **Development**:
+   - Use `npm run dev` for general development with watch mode
+   - Use `netlify dev` specifically when testing edge functions locally
 3. **Code Quality**: Run `npm run check` to verify formatting
 4. **Testing**: Use `npm test` to run Playwright E2E tests
 5. **Build**: Run `npm run build` to create production build
