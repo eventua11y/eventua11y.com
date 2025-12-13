@@ -1,5 +1,5 @@
 import { reactive, computed, watch } from 'vue';
-import dayjs from 'dayjs';
+import { isCallForSpeakersOpen } from '../utils/eventUtils';
 
 interface Event {
   callForSpeakers?: boolean;
@@ -66,17 +66,6 @@ const DEFAULT_FILTER_VALUES: Filters = {
 };
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
-
-/**
- * Checks if the call for speakers is open for a given event.
- * @param event - The event to check.
- * @returns True if the call for speakers is open, false otherwise.
- */
-const isCallForSpeakersOpen = (event: Event): boolean => {
-  if (!event.callForSpeakers) return false;
-  if (!event.callForSpeakersClosingDate) return true;
-  return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
-};
 
 // Create a reactive reference to defaultFilters
 const initialFilters = reactive({ ...defaultFilters });
