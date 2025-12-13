@@ -136,7 +136,8 @@ Located in `netlify/edge-functions/`:
 
 ### Development Workflow
 
-1. Use `netlify dev` when testing edge functions or full functionality
-2. Run `npm run check` before committing to ensure formatting compliance
-3. Test timezone functionality by changing browser timezone or using UI selector
-4. Verify accessibility with Playwright tests that include axe-core checks
+1. All tasks must be planned and recorded in a GitHub issue before implementation
+2. Use `netlify dev` when testing edge functions or full functionality
+3. Run `npm run check` before committing to ensure formatting compliance
+4. Test timezone functionality by changing browser timezone or using UI selector
+5. Verify accessibility with Playwright tests that include axe-core checks
