@@ -42,7 +42,7 @@
     "@types/node": "^25.0.0",
     "@typescript-eslint/parser": "^8.49.0",
     "astro": "^5.16.5",
-    "autoprefixer": "^10.4.22",
+    "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
     "cssnano": "^7.1.1",
     "eslint": "^9.39.1",
