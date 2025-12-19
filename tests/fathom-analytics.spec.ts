@@ -6,7 +6,9 @@ test.describe('Fathom Analytics', () => {
     await page.goto('/');
 
     // Check if the Fathom script is present
-    const fathomScript = page.locator('script[src="https://cdn.usefathom.com/script.js"]');
+    const fathomScript = page.locator(
+      'script[src="https://cdn.usefathom.com/script.js"]'
+    );
     await expect(fathomScript).toBeAttached();
 
     // Verify that data-spa attribute is NOT present
@@ -18,7 +20,9 @@ test.describe('Fathom Analytics', () => {
     expect(dataSite).toBe('XTSPEPUF');
 
     // Verify that defer attribute is present
-    const hasDefer = await fathomScript.evaluate((el) => el.hasAttribute('defer'));
+    const hasDefer = await fathomScript.evaluate((el) =>
+      el.hasAttribute('defer')
+    );
     expect(hasDefer).toBe(true);
   });
 
