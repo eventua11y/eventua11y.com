@@ -111,12 +111,6 @@
 
   --c-focus-ring-offset: var(--size-1);
   --c-focus-ring-width: var(--size-1);
-
-  /* ==========================================================================
-     HEADINGS FONT FAMILY (preserved from original)
-     ========================================================================== */
-
-  --c-headings-font-family: 'Roboto Slab', sans-serif;
 }
 
 /* Dark mode shadow adjustments
