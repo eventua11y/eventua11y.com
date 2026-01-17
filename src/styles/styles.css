@@ -1,7 +1,7 @@
 @import url('themes/_light.css');
 @import url('themes/_dark.css');
 @import url('_reset.css');
-@import url('_variables.css');
+@import url('_open-props.css');
 @import url('_color.css');
 @import url('_typo.css');
 @import url('_buttons.css');

@@ -1,0 +1,126 @@
+/**
+ * Open Props Integration Layer
+ *
+ * This file maps Open Props CSS custom properties to our existing token naming
+ * convention (--p-* for primitives). This allows gradual migration while
+ * maintaining backward compatibility with existing utility classes and components.
+ *
+ * Open Props provides:
+ * - Spacing: --size-* (static) and --size-fluid-* (responsive)
+ * - Typography: --font-size-* (static) and --font-size-fluid-* (responsive)
+ * - Shadows: --shadow-* (adaptive to light/dark)
+ * - Easing: --ease-* functions
+ * - Animations: --animation-* keyframes
+ * - Border radii: --radius-*
+ */
+
+:root {
+  /* ==========================================================================
+     SPACING SCALE
+     Maps Open Props fluid sizes to our --p-space-* convention.
+     Open Props uses --size-fluid-1 through --size-fluid-9.
+     ========================================================================== */
+
+  /* Base spacing scale using Open Props fluid sizes */
+  --p-space-3xs: var(--size-1); /* 0.25rem - smallest fixed size */
+  --p-space-2xs: var(--size-fluid-1); /* clamp(.5rem, 1vw, 1rem) */
+  --p-space-xs: var(--size-fluid-2); /* clamp(1rem, 2vw, 1.5rem) */
+  --p-space-s: var(--size-fluid-3); /* clamp(1.5rem, 3vw, 2rem) */
+  --p-space-m: var(--size-fluid-4); /* clamp(2rem, 4vw, 3rem) */
+  --p-space-l: var(--size-fluid-5); /* clamp(4rem, 6vw, 5rem) */
+  --p-space-xl: var(--size-fluid-6); /* clamp(5rem, 7vw, 7.5rem) */
+  --p-space-2xl: var(--size-fluid-7); /* clamp(7.5rem, 10vw, 10rem) */
+  --p-space-3xl: var(--size-fluid-8); /* clamp(10rem, 15vw, 15rem) */
+
+  /* One-up pairs for responsive spacing (min at mobile, max at desktop)
+     These use Open Props static sizes as we define the fluid behavior ourselves */
+  --p-space-3xs-2xs: clamp(var(--size-1), 1vw, var(--size-2));
+  --p-space-2xs-xs: clamp(var(--size-2), 1.5vw, var(--size-3));
+  --p-space-xs-s: clamp(var(--size-3), 2vw, var(--size-4));
+  --p-space-s-m: clamp(var(--size-4), 3vw, var(--size-6));
+  --p-space-m-l: clamp(var(--size-5), 4vw, var(--size-8));
+  --p-space-l-xl: clamp(var(--size-7), 6vw, var(--size-10));
+  --p-space-xl-2xl: clamp(var(--size-9), 8vw, var(--size-12));
+  --p-space-2xl-3xl: clamp(var(--size-11), 12vw, var(--size-14));
+
+  /* Custom pairs */
+  --p-space-s-l: clamp(var(--size-4), 4vw, var(--size-8));
+  --p-space-xs-m: clamp(var(--size-3), 3vw, var(--size-6));
+
+  /* ==========================================================================
+     TYPOGRAPHY SCALE
+     Maps Open Props fluid font sizes to our --p-step-* convention.
+     Open Props uses --font-size-fluid-0 through --font-size-fluid-3.
+     ========================================================================== */
+
+  --p-step--2: var(--font-size-0); /* 0.75rem - smallest */
+  --p-step--1: var(--font-size-1); /* 0.875rem */
+  --p-step-0: var(--font-size-fluid-0); /* clamp(1rem, 4vw, 1.5rem) - base */
+  --p-step-1: var(--font-size-fluid-1); /* clamp(1.5rem, 4vw, 2rem) */
+  --p-step-2: var(--font-size-fluid-2); /* clamp(2rem, 6vw, 3rem) */
+  --p-step-3: var(--font-size-fluid-3); /* clamp(3rem, 8vw, 4.5rem) */
+  --p-step-4: var(--font-size-5); /* 2rem - fixed large */
+  --p-step-5: var(--font-size-6); /* 2.5rem - fixed larger */
+
+  /* ==========================================================================
+     BORDER RADIUS
+     Using Open Props radius scale for consistency.
+     ========================================================================== */
+
+  --s-border-radius: var(--radius-2); /* Standard border radius */
+  --s-border-radius-sm: var(--radius-1);
+  --s-border-radius-lg: var(--radius-3);
+  --s-border-radius-round: var(--radius-round);
+
+  /* ==========================================================================
+     SHADOWS
+     Open Props shadows adapt to light/dark mode automatically.
+     ========================================================================== */
+
+  --s-shadow-sm: var(--shadow-1);
+  --s-shadow: var(--shadow-2);
+  --s-shadow-md: var(--shadow-3);
+  --s-shadow-lg: var(--shadow-4);
+  --s-shadow-xl: var(--shadow-5);
+
+  /* ==========================================================================
+     EASING FUNCTIONS
+     Open Props provides a comprehensive set of easing curves.
+     ========================================================================== */
+
+  --s-ease-default: var(--ease-3);
+  --s-ease-in: var(--ease-in-3);
+  --s-ease-out: var(--ease-out-3);
+  --s-ease-in-out: var(--ease-in-out-3);
+  --s-ease-elastic: var(--ease-elastic-out-3);
+  --s-ease-bounce: var(--ease-bounce-out-3);
+  --s-ease-spring: var(--ease-spring-3);
+
+  /* ==========================================================================
+     ANIMATION DURATIONS
+     Consistent timing for transitions and animations.
+     ========================================================================== */
+
+  --s-duration-fast: 150ms;
+  --s-duration-normal: 250ms;
+  --s-duration-slow: 400ms;
+
+  /* ==========================================================================
+     FOCUS RING (updated to use Open Props values)
+     ========================================================================== */
+
+  --c-focus-ring-offset: var(--size-1);
+  --c-focus-ring-width: var(--size-1);
+
+  /* ==========================================================================
+     HEADINGS FONT FAMILY (preserved from original)
+     ========================================================================== */
+
+  --c-headings-font-family: 'Roboto Slab', sans-serif;
+}
+
+/* Dark mode shadow adjustments
+   Open Props shadows are already adaptive, but we can customize if needed */
+html[data-theme='dark'] {
+  /* Shadows in dark mode use lighter values automatically via Open Props */
+}
