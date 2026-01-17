@@ -1,25 +1,22 @@
+/* Header styling for wa-page header slot */
 .masthead {
   --c-focus-ring-color: var(--c-masthead-focus-ring-color);
   background-color: var(--c-masthead-color-bg);
-  border-bottom: 1px solid var(--c-masthead-color-border);
   color: var(--c-masthead-color-fg);
-  padding: var(--p-space-s-m) var(--p-space-xs-m);
-  .inner {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    margin: 0 auto;
-    max-width: 1280px;
-    padding: 0 var(--p-space-xs-m);
-  }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--p-space-xs);
+  width: 100%;
 }
 
 @media screen and (max-width: 580px) {
-  .masthead .inner {
+  .masthead {
     flex-direction: column;
   }
 
-  .masthead .inner .logo {
+  .masthead .logo {
     margin-bottom: var(--p-space-s);
   }
 }
@@ -38,26 +35,4 @@
 
 .masthead .logo {
   max-width: 12rem;
-}
-
-.skip {
-  display: inline-block;
-  padding: var(--p-space-2xs) var(--p-space-m-l);
-}
-
-.skip:not(:focus):not(:active) {
-  position: absolute;
-  top: -1000px;
-  left: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-}
-
-.skip:focus {
-  color: var(--c-masthead-color-fg);
-  display: block;
-  outline-offset: -0.2em;
-  text-decoration: none;
 }
