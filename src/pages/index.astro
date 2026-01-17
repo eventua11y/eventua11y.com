@@ -12,39 +12,23 @@ export const prerender = false;
 ---
 
 <DefaultLayout>
+  <Fragment slot="subheader">
+    <nav aria-label="Event filters">
+      <FilterBar client:only="vue" />
+    </nav>
+  </Fragment>
+  <Fragment slot="dialogs">
+    <Filters client:only="vue" />
+  </Fragment>
   <Today client:load />
-  <FilterBar client:only="vue" />
-  <Filters client:only="vue" />
-  <div class="container grid">
-    <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l readable main-content">
-      <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
-      <EventList type="upcoming" client:load />
-    </div>
-    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' showTodayLink={true} />
+  <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="wa-padding-l">
+    <h1 id="upcoming-events-heading" class="wa-visually-hidden">Upcoming accessibility events</h1>
+    <EventList type="upcoming" client:load />
   </div>
+  <Fragment slot="aside">
+    <MonthNav client:load contentRegion='#events' showTodayLink={true} />
+  </Fragment>
 </DefaultLayout>
-
-<style>
-  #month-nav {
-    display: none;
-  }
-  @media (min-width: 769px) {
-    #month-nav {
-      display: block;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 3fr 1fr;
-      gap: var(--p-space-l);
-      align-items: start;
-    }
-  }
-
-  .main-content {
-    min-width: 0; /* Prevent content overflow */
-  }
-
-</style>
 
 <!-- Drawer open/close is handled declaratively by Web Awesome via data-drawer attributes -->
 
