@@ -5,10 +5,8 @@ test.beforeEach(async ({ page, baseURL }) => {
   // Wait for hydration indicators
   await page.waitForSelector('#upcoming-events');
   await page.waitForSelector('#filters');
-  await page.waitForSelector('.filters__count:not(:empty)');
+  await page.waitForSelector('#filters p:not(:empty)');
   await page.waitForSelector('#open-filter-drawer:not([disabled])');
-  await page.waitForSelector('#upcoming-events');
-  await page.waitForSelector('#filters');
 });
 
 test('filter button is visible', async ({ page }) => {
@@ -142,6 +140,8 @@ test('reset button clears filters', async ({ page }) => {
     name: 'Not accepting talks',
     exact: true,
   });
+  // Scroll the element into view before clicking
+  await notAcceptingTalksRadio.scrollIntoViewIfNeeded();
   await notAcceptingTalksRadio.check({ force: true });
 
   // Wait for reset button to become visible
@@ -155,7 +155,7 @@ test('reset button clears filters', async ({ page }) => {
   await page.waitForTimeout(1000);
 
   // Check filter status text shows "all events" (indicating no filters)
-  const filterStatus = page.locator('.filters__count');
+  const filterStatus = page.locator('#filters p');
   // Wait for the text to update and include "all"
   await expect(filterStatus).toContainText('all', { timeout: 5000 });
 
