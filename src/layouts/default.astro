@@ -79,17 +79,32 @@ const { title } = Astro.props.frontmatter || Astro.props;
       crossorigin="anonymous"></script>
   </head>
   <body>
-    <a href="#main" class="skip">
-      <i class="fa-solid fa-down-to-line"></i> Skip to main content
-    </a>
+    <wa-page disable-sticky="header" disable-navigation-toggle>
+      <span slot="skip-to-content">
+        <i class="fa-solid fa-down-to-line"></i> Skip to main content
+      </span>
 
-    <TheHeader />
+      <header slot="header">
+        <TheHeader />
+      </header>
 
-    <main id="main">
-      <slot />
-    </main>
+      <div slot="subheader">
+        <slot name="subheader" />
+      </div>
 
-    <TheFooter />
+      <main id="main" class="wa-stack wa-gap-2xl">
+        <slot />
+      </main>
+
+      <nav slot="aside" aria-label="Months">
+        <slot name="aside" />
+      </nav>
+
+      <div slot="footer">
+        <TheFooter />
+      </div>
+    </wa-page>
+    <slot name="dialogs" />
     <script
       src="https://cdn.usefathom.com/script.js"
       data-spa="auto"
@@ -111,3 +126,57 @@ const { title } = Astro.props.frontmatter || Astro.props;
     enabled: import.meta.env.PROD
   });
 </script>
+
+<style is:global>
+  /* wa-page requires html and body to have no margin/padding */
+  html,
+  body {
+    min-height: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  wa-page {
+    --main-width: 60rem;
+  }
+
+  /* Hide aside on mobile views */
+  wa-page[view='mobile'] [slot='aside'] {
+    display: none;
+  }
+
+  /* Reset list styles for semantic lists */
+  [role='list'] {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    --wa-content-spacing: 0;
+  }
+
+  [role='list'] > li {
+    margin: 0;
+  }
+
+  /* Limit paragraph width for readability */
+  p {
+    max-width: 65ch;
+  }
+
+  /* Reset content spacing in filter bar and footer */
+  #filters,
+  #global-footer {
+    --wa-content-spacing: 0;
+  }
+
+  /* Full width nav in subheader */
+  [slot='subheader'] nav {
+    width: 100%;
+  }
+
+  /* Border above and below subheader */
+  wa-page::part(subheader) {
+    border-top: 1px solid var(--wa-color-neutral-200);
+    border-bottom: 1px solid var(--wa-color-neutral-200);
+  }
+</style>
