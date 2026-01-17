@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Slab&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&family=Roboto+Slab&display=swap');
 
 h1 {
   font-family: 'Roboto Slab', sans-serif;
@@ -28,7 +28,7 @@ h5 {
 }
 
 body {
-  font-family: 'Atkinson Hyperlegible', sans-serif;
+  font-family: 'Atkinson Hyperlegible Next', sans-serif;
   font-size: var(--p-step-0);
   font-weight: 400;
 }
