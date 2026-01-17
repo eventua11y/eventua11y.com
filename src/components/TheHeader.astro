@@ -3,55 +3,49 @@ import Logo from '../images/eventua11y_logo_wordmark_white.svg';
 const currentPath = Astro.url.pathname;
 ---
 
-<header id="global-header" class="masthead" role="banner">
-  <div class="inner">
-    <div class="masthead__logo">
-      <a href="/" rel="home">
-        <Logo class="logo" aria-label="Eventua11y" />
-      </a>
-    </div>
-    <div class="masthead__actions">
-      <nav class="primaryNav">
-        <ul role="list" class="primaryNav__list"> 
-          <li class="primaryNav__item">
-            <a
-              class="primaryNav__link"
-              href="/past-events"
-              aria-current={currentPath === '/past-events' ? 'page' : undefined}
-            >
-              Past Events
-            </a>
-          </li>
-          <li class="primaryNav__item">
-            <a
-              class="primaryNav__link"
-              href="/"
-              aria-current={currentPath === '/' ? 'page' : undefined}
-            >
-              Upcoming
-            </a>
-          </li>
-        </ul>
-      </nav>
-      <wa-dropdown id="theme-selector" placement="bottom-end" distance="3">
-        <wa-button slot="trigger" id="theme-selector-button">
-          <wa-icon label="Light mode" name="sun-bright" variant="solid"></wa-icon>
+<a href="/" rel="home" id="header-logo">
+  <Logo aria-label="Eventua11y" />
+</a>
+
+<div class="wa-cluster wa-gap-m wa-align-items-center">
+  <nav aria-label="Primary">
+    <ul role="list" class="wa-cluster wa-gap-s">
+      <li>
+        <wa-button
+          href="/past-events"
+          variant="text"
+          aria-current={currentPath === '/past-events' ? 'page' : undefined}
+        >
+          Past Events
         </wa-button>
-        <wa-dropdown-item type="checkbox" id="light-mode" value="light"
-          >Light mode</wa-dropdown-item
+      </li>
+      <li>
+        <wa-button
+          href="/"
+          variant="text"
+          aria-current={currentPath === '/' ? 'page' : undefined}
         >
-        <wa-dropdown-item type="checkbox" id="dark-mode" value="dark"
-          >Dark mode</wa-dropdown-item
-        >
-        <wa-divider></wa-divider>
-        <wa-dropdown-item
-          type="checkbox"
-          id="system-default"
-          value="system"
-          checked>System default</wa-dropdown-item
-        >
-      </wa-dropdown>
-    </div>
-  </div>
-</header>
-<!-- End #global-header -->
+          Upcoming
+        </wa-button>
+      </li>
+    </ul>
+  </nav>
+  <wa-dropdown id="theme-selector" placement="bottom-end" distance="3">
+    <wa-button slot="trigger" id="theme-selector-button">
+      <wa-icon label="Light mode" name="sun-bright" variant="solid"></wa-icon>
+    </wa-button>
+    <wa-dropdown-item type="checkbox" id="light-mode" value="light"
+      >Light mode</wa-dropdown-item
+    >
+    <wa-dropdown-item type="checkbox" id="dark-mode" value="dark"
+      >Dark mode</wa-dropdown-item
+    >
+    <wa-divider></wa-divider>
+    <wa-dropdown-item
+      type="checkbox"
+      id="system-default"
+      value="system"
+      checked>System default</wa-dropdown-item
+    >
+  </wa-dropdown>
+</div>
