@@ -72,7 +72,7 @@
     "@shoelace-style/shoelace": "^2.20.1",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.1",
-    "sanity": "^4.21.1",
+    "sanity": "^5.4.0",
     "vue": "^3.5.25"
   }
 }
