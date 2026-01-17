@@ -68,7 +68,6 @@
     "@sentry/astro": "^10.30.0",
     "@sentry/cli": "^3.1.0",
     "@sentry/profiling-node": "^10.30.0",
-    "@sentry/vue": "^10.30.0",
     "@shoelace-style/shoelace": "^2.20.1",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.1",
