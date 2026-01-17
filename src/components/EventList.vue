@@ -215,14 +215,14 @@ watch(
 <template>
   <div>
     <!-- Loading state -->
-    <div v-if="loading" class="flow flow-xl">
+    <div v-if="loading" class="wa-stack wa-gap-xl">
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
       <Skeleton effect="sheen" />
     </div>
 
     <!-- Error state -->
-    <wa-callout v-else-if="error" variant="danger" class="my-xl">
+    <wa-callout v-else-if="error" variant="danger" class="wa-margin-block-l">
       <wa-icon
         slot="icon"
         name="octagon-exclamation"
@@ -234,7 +234,7 @@ watch(
     <!-- No events state -->
     <wa-callout
       v-else-if="!loading && Object.keys(groupedEvents).length === 0"
-      class="my-xl"
+      class="wa-margin-block-l"
     >
       <wa-icon slot="icon" name="circle-info" variant="regular"></wa-icon>
       {{
@@ -245,38 +245,32 @@ watch(
     </wa-callout>
 
     <!-- Events list -->
-    <div :id="`${type}-events`" v-else class="flow flow-2xl">
-      <section
-        v-for="(events, yearMonth) in groupedEvents"
+    <div :id="`${type}-events`" v-else class="wa-stack wa-gap-2xl">
+      <template
+        v-for="(events, yearMonth, index) in groupedEvents"
         :key="yearMonth"
-        :id="'section-' + yearMonth"
-        :data-month="yearMonth"
-        class="month flow flow-m"
       >
-        <h2 :id="'heading-' + yearMonth" class="month__heading">
-          {{ formatDate(yearMonth) }}
-        </h2>
-        <ol
-          role="list"
-          class="flow flow-l"
-          :aria-labelledby="'heading-' + yearMonth"
-        >
-          <li v-for="event in events" :key="event._id">
-            <EventBook
-              v-if="event._type === 'book'"
-              :book="event"
-              client:visible
-            />
-            <Event v-else :event="event" client:visible />
-          </li>
-        </ol>
-      </section>
+        <wa-divider v-if="index > 0"></wa-divider>
+        <section :id="'section-' + yearMonth" :data-month="yearMonth">
+          <h2 :id="'heading-' + yearMonth">
+            {{ formatDate(yearMonth) }}
+          </h2>
+          <ol
+            role="list"
+            class="wa-stack wa-gap-l"
+            :aria-labelledby="'heading-' + yearMonth"
+          >
+            <li v-for="event in events" :key="event._id">
+              <EventBook
+                v-if="event._type === 'book'"
+                :book="event"
+                client:visible
+              />
+              <Event v-else :event="event" client:visible />
+            </li>
+          </ol>
+        </section>
+      </template>
     </div>
   </div>
 </template>
-
-<style>
-h2 {
-  font-size: var(--p-step-4);
-}
-</style>

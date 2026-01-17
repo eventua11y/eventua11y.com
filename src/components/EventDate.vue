@@ -1,7 +1,26 @@
 <template>
-  <div class="event__dates">
-    <span class="event__dateStart">
-      <span class="sr-only">Starts</span>
+  <div class="wa-cluster wa-gap-xs">
+    <span v-if="isDeadline" class="wa-cluster wa-gap-xs">
+      <span>
+        <span class="wa-visually-hidden">Starts</span>
+        <time
+          :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
+          itemprop="startDate"
+        >
+          {{ formatDate(dateStart, getStartDateFormat()) }}
+          <template v-if="!dateEnd && !isInternational">
+            <span> </span>
+            <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
+              {{ currentTimezone }}
+            </abbr>
+          </template>
+        </time>
+      </span>
+      <wa-badge variant="danger" pill>Deadline</wa-badge>
+    </span>
+
+    <span v-else>
+      <span class="wa-visually-hidden">Starts</span>
       <time
         :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
         itemprop="startDate"
@@ -14,12 +33,11 @@
           </abbr>
         </template>
       </time>
-      <wa-badge v-if="isDeadline" variant="danger" pill>Deadline</wa-badge>
     </span>
 
-    <span v-if="dateEnd" class="event__dateEnd">
-      <span class="sr-only">Ends</span>
-      <i class="fa-solid fa-arrow-right-long"></i>
+    <span v-if="dateEnd">
+      <span class="wa-visually-hidden">Ends</span>
+      <wa-icon name="arrow-right-long" variant="solid" label="to"></wa-icon>
       <time
         :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
         itemprop="endDate"

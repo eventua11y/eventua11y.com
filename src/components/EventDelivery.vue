@@ -56,24 +56,22 @@ const locationIcon = computed(() =>
 </script>
 
 <template>
-  <div class="event__delivery text-small">
+  <div class="wa-cluster wa-gap-2xs">
     <span
       v-if="attendanceMode === ATTENDANCE_MODES.ONLINE"
-      class="event__online"
       itemprop="eventAttendanceMode"
       content="https://schema.org/OnlineEventAttendanceMode"
     >
-      <i class="fa-solid fa-laptop"></i>
+      <wa-icon name="laptop" variant="solid"></wa-icon>
       Online
     </span>
 
     <span
       v-else-if="attendanceMode === ATTENDANCE_MODES.OFFLINE"
-      class="event__location"
       itemprop="eventAttendanceMode"
       content="https://schema.org/OfflineEventAttendanceMode"
     >
-      <i class="fa-solid fa-fw fa-location-dot"></i>
+      <wa-icon name="location-dot" variant="solid"></wa-icon>
       <span itemprop="location" itemscope itemtype="https://schema.org/Place">
         {{ displayLocation }}
       </span>
@@ -81,28 +79,30 @@ const locationIcon = computed(() =>
 
     <div
       v-else-if="attendanceMode === ATTENDANCE_MODES.MIXED"
+      class="wa-cluster wa-gap-2xs"
       itemprop="eventAttendanceMode"
       content="https://schema.org/MixedEventAttendanceMode"
     >
-      <span class="event__location">
-        <i class="fa-solid fa-fw fa-location-dot"></i>
+      <span>
+        <wa-icon name="location-dot" variant="solid"></wa-icon>
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
           {{ displayLocation }}
         </span>
       </span>
-      <span class="text-muted">and</span>
-      <span class="event__online">
-        <i class="fa-solid fa-laptop"></i>
+      <span>and</span>
+      <span>
+        <wa-icon name="laptop" variant="solid"></wa-icon>
         Online
       </span>
     </div>
 
     <div v-else-if="attendanceMode === ATTENDANCE_MODES.NONE">
-      <span class="event__location">
-        <i :class="locationIcon"></i>
-        <span itemprop="location" itemscope itemtype="https://schema.org/Place">
-          {{ displayLocation }}
-        </span>
+      <wa-icon
+        :name="displayLocation === 'International' ? 'globe' : 'location-dot'"
+        variant="solid"
+      ></wa-icon>
+      <span itemprop="location" itemscope itemtype="https://schema.org/Place">
+        {{ displayLocation }}
       </span>
     </div>
   </div>

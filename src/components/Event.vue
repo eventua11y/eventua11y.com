@@ -152,31 +152,33 @@ const speakerDisplay = computed(() => {
 </script>
 
 <template>
-  <div v-if="event && event.type === 'deadline'" class="event event--deadline">
+  <!-- Deadline events don't use card -->
+  <div
+    v-if="event && event.type === 'deadline'"
+    class="event wa-stack wa-gap-2xs"
+  >
     <EventDate
       v-if="showDate && event.dateStart"
       :dateStart="event.dateStart"
       :timezone="event.timezone"
       :isDeadline="true"
     />
-    <span class="event__title"
+    <span
       >Submit proposals for <a :href="event.website">{{ event.title }}</a></span
     >
   </div>
-  <article
-    v-else-if="event && event.type"
-    :class="`event event--${event.type}`"
-    itemscope
-    itemtype="https://schema.org/Event"
-    :data-event-type="event.type"
+
+  <!-- Theme events don't use card -->
+  <div
+    v-else-if="event && event.type === 'theme'"
+    class="event wa-stack wa-gap-2xs"
   >
-    <h3 class="event__title" itemprop="name">
+    <h3 itemprop="name">
       <a v-if="event.website" :href="event.website" itemprop="url">{{
         event.title
       }}</a>
-      <span v-else>{{ event.title }}</span>
+      <template v-else>{{ event.title }}</template>
     </h3>
-
     <EventDate
       v-if="showDate && event.dateStart"
       :dateStart="event.dateStart"
@@ -185,32 +187,57 @@ const speakerDisplay = computed(() => {
       :day="event.day"
       :type="event.type"
     />
-
-    <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
-      featuring <span v-html="speakerDisplay"></span>
-    </div>
-
     <EventDelivery
       :attendanceMode="event.attendanceMode"
       :location="event.location"
-      v-if="event.type !== 'deadline'"
     />
+  </div>
 
-    <div
-      v-if="
-        event.description ||
-        (!isDedicatedToAccessibility && (hasChildren || event.isParent))
-      "
-      class="event__details flow flow-xs"
-    >
+  <!-- Regular events use wa-card -->
+  <wa-card
+    v-else-if="event && event.type"
+    class="event"
+    itemscope
+    itemtype="https://schema.org/Event"
+    :data-event-type="event.type"
+  >
+    <!-- Header with title and date -->
+    <div slot="header" class="wa-stack wa-gap-2xs">
+      <EventDate
+        v-if="showDate && event.dateStart"
+        :dateStart="event.dateStart"
+        :dateEnd="event.dateEnd"
+        :timezone="event.timezone"
+        :day="event.day"
+        :type="event.type"
+      />
+      <h3 itemprop="name">
+        <a v-if="event.website" :href="event.website" itemprop="url">{{
+          event.title
+        }}</a>
+        <template v-else>{{ event.title }}</template>
+      </h3>
+    </div>
+
+    <!-- Main content (default slot) -->
+    <div class="wa-stack wa-gap-s">
+      <div v-if="speakerDisplay">
+        featuring <span v-html="speakerDisplay"></span>
+      </div>
+
+      <EventDelivery
+        :attendanceMode="event.attendanceMode"
+        :location="event.location"
+      />
+
       <wa-details
-        v-if="event.description && event.type !== 'theme'"
+        v-if="event.description"
         summary="Description"
         appearance="outlined"
         icon-placement="start"
         :name="`event-${event._id}`"
       >
-        <p class="event__description" itemprop="description">
+        <p itemprop="description">
           {{ event.description }}
         </p>
       </wa-details>
@@ -225,7 +252,7 @@ const speakerDisplay = computed(() => {
         >
           <ol
             role="list"
-            class="flow flow-xs"
+            class="wa-stack wa-gap-xs"
             :aria-label="`Accessibility highlights for ${event.title}`"
           >
             <li v-for="child in event.children" :key="child._id">
@@ -250,8 +277,10 @@ const speakerDisplay = computed(() => {
       </template>
     </div>
 
+    <!-- Badges in footer -->
     <div
-      class="event__badges"
+      slot="footer"
+      class="wa-cluster wa-gap-2xs"
       v-if="isDedicatedToAccessibility || isCallForSpeakersOpen"
     >
       <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
@@ -261,15 +290,7 @@ const speakerDisplay = computed(() => {
         >Call for speakers</wa-badge
       >
     </div>
-  </article>
-  <div v-else class="event event--loading">Loading...</div>
-</template>
+  </wa-card>
 
-<style scoped>
-.event__badges {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: var(--p-space-3xs);
-  row-gap: var(--p-space-3xs);
-}
-</style>
+  <div v-else>Loading...</div>
+</template>
