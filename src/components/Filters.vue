@@ -1,7 +1,8 @@
 <template>
-  <wa-drawer id="filter-drawer" label="Filters">
-    <div class="flow flow-l">
-      <div class="flow flow-xs">
+  <wa-drawer id="filter-drawer" label="Filters" modal>
+    <div class="wa-stack wa-gap-l">
+      <!-- Radio group filters -->
+      <div class="wa-stack wa-gap-m">
         <wa-radio-group
           label="Attendance mode"
           name="attendance"
@@ -36,7 +37,8 @@
         </wa-radio-group>
       </div>
 
-      <div class="flow flow-xs">
+      <!-- Toggle switches -->
+      <div class="wa-stack wa-gap-s">
         <wa-switch
           ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
@@ -59,7 +61,9 @@
           >Show speaker deadlines</wa-switch
         >
       </div>
-      <div class="d-flex flex-col items-start gap-xs">
+
+      <!-- Action buttons -->
+      <div class="wa-stack wa-gap-xs wa-align-items-start">
         <wa-button variant="brand" size="large" data-drawer="close"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
           {{ filtersStore.nonDeadlineFutureCount }} events</wa-button
@@ -71,7 +75,8 @@
           name="filter-reset"
           data-testid="drawer-reset"
         >
-          <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
+          <wa-icon name="filter-circle-xmark" variant="solid"></wa-icon> Reset
+          Filters
         </wa-button>
       </div>
     </div>

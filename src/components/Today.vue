@@ -1,36 +1,29 @@
 <template>
-  <section id="today">
-    <div class="container flow">
-      <hgroup role="group" aria-roledescription="Heading group">
-        <h2>Today</h2>
-        <p aria-roledescription="subtitle">
-          <time class="text-muted" :datetime="today.format('YYYY-MM-DD')">{{
-            today.format('MMMM D, YYYY')
-          }}</time>
-        </p>
-      </hgroup>
-
-      <p v-if="today.format('MM-DD') === '01-01'">
-        Happy New Year! Here's to an eventful {{ today.format('YYYY') }}. 🎉
+  <section id="today" class="wa-padding-m wa-stack wa-gap-m">
+    <hgroup role="group" aria-roledescription="Heading group">
+      <h2>Today</h2>
+      <p aria-roledescription="subtitle">
+        <time :datetime="today.format('YYYY-MM-DD')">{{
+          today.format('MMMM D, YYYY')
+        }}</time>
       </p>
+    </hgroup>
 
-      <p v-if="todaysEvents.length === 0">
-        Take it easy, there are no accessibility events today. Browse
-        <a href="/past-events">past accessibility events</a> to see what you
-        missed.
-      </p>
-      <div v-else class="events flow">
-        <ul role="list" class="flow">
-          <li v-for="event in todaysEvents" :key="event._id">
-            <Event
-              :event="event"
-              class="readable"
-              :showDate="shouldShowDate(event)"
-            />
-          </li>
-        </ul>
-      </div>
-    </div>
+    <p v-if="today.format('MM-DD') === '01-01'">
+      Happy New Year! Here's to an eventful {{ today.format('YYYY') }}.
+    </p>
+
+    <p v-if="todaysEvents.length === 0">
+      Take it easy, there are no accessibility events today. Browse
+      <a href="/past-events">past accessibility events</a> to see what you
+      missed.
+    </p>
+    <ul v-else role="list" class="wa-stack wa-gap-m">
+      <li v-for="event in todaysEvents" :key="event._id">
+        <Event :event="event" :showDate="shouldShowDate(event)" />
+      </li>
+    </ul>
+    <wa-divider></wa-divider>
   </section>
 </template>
 
@@ -84,10 +77,3 @@ watch(
   { deep: true }
 );
 </script>
-
-<style>
-.events {
-  border-top: 1px solid var(--s-color-border);
-  padding-top: var(--p-space-s);
-}
-</style>

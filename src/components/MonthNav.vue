@@ -151,9 +151,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav aria-label="Months" class="month-nav pr-xl">
-    <ul role="list" class="month-list">
-      <li v-for="link in monthLinks" :key="link.identifier" class="mb-xs">
+  <div class="wa-padding-inline-end-xl">
+    <ul role="list" class="wa-stack wa-gap-xs">
+      <li v-for="link in monthLinks" :key="link.identifier">
         <a
           :href="link.href"
           :data-month-link="link.identifier"
@@ -164,34 +164,5 @@ onMounted(() => {
         </a>
       </li>
     </ul>
-  </nav>
+  </div>
 </template>
-
-<style>
-.month-nav {
-  border-left: 1px solid var(--s-color-border);
-  font-size: var(--p-step--1);
-  margin-top: var(--p-space-xl);
-  padding-left: var(--p-space-xs);
-  position: sticky;
-  top: var(--p-space-3xl);
-}
-
-.month-list a {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-  width: 100%;
-  white-space: nowrap;
-}
-
-.month-list a:hover {
-  text-decoration: underline;
-}
-
-.month-list a[aria-current='location'] {
-  transition: all 0.2s ease;
-  text-decoration: underline;
-  color: var(--c-color-link);
-}
-</style>

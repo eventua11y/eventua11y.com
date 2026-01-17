@@ -1,45 +1,40 @@
 <template>
-  <div id="filters" class="py-xs-s">
-    <div class="container">
-      <div class="filters__status">
-        <p
-          class="filters__count text-muted"
-          aria-live="polite"
-          aria-atomic="true"
+  <div id="filters" class="wa-split wa-align-items-center">
+    <!-- Left side: filter count and reset -->
+    <div class="wa-cluster wa-gap-xs wa-align-items-center">
+      <p aria-live="polite" aria-atomic="true">
+        <small v-if="filtersStore.showingAllEvents"
+          >Showing all {{ filtersStore.nonDeadlineFutureCount }} upcoming
+          events</small
         >
-          <small v-if="filtersStore.showingAllEvents"
-            >Showing all {{ filtersStore.nonDeadlineFutureCount }} upcoming
-            events</small
-          >
-          <small v-else>
-            Showing {{ filtersStore.nonDeadlineFilteredCount }} of
-            {{ filtersStore.nonDeadlineFutureCount }} upcoming events
-          </small>
-        </p>
-        <wa-button
-          v-if="filtersStore.isChanged"
-          id="filter-reset"
-          @click="resetFilters"
-          name="filter-reset"
-        >
-          <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
-        </wa-button>
-      </div>
-      <div class="filters__controls d-flex gap-xs items-center">
-        <wa-switch
-          ref="awarenessDaysSwitch"
-          :checked="filtersStore.filters.showAwarenessDays"
-          @change="toggleAwarenessDays"
-          id="filter-show-awareness-days-bar"
-          >Awareness days</wa-switch
-        >
-        <div class="group">
-          <wa-button id="open-filter-drawer" data-drawer="open filter-drawer">
-            <i class="fa-solid fa-filter"></i> Filter
-          </wa-button>
-          <TimezoneSelector />
-        </div>
-      </div>
+        <small v-else>
+          Showing {{ filtersStore.nonDeadlineFilteredCount }} of
+          {{ filtersStore.nonDeadlineFutureCount }} upcoming events
+        </small>
+      </p>
+      <wa-button
+        v-if="filtersStore.isChanged"
+        id="filter-reset"
+        @click="resetFilters"
+        name="filter-reset"
+        size="small"
+      >
+        <wa-icon name="filter-circle-xmark" variant="solid"></wa-icon> Reset
+      </wa-button>
+    </div>
+    <!-- Right side: toggles and filter button -->
+    <div class="wa-cluster wa-gap-xs wa-align-items-center">
+      <wa-switch
+        ref="awarenessDaysSwitch"
+        :checked="filtersStore.filters.showAwarenessDays"
+        @change="toggleAwarenessDays"
+        id="filter-show-awareness-days-bar"
+        >Awareness days</wa-switch
+      >
+      <wa-button id="open-filter-drawer" data-drawer="open filter-drawer">
+        <wa-icon name="filter" variant="solid"></wa-icon> Filter
+      </wa-button>
+      <TimezoneSelector />
     </div>
   </div>
 </template>
@@ -54,12 +49,6 @@ import TimezoneSelector from './TimezoneSelector.vue';
  * Displays filter controls and current filter status
  * Includes reset button, awareness days toggle, and filter drawer trigger
  */
-
-/**
- * Reference to filter toolbar element for intersection observer
- * Used to add sticky positioning when scrolled
- */
-const filterToolbar = ref(null);
 
 /**
  * Reference to awareness days switch component
@@ -103,8 +92,6 @@ function toggleAwarenessDays(event) {
 }
 
 /**
- * Sets up intersection observer for sticky positioning
- * Adds 'is-pinned' class when toolbar scrolls out of view
  * Initializes switch checked state from store
  */
 onMounted(async () => {
@@ -117,14 +104,5 @@ onMounted(async () => {
         filtersStore.filters.showAwarenessDays;
     }
   });
-
-  // Existing intersection observer code
-  if (filterToolbar.value) {
-    const observer = new IntersectionObserver(
-      ([e]) => e.target.classList.toggle('is-pinned', e.intersectionRatio < 1),
-      { threshold: [1] }
-    );
-    observer.observe(filterToolbar.value);
-  }
 });
 </script>
