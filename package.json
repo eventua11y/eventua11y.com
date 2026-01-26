@@ -52,7 +52,7 @@
     "eslint-plugin-playwright": "^2.4.0",
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^17.0.0",
-    "netlify-cli": "^23.12.3",
+    "netlify-cli": "^23.13.5",
     "playwright-chromium": "^1.57.0",
     "postcss-html": "^1.8.0",
     "prettier": "^3.7.4",
