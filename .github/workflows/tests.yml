@@ -67,7 +67,7 @@ jobs:
 
       - name: Install Playwright browsers
         run: |
-          timeout 5m npx playwright install --with-deps || (echo "Playwright installation timed out" && exit 1)
+          timeout 5m npx playwright install chromium --with-deps || (echo "Playwright installation timed out" && exit 1)
 
       - name: Run tests
         run: npx playwright test --retries=1 --timeout=90000
