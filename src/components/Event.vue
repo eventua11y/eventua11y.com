@@ -85,6 +85,19 @@ const eventSpeakers = computed(() => {
 const MAX_DISPLAYED_SPEAKERS = 3;
 
 /**
+ * Shuffles an array in place using the Fisher-Yates algorithm.
+ * @param {Array} array - The array to shuffle
+ * @returns {Array} The shuffled array (same reference)
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/**
  * Determines if an event is dedicated to accessibility
  * True if event is not marked as a parent and is not a child event
  */
@@ -98,7 +111,8 @@ const isDedicatedToAccessibility = computed(() => {
 
 /**
  * Formats speaker list for display
- * If more than 3 speakers, shows first 3 and count of remaining
+ * If more than 3 speakers, randomly selects 3 to display and shows count of remaining.
+ * This avoids giving preferential visibility to any particular speaker.
  * @returns {string} Formatted speaker list with HTML
  */
 const speakerDisplay = computed(() => {
@@ -132,7 +146,10 @@ const speakerDisplay = computed(() => {
     return `${first} and <span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}</span></span>`;
   }
 
-  const firstSpeakers = speakers
+  // Randomise which speakers are shown to avoid favouring any individual
+  const shuffled = shuffleArray([...speakers]);
+
+  const firstSpeakers = shuffled
     .slice(0, MAX_DISPLAYED_SPEAKERS)
     .map(
       (speaker) =>
