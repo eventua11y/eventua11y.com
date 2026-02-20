@@ -1,0 +1,12 @@
+---
+export const prerender = true;
+import DefaultLayout from '../layouts/default.astro';
+---
+
+<DefaultLayout title="Page not found">
+  <div class="container readable py-l flow">
+    <h1>Page not found</h1>
+    <p>The page you're looking for doesn't exist or may have been moved.</p>
+    <p>Try browsing <a href="/">upcoming accessibility events</a> instead.</p>
+  </div>
+</DefaultLayout>
