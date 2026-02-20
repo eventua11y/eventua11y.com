@@ -8,10 +8,7 @@
 </template>
 
 <script setup lang="ts">
-interface Book {
-  title: string;
-  link?: string;
-}
+import type { Book } from '../types/event';
 
 defineProps<{
   book: Book;

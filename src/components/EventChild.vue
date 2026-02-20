@@ -1,28 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
+import type { ChildEvent } from '../types/event';
 
-/**
- * Child event component (e.g., conference session, workshop)
- * Renders a sub-event with its title, format, date and duration
- */
+const props = defineProps<{
+  event: ChildEvent;
+}>();
 
-const props = defineProps({
-  event: {
-    type: Object,
-    required: true,
-    validator: (event) => {
-      return event.title;
-    },
-  },
-});
-
-/**
- * Mapping of event format codes to display strings
- * Used to convert format property to human-readable text
- */
-const formatStrings = {
+/** Mapping of event format codes to display strings. */
+const formatStrings: Record<string, string> = {
   talk: 'Talk',
   tutorial: 'Tutorial',
   workshop: 'Workshop',
@@ -45,7 +32,7 @@ const displayFormat = computed(
 );
 
 const formatPreposition = computed(() => {
-  const prepositions = {
+  const prepositions: Record<string, string> = {
     talk: 'by',
     tutorial: 'by',
     workshop: 'with',
@@ -57,7 +44,7 @@ const formatPreposition = computed(() => {
     keynote: 'by',
     roundtable: 'with',
   };
-  return prepositions[props.event.format] || 'by'; // fallback to 'by' if format not found
+  return (props.event.format && prepositions[props.event.format]) || 'by';
 });
 
 const speakersList = computed(() => {

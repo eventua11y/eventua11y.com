@@ -1,20 +1,32 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
-const props = defineProps({
-  contentRegion: { type: String, required: true },
-  showTodayLink: { type: Boolean, default: false }, // Add showTodayLink prop
-});
+interface MonthLink {
+  text: string;
+  identifier: string;
+  href: string;
+  sectionEl?: Element;
+}
 
-const monthLinks = ref([]);
+const props = withDefaults(
+  defineProps<{
+    contentRegion: string;
+    showTodayLink?: boolean;
+  }>(),
+  {
+    showTodayLink: false,
+  }
+);
+
+const monthLinks = ref<MonthLink[]>([]);
 const activeLink = ref('today');
-let observer; // declare mutable observer
+let observer: IntersectionObserver | null = null;
 
 /**
  * Scrolls smoothly to the target section and sets focus
  * @param {HTMLElement} target - The target element to scroll to
  */
-function scrollToSection(target) {
+function scrollToSection(target: Element | null) {
   if (target) {
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
@@ -37,7 +49,7 @@ function scrollToSection(target) {
  * Updates the month navigation links based on the current sections
  */
 function updateMonthNav() {
-  const tempLinks = [];
+  const tempLinks: MonthLink[] = [];
   // Conditionally add "Today" link
   if (props.showTodayLink) {
     tempLinks.push({
@@ -49,8 +61,9 @@ function updateMonthNav() {
   const monthSections = document.querySelectorAll('[data-month]');
   monthSections.forEach((section) => {
     const yearMonth = section.getAttribute('data-month');
-    const [year, month] = yearMonth.split('-');
-    const date = new Date(year, month - 1);
+    if (!yearMonth) return;
+    const [yearStr, monthStr] = yearMonth.split('-');
+    const date = new Date(Number(yearStr), Number(monthStr) - 1);
     const formatter = new Intl.DateTimeFormat('default', {
       month: 'long',
       year:
@@ -71,7 +84,7 @@ function updateMonthNav() {
  * @param {Event} e - The click event
  * @param {Object} link - The link object containing identifier and section element
  */
-function handleLinkClick(e, link) {
+function handleLinkClick(e: MouseEvent, link: MonthLink) {
   e.preventDefault();
   if (link.identifier === 'today') {
     const todaySection = document.getElementById('today');
@@ -143,10 +156,13 @@ onMounted(() => {
   });
 
   // Watch content region for DOM changes
-  contentObserver.observe(document.querySelector(props.contentRegion), {
-    childList: true,
-    subtree: true,
-  });
+  const contentEl = document.querySelector(props.contentRegion);
+  if (contentEl) {
+    contentObserver.observe(contentEl, {
+      childList: true,
+      subtree: true,
+    });
+  }
 });
 </script>
 
