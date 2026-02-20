@@ -1,14 +1,8 @@
 import { reactive, computed, watch } from 'vue';
 import { isCallForSpeakersOpen } from '../utils/eventUtils';
+import type { Event, Book } from '../types/event';
 
-interface Event {
-  callForSpeakers?: boolean;
-  callForSpeakersClosingDate?: string;
-  type: string;
-  attendanceMode: string;
-  _type?: string;
-  dateStart: string;
-}
+type ListItem = Event | Book;
 
 /**
  * Interface defining filter options
@@ -38,7 +32,7 @@ interface FiltersStore {
   todayEvents: Event[];
   futureEvents: Event[];
   pastEvents: Event[];
-  filteredEvents: Event[];
+  filteredEvents: ListItem[];
   fetchEvents: () => Promise<void>;
   setEvents: (
     futureEvents: Event[],
@@ -52,7 +46,7 @@ interface FiltersStore {
   showingAllEvents: boolean;
   nonDeadlineFutureCount: number;
   nonDeadlineFilteredCount: number;
-  books: Event[];
+  books: Book[];
   fetchBooks: () => Promise<void>;
 }
 
@@ -112,7 +106,7 @@ const filtersStore: FiltersStore = reactive({
       const response = await fetch('/api/get-books');
       if (!response.ok) throw new Error('Failed to fetch books');
       const books = await response.json();
-      this.books = books.map((book) => ({
+      this.books = books.map((book: Record<string, unknown>) => ({
         ...book,
         _type: 'book',
         dateStart: book.date, // date is already in UTC ISO format
@@ -187,9 +181,9 @@ const filtersStore: FiltersStore = reactive({
       const matchesAttendance =
         this.filters.attendance === 'any' ||
         (this.filters.attendance === 'online' &&
-          ['online', 'mixed'].includes(event.attendanceMode)) ||
+          ['online', 'mixed'].includes(event.attendanceMode || '')) ||
         (this.filters.attendance === 'offline' &&
-          ['offline', 'mixed'].includes(event.attendanceMode));
+          ['offline', 'mixed'].includes(event.attendanceMode || ''));
 
       // Cost filter
       const matchesCost =
@@ -243,7 +237,8 @@ const filtersStore: FiltersStore = reactive({
    */
   nonDeadlineFilteredCount: computed(() => {
     return filtersStore.filteredEvents.filter(
-      (event) => event.type !== 'deadline' && event._type !== 'book'
+      (item) =>
+        item._type !== 'book' && 'type' in item && item.type !== 'deadline'
     ).length;
   }),
 });
