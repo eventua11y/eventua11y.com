@@ -9,6 +9,7 @@ dotenv.config();
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://eventua11y.com',
   output: 'server',
   adapter: netlify(),
   integrations: [
