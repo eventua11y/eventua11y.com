@@ -5,27 +5,22 @@ import type { Event, Book } from '../types/event';
 type ListItem = Event | Book;
 
 /**
- * Interface defining filter options
- * - CFS filters (open/closed)
- * - Attendance mode filters (online/offline)
- * - Content type filters (awareness days, books, deadlines)
+ * Filter options for event list display.
  */
-interface Filters {
+export interface Filters {
   cfs: 'any' | 'open' | 'closed';
   attendance: 'any' | 'online' | 'offline';
   cost: 'any' | 'free' | 'paid';
-  // Remove old boolean properties
-  cfsOpen?: never;
-  cfsClosed?: never;
-  attendanceOnline?: never;
-  attendanceOffline?: never;
-  showFreeEvents?: never;
-  showPaidEvents?: never;
   showAwarenessDays: boolean;
   showBooks: boolean;
   showDeadlines: boolean;
 }
 
+/**
+ * Reactive store type as seen by consumers.
+ * Computed properties are listed as their unwrapped types because
+ * `reactive()` automatically unwraps `ComputedRef<T>` to `T`.
+ */
 interface FiltersStore {
   filters: Filters;
   events: Event[];
@@ -33,21 +28,22 @@ interface FiltersStore {
   futureEvents: Event[];
   pastEvents: Event[];
   filteredEvents: ListItem[];
+  books: Book[];
   fetchEvents: () => Promise<void>;
+  fetchBooks: () => Promise<void>;
   setEvents: (
     futureEvents: Event[],
     todayEvents: Event[],
     pastEvents: Event[]
   ) => void;
   resetFilters: () => void;
-  isChanged: boolean;
   filterEvents: (events: Event[]) => Event[];
   updateFilteredEvents: () => void;
+  // Computed properties (unwrapped by reactive)
+  isChanged: boolean;
   showingAllEvents: boolean;
   nonDeadlineFutureCount: number;
   nonDeadlineFilteredCount: number;
-  books: Book[];
-  fetchBooks: () => Promise<void>;
 }
 
 const DEFAULT_FILTER_VALUES: Filters = {
@@ -61,9 +57,6 @@ const DEFAULT_FILTER_VALUES: Filters = {
 
 const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
 
-// Create a reactive reference to defaultFilters
-const initialFilters = reactive({ ...defaultFilters });
-
 /**
  * Loads filters from localStorage.
  * @returns The stored filters or the default filters if none are stored.
@@ -76,14 +69,17 @@ const getStoredFilters = (): Filters => {
   return saved ? JSON.parse(saved) : { ...defaultFilters };
 };
 
-const filtersStore: FiltersStore = reactive({
+// Type assertion is needed because computed() returns ComputedRef<T>,
+// but reactive() unwraps it to T at runtime. TypeScript cannot express
+// this self-referential unwrapping without an explicit interface.
+const filtersStore = reactive({
   filters: getStoredFilters(),
-  events: [],
-  todayEvents: [],
-  futureEvents: [],
-  pastEvents: [],
-  filteredEvents: [],
-  books: [],
+  events: [] as Event[],
+  todayEvents: [] as Event[],
+  futureEvents: [] as Event[],
+  pastEvents: [] as Event[],
+  filteredEvents: [] as ListItem[],
+  books: [] as Book[],
 
   /**
    * Fetches events from the API and sets them in the store.
@@ -135,14 +131,13 @@ const filtersStore: FiltersStore = reactive({
    * Resets the filters to their default values and updates the filtered events.
    */
   resetFilters() {
-    // Reset filters by copying default values
     this.filters = { ...defaultFilters };
     localStorage.setItem('filters', JSON.stringify(this.filters));
     this.updateFilteredEvents();
   },
 
   /**
-   * Computed property to check if the filters have changed from their default values.
+   * Whether any filter has changed from its default value.
    */
   isChanged: computed(() => {
     return Object.keys(defaultFilters).some(
@@ -153,11 +148,7 @@ const filtersStore: FiltersStore = reactive({
   }),
 
   /**
-   * Filters events based on current filter settings
-   * - Handles deadlines visibility
-   * - Handles awareness days visibility
-   * - Applies CFS status filters
-   * - Applies attendance mode filters
+   * Filters events based on current filter settings.
    * @param events - Array of events to filter
    * @returns Filtered array of events
    */
@@ -196,14 +187,12 @@ const filtersStore: FiltersStore = reactive({
   },
 
   /**
-   * Updates filtered events based on current filters
-   * - Applies filters to future events
-   * - Conditionally includes books based on showBooks filter
-   * - Sorts combined results chronologically
+   * Updates filtered events based on current filters.
+   * Applies filters to future events, conditionally includes books,
+   * and sorts combined results chronologically.
    */
   updateFilteredEvents() {
     const filteredBaseEvents = this.filterEvents(this.futureEvents);
-    // Only include books if the filter is enabled
     const relevantBooks = this.filters.showBooks ? this.books : [];
     this.filteredEvents = [...filteredBaseEvents, ...relevantBooks].sort(
       (a, b) =>
@@ -212,7 +201,7 @@ const filtersStore: FiltersStore = reactive({
   },
 
   /**
-   * Computed property to check if all future events are being shown.
+   * Whether all future events are being shown (no filtering active).
    */
   showingAllEvents: computed(() => {
     return (
@@ -222,26 +211,24 @@ const filtersStore: FiltersStore = reactive({
   }),
 
   /**
-   * Count of non-deadline and non-book future events
-   * Used for filter status display
+   * Count of non-deadline and non-book future events.
    */
   nonDeadlineFutureCount: computed(() => {
     return filtersStore.futureEvents.filter(
-      (event) => event.type !== 'deadline' && event._type !== 'book'
+      (event: Event) => event.type !== 'deadline' && event._type !== 'book'
     ).length;
   }),
 
   /**
-   * Count of non-deadline and non-book filtered events
-   * Used for filter status display
+   * Count of non-deadline and non-book filtered events.
    */
   nonDeadlineFilteredCount: computed(() => {
     return filtersStore.filteredEvents.filter(
-      (item) =>
+      (item: ListItem) =>
         item._type !== 'book' && 'type' in item && item.type !== 'deadline'
     ).length;
   }),
-});
+}) as unknown as FiltersStore;
 
 // Watch filters for changes and update localStorage and filtered events
 if (typeof window !== 'undefined' && localStorage) {
