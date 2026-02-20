@@ -25,20 +25,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
-/**
- * TimezoneSelector component
- * Allows users to toggle between local and event timezones
- * Includes dropdown menu with timezone options
- */
-
-// Set up dayjs timezone plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -78,7 +71,7 @@ const selectedTimezoneLabel = computed(() => {
  * Updates timezone preference when user selects an option
  * @param {CustomEvent} event - Menu select event
  */
-function updateTimezone(event) {
+function updateTimezone(event: CustomEvent) {
   if (!userStore.geo?.timezone) return;
   const isLocalTimezone = event.detail.item.value === userTimezone.value;
   userStore.setTimezone(

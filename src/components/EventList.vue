@@ -1,42 +1,32 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import Event from './Event.vue';
 import EventBook from './EventBook.vue';
 import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
+import type { Event as EventType, Book } from '../types/event';
 
-/**
- * EventList component
- * Displays a grouped list of events by month
- * Handles both upcoming and past events with different sorting
- */
+type ListItem = EventType | Book;
+type GroupedEvents = Record<string, ListItem[]>;
 
-/**
- * @prop {string} type - Type of events to display ('past' or 'upcoming')
- */
-const props = defineProps({
-  // 'past' or 'upcoming'
-  type: {
-    type: String,
-    required: true,
-    validator: (value) => ['past', 'upcoming'].includes(value),
-  },
-});
+const props = defineProps<{
+  type: 'past' | 'upcoming';
+}>();
 
 // Reactive references for component state
-const groupedEvents = ref({});
+const groupedEvents = ref<GroupedEvents>({});
 const loading = ref(true);
-const error = ref(null);
+const error = ref<string | null>(null);
 
 /**
  * Formats year-month string into readable date
  * @param {string} yearMonth - Format: "YYYY-M"
  * @returns {string} Formatted date (e.g., "January" or "January 2024")
  */
-const formatDate = (yearMonth) => {
-  const [year, month] = yearMonth.split('-');
-  const date = new Date(year, month - 1);
+const formatDate = (yearMonth: string) => {
+  const [yearStr, monthStr] = yearMonth.split('-');
+  const date = new Date(Number(yearStr), Number(monthStr) - 1);
   const now = new Date();
 
   // Check if date is current month and year
@@ -63,11 +53,13 @@ const formatDate = (yearMonth) => {
  * - Upcoming events: chronological order
  * @param {Array} events - Array of event and book objects
  */
-const groupEvents = (events) => {
+const groupEvents = (events: ListItem[]) => {
   // Filter out deadline events from past events
   const filteredEvents =
     props.type === 'past'
-      ? events.filter((event) => event.type !== 'deadline')
+      ? events.filter(
+          (event) => !('type' in event) || event.type !== 'deadline'
+        )
       : events;
 
   // Initial sort of all events before grouping by month
@@ -83,7 +75,7 @@ const groupEvents = (events) => {
   });
 
   // Group by year-month, using UTC for books and local time for events
-  const groups = sortedEvents.reduce((groups, event) => {
+  const groups = sortedEvents.reduce((groups: GroupedEvents, event) => {
     const date = new Date(event.dateStart);
     // Use UTC methods for books since their dates are in UTC
     const yearMonth =
@@ -93,7 +85,7 @@ const groupEvents = (events) => {
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
-  }, {});
+  }, {} as GroupedEvents);
 
   // Sort each month's events: books first, then events by date
   Object.keys(groups).forEach((yearMonth) => {

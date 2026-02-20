@@ -36,7 +36,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -57,39 +57,25 @@ dayjs.extend(advancedFormat);
 const locale = userStore.locale || 'en';
 dayjs.locale(locale);
 
-const props = defineProps({
-  dateStart: {
-    type: String,
-    required: true,
-  },
-  dateEnd: {
-    type: String,
-    required: false,
-  },
-  timezone: {
-    type: String,
-    required: false,
-    default: '',
-  },
-  day: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  isDeadline: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  type: {
-    type: String,
-    required: false,
-    default: 'event',
-  },
-});
+const props = withDefaults(
+  defineProps<{
+    dateStart: string;
+    dateEnd?: string;
+    timezone?: string;
+    day?: boolean;
+    isDeadline?: boolean;
+    type?: string;
+  }>(),
+  {
+    timezone: '',
+    day: false,
+    isDeadline: false,
+    type: 'event',
+  }
+);
 
 // Maps timezone abbreviations to their full names
-const timezoneFullNames = {
+const timezoneFullNames: Record<string, string> = {
   UTC: 'Coordinated Universal Time',
   EST: 'Eastern Standard Time',
   EDT: 'Eastern Daylight Time',
@@ -127,7 +113,7 @@ const timezoneFullNames = {
  * @param {string} abbreviation - Timezone abbreviation (e.g., 'UTC', 'EST')
  * @returns {string|null} Full timezone name or null if not found
  */
-function getFullTimezoneName(abbreviation) {
+function getFullTimezoneName(abbreviation: string): string | null {
   return timezoneFullNames[abbreviation] || null;
 }
 
@@ -137,7 +123,7 @@ function getFullTimezoneName(abbreviation) {
  * @param {string} format - The desired format pattern
  * @returns {string} Formatted date string
  */
-function formatDate(date, format) {
+function formatDate(date: string | Date, format: string): string {
   const utcDate = dayjs.utc(date);
   const locale = userStore.locale || 'en';
   if (isInternational.value) {
@@ -156,7 +142,10 @@ function formatDate(date, format) {
  * @param {string|Date} date2 - Second date to compare
  * @returns {boolean} True if dates are on the same day
  */
-function isSameDay(date1, date2) {
+function isSameDay(
+  date1: string | Date,
+  date2: string | Date | undefined
+): boolean {
   const tz = userStore.useLocalTimezone
     ? userStore.timezone || 'UTC'
     : props.timezone || 'UTC';

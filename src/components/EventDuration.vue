@@ -8,25 +8,14 @@
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import dayjs from 'dayjs';
+import type { ChildEvent } from '../types/event';
 
-/**
- * Event duration component
- * Displays event duration in hours and minutes
- * Includes schema.org markup and screen reader text
- *
- * @prop {Object} event - Event object with start and end dates
- * @prop {string} event.dateStart - ISO date string for event start
- * @prop {string} event.dateEnd - ISO date string for event end
- */
-const props = defineProps({
-  event: {
-    type: Object,
-    required: true,
-  },
-});
+const props = defineProps<{
+  event: Pick<ChildEvent, 'dateStart' | 'dateEnd'>;
+}>();
 
 // Extract dates for duration calculation
 const dateStart = props.event.dateStart;

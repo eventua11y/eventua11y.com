@@ -1,28 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { isCallForSpeakersOpen } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
+import type { Event as EventType, Speaker } from '../types/event';
 
-/**
- * Event component displays a single event with its details
- * Props:
- * @prop {Object} event - Event object containing title, type, dates, and other metadata
- */
-const props = defineProps({
-  event: {
-    type: Object,
-    required: true,
-    validator: (event) => {
-      return event.title && event.type;
-    },
-  },
-  showDate: {
-    type: Boolean,
-    default: true,
-  },
-});
+const props = withDefaults(
+  defineProps<{
+    event: EventType;
+    showDate?: boolean;
+  }>(),
+  {
+    showDate: true,
+  }
+);
 
 /**
  * Checks if event has child events (e.g., conference tracks, sessions)
@@ -44,7 +36,7 @@ const callForSpeakersOpen = computed(() => isCallForSpeakersOpen(props.event));
  */
 const enumeratedChildTypes = computed(() => {
   if (!props.event.children) return '';
-  const counts = {};
+  const counts: Record<string, number> = {};
   props.event.children.forEach((child) => {
     if (!child.format) return;
     if (!counts[child.format]) counts[child.format] = 0;
@@ -89,7 +81,7 @@ const MAX_DISPLAYED_SPEAKERS = 3;
  * @param {Array} array - The array to shuffle
  * @returns {Array} The shuffled array (same reference)
  */
-function shuffleArray(array) {
+function shuffleArray<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
