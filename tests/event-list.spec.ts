@@ -254,11 +254,12 @@ test.describe('Event List', () => {
       return;
     }
 
-    // Calculate the date 12 months ago
-    const today = new Date();
-    const twelveMonthsAgo = new Date(
-      today.setFullYear(today.getFullYear() - 1)
-    );
+    // Calculate the date 12 months ago, truncated to the start of the day (UTC)
+    // to avoid flaky failures caused by timezone differences between the test
+    // runner and event datetimes (see #502)
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+    twelveMonthsAgo.setUTCHours(0, 0, 0, 0);
 
     // Check each event's date to ensure it's not older than 12 months
     // Note: We check the end date if available, as multi-day events that started
