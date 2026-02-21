@@ -111,13 +111,6 @@ const jsonLd = {
 
 <DefaultLayout title={event.title} description={metaDescription} ogType="event">
   <div class="container py-l">
-    <nav aria-label="Breadcrumb" class="mb-m">
-      <ol role="list" class="breadcrumb text-small">
-        <li><a href="/">Events</a></li>
-        <li aria-current="page">{event.title}</li>
-      </ol>
-    </nav>
-
     <article
       class="event-detail readable flow flow-m"
       itemscope
@@ -246,24 +239,6 @@ const jsonLd = {
 </DefaultLayout>
 
 <style>
-  .breadcrumb {
-    display: flex;
-    gap: 0.5em;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .breadcrumb li:not(:last-child)::after {
-    content: '/';
-    margin-inline-start: 0.5em;
-    color: var(--s-color-fg-muted);
-  }
-
-  .breadcrumb li:last-child {
-    color: var(--s-color-fg-muted);
-  }
-
   .event-detail__title {
     text-wrap: balance;
   }

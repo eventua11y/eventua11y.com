@@ -59,25 +59,6 @@ test.describe('Event detail page', () => {
     await expect(footer).toBeVisible();
   });
 
-  test('breadcrumb navigation is present', async ({ page }) => {
-    const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' });
-    await expect(breadcrumb).toBeVisible();
-  });
-
-  test('breadcrumb has link back to events list', async ({ page }) => {
-    const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' });
-    const homeLink = breadcrumb.getByRole('link', { name: 'Events' });
-    await expect(homeLink).toBeVisible();
-    await expect(homeLink).toHaveAttribute('href', '/');
-  });
-
-  test('breadcrumb shows current page', async ({ page }) => {
-    const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' });
-    const currentItem = breadcrumb.locator('[aria-current="page"]');
-    await expect(currentItem).toBeVisible();
-    await expect(currentItem).toHaveText(TEST_EVENT_TITLE);
-  });
-
   test('article has Schema.org Event markup', async ({ page }) => {
     const article = page.locator(
       'article[itemtype="https://schema.org/Event"]'
