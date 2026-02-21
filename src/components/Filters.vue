@@ -114,9 +114,6 @@ function closeDrawer() {
 
 function resetFilters() {
   filtersStore.resetFilters();
-  filtersStore.filters.cfs = 'any';
-  filtersStore.filters.attendance = 'any';
-  filtersStore.filters.cost = 'any';
 }
 
 function toggleAwarenessDays(event) {

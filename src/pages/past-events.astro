@@ -5,23 +5,28 @@ import MonthNav from '../components/MonthNav.vue';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
-
 ---
 
 <DefaultLayout title="Past accessibility events">
   <div class="container grid">
-    <div id="events" role="region" aria-labelledby="past-events-heading" class="py-l readable main-content">
-      <h1 id="past-events-heading" class="sr-only">Past accessibility events</h1>
+    <div
+      id="events"
+      role="region"
+      aria-labelledby="past-events-heading"
+      class="py-l readable main-content"
+    >
+      <h1 id="past-events-heading" class="sr-only">
+        Past accessibility events
+      </h1>
       <EventList type="past" client:load />
     </div>
-    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' />
+    <MonthNav id="month-nav" class="mb-l" client:load contentRegion="#events" />
   </div>
   <!-- End container -->
 </DefaultLayout>
 
-
 <style>
-    #month-nav {
+  #month-nav {
     display: none;
   }
   @media (min-width: 769px) {

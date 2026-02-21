@@ -5,17 +5,14 @@
   </details>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
+import type { Event } from '../types/event';
 
-const props = defineProps({
-  event: {
-    type: Object,
-    required: true,
-  },
-});
+const props = defineProps<{
+  event: Event;
+}>();
 
-// Computed property to format the event object as a JSON string
 const formattedEvent = computed(() => JSON.stringify(props.event, null, 2));
 </script>
 
