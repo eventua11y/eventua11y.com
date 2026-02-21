@@ -1,7 +1,6 @@
 :root {
   --text-opacity: 1; /* Default opacity value */
   --p-color-white: rgba(255, 255, 255, var(--text-opacity));
-  --p-color-black: rgba(16, 25, 33, var(--text-opacity));
   --p-color-yellow-bg: rgba(255, 245, 204, var(--text-opacity));
   --p-color-blue-bg: rgba(204, 231, 245, var(--text-opacity));
   --p-color-blue: rgba(0, 66, 191, var(--text-opacity));

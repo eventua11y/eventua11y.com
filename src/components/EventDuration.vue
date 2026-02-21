@@ -48,6 +48,3 @@ const formattedDuration = computed(() => {
   }
 });
 </script>
-
-<!-- <style scoped>
-</style> -->

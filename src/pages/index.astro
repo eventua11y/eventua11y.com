@@ -8,7 +8,6 @@ import MonthNav from '../components/MonthNav.vue';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
-
 ---
 
 <DefaultLayout>
@@ -16,11 +15,24 @@ export const prerender = false;
   <FilterBar client:only="vue" />
   <Filters client:only="vue" />
   <div class="container grid">
-    <div id="events" role="region" aria-labelledby="upcoming-events-heading" class="py-l readable main-content">
-      <h1 id="upcoming-events-heading" class="sr-only">Upcoming accessibility events</h1>
+    <div
+      id="events"
+      role="region"
+      aria-labelledby="upcoming-events-heading"
+      class="py-l readable main-content"
+    >
+      <h1 id="upcoming-events-heading" class="sr-only">
+        Upcoming accessibility events
+      </h1>
       <EventList type="upcoming" client:load />
     </div>
-    <MonthNav id="month-nav" class="mb-l" client:load contentRegion='#events' showTodayLink={true} />
+    <MonthNav
+      id="month-nav"
+      class="mb-l"
+      client:load
+      contentRegion="#events"
+      showTodayLink={true}
+    />
   </div>
 </DefaultLayout>
 
@@ -43,7 +55,6 @@ export const prerender = false;
   .main-content {
     min-width: 0; /* Prevent content overflow */
   }
-
 </style>
 
 <script>
@@ -92,4 +103,3 @@ export const prerender = false;
     initDrawer();
   });
 </script>
-
