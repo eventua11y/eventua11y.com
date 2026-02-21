@@ -70,3 +70,24 @@ main {
   border-radius: var(--p-space-2xs);
   padding: var(--p-space-xs-m);
 }
+
+/* Event list grid layout (used by index and past-events pages) */
+#month-nav {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  #month-nav {
+    display: block;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: var(--p-space-l);
+    align-items: start;
+  }
+}
+
+.main-content {
+  min-width: 0; /* Prevent content overflow */
+}

@@ -36,27 +36,6 @@ export const prerender = false;
   </div>
 </DefaultLayout>
 
-<style>
-  #month-nav {
-    display: none;
-  }
-  @media (min-width: 769px) {
-    #month-nav {
-      display: block;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 3fr 1fr;
-      gap: var(--p-space-l);
-      align-items: start;
-    }
-  }
-
-  .main-content {
-    min-width: 0; /* Prevent content overflow */
-  }
-</style>
-
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     let drawer = document.querySelector('sl-drawer');
