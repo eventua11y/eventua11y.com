@@ -80,19 +80,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, ref, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
-
-const isFiltersChanged = computed(() => filtersStore.isChanged);
-
-watch(
-  () => filtersStore.filters,
-  () => {
-    console.debug('Filters changed:', filtersStore.filters);
-    console.debug('Is changed:', isFiltersChanged.value);
-  },
-  { deep: true }
-);
 
 const awarenessDaysSwitch = ref(null);
 const booksSwitch = ref(null);

@@ -51,8 +51,6 @@ const today = computed(() => {
   const timezone = userStore.geo?.timezone || 'UTC';
   return dayjs().tz(timezone).startOf('day');
 });
-console.log('User timezone is:', userStore.timezone);
-console.log('Today is:', today.value.format('YYYY-MM-DD'));
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
