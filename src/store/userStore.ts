@@ -1,9 +1,10 @@
 import { reactive } from 'vue';
 
 interface Geo {
-  country: string;
-  region: string;
-  city: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  timezone?: string;
 }
 
 interface UserStore {

@@ -428,7 +428,7 @@ export default async function handler(
     return new Response(JSON.stringify(clientResponse), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+        'Cache-Control': 'private, max-age=300, stale-while-revalidate=60',
         Vary: 'Accept-Encoding',
       },
     });
