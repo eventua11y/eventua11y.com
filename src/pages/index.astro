@@ -6,6 +6,7 @@ import FilterBar from '../components/FilterBar.vue';
 import Filters from '../components/Filters.vue';
 import MonthNav from '../components/MonthNav.vue';
 import StaticEventList from '../components/StaticEventList.astro';
+import FilterBarPlaceholder from '../components/FilterBarPlaceholder.astro';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
@@ -13,6 +14,7 @@ export const prerender = false;
 
 <DefaultLayout>
   <Today client:load />
+  <FilterBarPlaceholder />
   <FilterBar client:only="vue" />
   <Filters client:only="vue" />
   <div class="container grid">

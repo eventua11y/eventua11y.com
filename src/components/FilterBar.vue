@@ -102,6 +102,9 @@ function toggleAwarenessDays(event) {
 onMounted(async () => {
   await nextTick();
 
+  // Remove the static placeholder now that the real FilterBar is mounted
+  document.getElementById('filters-placeholder')?.remove();
+
   // Initialize switch state with setTimeout
   setTimeout(() => {
     if (awarenessDaysSwitch.value) {
