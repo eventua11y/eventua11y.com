@@ -6,6 +6,12 @@ import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 import type { Event as EventType, Book } from '../types/event';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type ListItem = EventType | Book;
 type GroupedEvents = Record<string, ListItem[]>;
@@ -20,29 +26,52 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 /**
- * Formats year-month string into readable date
+ * Formats year-month string into readable heading
  * @param {string} yearMonth - Format: "YYYY-M"
- * @returns {string} Formatted date (e.g., "January" or "January 2024")
+ * @returns {string} Formatted heading (e.g., "This month", "January", or "January 2024")
  */
 const formatDate = (yearMonth: string) => {
   const [yearStr, monthStr] = yearMonth.split('-');
-  const date = new Date(Number(yearStr), Number(monthStr) - 1);
-  const now = new Date();
+  const year = Number(yearStr);
+  const month = Number(monthStr) - 1; // 0-indexed for Date constructor
+  const date = new Date(year, month);
+
+  const userTz = userStore.geo?.timezone || 'UTC';
+  const now = dayjs().tz(userTz);
 
   // Check if date is current month and year
-  if (
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
-  ) {
+  if (month === now.month() && year === now.year()) {
     return 'This month';
   }
 
   const formatter = new Intl.DateTimeFormat('default', {
     month: 'long',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+    year: year !== now.year() ? 'numeric' : undefined,
   });
 
   return formatter.format(date);
+};
+
+/**
+ * Returns a "YYYY-M" key for grouping an item by its calendar month.
+ *
+ * Books and international events (no timezone) use UTC so the month
+ * matches the date stored in Sanity. Local events use the same timezone
+ * logic as EventDate: either the event's own timezone or the user's
+ * selected timezone, depending on the useLocalTimezone preference.
+ */
+const getYearMonth = (item: ListItem): string => {
+  if (item._type === 'book' || !('timezone' in item) || !item.timezone) {
+    // Books and international events: use UTC
+    const d = dayjs.utc(item.dateStart);
+    return `${d.year()}-${d.month() + 1}`;
+  }
+  // Local events: respect the user's timezone preference
+  const tz = userStore.useLocalTimezone
+    ? userStore.timezone || 'UTC'
+    : item.timezone;
+  const d = dayjs.utc(item.dateStart).tz(tz);
+  return `${d.year()}-${d.month() + 1}`;
 };
 
 /**
@@ -74,14 +103,9 @@ const groupEvents = (events: ListItem[]) => {
     return props.type === 'past' ? -comparison : comparison;
   });
 
-  // Group by year-month, using UTC for books and local time for events
+  // Group by year-month using timezone-aware logic
   const groups = sortedEvents.reduce((groups: GroupedEvents, event) => {
-    const date = new Date(event.dateStart);
-    // Use UTC methods for books since their dates are in UTC
-    const yearMonth =
-      event._type === 'book'
-        ? `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`
-        : `${date.getFullYear()}-${date.getMonth() + 1}`;
+    const yearMonth = getYearMonth(event);
     if (!groups[yearMonth]) groups[yearMonth] = [];
     groups[yearMonth].push(event);
     return groups;
@@ -123,12 +147,16 @@ const groupEvents = (events: ListItem[]) => {
 
   // Filter out past months for upcoming events
   if (props.type !== 'past') {
-    const now = new Date();
-    const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const userTz = userStore.geo?.timezone || 'UTC';
+    const now = dayjs().tz(userTz);
+    const currentYear = now.year();
+    const currentMonth = now.month() + 1; // dayjs months are 0-indexed
     Object.keys(sortedGroups).forEach((yearMonth) => {
       const [year, month] = yearMonth.split('-').map(Number);
-      const groupDate = new Date(year, month - 1);
-      if (groupDate < currentMonthDate) {
+      if (
+        year < currentYear ||
+        (year === currentYear && month < currentMonth)
+      ) {
         delete sortedGroups[yearMonth];
       }
     });
