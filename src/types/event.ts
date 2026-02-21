@@ -12,6 +12,7 @@ export interface Event {
   _type?: string;
   type: string;
   title: string;
+  slug?: { current: string };
   description?: string;
   dateStart: string;
   dateEnd?: string;
@@ -32,6 +33,7 @@ export interface Event {
 export interface ChildEvent {
   _id: string;
   title: string;
+  slug?: { current: string };
   type?: string;
   dateStart?: string;
   dateEnd?: string;
