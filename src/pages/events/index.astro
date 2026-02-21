@@ -1,0 +1,11 @@
+---
+/**
+ * Redirect /events to the homepage.
+ *
+ * Individual event pages live at /events/[slug], but there is no
+ * dedicated events listing page — the homepage serves that purpose.
+ */
+export const prerender = false;
+
+return Astro.redirect('/', 301);
+---

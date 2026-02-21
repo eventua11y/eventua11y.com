@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import type { Event } from '../types/event';
+import { getEventUrl } from '../utils/eventUtils';
 
 dayjs.extend(utc);
 dayjs.extend(localizedFormat);
@@ -53,6 +54,9 @@ function getEndFormat(): string {
   return 'LLL [UTC]';
 }
 
+// Internal event page URL (if slug exists)
+const eventUrl = getEventUrl(event);
+
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
 const displayLocation = event.location || 'International';
@@ -74,7 +78,8 @@ const displayLocation = event.location || 'International';
         </span>
       </div>
       <span class="event__title">
-        Submit proposals for <a href={event.website}>{event.title}</a>
+        Submit proposals for{' '}
+        <a href={eventUrl || event.website}>{event.title}</a>
       </span>
     </div>
   ) : event.type ? (
@@ -85,14 +90,13 @@ const displayLocation = event.location || 'International';
       data-event-type={event.type}
     >
       <h3 class="event__title" itemprop="name">
-        {event.website ? (
-          <a href={event.website} itemprop="url">
-            {event.title}
-          </a>
+        {eventUrl ? (
+          <a href={eventUrl}>{event.title}</a>
         ) : (
           <span>{event.title}</span>
         )}
       </h3>
+      {event.website && <meta itemprop="url" content={event.website} />}
 
       {event.dateStart && (
         <div class="event__dates">

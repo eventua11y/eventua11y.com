@@ -40,6 +40,7 @@ interface RawEvent {
   _type: string;
   type: string;
   title: string;
+  slug?: { current: string };
   description?: string;
   dateStart: string;
   dateEnd?: string;
@@ -165,6 +166,38 @@ export async function getEvents(): Promise<{
     );
 
   return { future, past };
+}
+
+// ── Single event query ─────────────────────────────────────────────────
+
+/**
+ * Fetches a single event by its slug, including resolved speakers
+ * and child events. Returns null if no matching event is found.
+ */
+export async function getEventBySlug(slug: string): Promise<Event | null> {
+  const client = getSanityClient();
+
+  const event: RawEvent | null = await client.fetch(
+    `
+    *[_type == "event" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+      ...,
+      "speakers": speakers[]->{ _id, name },
+      "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
+        ...,
+        "speakers": speakers[]->{ _id, name }
+      } | order(dateStart asc)
+    }
+  `,
+    { slug }
+  );
+
+  if (!event) return null;
+
+  return {
+    ...event,
+    children:
+      event.children && event.children.length > 0 ? event.children : undefined,
+  } as Event;
 }
 
 // ── Book queries ───────────────────────────────────────────────────────

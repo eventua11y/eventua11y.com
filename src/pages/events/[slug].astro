@@ -1,0 +1,263 @@
+---
+/**
+ * Dynamic event detail page.
+ *
+ * Fetches a single event by slug from Sanity and renders a full
+ * detail view with structured data, per-event meta tags, and
+ * reusable Vue components for dates and delivery mode.
+ *
+ * This page runs in SSR mode (no getStaticPaths needed).
+ */
+import DefaultLayout from '../../layouts/default.astro';
+import { getEventBySlug } from '../../lib/sanity';
+import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
+import EventDelivery from '../../components/EventDelivery.vue';
+import EventChild from '../../components/EventChild.vue';
+import EventDuration from '../../components/EventDuration.vue';
+import { isCallForSpeakersOpen } from '../../utils/eventUtils';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+const event = await getEventBySlug(slug);
+
+if (!event) {
+  return Astro.redirect('/404');
+}
+
+// Build meta description from event data
+const metaDescription = event.description
+  ? event.description.slice(0, 160) +
+    (event.description.length > 160 ? '...' : '')
+  : `${event.title} — a digital accessibility event on Eventua11y.`;
+
+// Check states
+const callForSpeakersOpen = isCallForSpeakersOpen(event);
+const hasChildren = Array.isArray(event.children) && event.children.length > 0;
+const isDedicatedToAccessibility =
+  !event.isParent && !event.parent && event.type !== 'theme';
+
+// All speakers (from children or event itself)
+const allSpeakers = (() => {
+  if (hasChildren) {
+    return (event.children ?? [])
+      .flatMap((child) => child.speakers ?? [])
+      .filter((s) => s?.name && s?._id)
+      .filter(
+        (speaker, index, self) =>
+          index === self.findIndex((s) => s._id === speaker._id)
+      );
+  }
+  return (event.speakers ?? []).filter((s) => s?.name && s?._id);
+})();
+
+// Enumerate child event types for summary
+const enumeratedChildTypes = (() => {
+  if (!event.children) return '';
+  const counts: Record<string, number> = {};
+  event.children.forEach((child) => {
+    if (!child.format) return;
+    counts[child.format] = (counts[child.format] || 0) + 1;
+  });
+  return Object.entries(counts)
+    .map(([format, count]) => `${count} ${format}${count > 1 ? 's' : ''}`)
+    .join(', ');
+})();
+
+// JSON-LD structured data
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: event.title,
+  ...(event.description && { description: event.description }),
+  startDate: event.dateStart,
+  ...(event.dateEnd && { endDate: event.dateEnd }),
+  ...(event.website && { url: event.website }),
+  ...(event.attendanceMode === 'online' && {
+    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+    location: { '@type': 'VirtualLocation', url: event.website },
+  }),
+  ...(event.attendanceMode === 'offline' && {
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    ...(event.location && {
+      location: { '@type': 'Place', name: event.location },
+    }),
+  }),
+  ...(event.attendanceMode === 'mixed' && {
+    eventAttendanceMode: 'https://schema.org/MixedEventAttendanceMode',
+    location: [
+      ...(event.location ? [{ '@type': 'Place', name: event.location }] : []),
+      ...(event.website
+        ? [{ '@type': 'VirtualLocation', url: event.website }]
+        : []),
+    ],
+  }),
+  ...(allSpeakers.length > 0 && {
+    performer: allSpeakers.map((s) => ({
+      '@type': 'Person',
+      name: s.name,
+    })),
+  }),
+  ...(event.isFree && {
+    isAccessibleForFree: true,
+  }),
+};
+---
+
+<DefaultLayout title={event.title} description={metaDescription} ogType="event">
+  <div class="container py-l">
+    <article
+      class="event-detail readable flow flow-m"
+      itemscope
+      itemtype="https://schema.org/Event"
+    >
+      <h1 class="event-detail__title" itemprop="name">
+        {event.title}
+      </h1>
+
+      <EventDateWithTimezone
+        client:only="vue"
+        dateStart={event.dateStart}
+        dateEnd={event.dateEnd}
+        timezone={event.timezone}
+        day={event.day}
+        type={event.type}
+      />
+
+      <EventDelivery
+        client:load
+        attendanceMode={event.attendanceMode}
+        location={event.location}
+      />
+
+      {
+        allSpeakers.length > 0 && (
+          <div class="event-detail__speakers">
+            <h2 class="text-large">
+              {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
+            </h2>
+            <ul role="list" class="flow flow-3xs">
+              {allSpeakers.map((speaker) => (
+                <li
+                  itemprop="performer"
+                  itemscope
+                  itemtype="https://schema.org/Person"
+                >
+                  <span itemprop="name">{speaker.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+
+      {
+        event.description && (
+          <div class="event-detail__description">
+            <h2 class="text-large">Description</h2>
+            <p itemprop="description">{event.description}</p>
+          </div>
+        )
+      }
+
+      <div class="event-detail__badges">
+        {
+          isDedicatedToAccessibility && (
+            <sl-badge pill variant="neutral">
+              Dedicated to accessibility
+            </sl-badge>
+          )
+        }
+        {
+          callForSpeakersOpen && (
+            <sl-badge variant="success" pill>
+              Call for speakers
+            </sl-badge>
+          )
+        }
+        {
+          event.isFree && (
+            <sl-badge pill variant="neutral">
+              Free
+            </sl-badge>
+          )
+        }
+      </div>
+
+      {
+        event.website && (
+          <div class="event-detail__cta">
+            <a href={event.website} class="btn" rel="noopener noreferrer">
+              Visit event website
+              <span class="sr-only">(opens external site)</span>
+            </a>
+          </div>
+        )
+      }
+
+      {
+        !isDedicatedToAccessibility && hasChildren && (
+          <section class="event-detail__children flow flow-s">
+            <h2>Accessibility highlights: {enumeratedChildTypes}</h2>
+            <ol
+              role="list"
+              class="flow flow-xs"
+              aria-label={`Accessibility sessions for ${event.title}`}
+            >
+              {event.children!.map((child) => (
+                <li>
+                  <EventChild client:load event={child} />
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+
+      {
+        !isDedicatedToAccessibility && !hasChildren && event.isParent && (
+          <section class="event-detail__children flow">
+            <h2>Schedule</h2>
+            <p>
+              {event.title} is expected to include one or more
+              accessibility-themed sessions but the full schedule has not yet
+              been announced. Details will be published here closer to the date
+              of the event.
+            </p>
+          </section>
+        )
+      }
+    </article>
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</DefaultLayout>
+
+<style>
+  .event-detail__title {
+    text-wrap: balance;
+  }
+
+  .event-detail__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--p-space-3xs);
+  }
+
+  .event-detail__badges:empty {
+    display: none;
+  }
+
+  .event-detail__cta {
+    margin-block: var(--p-space-xs);
+  }
+
+  .event-detail__children h2 {
+    font-size: var(--p-step-2);
+  }
+</style>
