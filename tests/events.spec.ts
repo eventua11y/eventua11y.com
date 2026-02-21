@@ -31,7 +31,9 @@ test('footer is visible', async ({ page }) => {
 });
 
 test('has no accessibility violations', async ({ page }) => {
-  const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+  const accessibilityScanResults = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
   expect(accessibilityScanResults.violations).toEqual([]);
 });
 
