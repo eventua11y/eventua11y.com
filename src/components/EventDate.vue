@@ -154,9 +154,8 @@ function isSameDay(
 
 /**
  * Determines date format for start date based on event type:
- * - Single date: Full date with year (MMM D, YYYY)
- * - Multi-day: Month and day only (MMM D)
- * - Same-day: Full date and time (LLL)
+ * - Theme/deadline/day: Full date without time (LL)
+ * - All other events: Full date and time (LLL)
  * @returns {string} Format pattern for dayjs
  */
 function getStartDateFormat() {
@@ -164,7 +163,6 @@ function getStartDateFormat() {
   if (props.isDeadline) return 'LL';
   if (props.day) return 'LL';
 
-  if (!props.dateEnd) return 'LLL';
   return 'LLL';
 }
 
