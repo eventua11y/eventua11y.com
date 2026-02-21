@@ -25,10 +25,6 @@ const isTheme = event.type === 'theme';
 const isAllDay = event.day === true;
 const isInternational = !event.timezone;
 
-// Determine if this event is dedicated to accessibility
-const isDedicatedToAccessibility =
-  !event.isParent && event.parent === undefined && event.type !== 'theme';
-
 // CFS open check
 const callForSpeakersOpen =
   event.callForSpeakers &&
@@ -195,14 +191,9 @@ const displayLocation = event.location || 'International';
         </details>
       )}
 
-      {(isDedicatedToAccessibility || callForSpeakersOpen) && (
+      {callForSpeakersOpen && (
         <div class="event__badges">
-          {isDedicatedToAccessibility && (
-            <span class="badge">Dedicated to accessibility</span>
-          )}
-          {callForSpeakersOpen && (
-            <span class="badge badge--success">Call for speakers</span>
-          )}
+          <span class="badge badge--success">Call for speakers</span>
         </div>
       )}
     </article>
