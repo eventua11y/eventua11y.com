@@ -6,15 +6,9 @@
       "command": ["npx", "-y", "@netlify/mcp"]
     },
     "sanity": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "mcp-remote",
-        "https://mcp.sanity.io",
-        "--transport",
-        "http-only"
-      ]
+      "type": "remote",
+      "url": "https://mcp.sanity.io",
+      "oauth": {}
     },
     "astro-docs": {
       "type": "remote",
