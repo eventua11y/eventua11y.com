@@ -40,7 +40,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **UI Components**: Shoelace web components
 - **Content Management**: Sanity CMS for events data
 - **Deployment**: Netlify with edge functions
-- **Testing**: Playwright for E2E testing with accessibility testing via axe-core
+- **Testing**: Playwright for E2E testing; axe-core for automated accessibility scans
 - **Monitoring**: Sentry for error tracking
 
 ### Key Architecture Patterns
@@ -95,12 +95,19 @@ Located in `netlify/edge-functions/`:
 - **Awareness Days**: Accessibility awareness days/weeks
 - **Books**: Book releases related to accessibility
 
-### Testing Strategy
+### Accessibility Testing
 
-- Comprehensive E2E testing with Playwright
-- Accessibility testing integrated via @axe-core/playwright
-- Tests cover filtering, theme switching, timezone selection, and core user flows
-- Focus on ensuring WCAG 2.2 Level AA compliance
+This project uses a two-layer accessibility testing strategy in `tests/accessibility.spec.ts`:
+
+1. **axe-core scans** on every page as a foundation, scoped to WCAG 2.2 Level AA. These catch a broad range of automated violations.
+2. **Playwright assertions** on top for things axe cannot catch: accessible names on interactive elements, landmark structure, heading hierarchy, `aria-current` navigation state, `aria-live` regions, and `lang` attribute.
+
+When adding new pages or interactive components, add both layers:
+
+- An axe scan for the new page using the shared `runAxeScan()` helper
+- Targeted assertions for any interactive elements, landmarks, or headings
+
+**Shoelace shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Shoelace web component buttons (`sl-button`, `sl-icon-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. The axe scan validates the actual computed accessible name.
 
 ## Development Notes
 

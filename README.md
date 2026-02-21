@@ -44,8 +44,8 @@ See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this p
 
 ### Testing
 
-- [Playwright](https://playwright.dev/) -- end-to-end tests
-- [axe-core](https://github.com/dequelabs/axe-core) -- automated accessibility testing in E2E tests
+- [Playwright](https://playwright.dev/) -- end-to-end and accessibility tests
+- [axe-core](https://github.com/dequelabs/axe-core) -- automated WCAG 2.2 AA scans on every page as a foundation, with Playwright assertions layered on top for accessible names, landmarks, heading hierarchy, and ARIA states that axe cannot catch
 - [Vitest](https://vitest.dev/) -- unit tests
 
 ### Code quality
