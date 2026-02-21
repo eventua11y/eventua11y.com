@@ -248,6 +248,24 @@ export function groupByMonth(
     });
   }
 
+  // For upcoming: drop month groups that are in the past.
+  // This mirrors the client-side EventList.vue behaviour (lines 140-155)
+  // and prevents old books from appearing in the upcoming list.
+  if (type !== 'past') {
+    const now = dayjs.utc();
+    const currentYear = now.year();
+    const currentMonth = now.month() + 1; // dayjs months are 0-indexed
+    for (const key of Object.keys(groups)) {
+      const [year, month] = key.split('-').map(Number);
+      if (
+        year < currentYear ||
+        (year === currentYear && month < currentMonth)
+      ) {
+        delete groups[key];
+      }
+    }
+  }
+
   // Sort month keys
   const sortedEntries = Object.entries(groups).sort((a, b) => {
     const [yearA, monthA] = a[0].split('-').map(Number);
