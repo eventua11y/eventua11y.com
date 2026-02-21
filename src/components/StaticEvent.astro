@@ -1,0 +1,210 @@
+---
+/**
+ * Server-rendered event card for the <noscript> fallback.
+ *
+ * This is a simplified Astro version of Event.vue that renders
+ * Schema.org-annotated HTML without any client-side interactivity.
+ * It uses UTC dates since user timezone is unknown during SSR.
+ */
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import type { Event } from '../types/event';
+
+dayjs.extend(utc);
+dayjs.extend(localizedFormat);
+
+interface Props {
+  event: Event;
+}
+
+const { event } = Astro.props;
+
+const isDeadline = event.type === 'deadline';
+const isTheme = event.type === 'theme';
+const isAllDay = event.day === true;
+const isInternational = !event.timezone;
+
+// Determine if this event is dedicated to accessibility
+const isDedicatedToAccessibility =
+  !event.isParent && event.parent === undefined && event.type !== 'theme';
+
+// CFS open check
+const callForSpeakersOpen =
+  event.callForSpeakers &&
+  (!event.callForSpeakersClosingDate ||
+    new Date() < new Date(event.callForSpeakersClosingDate));
+
+// Date formatting using UTC (mirrors dateUtils.ts logic)
+function formatDate(date: string, format: string): string {
+  return dayjs.utc(date).format(format);
+}
+
+function getStartFormat(): string {
+  if (isTheme || isDeadline || isAllDay) return 'LL';
+  return 'LLL';
+}
+
+function getEndFormat(): string {
+  if (isAllDay) return 'LL';
+  // Same-day check in UTC
+  if (
+    event.dateEnd &&
+    dayjs.utc(event.dateStart).isSame(dayjs.utc(event.dateEnd), 'day')
+  ) {
+    return 'LT';
+  }
+  return 'LLL';
+}
+
+// Attendance mode display
+const attendanceMode = event.attendanceMode || 'none';
+const displayLocation = event.location || 'International';
+---
+
+{
+  isDeadline ? (
+    <div class="event event--deadline">
+      <div class="event__dates">
+        <span class="event__dateStart">
+          <span class="sr-only">Starts</span>
+          <time
+            datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
+            itemprop="startDate"
+          >
+            {formatDate(event.dateStart, getStartFormat())}
+          </time>
+          <span class="badge badge--danger">Deadline</span>
+        </span>
+      </div>
+      <span class="event__title">
+        Submit proposals for <a href={event.website}>{event.title}</a>
+      </span>
+    </div>
+  ) : event.type ? (
+    <article
+      class={`event event--${event.type}`}
+      itemscope
+      itemtype="https://schema.org/Event"
+      data-event-type={event.type}
+    >
+      <h3 class="event__title" itemprop="name">
+        {event.website ? (
+          <a href={event.website} itemprop="url">
+            {event.title}
+          </a>
+        ) : (
+          <span>{event.title}</span>
+        )}
+      </h3>
+
+      {event.dateStart && (
+        <div class="event__dates">
+          <span class="event__dateStart">
+            <span class="sr-only">Starts</span>
+            <time
+              datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
+              itemprop="startDate"
+            >
+              {formatDate(event.dateStart, getStartFormat())}
+            </time>
+          </span>
+          {event.dateEnd && (
+            <span class="event__dateEnd">
+              <span class="sr-only">Ends</span>
+              <span aria-hidden="true">&rarr;</span>
+              <time
+                datetime={formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')}
+                itemprop="endDate"
+              >
+                {formatDate(event.dateEnd, getEndFormat())}
+              </time>
+            </span>
+          )}
+        </div>
+      )}
+
+      {attendanceMode !== 'none' && event.type !== 'deadline' && (
+        <div class="event__delivery text-small">
+          {attendanceMode === 'online' && (
+            <span class="event__online">
+              <meta
+                itemprop="eventAttendanceMode"
+                content="https://schema.org/OnlineEventAttendanceMode"
+              />
+              Online
+            </span>
+          )}
+          {attendanceMode === 'offline' && (
+            <span class="event__location">
+              <meta
+                itemprop="eventAttendanceMode"
+                content="https://schema.org/OfflineEventAttendanceMode"
+              />
+              <span
+                itemprop="location"
+                itemscope
+                itemtype="https://schema.org/Place"
+              >
+                {displayLocation}
+              </span>
+            </span>
+          )}
+          {attendanceMode === 'mixed' && (
+            <div>
+              <meta
+                itemprop="eventAttendanceMode"
+                content="https://schema.org/MixedEventAttendanceMode"
+              />
+              <span class="event__location">
+                <span
+                  itemprop="location"
+                  itemscope
+                  itemtype="https://schema.org/Place"
+                >
+                  {displayLocation}
+                </span>
+              </span>
+              <span class="text-muted"> and </span>
+              <span class="event__online">Online</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {attendanceMode === 'none' && event.type !== 'deadline' && (
+        <div class="event__delivery text-small">
+          <span class="event__location">
+            <span
+              itemprop="location"
+              itemscope
+              itemtype="https://schema.org/Place"
+            >
+              {displayLocation}
+            </span>
+          </span>
+        </div>
+      )}
+
+      {event.description && !isTheme && (
+        <details class="event__children flow">
+          <summary>Description</summary>
+          <p class="event__description" itemprop="description">
+            {event.description}
+          </p>
+        </details>
+      )}
+
+      {(isDedicatedToAccessibility || callForSpeakersOpen) && (
+        <div class="event__badges">
+          {isDedicatedToAccessibility && (
+            <span class="badge">Dedicated to accessibility</span>
+          )}
+          {callForSpeakersOpen && (
+            <span class="badge badge--success">Call for speakers</span>
+          )}
+        </div>
+      )}
+    </article>
+  ) : null
+}

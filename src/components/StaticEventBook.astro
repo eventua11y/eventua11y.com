@@ -1,0 +1,26 @@
+---
+/**
+ * Server-rendered book card for the <noscript> fallback.
+ * Mirrors the structure of EventBook.vue.
+ */
+import type { Book } from '../types/event';
+
+interface Props {
+  book: Book;
+}
+
+const { book } = Astro.props;
+---
+
+<div class="book">
+  <span class="text-small text-muted">Accessibility Book Club is reading</span>
+  {
+    book.link ? (
+      <a class="book__title" href={book.link}>
+        {book.title}
+      </a>
+    ) : (
+      <span class="book__title">{book.title}</span>
+    )
+  }
+</div>

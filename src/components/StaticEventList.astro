@@ -1,0 +1,75 @@
+---
+/**
+ * Server-rendered event list for the <noscript> fallback.
+ *
+ * This component fetches events and books from Sanity during Astro SSR,
+ * groups them by month using UTC, and renders them as static HTML.
+ * It is only visible when JavaScript is disabled (wrapped in <noscript>
+ * by the consuming page).
+ *
+ * When JavaScript is available, the Vue EventList component takes over
+ * with timezone-aware dates, filtering, and interactivity.
+ */
+import StaticEvent from './StaticEvent.astro';
+import StaticEventBook from './StaticEventBook.astro';
+import {
+  getEvents,
+  getBooks,
+  groupByMonth,
+  formatMonthHeading,
+} from '../lib/sanity';
+import type { Event, Book } from '../types/event';
+
+interface Props {
+  type: 'upcoming' | 'past';
+}
+
+const { type } = Astro.props;
+
+let groupedItems: Record<string, (Event | Book)[]> = {};
+let error: string | null = null;
+
+try {
+  const [{ future, past }, books] = await Promise.all([
+    getEvents(),
+    getBooks(),
+  ]);
+
+  const events = type === 'upcoming' ? future : past;
+  groupedItems = groupByMonth(events, books, type);
+} catch (e) {
+  error = `Unable to load ${type} events.`;
+  console.error('StaticEventList SSR error:', e);
+}
+---
+
+{
+  error ? (
+    <p>{error}</p>
+  ) : Object.keys(groupedItems).length === 0 ? (
+    <p>
+      {type === 'past'
+        ? 'There are no past events to display.'
+        : 'There are no upcoming events to display.'}
+    </p>
+  ) : (
+    <div id={`${type}-events-static`} class="flow flow-2xl">
+      {Object.entries(groupedItems).map(([yearMonth, items]) => (
+        <section class="month flow flow-m">
+          <h2 class="month__heading">{formatMonthHeading(yearMonth)}</h2>
+          <ol role="list" class="flow flow-l">
+            {items.map((item) => (
+              <li>
+                {item._type === 'book' ? (
+                  <StaticEventBook book={item as Book} />
+                ) : (
+                  <StaticEvent event={item as Event} />
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
+  )
+}

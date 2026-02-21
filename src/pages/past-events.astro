@@ -2,6 +2,7 @@
 import DefaultLayout from '../layouts/default.astro';
 import EventList from '../components/EventList.vue';
 import MonthNav from '../components/MonthNav.vue';
+import StaticEventList from '../components/StaticEventList.astro';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
@@ -19,6 +20,9 @@ export const prerender = false;
         Past accessibility events
       </h1>
       <EventList type="past" client:load />
+      <noscript>
+        <StaticEventList type="past" />
+      </noscript>
     </div>
     <MonthNav id="month-nav" class="mb-l" client:load contentRegion="#events" />
   </div>
