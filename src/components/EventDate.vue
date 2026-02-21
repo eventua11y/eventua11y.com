@@ -45,6 +45,11 @@ import timezone from 'dayjs/plugin/timezone';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import userStore from '../store/userStore';
+import {
+  getStartDateFormat as _getStartDateFormat,
+  getEndDateFormat as _getEndDateFormat,
+  formatEventDate,
+} from '../utils/dateUtils';
 import 'dayjs/locale/en';
 import 'dayjs/locale/es';
 import 'dayjs/locale/fr';
@@ -118,75 +123,35 @@ function getFullTimezoneName(abbreviation: string): string | null {
   return timezoneFullNames[abbreviation] || null;
 }
 
-/**
- * Formats a date using dayjs with or without timezone conversion
- * @param {string|Date} date - The date to format
- * @param {string} format - The desired format pattern
- * @returns {string} Formatted date string
- */
+/** Delegates to the shared formatEventDate utility */
 function formatDate(date: string | Date, format: string): string {
-  const utcDate = dayjs.utc(date);
-  const locale = userStore.locale || 'en';
-  if (isInternational.value) {
-    return utcDate.locale(locale).format(format);
-  } else {
-    const tz = userStore.useLocalTimezone
-      ? userStore.timezone || 'UTC'
-      : props.timezone || 'UTC';
-    return utcDate.tz(tz).locale(locale).format(format);
-  }
+  return formatEventDate(date, format, {
+    timezone: props.timezone,
+    useLocalTimezone: userStore.useLocalTimezone,
+    userTimezone: userStore.timezone || undefined,
+    locale: userStore.locale || 'en',
+  });
 }
 
-/**
- * Checks if two dates fall on the same day, accounting for timezones
- * @param {string|Date} date1 - First date to compare
- * @param {string|Date} date2 - Second date to compare
- * @returns {boolean} True if dates are on the same day
- */
-function isSameDay(
-  date1: string | Date,
-  date2: string | Date | undefined
-): boolean {
-  const tz = userStore.useLocalTimezone
-    ? userStore.timezone || 'UTC'
-    : props.timezone || 'UTC';
-  return dayjs(date1).tz(tz).isSame(dayjs(date2).tz(tz), 'day');
-}
-
-/**
- * Determines the dayjs format pattern for the start date.
- *
- * Date-only (LL, e.g. "January 15, 2026"):
- *   - Awareness days/weeks (type === 'theme')
- *   - CFS deadlines (isDeadline)
- *   - All-day events (day)
- *
- * Date and time (LLL, e.g. "January 15, 2026 2:00 PM"):
- *   - All other timed events
- */
+/** Delegates to the shared getStartDateFormat utility */
 function getStartDateFormat(): string {
-  if (props.type === 'theme') return 'LL';
-  if (props.isDeadline) return 'LL';
-  if (props.day) return 'LL';
-  return 'LLL';
+  return _getStartDateFormat({
+    type: props.type,
+    isDeadline: props.isDeadline,
+    day: props.day,
+  });
 }
 
-/**
- * Determines the dayjs format pattern for the end date.
- *
- * Date-only (LL, e.g. "January 18, 2026"):
- *   - All-day events (day)
- *
- * Time-only (LT, e.g. "5:00 PM"):
- *   - Same-day events (avoids repeating the date from the start)
- *
- * Date and time (LLL, e.g. "January 18, 2026 5:00 PM"):
- *   - Multi-day timed events
- */
+/** Delegates to the shared getEndDateFormat utility */
 function getEndDateFormat(): string {
-  if (props.day) return 'LL';
-  if (isSameDay(props.dateStart, props.dateEnd)) return 'LT';
-  return 'LLL';
+  return _getEndDateFormat({
+    day: props.day,
+    dateStart: props.dateStart,
+    dateEnd: props.dateEnd,
+    timezone: props.timezone,
+    useLocalTimezone: userStore.useLocalTimezone,
+    userTimezone: userStore.timezone || undefined,
+  });
 }
 
 /**
