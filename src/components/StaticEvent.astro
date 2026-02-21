@@ -37,12 +37,12 @@ function formatDate(date: string, format: string): string {
 }
 
 function getStartFormat(): string {
-  if (isTheme || isDeadline || isAllDay) return 'LL';
+  if (isTheme || isDeadline || isAllDay) return 'LL [UTC]';
   return 'LLL [UTC]';
 }
 
 function getEndFormat(): string {
-  if (isAllDay) return 'LL';
+  if (isAllDay) return 'LL [UTC]';
   // Same-day check in UTC
   if (
     event.dateEnd &&
