@@ -6,12 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Theme selection functionality
-  const LIGHT_MODE_ICON =
-    '<sl-icon label="Light mode" name="sun-fill"></sl-icon>';
-  const DARK_MODE_ICON =
-    '<sl-icon label="Dark mode" name="moon-fill"></sl-icon>';
-
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+  /**
+   * Updates the theme selector icon-button to reflect the current theme.
+   */
+  function updateThemeIcon(
+    button: HTMLElement,
+    iconName: string,
+    label: string
+  ) {
+    button.setAttribute('name', iconName);
+    button.setAttribute('label', label);
+  }
 
   /**
    * Applies the selected theme to the document.
@@ -31,12 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('sl-theme-dark');
       localStorage.setItem('theme', 'light');
-      themeSelectorButton.innerHTML = LIGHT_MODE_ICON;
+      updateThemeIcon(themeSelectorButton, 'sun-fill', 'Light mode');
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('sl-theme-dark');
       localStorage.setItem('theme', 'dark');
-      themeSelectorButton.innerHTML = DARK_MODE_ICON;
+      updateThemeIcon(themeSelectorButton, 'moon-fill', 'Dark mode');
     } else {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('sl-theme-dark');
@@ -44,10 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (prefersDarkScheme.matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.classList.add('sl-theme-dark');
-        themeSelectorButton.innerHTML = DARK_MODE_ICON;
+        updateThemeIcon(themeSelectorButton, 'moon-fill', 'Dark mode');
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
-        themeSelectorButton.innerHTML = LIGHT_MODE_ICON;
+        updateThemeIcon(themeSelectorButton, 'sun-fill', 'Light mode');
       }
     }
   }
