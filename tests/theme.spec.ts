@@ -23,9 +23,10 @@ test.describe('Theme Switching', () => {
 
   test('should start with system theme', async ({ page }) => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(
-      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
-    ).toBeVisible();
+    await expect(page.locator('#theme-selector-button')).toHaveAttribute(
+      'label',
+      'Light mode'
+    );
   });
 
   test('should switch to light theme and persist', async ({
@@ -38,9 +39,10 @@ test.describe('Theme Switching', () => {
 
     // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(
-      page.locator('#theme-selector-button sl-icon[label="Light mode"]')
-    ).toBeVisible();
+    await expect(page.locator('#theme-selector-button')).toHaveAttribute(
+      'label',
+      'Light mode'
+    );
 
     // Verify persistence
     const newPage = await context.newPage();
@@ -62,9 +64,10 @@ test.describe('Theme Switching', () => {
 
     // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(
-      page.locator('#theme-selector-button sl-icon[label="Dark mode"]')
-    ).toBeVisible();
+    await expect(page.locator('#theme-selector-button')).toHaveAttribute(
+      'label',
+      'Dark mode'
+    );
 
     // Get storage state
     const storageState = await context.storageState();
