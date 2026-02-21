@@ -14,6 +14,7 @@ import EventDate from '../../components/EventDate.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
 import EventDuration from '../../components/EventDuration.vue';
+import TimezoneSelector from '../../components/TimezoneSelector.vue';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
 
 export const prerender = false;
@@ -120,14 +121,17 @@ const jsonLd = {
         {event.title}
       </h1>
 
-      <EventDate
-        client:load
-        dateStart={event.dateStart}
-        dateEnd={event.dateEnd}
-        timezone={event.timezone}
-        day={event.day}
-        type={event.type}
-      />
+      <div class="event-detail__dates">
+        <EventDate
+          client:load
+          dateStart={event.dateStart}
+          dateEnd={event.dateEnd}
+          timezone={event.timezone}
+          day={event.day}
+          type={event.type}
+        />
+        <TimezoneSelector client:load />
+      </div>
 
       <EventDelivery
         client:load
@@ -241,6 +245,13 @@ const jsonLd = {
 <style>
   .event-detail__title {
     text-wrap: balance;
+  }
+
+  .event-detail__dates {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--p-space-xs);
   }
 
   .event-detail__badges {
