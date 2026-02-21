@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { isCallForSpeakersOpen } from '../utils/eventUtils';
+import Icon from './Icon.vue';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
@@ -203,7 +204,7 @@ const speakerDisplay = computed(() => {
       class="event__children flow"
     >
       <summary>
-        <i class="icon fa-solid fa-caret-right"></i>
+        <Icon name="caret-right" />
         Description
       </summary>
       <p class="event__description" itemprop="description">
@@ -214,7 +215,7 @@ const speakerDisplay = computed(() => {
     <template v-if="!isDedicatedToAccessibility">
       <details v-if="hasChildren" class="event__children flow flow-xs">
         <summary>
-          <i class="icon fa-solid fa-caret-right"></i>
+          <Icon name="caret-right" />
           Accessibility highlights: {{ enumeratedChildTypes }}
         </summary>
         <ol
@@ -229,7 +230,7 @@ const speakerDisplay = computed(() => {
       </details>
       <details v-else-if="event.isParent" class="event__children flow">
         <summary>
-          <i class="icon fa-solid fa-caret-right"></i>
+          <Icon name="caret-right" />
           Schedule not yet announced
         </summary>
         <p>

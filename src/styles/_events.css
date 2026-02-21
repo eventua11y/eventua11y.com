@@ -20,7 +20,7 @@
   flex-wrap: wrap;
   font-size: var(--p-step--1);
   /* gap: 0.2rem; */
-  .fa-arrow-right-long {
+  .event__dateEnd > .icon {
     margin: 0 0.3rem;
   }
 }

@@ -13,6 +13,7 @@ const ATTENDANCE_MODES = {
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import Icon from './Icon.vue';
 
 type AttendanceMode = (typeof ATTENDANCE_MODES)[keyof typeof ATTENDANCE_MODES];
 
@@ -39,9 +40,7 @@ const displayLocation = computed(() => props.location || 'International');
  * @returns {string} Icon class name
  */
 const locationIcon = computed(() =>
-  displayLocation.value === 'International'
-    ? 'fa-solid fa-fw fa-globe'
-    : 'fa-solid fa-fw fa-location-dot'
+  displayLocation.value === 'International' ? 'globe' : 'location-dot'
 );
 </script>
 
@@ -53,7 +52,7 @@ const locationIcon = computed(() =>
       itemprop="eventAttendanceMode"
       content="https://schema.org/OnlineEventAttendanceMode"
     >
-      <i class="fa-solid fa-laptop"></i>
+      <Icon name="laptop" />
       Online
     </span>
 
@@ -63,7 +62,7 @@ const locationIcon = computed(() =>
       itemprop="eventAttendanceMode"
       content="https://schema.org/OfflineEventAttendanceMode"
     >
-      <i class="fa-solid fa-fw fa-location-dot"></i>
+      <Icon name="location-dot" :fw="true" />
       <span itemprop="location" itemscope itemtype="https://schema.org/Place">
         {{ displayLocation }}
       </span>
@@ -75,21 +74,21 @@ const locationIcon = computed(() =>
       content="https://schema.org/MixedEventAttendanceMode"
     >
       <span class="event__location">
-        <i class="fa-solid fa-fw fa-location-dot"></i>
+        <Icon name="location-dot" :fw="true" />
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
           {{ displayLocation }}
         </span>
       </span>
       <span class="text-muted">and</span>
       <span class="event__online">
-        <i class="fa-solid fa-laptop"></i>
+        <Icon name="laptop" />
         Online
       </span>
     </div>
 
     <div v-else-if="attendanceMode === ATTENDANCE_MODES.NONE">
       <span class="event__location">
-        <i :class="locationIcon"></i>
+        <Icon :name="locationIcon" :fw="true" />
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
           {{ displayLocation }}
         </span>

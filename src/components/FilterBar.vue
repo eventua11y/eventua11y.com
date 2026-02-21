@@ -23,7 +23,7 @@
           type="primary"
           name="filter-reset"
         >
-          <i class="fa-solid fa-filter-circle-xmark"></i> Reset Filters
+          <Icon name="filter-circle-xmark" /> Reset Filters
         </sl-button>
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
@@ -36,7 +36,7 @@
         >
         <div class="group">
           <sl-button id="open-filter-drawer" @click="handleFilterClick">
-            <i class="fa-solid fa-filter"></i> Filter
+            <Icon name="filter" /> Filter
           </sl-button>
           <TimezoneSelector />
         </div>
@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
+import Icon from './Icon.vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 

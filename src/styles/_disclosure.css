@@ -27,6 +27,6 @@ details > summary:hover {
   cursor: pointer;
 }
 
-details[open] .icon {
+details[open] > summary .icon {
   transform: rotate(90deg);
 }
