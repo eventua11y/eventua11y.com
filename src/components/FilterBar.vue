@@ -35,11 +35,7 @@
           >Awareness days</sl-switch
         >
         <div class="group">
-          <sl-button
-            id="open-filter-drawer"
-            @click="handleFilterClick"
-            aria-label="Filter"
-          >
+          <sl-button id="open-filter-drawer" @click="handleFilterClick">
             <Icon name="filter" /> Filter
           </sl-button>
           <TimezoneSelector />

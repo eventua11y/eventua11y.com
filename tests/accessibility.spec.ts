@@ -110,13 +110,13 @@ test.describe('Homepage accessibility', () => {
   });
 
   test('filter button has accessible name', async ({ page }) => {
+    // The sl-button gets its accessible name from the slotted text "Filter".
+    // Playwright's toHaveAccessibleName cannot pierce shadow DOM to read
+    // the computed name, but the axe scan confirms the button is accessible.
+    // Here we verify the button text content directly.
     const filterButton = page.locator('#open-filter-drawer');
     await filterButton.waitFor({ state: 'visible', timeout: 5000 });
-    // sl-button provides its accessible name via aria-label, which is
-    // applied to the inner <button> in shadow DOM. Playwright's
-    // toHaveAccessibleName cannot pierce shadow DOM, so we verify the
-    // aria-label attribute directly. The axe scan confirms the button is accessible.
-    await expect(filterButton).toHaveAttribute('aria-label', /filter/i);
+    await expect(filterButton).toContainText('Filter');
   });
 
   test('filter count region is an aria-live region', async ({ page }) => {
