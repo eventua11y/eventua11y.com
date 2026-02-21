@@ -421,16 +421,12 @@ export default async function handler(
     console.log('[handler] Timezone debug:', timezoneDebug);
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
-    const eventsWithDebug = {
-      ...events,
-      debug: {
-        timezone: timezoneDebug,
-        events: events.debug,
-      },
-    };
     console.log('[handler] Events fetched successfully:', events.events.length);
 
-    return new Response(JSON.stringify(eventsWithDebug), {
+    // Strip debug data from the client response
+    const { debug: _debug, ...clientResponse } = events;
+
+    return new Response(JSON.stringify(clientResponse), {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',

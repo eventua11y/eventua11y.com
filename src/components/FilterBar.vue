@@ -1,5 +1,5 @@
 <template>
-  <div id="filters" class="py-xs-s">
+  <div id="filters" ref="filterToolbar" class="py-xs-s">
     <div class="container">
       <div class="filters__status">
         <p
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 
@@ -67,25 +67,6 @@ const filterToolbar = ref(null);
  * Used to ensure proper initialization of checked state
  */
 const awarenessDaysSwitch = ref(null);
-
-/**
- * Computed property to track filter changes
- * Used to show/hide reset button
- */
-const isFiltersChanged = computed(() => filtersStore.isChanged);
-
-/**
- * Watch filter changes for debugging
- * Logs current filters state and change status
- */
-watch(
-  () => filtersStore.filters,
-  () => {
-    console.debug('Filters changed:', filtersStore.filters);
-    console.debug('Is changed:', isFiltersChanged.value);
-  },
-  { deep: true }
-);
 
 /**
  * Resets all filters to default values
