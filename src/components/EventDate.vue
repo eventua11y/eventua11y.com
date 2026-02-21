@@ -154,29 +154,36 @@ function isSameDay(
 }
 
 /**
- * Determines date format for start date based on event type:
- * - Single date: Full date with year (MMM D, YYYY)
- * - Multi-day: Month and day only (MMM D)
- * - Same-day: Full date and time (LLL)
- * @returns {string} Format pattern for dayjs
+ * Determines the dayjs format pattern for the start date.
+ *
+ * Date-only (LL, e.g. "January 15, 2026"):
+ *   - Awareness days/weeks (type === 'theme')
+ *   - CFS deadlines (isDeadline)
+ *   - All-day events (day)
+ *
+ * Date and time (LLL, e.g. "January 15, 2026 2:00 PM"):
+ *   - All other timed events
  */
-function getStartDateFormat() {
+function getStartDateFormat(): string {
   if (props.type === 'theme') return 'LL';
   if (props.isDeadline) return 'LL';
   if (props.day) return 'LL';
-
-  if (!props.dateEnd) return 'LLL';
   return 'LLL';
 }
 
 /**
- * Determines date format for end date based on event type:
- * - Same-day event: Time only (LT)
- * - Multi-day event: Full date with year (MMM D, YYYY)
- * - Awareness day: Full date (LL)
- * @returns {string} Format pattern for dayjs
+ * Determines the dayjs format pattern for the end date.
+ *
+ * Date-only (LL, e.g. "January 18, 2026"):
+ *   - All-day events (day)
+ *
+ * Time-only (LT, e.g. "5:00 PM"):
+ *   - Same-day events (avoids repeating the date from the start)
+ *
+ * Date and time (LLL, e.g. "January 18, 2026 5:00 PM"):
+ *   - Multi-day timed events
  */
-function getEndDateFormat() {
+function getEndDateFormat(): string {
   if (props.day) return 'LL';
   if (isSameDay(props.dateStart, props.dateEnd)) return 'LT';
   return 'LLL';
