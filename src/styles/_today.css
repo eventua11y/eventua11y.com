@@ -2,6 +2,7 @@
   --hover-color: var(--s-color-secondary);
   border-bottom: 1px solid var(--s-color-border);
   color: var(--s-color-on-background);
+  min-height: 5rem; /* Reserve space to reduce CLS before Vue hydration */
   padding: var(--p-space-s-l) 0;
   .event--theme {
     background-color: transparent;

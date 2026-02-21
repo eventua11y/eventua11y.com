@@ -75,7 +75,9 @@ select {
   }
 }
 
-/* Hide custom elements that are not yet registered to prevent FOUCE */
+/* Hide custom elements that are not yet registered to prevent FOUCE.
+   Skeleton placeholders use native HTML/CSS (not Shoelace) so they are
+   unaffected by this rule and render immediately. */
 :not(:defined) {
   display: none;
   visibility: hidden;

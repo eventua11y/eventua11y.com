@@ -1,20 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Slab&display=swap');
+/* Google Fonts loaded via <link> tags in default.astro <head> for faster discovery */
+
+/* Metric-matched fallback fonts to reduce CLS during font swap */
+@font-face {
+  font-family: 'Roboto Slab Fallback';
+  src: local('Times New Roman');
+  size-adjust: 113%;
+  ascent-override: 93%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Fallback';
+  src: local('Arial');
+  size-adjust: 101%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
 
 h1 {
-  font-family: 'Roboto Slab', sans-serif;
+  font-family: 'Roboto Slab', 'Roboto Slab Fallback', sans-serif;
   font-size: var(--p-step-4);
   /* margin-bottom: 2rem; */
 }
 
 h2 {
-  font-family: 'Roboto Slab', sans-serif;
+  font-family: 'Roboto Slab', 'Roboto Slab Fallback', sans-serif;
   font-size: var(--p-step-3);
   font-weight: 700;
   /* margin-bottom: var(--p-space-m); */
 }
 
 h3 {
-  font-family: 'Roboto Slab', sans-serif;
+  font-family: 'Roboto Slab', 'Roboto Slab Fallback', sans-serif;
   font-size: var(--p-step-2);
   font-weight: 400;
 }
@@ -28,7 +47,8 @@ h5 {
 }
 
 body {
-  font-family: 'Atkinson Hyperlegible', sans-serif;
+  font-family:
+    'Atkinson Hyperlegible', 'Atkinson Hyperlegible Fallback', sans-serif;
   font-size: var(--p-step-0);
   font-weight: 400;
 }
