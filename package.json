@@ -5,6 +5,8 @@
   "main": "index.astro",
   "scripts": {
     "test": "npx playwright test",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "test:ui": "npx playwright test --ui",
     "dev": "concurrently \"astro dev\" \"npm run check:watch\"",
     "start": "astro dev",
@@ -56,7 +58,8 @@
     "playwright-chromium": "^1.57.0",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
-    "typescript-eslint": "^8.49.0"
+    "typescript-eslint": "^8.49.0",
+    "vitest": "^4.0.18"
   },
   "dependencies": {
     "@astrojs/netlify": "^6.6.3",

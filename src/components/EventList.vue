@@ -9,6 +9,7 @@ import type { Event as EventType, Book } from '../types/event';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -52,26 +53,17 @@ const formatDate = (yearMonth: string) => {
   return formatter.format(date);
 };
 
-/**
- * Returns a "YYYY-M" key for grouping an item by its calendar month.
- *
- * Books and international events (no timezone) use UTC so the month
- * matches the date stored in Sanity. Local events use the same timezone
- * logic as EventDate: either the event's own timezone or the user's
- * selected timezone, depending on the useLocalTimezone preference.
- */
+/** Delegates to the shared getYearMonth utility */
 const getYearMonth = (item: ListItem): string => {
-  if (item._type === 'book' || !('timezone' in item) || !item.timezone) {
-    // Books and international events: use UTC
-    const d = dayjs.utc(item.dateStart);
-    return `${d.year()}-${d.month() + 1}`;
-  }
-  // Local events: respect the user's timezone preference
-  const tz = userStore.useLocalTimezone
-    ? userStore.timezone || 'UTC'
-    : item.timezone;
-  const d = dayjs.utc(item.dateStart).tz(tz);
-  return `${d.year()}-${d.month() + 1}`;
+  const isBook = item._type === 'book';
+  const eventTimezone =
+    !isBook && 'timezone' in item ? item.timezone : undefined;
+  return _getYearMonth(item.dateStart, {
+    isBook,
+    timezone: eventTimezone,
+    useLocalTimezone: userStore.useLocalTimezone,
+    userTimezone: userStore.timezone || undefined,
+  });
 };
 
 /**

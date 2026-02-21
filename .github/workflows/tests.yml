@@ -1,4 +1,4 @@
-name: 'E2E Tests'
+name: 'Tests'
 
 on:
   pull_request:
@@ -8,6 +8,24 @@ permissions:
   statuses: read
 
 jobs:
+  tests_unit:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
   tests_e2e:
     name: Run end-to-end tests
     runs-on: ubuntu-latest
