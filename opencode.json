@@ -10,6 +10,11 @@
       "url": "https://mcp.sanity.io",
       "oauth": {}
     },
+    "sentry": {
+      "type": "remote",
+      "url": "https://mcp.sentry.dev/mcp",
+      "oauth": {}
+    },
     "astro-docs": {
       "type": "remote",
       "url": "https://mcp.docs.astro.build/mcp",
