@@ -14,9 +14,11 @@ import { createClient } from '@sanity/client';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isSameOrAfter);
 
 import type { Event, Book } from '../types/event';
 
@@ -116,18 +118,32 @@ export async function getEvents(): Promise<{
   }
 
   // Classify using UTC
+  // The edge function splits events into today / future / past, then the
+  // client merges today + future into "upcoming". We replicate that here by
+  // including any event whose end-date (or start-date when no end-date)
+  // has NOT yet passed — i.e. it is today or in the future.
   const now = dayjs.utc();
-  const todayEnd = now.endOf('day');
   const todayStart = now.startOf('day');
   const twelveMonthsAgo = todayStart.subtract(12, 'month');
+
+  /**
+   * Convert an event date to UTC for comparison.
+   * - Events with a timezone: parse in the event's timezone, convert to UTC.
+   * - International events (no timezone): treat the stored date as UTC.
+   */
+  const toUtc = (dateStr: string, eventTz?: string) => {
+    if (!eventTz) return dayjs.utc(dateStr);
+    return dayjs.tz(dateStr, eventTz).utc();
+  };
 
   const future = allEvents
     .filter((event) => {
       if (event.parent) return false;
-      const start = event.timezone
-        ? dayjs(event.dateStart).tz(event.timezone).tz('UTC')
-        : dayjs.utc(event.dateStart);
-      return start.isAfter(todayEnd);
+      if (!event.dateStart) return false;
+      // An event is "upcoming" if it hasn't ended yet.
+      // Use dateEnd when available (multi-day events), otherwise dateStart.
+      const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
+      return end.isSameOrAfter(todayStart);
     })
     .sort(
       (a, b) =>
@@ -140,11 +156,7 @@ export async function getEvents(): Promise<{
       if (!event.dateStart) return false;
       // Exclude deadline events from past events
       if (event.type === 'deadline') return false;
-      const end = event.timezone
-        ? dayjs(event.dateEnd || event.dateStart)
-            .tz(event.timezone)
-            .tz('UTC')
-        : dayjs.utc(event.dateEnd || event.dateStart);
+      const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
       return end.isBefore(todayStart) && end.isAfter(twelveMonthsAgo);
     })
     .sort(
