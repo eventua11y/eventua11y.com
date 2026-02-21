@@ -1,9 +1,10 @@
-#filters {
+#filters,
+#filters-placeholder {
   align-items: center;
   background-color: var(--s-color-background);
   border-bottom: 1px solid var(--s-color-border);
   margin-bottom: var(--p-space-s-l);
-  min-height: 3.5rem; /* Reserve space to reduce CLS before Vue hydration */
+  min-height: 3.5rem;
   position: sticky;
   top: -1px;
   z-index: 1;

@@ -1,0 +1,17 @@
+---
+/**
+ * Static placeholder that reserves space for the FilterBar before Vue hydrates.
+ * Mirrors the layout of FilterBar.vue so the page doesn't shift when the real
+ * component loads. Removed by FilterBar.vue on mount.
+ */
+---
+
+<div id="filters-placeholder" class="py-xs-s">
+  <div class="container">
+    <div class="filters__status">
+      <p class="filters__count text-muted">
+        <small>Loading events&hellip;</small>
+      </p>
+    </div>
+  </div>
+</div>
