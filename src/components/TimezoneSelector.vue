@@ -2,7 +2,7 @@
   <div>
     <label class="sr-only" for="timezone-dropdown">Timezone</label>
     <sl-dropdown id="timezone-dropdown" distance="3" placement="bottom-end">
-      <sl-button slot="trigger" size="small" caret>
+      <sl-button slot="trigger" :size="size" caret>
         {{ selectedTimezoneLabel }}
       </sl-button>
       <sl-menu @sl-select="updateTimezone">
@@ -34,6 +34,15 @@ import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+withDefaults(
+  defineProps<{
+    size?: 'small' | 'medium' | 'large';
+  }>(),
+  {
+    size: 'medium',
+  }
+);
 
 // Default timezone if user's timezone cannot be detected
 const defaultTimezone = 'UTC';
