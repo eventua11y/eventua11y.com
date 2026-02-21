@@ -38,7 +38,7 @@ function formatDate(date: string, format: string): string {
 
 function getStartFormat(): string {
   if (isTheme || isDeadline || isAllDay) return 'LL';
-  return 'LLL';
+  return 'LLL [UTC]';
 }
 
 function getEndFormat(): string {
@@ -48,9 +48,9 @@ function getEndFormat(): string {
     event.dateEnd &&
     dayjs.utc(event.dateStart).isSame(dayjs.utc(event.dateEnd), 'day')
   ) {
-    return 'LT';
+    return 'LT [UTC]';
   }
-  return 'LLL';
+  return 'LLL [UTC]';
 }
 
 // Attendance mode display
