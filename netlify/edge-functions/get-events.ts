@@ -313,57 +313,56 @@ async function getRawEvents(client: SanityClient): Promise<Event[]> {
 
   console.log('[getRawEvents] Fetching fresh data from Sanity');
 
-  // Fetch all non-draft events
-  const events: Event[] = await client.fetch(`
-    *[_type == "event" && !(_id in path("drafts.**"))] {
-      ...,
-      "speakers": speakers[]->{ _id, name }
-    }
-  `);
-
-  // Fetch children for each event and add CFS deadline events
-  const eventsWithChildrenAndDeadlines = await Promise.all(
-    events.map(async (event) => {
-      // Fetch child events for each parent event
-      const children: Event[] = await client.fetch(
-        `
-      *[_type == "event" && parent._ref == $eventId] {
+  // Fetch parent events and child events in two queries instead of N+1
+  const [parentEvents, childEvents]: [Event[], Event[]] = await Promise.all([
+    client.fetch(`
+      *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
+        ...,
+        "speakers": speakers[]->{ _id, name }
+      }
+    `),
+    client.fetch(`
+      *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
         ...,
         "speakers": speakers[]->{ _id, name }
       } | order(dateStart asc)
-    `,
-        { eventId: event._id }
-      );
+    `),
+  ]);
 
-      // Add children to the event if any
-      const eventWithChildren = {
-        ...event,
-        children: children.length > 0 ? children : undefined,
-      };
+  // Group child events by parent reference
+  const childrenByParent: Record<string, Event[]> = {};
+  for (const child of childEvents) {
+    const parentId = child.parent?._ref;
+    if (parentId) {
+      if (!childrenByParent[parentId]) childrenByParent[parentId] = [];
+      childrenByParent[parentId].push(child);
+    }
+  }
 
-      // Add CFS (Call for Speakers) deadline event if applicable
-      const cfsDeadlineEvents: Event[] = [];
-      if (event.callForSpeakersClosingDate) {
-        cfsDeadlineEvents.push({
-          _id: `${event._id}-cfs-deadline`,
-          _type: 'event',
-          type: 'deadline',
-          title: `${event.title}`,
-          dateStart: event.callForSpeakersClosingDate,
-          timezone: event.timezone,
-          website: event.website,
-          attendanceMode: event.attendanceMode,
-          callForSpeakers: event.callForSpeakers,
-        });
-      }
+  // Attach children to parents and create CFS deadline events
+  const flattenedEvents: Event[] = [];
+  for (const event of parentEvents) {
+    const children = childrenByParent[event._id];
+    flattenedEvents.push({
+      ...event,
+      children: children && children.length > 0 ? children : undefined,
+    });
 
-      // Return the event with children and CFS deadline events
-      return [eventWithChildren, ...cfsDeadlineEvents];
-    })
-  );
-
-  // Flatten the array of events
-  const flattenedEvents = eventsWithChildrenAndDeadlines.flat();
+    // Add CFS (Call for Speakers) deadline event if applicable
+    if (event.callForSpeakersClosingDate) {
+      flattenedEvents.push({
+        _id: `${event._id}-cfs-deadline`,
+        _type: 'event',
+        type: 'deadline',
+        title: `${event.title}`,
+        dateStart: event.callForSpeakersClosingDate,
+        timezone: event.timezone,
+        website: event.website,
+        attendanceMode: event.attendanceMode,
+        callForSpeakers: event.callForSpeakers,
+      });
+    }
+  }
 
   // Update cache with raw events
   cache.events = flattenedEvents;
