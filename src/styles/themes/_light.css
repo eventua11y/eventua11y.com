@@ -39,7 +39,7 @@
 
   /* Masthead */
   --c-masthead-color-bg: var(--s-color-primary);
-  --c-masthead-color-fg: var(--color-on-primary);
+  --c-masthead-color-fg: var(--s-color-on-primary);
   --c-masthead-focus-ring-color: var(--p-color-white);
 
   /* Navigation */
@@ -51,7 +51,7 @@
   /* Footer */
   --c-footer-color-bg: var(--p-color-grey-900);
   --c-footer-color-muted-fg: var(--p-color-grey-400);
-  --c-footer-color-link: var(--color-primary);
+  --c-footer-color-link: var(--s-color-primary);
   --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
