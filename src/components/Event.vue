@@ -249,7 +249,11 @@ const speakerDisplay = computed(() => {
       <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
         >Dedicated to accessibility</wa-badge
       >
-      <wa-badge variant="success" pill v-if="callForSpeakersOpen"
+      <wa-badge
+        variant="success"
+        pill
+        attention="pulse"
+        v-if="callForSpeakersOpen"
         >Call for speakers</wa-badge
       >
     </div>
