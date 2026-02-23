@@ -19,6 +19,34 @@ async function runAxeScan(page: Page) {
   return results;
 }
 
+// Helper: parse an rgb/rgba color string into { r, g, b } values (0–255)
+function parseColor(color: string): { r: number; g: number; b: number } {
+  const match = color.match(
+    /rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/
+  );
+  if (!match) throw new Error(`Could not parse color: ${color}`);
+  return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]) };
+}
+
+// Helper: calculate relative luminance per WCAG 2.x
+// https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+function luminance({ r, g, b }: { r: number; g: number; b: number }): number {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
+    const s = c / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+// Helper: calculate contrast ratio between two colors
+function contrastRatio(fg: string, bg: string): number {
+  const l1 = luminance(parseColor(fg));
+  const l2 = luminance(parseColor(bg));
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 // ---------------------------------------------------------------------------
 // Homepage (/)
 // ---------------------------------------------------------------------------
@@ -412,5 +440,38 @@ for (const colorScheme of ['light', 'dark'] as const) {
         expect(results.violations).toEqual([]);
       });
     }
+
+    // Axe cannot check contrast on SVG icons inside Shoelace shadow DOM,
+    // so we manually verify the theme selector icon meets WCAG 2.x
+    // non-text contrast (3:1 minimum for UI components).
+    test(`theme selector icon meets 3:1 contrast in ${colorScheme} mode`, async ({
+      context,
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme });
+      await context.addInitScript((theme: string) => {
+        window.localStorage.setItem('theme', theme);
+      }, colorScheme);
+
+      await page.goto('/');
+      // Only wait for the masthead — event content requires the API
+      await page.waitForSelector('.masthead');
+
+      const masthead = page.locator('.masthead');
+      const themeButton = page.locator('#theme-selector-button');
+
+      const bgColor = await masthead.evaluate(
+        (el) => getComputedStyle(el).backgroundColor
+      );
+      const fgColor = await themeButton.evaluate(
+        (el) => getComputedStyle(el).color
+      );
+
+      const ratio = contrastRatio(fgColor, bgColor);
+      expect(
+        ratio,
+        `Theme selector icon contrast ratio is ${ratio.toFixed(2)}:1 (${fgColor} on ${bgColor}), expected at least 3:1`
+      ).toBeGreaterThanOrEqual(3);
+    });
   });
 }

@@ -62,6 +62,14 @@
   text-decoration: none;
 }
 
+/* Override Shoelace icon-button default color (--sl-color-neutral-600) so the
+   icon is visible against the masthead background in both themes. The shadow
+   DOM :host rule reads --sl-color-neutral-600, so we override that variable
+   rather than setting color directly (which the :host rule would beat). */
+.masthead sl-icon-button {
+  --sl-color-neutral-600: var(--c-masthead-color-fg);
+}
+
 /* Ensure Shoelace components inside .masthead use the focus ring color */
 .masthead sl-button::part(base):focus-visible {
   outline-color: var(--c-focus-ring-color);
