@@ -364,3 +364,53 @@ test.describe('Shared component accessibility', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Axe scans in explicit light and dark modes
+// ---------------------------------------------------------------------------
+// The tests above run with the system default (typically light). These tests
+// explicitly force each color mode via localStorage and emulateMedia to catch
+// contrast regressions that only surface in a specific theme.
+const pages = [
+  { name: 'Homepage', path: '/', waitSelector: '#upcoming-events' },
+  { name: 'Past Events', path: '/past-events', waitSelector: '#past-events' },
+  { name: 'Accessibility Statement', path: '/accessibility' },
+  { name: 'Curation Policy', path: '/curation-policy' },
+  { name: '404', path: '/404' },
+];
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`Axe scans in ${colorScheme} mode`, () => {
+    for (const { name, path, waitSelector } of pages) {
+      test(`${name} (${path}) has no WCAG 2.2 AA violations in ${colorScheme} mode`, async ({
+        context,
+        page,
+      }) => {
+        await page.emulateMedia({ colorScheme });
+        await context.addInitScript((theme: string) => {
+          window.localStorage.setItem('theme', theme);
+        }, colorScheme);
+
+        await page.goto(path);
+        if (waitSelector) {
+          await page.waitForSelector(waitSelector);
+        }
+
+        // Close filter drawer if open (homepage)
+        const filterDrawer = page.locator('#filter-drawer');
+        if (await filterDrawer.isVisible()) {
+          await page.keyboard.press('Escape');
+          await expect(filterDrawer).not.toBeVisible();
+        }
+
+        await expect(page.locator('html')).toHaveAttribute(
+          'data-theme',
+          colorScheme
+        );
+
+        const results = await runAxeScan(page);
+        expect(results.violations).toEqual([]);
+      });
+    }
+  });
+}
