@@ -7,9 +7,7 @@
   --sl-panel-background-color: var(--c-panel-color-bg);
 }
 
-sl-badge[variant='success']::part(base) {
-  background-color: var(--sl-color-success-700);
-}
+/* wa-badge success variant uses Web Awesome's built-in theming */
 
 .checkbox--medium {
   font-size: var(--p-step-1);
