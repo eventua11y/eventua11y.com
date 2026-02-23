@@ -472,6 +472,17 @@ for (const colorScheme of ['light', 'dark'] as const) {
         ratio,
         `Theme selector icon contrast ratio is ${ratio.toFixed(2)}:1 (${fgColor} on ${bgColor}), expected at least 3:1`
       ).toBeGreaterThanOrEqual(3);
+
+      // Also check hover state — Shoelace uses --sl-color-primary-600
+      await themeButton.hover();
+      const hoverFgColor = await themeButton.evaluate(
+        (el) => getComputedStyle(el).color
+      );
+      const hoverRatio = contrastRatio(hoverFgColor, bgColor);
+      expect(
+        hoverRatio,
+        `Theme selector icon hover contrast ratio is ${hoverRatio.toFixed(2)}:1 (${hoverFgColor} on ${bgColor}), expected at least 3:1`
+      ).toBeGreaterThanOrEqual(3);
     });
   });
 }

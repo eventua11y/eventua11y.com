@@ -62,12 +62,13 @@
   text-decoration: none;
 }
 
-/* Override Shoelace icon-button default color (--sl-color-neutral-600) so the
-   icon is visible against the masthead background in both themes. The shadow
-   DOM :host rule reads --sl-color-neutral-600, so we override that variable
-   rather than setting color directly (which the :host rule would beat). */
+/* Override Shoelace icon-button colors so the icon is visible against the
+   masthead background in both themes. The shadow DOM uses these variables
+   for default, hover/focus, and active states respectively. */
 .masthead sl-icon-button {
   --sl-color-neutral-600: var(--c-masthead-color-fg);
+  --sl-color-primary-600: var(--c-masthead-color-fg);
+  --sl-color-primary-700: var(--c-masthead-color-fg);
 }
 
 /* Ensure Shoelace components inside .masthead use the focus ring color */
