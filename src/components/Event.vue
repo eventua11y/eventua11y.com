@@ -246,11 +246,15 @@ const speakerDisplay = computed(() => {
       class="event__badges"
       v-if="isDedicatedToAccessibility || callForSpeakersOpen"
     >
-      <sl-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
-        >Dedicated to accessibility</sl-badge
+      <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
+        >Dedicated to accessibility</wa-badge
       >
-      <sl-badge variant="success" pill v-if="callForSpeakersOpen"
-        >Call for speakers</sl-badge
+      <wa-badge
+        variant="success"
+        pill
+        attention="pulse"
+        v-if="callForSpeakersOpen"
+        >Call for speakers</wa-badge
       >
     </div>
   </article>
