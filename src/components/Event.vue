@@ -5,7 +5,7 @@ import Icon from './Icon.vue';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
-import type { Event as EventType, Speaker } from '../types/event';
+import type { Event as EventType } from '../types/event';
 
 const props = withDefaults(
   defineProps<{

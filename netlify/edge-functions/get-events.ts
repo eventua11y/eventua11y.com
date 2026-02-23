@@ -53,7 +53,7 @@ interface EventsResponse {
     timezone?: {
       userInfoTimezone: string;
       resolvedTimezone: string;
-      geo: any;
+      geo: Record<string, unknown>;
       headers: Record<string, string>;
     };
     events?: Array<{
@@ -115,7 +115,7 @@ function createSanityClient(): SanityClient {
     return createClient(config);
   } catch (error) {
     console.error('Failed to create Sanity client:', error);
-    throw new Error('Sanity client initialization failed');
+    throw new Error('Sanity client initialization failed', { cause: error });
   }
 }
 
@@ -142,7 +142,7 @@ function processEventsForTimezone(
   events: Event[],
   userTimezone: string
 ): EventsResponse {
-  const debugLogs: Array<Record<string, any>> = [];
+  const debugLogs: Array<Record<string, unknown>> = [];
 
   try {
     // Use user's timezone for base calculations
@@ -291,7 +291,7 @@ function processEventsForTimezone(
       '[processEventsForTimezone] Failed:',
       (error as unknown as { message?: string })?.message || error
     );
-    throw new Error('Failed to process events for timezone');
+    throw new Error('Failed to process events for timezone', { cause: error });
   }
 }
 
@@ -423,6 +423,7 @@ export default async function handler(
     console.log('[handler] Events fetched successfully:', events.events.length);
 
     // Strip debug data from the client response
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { debug: _debug, ...clientResponse } = events;
 
     return new Response(JSON.stringify(clientResponse), {

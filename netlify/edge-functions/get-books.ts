@@ -14,7 +14,7 @@ import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
  * - Includes timestamp for TTL calculation
  */
 const cache = {
-  data: null as any | null,
+  data: null as unknown,
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };
@@ -48,7 +48,7 @@ function createSanityClient(): SanityClient {
     return createClient(config);
   } catch (error) {
     console.error('Failed to create Sanity client:', error);
-    throw new Error('Sanity client initialization failed');
+    throw new Error('Sanity client initialization failed', { cause: error });
   }
 }
 
@@ -74,7 +74,7 @@ async function fetchBooksFromSanity(client: SanityClient) {
     `);
   } catch (error) {
     console.error('[fetchBooksFromSanity] Failed:', error);
-    throw new Error('Failed to fetch books from Sanity');
+    throw new Error('Failed to fetch books from Sanity', { cause: error });
   }
 }
 

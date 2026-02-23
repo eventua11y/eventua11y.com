@@ -41,7 +41,7 @@ import { computed } from 'vue';
 import Icon from './Icon.vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import timezonePlugin from 'dayjs/plugin/timezone';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import userStore from '../store/userStore';
@@ -56,7 +56,7 @@ import 'dayjs/locale/fr';
 import 'dayjs/locale/de';
 
 dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(timezonePlugin);
 dayjs.extend(localizedFormat);
 dayjs.extend(advancedFormat);
 
