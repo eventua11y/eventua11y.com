@@ -95,8 +95,9 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
     />
     <link rel="manifest" href="/favicon/site.webmanifest" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    {faKitCode && <meta data-fa-kit-code={faKitCode} />}
   </head>
-  <body data-fa-kit-code={faKitCode || undefined}>
+  <body>
     <a href="#main" class="skip">
       <svg
         xmlns="http://www.w3.org/2000/svg"
