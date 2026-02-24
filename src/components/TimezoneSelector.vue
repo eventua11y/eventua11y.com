@@ -10,18 +10,14 @@
       <wa-button slot="trigger" appearance="outlined" with-caret>
         {{ selectedTimezoneLabel }}
       </wa-button>
-      <wa-dropdown-item
-        type="checkbox"
-        :value="userTimezone"
-        :checked="isLocalTimezone"
-        >{{ userTimezoneLabel }}</wa-dropdown-item
-      >
-      <wa-dropdown-item
-        type="checkbox"
-        value="event"
-        :checked="!isLocalTimezone"
-        >Event local times</wa-dropdown-item
-      >
+      <wa-dropdown-item :value="userTimezone">
+        <wa-icon v-if="isLocalTimezone" slot="icon" name="check"></wa-icon>
+        {{ userTimezoneLabel }}
+      </wa-dropdown-item>
+      <wa-dropdown-item value="event">
+        <wa-icon v-if="!isLocalTimezone" slot="icon" name="check"></wa-icon>
+        Event local times
+      </wa-dropdown-item>
     </wa-dropdown>
   </div>
 </template>
