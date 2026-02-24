@@ -2,38 +2,41 @@
   <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
     <div class="flow flow-l">
       <div class="flow flow-xs">
-        <sl-radio-group
+        <wa-radio-group
           label="Attendance mode"
           name="attendance"
+          size="medium"
           :value="filtersStore.filters.attendance"
-          @sl-change="(e) => updateFilter('attendance', e)"
+          @change="(e) => updateFilter('attendance', e)"
         >
-          <sl-radio value="any">No preference</sl-radio>
-          <sl-radio value="online">Online</sl-radio>
-          <sl-radio value="offline">In-person</sl-radio>
-        </sl-radio-group>
+          <wa-radio value="any">No preference</wa-radio>
+          <wa-radio value="online">Online</wa-radio>
+          <wa-radio value="offline">In-person</wa-radio>
+        </wa-radio-group>
 
-        <sl-radio-group
+        <wa-radio-group
           label="Ticket cost"
           name="cost"
+          size="medium"
           :value="filtersStore.filters.cost"
-          @sl-change="(e) => updateFilter('cost', e)"
+          @change="(e) => updateFilter('cost', e)"
         >
-          <sl-radio value="any">No preference</sl-radio>
-          <sl-radio value="free">Free</sl-radio>
-          <sl-radio value="paid">Paid</sl-radio>
-        </sl-radio-group>
+          <wa-radio value="any">No preference</wa-radio>
+          <wa-radio value="free">Free</wa-radio>
+          <wa-radio value="paid">Paid</wa-radio>
+        </wa-radio-group>
 
-        <sl-radio-group
+        <wa-radio-group
           label="Call for speakers"
           name="cfs"
+          size="medium"
           :value="filtersStore.filters.cfs"
-          @sl-change="(e) => updateFilter('cfs', e)"
+          @change="(e) => updateFilter('cfs', e)"
         >
-          <sl-radio value="any">No preference</sl-radio>
-          <sl-radio value="open">Accepting talks</sl-radio>
-          <sl-radio value="closed">Not accepting talks</sl-radio>
-        </sl-radio-group>
+          <wa-radio value="any">No preference</wa-radio>
+          <wa-radio value="open">Accepting talks</wa-radio>
+          <wa-radio value="closed">Not accepting talks</wa-radio>
+        </wa-radio-group>
       </div>
 
       <div class="flow flow-xs">
@@ -139,7 +142,7 @@ function updateFilter(
 </script>
 
 <style scoped>
-sl-radio-group {
+wa-radio-group {
   border: 1px solid var(--s-color-border);
   border-radius: var(--p-space-2xs);
   padding: var(--p-space-xs);
