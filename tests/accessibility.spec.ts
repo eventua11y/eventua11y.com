@@ -12,8 +12,10 @@ import AxeBuilder from '@axe-core/playwright';
  */
 
 // Helper: run an axe scan scoped to WCAG 2.2 Level AA
+// Excludes iframes to avoid false positives from third-party toolbars (#549)
 async function runAxeScan(page: Page) {
   const results = await new AxeBuilder({ page })
+    .exclude('iframe')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
   return results;
