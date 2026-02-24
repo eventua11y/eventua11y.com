@@ -28,7 +28,7 @@
       > * {
         flex: 1;
       }
-      sl-button,
+      wa-button,
       sl-dropdown {
         width: 100%;
       }
@@ -83,6 +83,6 @@
   align-items: flex-start;
 }
 
-#filter-drawer sl-button::part(base):focus-visible {
+#filter-drawer wa-button::part(base):focus-visible {
   outline-color: var(--c-focus-ring-color);
 }

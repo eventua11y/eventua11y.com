@@ -9,15 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
   /**
-   * Updates the theme selector icon-button to reflect the current theme.
+   * Updates the theme selector button icon to reflect the current theme.
+   * The button contains a child wa-icon element whose name and label we update.
    */
   function updateThemeIcon(
     button: HTMLElement,
     iconName: string,
     label: string
   ) {
-    button.setAttribute('name', iconName);
-    button.setAttribute('label', label);
+    const icon = button.querySelector('wa-icon');
+    if (icon) {
+      icon.setAttribute('name', iconName);
+      icon.setAttribute('label', label);
+    }
   }
 
   /**
@@ -38,12 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('sl-theme-dark');
       localStorage.setItem('theme', 'light');
-      updateThemeIcon(themeSelectorButton, 'sun-fill', 'Light mode');
+      updateThemeIcon(themeSelectorButton, 'sun-bright', 'Light mode');
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('sl-theme-dark');
       localStorage.setItem('theme', 'dark');
-      updateThemeIcon(themeSelectorButton, 'moon-fill', 'Dark mode');
+      updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
     } else {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('sl-theme-dark');
@@ -51,10 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (prefersDarkScheme.matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.classList.add('sl-theme-dark');
-        updateThemeIcon(themeSelectorButton, 'moon-fill', 'Dark mode');
+        updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
-        updateThemeIcon(themeSelectorButton, 'sun-fill', 'Light mode');
+        updateThemeIcon(themeSelectorButton, 'sun-bright', 'Light mode');
       }
     }
   }

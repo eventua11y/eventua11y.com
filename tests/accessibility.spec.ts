@@ -107,11 +107,12 @@ test.describe('Homepage accessibility', () => {
 
   test('theme selector button has accessible name', async ({ page }) => {
     const themeButton = page.locator('#theme-selector-button');
-    // sl-icon-button provides its accessible name via the label attribute,
-    // which is applied to the inner <button> in shadow DOM. Playwright's
-    // toHaveAccessibleName cannot pierce shadow DOM, so we verify the
-    // label attribute directly. The axe scan confirms the button is accessible.
-    await expect(themeButton).toHaveAttribute('label', /.+/);
+    // wa-button gets its accessible name from the child wa-icon's label
+    // attribute. Playwright's toHaveAccessibleName cannot pierce shadow DOM,
+    // so we verify the wa-icon label attribute directly. The axe scan
+    // confirms the button is accessible.
+    const icon = themeButton.locator('wa-icon');
+    await expect(icon).toHaveAttribute('label', /.+/);
   });
 
   test('upcoming events heading exists (visually hidden)', async ({ page }) => {
@@ -140,7 +141,7 @@ test.describe('Homepage accessibility', () => {
   });
 
   test('filter button has accessible name', async ({ page }) => {
-    // The sl-button gets its accessible name from the slotted text "Filter".
+    // The wa-button gets its accessible name from the slotted text "Filter".
     // Playwright's toHaveAccessibleName cannot pierce shadow DOM to read
     // the computed name, but the axe scan confirms the button is accessible.
     // Here we verify the button text content directly.
@@ -443,7 +444,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       });
     }
 
-    // Axe cannot check contrast on SVG icons inside Shoelace shadow DOM,
+    // Axe cannot check contrast on SVG icons inside Web Awesome shadow DOM,
     // so we manually verify the theme selector icon meets WCAG 2.x
     // non-text contrast (3:1 minimum for UI components).
     test(`theme selector icon meets 3:1 contrast in ${colorScheme} mode`, async ({
@@ -475,7 +476,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
         `Theme selector icon contrast ratio is ${ratio.toFixed(2)}:1 (${fgColor} on ${bgColor}), expected at least 3:1`
       ).toBeGreaterThanOrEqual(3);
 
-      // Also check hover state — Shoelace uses --sl-color-primary-600
+      // Also check hover state
       await themeButton.hover();
       const hoverFgColor = await themeButton.evaluate(
         (el) => getComputedStyle(el).color

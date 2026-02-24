@@ -2,9 +2,9 @@
   <div>
     <label class="sr-only" for="timezone-dropdown">Timezone</label>
     <sl-dropdown id="timezone-dropdown" distance="3" placement="bottom-end">
-      <sl-button slot="trigger" caret>
+      <wa-button slot="trigger" with-caret>
         {{ selectedTimezoneLabel }}
-      </sl-button>
+      </wa-button>
       <sl-menu @sl-select="updateTimezone">
         <sl-menu-item
           type="radio"

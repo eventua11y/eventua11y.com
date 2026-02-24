@@ -60,21 +60,21 @@
         >
       </div>
       <div class="d-flex flex-col items-start gap-xs">
-        <sl-button variant="primary" size="large" @click="closeDrawer"
+        <wa-button variant="brand" size="large" @click="closeDrawer"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
-          {{ filtersStore.nonDeadlineFutureCount }} events</sl-button
+          {{ filtersStore.nonDeadlineFutureCount }} events</wa-button
         >
-        <sl-button
+        <wa-button
           v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
-          type="primary"
+          variant="brand"
           name="filter-reset"
           data-testid="drawer-reset"
         >
-          <wa-icon name="filter-circle-xmark" auto-width></wa-icon> Reset
-          Filters
-        </sl-button>
+          <wa-icon slot="start" name="filter-circle-xmark" auto-width></wa-icon>
+          Reset Filters
+        </wa-button>
       </div>
     </div>
   </sl-drawer>

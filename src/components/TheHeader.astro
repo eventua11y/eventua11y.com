@@ -34,11 +34,9 @@ const currentPath = Astro.url.pathname;
         </ul>
       </nav>
       <sl-dropdown id="theme-selector" placement="bottom-end" distance="3">
-        <sl-icon-button
-          slot="trigger"
-          id="theme-selector-button"
-          name="sun-fill"
-          label="Light mode"></sl-icon-button>
+        <wa-button slot="trigger" id="theme-selector-button" appearance="plain"
+          ><wa-icon name="sun-bright" label="Light mode"></wa-icon></wa-button
+        >
         <sl-menu>
           <sl-menu-item type="checkbox" id="light-mode" value="light"
             >Light mode</sl-menu-item
