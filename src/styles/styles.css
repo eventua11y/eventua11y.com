@@ -45,23 +45,23 @@ main {
   background-color: var(--s-color-background);
 }
 
-*:focus-visible,
+*:not(
+    wa-badge,
+    wa-button,
+    wa-callout,
+    wa-divider,
+    wa-dropdown,
+    wa-dropdown-item,
+    wa-icon,
+    wa-option,
+    wa-select
+  ):focus-visible,
 .masthead__logo > a:focus-visible {
   outline-color: var(--c-focus-ring-color);
   outline-style: solid;
   outline-offset: var(--c-focus-ring-offset);
   outline-width: var(--c-focus-ring-width);
   text-decoration: none !important;
-}
-
-/* Let Web Awesome components use their own focus ring styles.
-   The global *:focus-visible above sets a large outline-offset that
-   gets clipped by WA's dropdown panel overflow. WA's built-in focus
-   ring (--wa-focus-ring) is designed to work within its own layout. */
-wa-dropdown-item:focus-visible,
-wa-option:focus-visible {
-  outline: var(--wa-focus-ring);
-  outline-offset: var(--wa-focus-ring-offset);
 }
 
 /* Completely hides elements with the hidden attribute */
