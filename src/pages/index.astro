@@ -69,11 +69,17 @@ export const prerender = false;
 
     function setupEventListeners() {
       document.addEventListener('filters:open', () => {
-        try {
-          drawer.show();
-        } catch (e) {
-          console.error('Error showing drawer:', e);
-        }
+        // Defer show() so the pointer event that triggered this
+        // completes before the dialog backdrop appears. Without
+        // this, wa-drawer's light-dismiss handler sees the same
+        // pointerdown on the backdrop and immediately closes it.
+        requestAnimationFrame(() => {
+          try {
+            drawer.show();
+          } catch (e) {
+            console.error('Error showing drawer:', e);
+          }
+        });
       });
 
       document.addEventListener('filters:close', () => {
