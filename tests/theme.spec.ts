@@ -98,18 +98,20 @@ test.describe('Theme Switching', () => {
   test('should handle theme selector interactions correctly', async ({
     page,
   }) => {
-    // Test menu opening
-    await page.click('#theme-selector-button');
-    await expect(page.locator('#theme-selector sl-menu')).toBeVisible();
+    const dropdown = page.locator('#theme-selector');
 
-    // Test click outside
-    await page.click('body');
-    await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
-
-    // Test keyboard interaction
+    // Test menu opening — wa-dropdown sets the `open` attribute when visible
     await page.click('#theme-selector-button');
-    await expect(page.locator('#theme-selector sl-menu')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.locator('#theme-selector sl-menu')).not.toBeVisible();
+    await expect(dropdown).toHaveAttribute('open', '');
+
+    // Test click outside — click main content area to dismiss the dropdown
+    await page.click('main');
+    await expect(dropdown).not.toHaveAttribute('open');
+
+    // Test Escape key closes the dropdown
+    await page.click('#theme-selector-button');
+    await expect(dropdown).toHaveAttribute('open', '');
+    await dropdown.press('Escape');
+    await expect(dropdown).not.toHaveAttribute('open');
   });
 });

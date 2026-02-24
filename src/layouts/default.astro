@@ -2,6 +2,7 @@
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@awesome.me/webawesome/dist/styles/themes/default.css';
+import '@awesome.me/webawesome/dist/styles/utilities/visually-hidden.css';
 import '../styles/styles.css';
 import TheFooter from '../components/TheFooter.astro';
 import TheHeader from '../components/TheHeader.astro';
@@ -131,9 +132,12 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
   import '@awesome.me/webawesome/dist/components/badge/badge.js';
   // sl-icon migrated to wa-icon (Web Awesome)
   import '@awesome.me/webawesome/dist/components/icon/icon.js';
-  import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
-  import '@shoelace-style/shoelace/dist/components/menu/menu.js';
-  import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
+  // sl-dropdown, sl-menu, sl-menu-item migrated to wa-dropdown, wa-dropdown-item (Web Awesome)
+  // Theme selector uses wa-dropdown; timezone selector uses wa-select + wa-option
+  import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
+  import '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js';
+  import '@awesome.me/webawesome/dist/components/select/select.js';
+  import '@awesome.me/webawesome/dist/components/option/option.js';
   import '@shoelace-style/shoelace/dist/components/alert/alert.js';
   import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
   import '@shoelace-style/shoelace/dist/components/switch/switch.js';

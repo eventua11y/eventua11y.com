@@ -17,6 +17,9 @@ html[data-theme='dark'] {
   color-scheme: dark;
   accent-color: var(--s-color-primary);
 
+  /* Align WA's surface color with the project's dark background */
+  --wa-color-surface-default: var(--p-color-black);
+
   /* Body */
   --c-body-color-bg: var(--s-color-bg);
   --c-body-color-fg: var(--s-color-fg);

@@ -99,13 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Add event listener for theme selection changes
-  const menu = document.querySelector('sl-menu');
-  if (menu) {
-    menu.addEventListener('sl-select', (event: CustomEvent) => {
+  const themeDropdown = document.querySelector('#theme-selector');
+  if (themeDropdown) {
+    themeDropdown.addEventListener('wa-select', ((event: CustomEvent) => {
       const selectedTheme = event.detail.item.value;
       applyTheme(selectedTheme);
       updateSelection(selectedTheme);
-    });
+    }) as EventListener);
   }
 
   // Listen for changes to the user's system preference and update the theme accordingly

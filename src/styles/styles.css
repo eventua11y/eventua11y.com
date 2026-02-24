@@ -45,7 +45,17 @@ main {
   background-color: var(--s-color-background);
 }
 
-*:focus-visible,
+*:not(
+    wa-badge,
+    wa-button,
+    wa-callout,
+    wa-divider,
+    wa-dropdown,
+    wa-dropdown-item,
+    wa-icon,
+    wa-option,
+    wa-select
+  ):focus-visible,
 .masthead__logo > a:focus-visible {
   outline-color: var(--c-focus-ring-color);
   outline-style: solid;

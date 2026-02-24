@@ -29,8 +29,20 @@
         flex: 1;
       }
       wa-button,
-      sl-dropdown {
+      wa-dropdown {
         width: 100%;
+      }
+      @media (min-width: 700px) {
+        > wa-button,
+        > wa-dropdown {
+          flex: 0 0 auto;
+          width: auto;
+        }
+      }
+      wa-select::part(listbox) {
+        white-space: nowrap;
+        width: max-content;
+        min-width: 100%;
       }
     }
   }
