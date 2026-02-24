@@ -39,7 +39,7 @@
           <wa-button
             id="open-filter-drawer"
             appearance="outlined"
-            @click="handleFilterClick"
+            data-drawer="open filter-drawer"
           >
             <wa-icon slot="start" name="filter" auto-width></wa-icon> Filter
           </wa-button>
@@ -79,15 +79,6 @@ const awarenessDaysSwitch = ref(null);
  */
 function resetFilters() {
   filtersStore.resetFilters();
-}
-
-/**
- * Handles filter button click
- * Dispatches custom event to open filter drawer
- */
-function handleFilterClick() {
-  const event = new CustomEvent('filters:open');
-  document.dispatchEvent(event);
 }
 
 /**
