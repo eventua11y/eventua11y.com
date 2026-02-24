@@ -54,7 +54,8 @@ main {
     wa-dropdown-item,
     wa-icon,
     wa-option,
-    wa-select
+    wa-select,
+    wa-switch
   ):focus-visible,
 .masthead__logo > a:focus-visible {
   outline-color: var(--c-focus-ring-color);

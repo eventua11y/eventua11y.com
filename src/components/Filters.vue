@@ -37,26 +37,26 @@
       </div>
 
       <div class="flow flow-xs">
-        <sl-switch
+        <wa-switch
           ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
-          @sl-change="toggleAwarenessDays"
+          @change="toggleAwarenessDays"
           id="filter-show-awareness-days-drawer"
-          >Show awareness days</sl-switch
+          >Show awareness days</wa-switch
         >
-        <sl-switch
+        <wa-switch
           ref="booksSwitch"
           :checked="filtersStore.filters.showBooks"
-          @sl-change="toggleBooks"
+          @change="toggleBooks"
           id="filter-show-books-drawer"
-          >Show Book Club</sl-switch
+          >Show Book Club</wa-switch
         >
-        <sl-switch
+        <wa-switch
           ref="deadlinesSwitch"
           :checked="filtersStore.filters.showDeadlines"
-          @sl-change="toggleDeadlines"
+          @change="toggleDeadlines"
           id="filter-show-deadlines-drawer"
-          >Show speaker deadlines</sl-switch
+          >Show speaker deadlines</wa-switch
         >
       </div>
       <div class="d-flex flex-col items-start gap-xs">
