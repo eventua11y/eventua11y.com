@@ -6,10 +6,9 @@ test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
   // await page.waitForLoadState('networkidle');
   const filterDrawer = page.locator('#filter-drawer');
-  const isVisible = await filterDrawer.isVisible();
-  if (isVisible) {
+  if ((await filterDrawer.getAttribute('open')) !== null) {
     await page.keyboard.press('Escape');
-    await expect(filterDrawer).not.toBeVisible();
+    await expect(filterDrawer).not.toHaveAttribute('open');
   }
   await page.waitForSelector('#upcoming-events');
 });
