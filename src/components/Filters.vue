@@ -1,5 +1,5 @@
 <template>
-  <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
+  <wa-drawer id="filter-drawer" label="Filters" @wa-after-hide="emitCloseEvent">
     <div class="flow flow-l">
       <div class="flow flow-xs">
         <wa-radio-group
@@ -80,7 +80,7 @@
         </wa-button>
       </div>
     </div>
-  </sl-drawer>
+  </wa-drawer>
 </template>
 
 <script setup lang="ts">
