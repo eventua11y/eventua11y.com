@@ -108,14 +108,18 @@ test.describe('Theme Switching', () => {
     await page.click('main');
     await expect(dropdown).not.toHaveAttribute('open');
 
-    // Test Escape key closes the dropdown
+    // Test Escape key closes the dropdown.
+    // Wait for wa-after-show to ensure the dropdown's document-level
+    // keydown listener is registered (it's added inside showMenu(),
+    // which runs asynchronously via Lit's updated() lifecycle).
     await page.click('#theme-selector-button');
-    await expect(dropdown).toHaveAttribute('open', '');
-    await page.evaluate(() => {
-      document.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
-      );
-    });
+    await dropdown.evaluate(
+      (el) =>
+        new Promise<void>((resolve) =>
+          el.addEventListener('wa-after-show', () => resolve(), { once: true })
+        )
+    );
+    await page.keyboard.press('Escape');
     await expect(dropdown).not.toHaveAttribute('open');
   });
 });
