@@ -235,7 +235,11 @@ watch(
 
     <!-- Error state -->
     <sl-alert v-else-if="error" open variant="danger" class="my-xl">
-      <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
+      <wa-icon
+        slot="icon"
+        name="octagon-exclamation"
+        variant="regular"
+      ></wa-icon>
       {{ error }}
     </sl-alert>
 
@@ -245,7 +249,7 @@ watch(
       open
       class="my-xl"
     >
-      <sl-icon slot="icon" name="info-circle"></sl-icon>
+      <wa-icon slot="icon" name="circle-info" variant="regular"></wa-icon>
       {{
         type === 'past'
           ? 'There are no past events to display.'

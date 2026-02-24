@@ -72,7 +72,8 @@
           name="filter-reset"
           data-testid="drawer-reset"
         >
-          <Icon name="filter-circle-xmark" /> Reset Filters
+          <wa-icon name="filter-circle-xmark" auto-width></wa-icon> Reset
+          Filters
         </sl-button>
       </div>
     </div>
@@ -81,7 +82,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import Icon from './Icon.vue';
 import filtersStore from '../store/filtersStore';
 
 const awarenessDaysSwitch = ref(null);

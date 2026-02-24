@@ -19,7 +19,7 @@
 
     <span v-if="dateEnd" class="event__dateEnd">
       <span class="sr-only">Ends</span>
-      <Icon name="arrow-right-long" />
+      <wa-icon name="arrow-right-long" auto-width></wa-icon>
       <time
         :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
         itemprop="endDate"
@@ -38,7 +38,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Icon from './Icon.vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezonePlugin from 'dayjs/plugin/timezone';

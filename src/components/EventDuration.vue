@@ -2,7 +2,7 @@
   <span class="event__duration">
     <span class="sr-only">Duration</span>
     <time :datetime="`PT${duration}M`" itemprop="duration">
-      <Icon name="timer" />
+      <wa-icon name="timer" auto-width></wa-icon>
       {{ formattedDuration }}
     </time>
   </span>
@@ -10,7 +10,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Icon from './Icon.vue';
 import dayjs from 'dayjs';
 import type { ChildEvent } from '../types/event';
 
