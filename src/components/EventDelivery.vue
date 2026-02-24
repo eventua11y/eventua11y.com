@@ -13,8 +13,6 @@ const ATTENDANCE_MODES = {
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Icon from './Icon.vue';
-
 type AttendanceMode = (typeof ATTENDANCE_MODES)[keyof typeof ATTENDANCE_MODES];
 
 const props = withDefaults(
@@ -52,7 +50,7 @@ const locationIcon = computed(() =>
       itemprop="eventAttendanceMode"
       content="https://schema.org/OnlineEventAttendanceMode"
     >
-      <Icon name="laptop" />
+      <wa-icon name="laptop" auto-width></wa-icon>
       Online
     </span>
 
@@ -62,7 +60,7 @@ const locationIcon = computed(() =>
       itemprop="eventAttendanceMode"
       content="https://schema.org/OfflineEventAttendanceMode"
     >
-      <Icon name="location-dot" :fw="true" />
+      <wa-icon name="location-dot"></wa-icon>
       <span itemprop="location" itemscope itemtype="https://schema.org/Place">
         {{ displayLocation }}
       </span>
@@ -74,21 +72,21 @@ const locationIcon = computed(() =>
       content="https://schema.org/MixedEventAttendanceMode"
     >
       <span class="event__location">
-        <Icon name="location-dot" :fw="true" />
+        <wa-icon name="location-dot"></wa-icon>
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
           {{ displayLocation }}
         </span>
       </span>
       <span class="text-muted">and</span>
       <span class="event__online">
-        <Icon name="laptop" />
+        <wa-icon name="laptop" auto-width></wa-icon>
         Online
       </span>
     </div>
 
     <div v-else-if="attendanceMode === ATTENDANCE_MODES.NONE">
       <span class="event__location">
-        <Icon :name="locationIcon" :fw="true" />
+        <wa-icon :name="locationIcon"></wa-icon>
         <span itemprop="location" itemscope itemtype="https://schema.org/Place">
           {{ displayLocation }}
         </span>

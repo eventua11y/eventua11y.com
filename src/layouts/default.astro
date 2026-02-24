@@ -6,6 +6,7 @@ import '../styles/styles.css';
 import TheFooter from '../components/TheFooter.astro';
 import TheHeader from '../components/TheHeader.astro';
 const { title } = Astro.props.frontmatter || Astro.props;
+const faKitCode = import.meta.env.FA_KIT_CODE || '';
 ---
 
 <!doctype html>
@@ -94,6 +95,7 @@ const { title } = Astro.props.frontmatter || Astro.props;
     />
     <link rel="manifest" href="/favicon/site.webmanifest" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    {faKitCode && <meta data-fa-kit-code={faKitCode} />}
   </head>
   <body>
     <a href="#main" class="skip">
@@ -126,7 +128,8 @@ const { title } = Astro.props.frontmatter || Astro.props;
   import '@shoelace-style/shoelace/dist/components/button/button.js';
   // sl-badge migrated to wa-badge (Web Awesome)
   import '@awesome.me/webawesome/dist/components/badge/badge.js';
-  import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+  // sl-icon migrated to wa-icon (Web Awesome)
+  import '@awesome.me/webawesome/dist/components/icon/icon.js';
   import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
   import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
   import '@shoelace-style/shoelace/dist/components/menu/menu.js';
@@ -137,7 +140,8 @@ const { title } = Astro.props.frontmatter || Astro.props;
   // sl-skeleton removed — replaced with native CSS skeleton in Skeleton.vue
   import '@shoelace-style/shoelace/dist/components/radio/radio.js';
   import '@shoelace-style/shoelace/dist/components/radio-group/radio-group.js';
-  import '@shoelace-style/shoelace/dist/components/divider/divider.js';
+  // sl-divider migrated to wa-divider (Web Awesome)
+  import '@awesome.me/webawesome/dist/components/divider/divider.js';
 
   // Set base path for Shoelace assets
   import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
