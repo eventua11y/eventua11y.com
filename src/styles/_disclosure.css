@@ -14,7 +14,8 @@ details > summary {
   user-select: none;
 }
 
-details > summary .icon {
+details > summary .icon,
+details > summary wa-icon {
   margin-right: 0.25em;
 }
 
@@ -27,6 +28,7 @@ details > summary:hover {
   cursor: pointer;
 }
 
-details[open] > summary .icon {
+details[open] > summary .icon,
+details[open] > summary wa-icon {
   transform: rotate(90deg);
 }

@@ -20,3 +20,8 @@ sl-checkbox[size='medium']::part(label) {
 sl-menu-item:focus-visible {
   outline: none;
 }
+
+/* wa-divider inside Shoelace menus should match Shoelace's panel border color */
+sl-menu wa-divider {
+  --color: var(--sl-panel-border-color);
+}

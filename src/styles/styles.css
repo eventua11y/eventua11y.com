@@ -16,6 +16,15 @@
 @import url('_utilities.css');
 @import url('_shoelace.css');
 
+/* Base SVG icon sizing (previously in Icon.vue, still used by footer/skip-link SVGs) */
+.icon {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  vertical-align: -0.125em;
+  overflow: visible;
+}
+
 .container {
   margin: 0 auto;
   max-width: 1280px;
