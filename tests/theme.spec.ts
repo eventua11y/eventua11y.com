@@ -111,7 +111,11 @@ test.describe('Theme Switching', () => {
     // Test Escape key closes the dropdown
     await page.click('#theme-selector-button');
     await expect(dropdown).toHaveAttribute('open', '');
-    await dropdown.press('Escape');
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+      );
+    });
     await expect(dropdown).not.toHaveAttribute('open');
   });
 });
