@@ -1,5 +1,5 @@
 <template>
-  <wa-drawer id="filter-drawer" label="Filters" :light-dismiss="false">
+  <wa-drawer id="filter-drawer" label="Filters">
     <div class="flow flow-l">
       <div class="flow flow-xs">
         <wa-radio-group

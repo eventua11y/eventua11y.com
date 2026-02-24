@@ -382,11 +382,18 @@ test.describe('Shared component accessibility', () => {
   });
 
   test('filter drawer has accessible label when opened', async ({ page }) => {
+    const drawer = page.locator('#filter-drawer');
+    const afterShow = drawer.evaluate(
+      (el) =>
+        new Promise<void>((resolve) =>
+          el.addEventListener('wa-after-show', () => resolve(), { once: true })
+        )
+    );
     const filterButton = page.locator('#open-filter-drawer');
     await filterButton.waitFor({ state: 'visible', timeout: 5000 });
     await filterButton.click();
+    await afterShow;
 
-    const drawer = page.locator('#filter-drawer');
     await expect(drawer).toBeVisible();
     await expect(drawer).toHaveAttribute('label', 'Filters');
   });
