@@ -2,7 +2,7 @@
   <div>
     <label class="sr-only" for="timezone-dropdown">Timezone</label>
     <sl-dropdown id="timezone-dropdown" distance="3" placement="bottom-end">
-      <wa-button slot="trigger" with-caret>
+      <wa-button slot="trigger" appearance="outlined" with-caret>
         {{ selectedTimezoneLabel }}
       </wa-button>
       <sl-menu @sl-select="updateTimezone">

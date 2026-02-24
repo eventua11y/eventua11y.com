@@ -63,8 +63,9 @@
 }
 
 /* Override button colors so the theme-selector icon is visible against the
-   masthead background in both themes. */
-.masthead #theme-selector-button {
+   masthead background in both themes. Uses ::part(base) to reach into
+   the wa-button shadow DOM. */
+.masthead #theme-selector-button::part(base) {
   color: var(--c-masthead-color-fg);
 }
 

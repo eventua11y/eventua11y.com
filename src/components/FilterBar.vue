@@ -36,7 +36,11 @@
           >Awareness days</sl-switch
         >
         <div class="group">
-          <wa-button id="open-filter-drawer" @click="handleFilterClick">
+          <wa-button
+            id="open-filter-drawer"
+            appearance="outlined"
+            @click="handleFilterClick"
+          >
             <wa-icon slot="start" name="filter" auto-width></wa-icon> Filter
           </wa-button>
           <TimezoneSelector />
