@@ -24,7 +24,7 @@ See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this p
 
 ### UI and styling
 
-- [Shoelace](https://shoelace.style/) -- web component library providing the core UI elements
+- [Web Awesome](https://webawesome.com/) -- web component library providing the core UI elements
 - Custom CSS with light and dark themes
 - [PostCSS](https://postcss.org/) with Autoprefixer and cssnano
 

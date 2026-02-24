@@ -40,21 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.classList.remove('sl-theme-dark', 'wa-dark');
+      document.documentElement.classList.remove('wa-dark');
       localStorage.setItem('theme', 'light');
       updateThemeIcon(themeSelectorButton, 'sun-bright', 'Light mode');
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('sl-theme-dark', 'wa-dark');
+      document.documentElement.classList.add('wa-dark');
       localStorage.setItem('theme', 'dark');
       updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
     } else {
       document.documentElement.removeAttribute('data-theme');
-      document.documentElement.classList.remove('sl-theme-dark', 'wa-dark');
+      document.documentElement.classList.remove('wa-dark');
       localStorage.removeItem('theme');
       if (prefersDarkScheme.matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.classList.add('sl-theme-dark', 'wa-dark');
+        document.documentElement.classList.add('wa-dark');
         updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
