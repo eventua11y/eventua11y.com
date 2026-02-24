@@ -1,6 +1,4 @@
 ---
-import '@shoelace-style/shoelace/dist/themes/light.css';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@awesome.me/webawesome/dist/styles/themes/default.css';
 import '@awesome.me/webawesome/dist/styles/utilities/visually-hidden.css';
 import '../styles/styles.css';
@@ -125,37 +123,20 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
 </html>
 
 <script>
-  // Import Shoelace components after hydration
-  // sl-button, sl-icon-button migrated to wa-button (Web Awesome)
-  import '@awesome.me/webawesome/dist/components/button/button.js';
-  // sl-badge migrated to wa-badge (Web Awesome)
+  // Web Awesome component imports (cherry-picked for tree-shaking)
   import '@awesome.me/webawesome/dist/components/badge/badge.js';
-  // sl-icon migrated to wa-icon (Web Awesome)
-  import '@awesome.me/webawesome/dist/components/icon/icon.js';
-  // sl-dropdown, sl-menu, sl-menu-item migrated to wa-dropdown, wa-dropdown-item (Web Awesome)
-  // Theme selector uses wa-dropdown; timezone selector uses wa-select + wa-option
+  import '@awesome.me/webawesome/dist/components/button/button.js';
+  import '@awesome.me/webawesome/dist/components/callout/callout.js';
+  import '@awesome.me/webawesome/dist/components/divider/divider.js';
+  import '@awesome.me/webawesome/dist/components/drawer/drawer.js';
   import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
   import '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js';
-  import '@awesome.me/webawesome/dist/components/select/select.js';
+  import '@awesome.me/webawesome/dist/components/icon/icon.js';
   import '@awesome.me/webawesome/dist/components/option/option.js';
-  // sl-alert migrated to wa-callout (Web Awesome)
-  import '@awesome.me/webawesome/dist/components/callout/callout.js';
-  // sl-drawer migrated to wa-drawer (Web Awesome)
-  import '@awesome.me/webawesome/dist/components/drawer/drawer.js';
-  // sl-switch migrated to wa-switch (Web Awesome)
-  import '@awesome.me/webawesome/dist/components/switch/switch.js';
-  // sl-skeleton removed — replaced with native CSS skeleton in Skeleton.vue
-  // sl-radio, sl-radio-group migrated to wa-radio, wa-radio-group (Web Awesome)
   import '@awesome.me/webawesome/dist/components/radio/radio.js';
   import '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
-  // sl-divider migrated to wa-divider (Web Awesome)
-  import '@awesome.me/webawesome/dist/components/divider/divider.js';
-
-  // Set base path for Shoelace assets
-  import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-  setBasePath(
-    'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/'
-  );
+  import '@awesome.me/webawesome/dist/components/select/select.js';
+  import '@awesome.me/webawesome/dist/components/switch/switch.js';
 
   import '../scripts/main.ts';
 </script>
