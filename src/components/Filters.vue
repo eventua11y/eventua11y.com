@@ -5,6 +5,7 @@
         <wa-radio-group
           label="Attendance mode"
           name="attendance"
+          size="medium"
           :value="filtersStore.filters.attendance"
           @change="(e) => updateFilter('attendance', e)"
         >
@@ -16,6 +17,7 @@
         <wa-radio-group
           label="Ticket cost"
           name="cost"
+          size="medium"
           :value="filtersStore.filters.cost"
           @change="(e) => updateFilter('cost', e)"
         >
@@ -27,6 +29,7 @@
         <wa-radio-group
           label="Call for speakers"
           name="cfs"
+          size="medium"
           :value="filtersStore.filters.cfs"
           @change="(e) => updateFilter('cfs', e)"
         >
