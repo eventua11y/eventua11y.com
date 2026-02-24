@@ -90,7 +90,9 @@ jobs:
       - name: Run tests
         run: npx playwright test --retries=1 --timeout=90000
         env:
-          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.netlify.outputs.url }}
+          # Hide the Netlify Drawer toolbar so it doesn't inject an iframe
+          # that causes false-positive axe-core ARIA violations (#549)
+          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.netlify.outputs.url }}?ntl-drawer-state=hidden
 
       - name: Upload test results
         if: always()
