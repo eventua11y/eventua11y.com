@@ -109,16 +109,17 @@ test.describe('Theme Switching', () => {
     await expect(dropdown).not.toHaveAttribute('open');
 
     // Test Escape key closes the dropdown.
-    // Wait for wa-after-show to ensure the dropdown's document-level
-    // keydown listener is registered (it's added inside showMenu(),
-    // which runs asynchronously via Lit's updated() lifecycle).
-    await page.click('#theme-selector-button');
-    await dropdown.evaluate(
+    // Set up the wa-after-show listener BEFORE clicking so we don't
+    // miss the event, then click to open, then wait for the event to
+    // confirm the document-level keydown listener is registered.
+    const afterShow = dropdown.evaluate(
       (el) =>
         new Promise<void>((resolve) =>
           el.addEventListener('wa-after-show', () => resolve(), { once: true })
         )
     );
+    await page.click('#theme-selector-button');
+    await afterShow;
     await page.keyboard.press('Escape');
     await expect(dropdown).not.toHaveAttribute('open');
   });
