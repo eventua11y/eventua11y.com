@@ -56,11 +56,13 @@ test.describe('Homepage accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('#upcoming-events');
+    // wa-drawer uses <dialog showModal()> which renders in the top layer;
+    // the host element has height: 0 so isVisible() is unreliable.
+    // Check the open attribute instead.
     const filterDrawer = page.locator('#filter-drawer');
-    const isVisible = await filterDrawer.isVisible();
-    if (isVisible) {
+    if ((await filterDrawer.getAttribute('open')) !== null) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toBeVisible();
+      await expect(filterDrawer).not.toHaveAttribute('open');
     }
   });
 
@@ -350,10 +352,9 @@ test.describe('Shared component accessibility', () => {
     await page.goto('/');
     await page.waitForSelector('#upcoming-events');
     const filterDrawer = page.locator('#filter-drawer');
-    const isVisible = await filterDrawer.isVisible();
-    if (isVisible) {
+    if ((await filterDrawer.getAttribute('open')) !== null) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toBeVisible();
+      await expect(filterDrawer).not.toHaveAttribute('open');
     }
   });
 
@@ -382,12 +383,19 @@ test.describe('Shared component accessibility', () => {
   });
 
   test('filter drawer has accessible label when opened', async ({ page }) => {
+    const drawer = page.locator('#filter-drawer');
+    const afterShow = drawer.evaluate(
+      (el) =>
+        new Promise<void>((resolve) =>
+          el.addEventListener('wa-after-show', () => resolve(), { once: true })
+        )
+    );
     const filterButton = page.locator('#open-filter-drawer');
     await filterButton.waitFor({ state: 'visible', timeout: 5000 });
     await filterButton.click();
+    await afterShow;
 
-    const drawer = page.locator('#filter-drawer');
-    await expect(drawer).toBeVisible();
+    await expect(drawer).toHaveAttribute('open', '');
     await expect(drawer).toHaveAttribute('label', 'Filters');
   });
 
@@ -427,11 +435,14 @@ for (const colorScheme of ['light', 'dark'] as const) {
           await page.waitForSelector(waitSelector);
         }
 
-        // Close filter drawer if open (homepage)
+        // Close filter drawer if open (homepage only)
         const filterDrawer = page.locator('#filter-drawer');
-        if (await filterDrawer.isVisible()) {
+        if (
+          (await filterDrawer.count()) > 0 &&
+          (await filterDrawer.getAttribute('open')) !== null
+        ) {
           await page.keyboard.press('Escape');
-          await expect(filterDrawer).not.toBeVisible();
+          await expect(filterDrawer).not.toHaveAttribute('open');
         }
 
         await expect(page.locator('html')).toHaveAttribute(

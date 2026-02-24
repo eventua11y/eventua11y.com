@@ -1,5 +1,5 @@
 <template>
-  <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
+  <wa-drawer id="filter-drawer" label="Filters">
     <div class="flow flow-l">
       <div class="flow flow-xs">
         <wa-radio-group
@@ -63,7 +63,7 @@
         >
       </div>
       <div class="d-flex flex-col items-start gap-xs">
-        <wa-button variant="brand" size="large" @click="closeDrawer"
+        <wa-button variant="brand" size="large" data-drawer="close"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
           {{ filtersStore.nonDeadlineFutureCount }} events</wa-button
         >
@@ -80,7 +80,7 @@
         </wa-button>
       </div>
     </div>
-  </sl-drawer>
+  </wa-drawer>
 </template>
 
 <script setup lang="ts">
@@ -106,15 +106,6 @@ onMounted(() => {
     }
   });
 });
-
-function emitCloseEvent() {
-  const event = new CustomEvent('filters:close');
-  document.dispatchEvent(event);
-}
-
-function closeDrawer() {
-  emitCloseEvent();
-}
 
 function resetFilters() {
   filtersStore.resetFilters();
