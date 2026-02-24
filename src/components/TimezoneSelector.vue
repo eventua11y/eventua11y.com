@@ -10,20 +10,24 @@
       <wa-button slot="trigger" appearance="outlined" with-caret>
         {{ selectedTimezoneLabel }}
       </wa-button>
-      <wa-dropdown-item :value="userTimezone">
-        <wa-icon v-if="isLocalTimezone" slot="icon" name="check"></wa-icon>
-        {{ userTimezoneLabel }}
-      </wa-dropdown-item>
-      <wa-dropdown-item value="event">
-        <wa-icon v-if="!isLocalTimezone" slot="icon" name="check"></wa-icon>
-        Event local times
-      </wa-dropdown-item>
+      <wa-dropdown-item
+        type="checkbox"
+        :value="userTimezone"
+        :checked="isLocalTimezone"
+        >{{ userTimezoneLabel }}</wa-dropdown-item
+      >
+      <wa-dropdown-item
+        type="checkbox"
+        value="event"
+        :checked="!isLocalTimezone"
+        >Event local times</wa-dropdown-item
+      >
     </wa-dropdown>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, nextTick, onMounted } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -65,16 +69,33 @@ const selectedTimezoneLabel = computed(() => {
 });
 
 /**
- * Updates timezone preference when user selects an option
- * @param {CustomEvent} event - Menu select event
+ * Updates timezone preference when user selects an option.
+ * WA checkbox items toggle independently, so we enforce radio-like
+ * mutual exclusivity by explicitly setting .checked on both items
+ * after updating the store. nextTick ensures Vue's reactive cycle
+ * completes before we reconcile with WA's internal state.
+ * @param {CustomEvent} event - Dropdown select event
  */
 function updateTimezone(event: CustomEvent) {
   if (!userStore.geo?.timezone) return;
-  const isLocalTimezone = event.detail.item.value === userTimezone.value;
+  const selectedIsLocal = event.detail.item.value === userTimezone.value;
   userStore.setTimezone(
-    isLocalTimezone ? userTimezone.value : 'event',
-    isLocalTimezone
+    selectedIsLocal ? userTimezone.value : 'event',
+    selectedIsLocal
   );
+
+  // Reconcile WA's internal checked state with our store
+  nextTick(() => {
+    const dropdown = document.getElementById('timezone-dropdown');
+    if (!dropdown) return;
+    const items = dropdown.querySelectorAll('wa-dropdown-item');
+    items.forEach((item: Element) => {
+      const el = item as HTMLElement & { checked: boolean; value: string };
+      el.checked = selectedIsLocal
+        ? el.value === userTimezone.value
+        : el.value === 'event';
+    });
+  });
 }
 
 /**
