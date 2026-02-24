@@ -102,12 +102,13 @@ test.describe('Theme Switching', () => {
     await page.click('#theme-selector-button');
     await expect(page.locator('#theme-selector')).toHaveAttribute('open', '');
 
-    // Test click outside
-    await page.click('body');
+    // Test click outside — click main content area to dismiss the dropdown
+    await page.click('main');
     await expect(page.locator('#theme-selector')).not.toHaveAttribute('open');
 
-    // Test keyboard interaction
-    await page.click('#theme-selector-button');
+    // Test keyboard interaction — focus the trigger so Escape reaches the dropdown
+    await page.locator('#theme-selector-button').focus();
+    await page.keyboard.press('Enter');
     await expect(page.locator('#theme-selector')).toHaveAttribute('open', '');
     await page.keyboard.press('Escape');
     await expect(page.locator('#theme-selector')).not.toHaveAttribute('open');
