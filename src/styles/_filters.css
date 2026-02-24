@@ -26,16 +26,16 @@
         width: auto;
       }
       > * {
-        flex: 0 0 auto;
+        flex: 1;
         min-width: 0;
-      }
-      > wa-select {
-        flex: 1 1 auto;
       }
       wa-button,
       wa-dropdown,
       wa-select {
         width: 100%;
+      }
+      wa-select {
+        min-width: 14rem;
       }
       wa-select::part(listbox) {
         white-space: nowrap;
