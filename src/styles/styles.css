@@ -54,6 +54,15 @@ main {
   text-decoration: none !important;
 }
 
+/* Let Web Awesome components use their own focus ring styles.
+   The global *:focus-visible above sets a large outline-offset that
+   gets clipped by WA's dropdown panel overflow. WA's built-in focus
+   ring (--wa-focus-ring) is designed to work within its own layout. */
+wa-dropdown-item:focus-visible {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
+}
+
 /* Completely hides elements with the hidden attribute */
 [hidden] {
   display: none !important;
