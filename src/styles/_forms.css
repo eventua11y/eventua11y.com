@@ -7,7 +7,7 @@
   }
 }
 
-[type='checkbox']:not(sl-menu-item) {
+[type='checkbox']:not(wa-dropdown-item) {
   width: 16px;
   height: 16px;
 }

@@ -17,11 +17,4 @@ sl-checkbox[size='medium']::part(label) {
   font-size: var(--p-step--1);
 }
 
-sl-menu-item:focus-visible {
-  outline: none;
-}
-
-/* wa-divider inside Shoelace menus should match Shoelace's panel border color */
-sl-menu wa-divider {
-  --color: var(--sl-panel-border-color);
-}
+/* sl-menu-item and sl-menu wa-divider rules removed — migrated to wa-dropdown-item */

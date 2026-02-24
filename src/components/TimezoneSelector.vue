@@ -1,27 +1,28 @@
 <template>
   <div>
     <label class="sr-only" for="timezone-dropdown">Timezone</label>
-    <sl-dropdown id="timezone-dropdown" distance="3" placement="bottom-end">
+    <wa-dropdown
+      id="timezone-dropdown"
+      distance="3"
+      placement="bottom-end"
+      @wa-select="updateTimezone"
+    >
       <wa-button slot="trigger" appearance="outlined" with-caret>
         {{ selectedTimezoneLabel }}
       </wa-button>
-      <sl-menu @sl-select="updateTimezone">
-        <sl-menu-item
-          type="radio"
-          name="timezone"
-          :value="userTimezone"
-          :selected="isLocalTimezone"
-          >{{ userTimezoneLabel }}</sl-menu-item
-        >
-        <sl-menu-item
-          type="radio"
-          name="timezone"
-          value="event"
-          :selected="!isLocalTimezone"
-          >Event local times</sl-menu-item
-        >
-      </sl-menu>
-    </sl-dropdown>
+      <wa-dropdown-item
+        type="checkbox"
+        :value="userTimezone"
+        :checked="isLocalTimezone"
+        >{{ userTimezoneLabel }}</wa-dropdown-item
+      >
+      <wa-dropdown-item
+        type="checkbox"
+        value="event"
+        :checked="!isLocalTimezone"
+        >Event local times</wa-dropdown-item
+      >
+    </wa-dropdown>
   </div>
 </template>
 
