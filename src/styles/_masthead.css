@@ -64,8 +64,19 @@
 
 /* Override button colors so the theme-selector icon is visible against the
    masthead background in both themes. Uses ::part(base) to reach into
-   the wa-button shadow DOM. */
+   the wa-button shadow DOM. The hover/active overrides prevent WA's
+   default neutral hover background from hiding the icon. */
 .masthead #theme-selector-button::part(base) {
+  color: var(--c-masthead-color-fg);
+}
+
+.masthead #theme-selector-button::part(base):hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--c-masthead-color-fg);
+}
+
+.masthead #theme-selector-button::part(base):active {
+  background: rgba(255, 255, 255, 0.25);
   color: var(--c-masthead-color-fg);
 }
 
