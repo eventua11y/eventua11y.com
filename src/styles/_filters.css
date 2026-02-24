@@ -26,11 +26,11 @@
         width: auto;
       }
       > * {
-        flex: 1;
+        flex: 0 0 auto;
         min-width: 0;
       }
       > wa-select {
-        flex: 2;
+        flex: 1 1 auto;
       }
       wa-button,
       wa-dropdown,
