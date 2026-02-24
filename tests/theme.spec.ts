@@ -23,10 +23,11 @@ test.describe('Theme Switching', () => {
 
   test('should start with system theme', async ({ page }) => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(page.locator('#theme-selector-button')).toHaveAttribute(
-      'label',
-      'Light mode'
-    );
+    // wa-button is a Web Component — the label lives on the child wa-icon,
+    // not on the wa-button host element (see AGENTS.md shadow DOM caveat).
+    await expect(
+      page.locator('#theme-selector-button wa-icon')
+    ).toHaveAttribute('label', 'Light mode');
   });
 
   test('should switch to light theme and persist', async ({
@@ -39,10 +40,9 @@ test.describe('Theme Switching', () => {
 
     // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(page.locator('#theme-selector-button')).toHaveAttribute(
-      'label',
-      'Light mode'
-    );
+    await expect(
+      page.locator('#theme-selector-button wa-icon')
+    ).toHaveAttribute('label', 'Light mode');
 
     // Verify persistence
     const newPage = await context.newPage();
@@ -64,10 +64,9 @@ test.describe('Theme Switching', () => {
 
     // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(page.locator('#theme-selector-button')).toHaveAttribute(
-      'label',
-      'Dark mode'
-    );
+    await expect(
+      page.locator('#theme-selector-button wa-icon')
+    ).toHaveAttribute('label', 'Dark mode');
 
     // Get storage state
     const storageState = await context.storageState();

@@ -41,7 +41,7 @@ test.describe('Timezone Selector', () => {
     await expect(menu).toBeVisible({ timeout: 5000 });
 
     // Get initial selection text
-    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    const triggerButton = page.locator('#timezone-dropdown wa-button');
     const initialText = await triggerButton.textContent();
 
     // Find which option is not selected and click it
@@ -181,7 +181,7 @@ test.describe('Timezone Selector', () => {
     await page.waitForTimeout(2000);
 
     // Get the current selection text
-    const triggerButton = page.locator('#timezone-dropdown sl-button');
+    const triggerButton = page.locator('#timezone-dropdown wa-button');
 
     // Make sure the dropdown has closed and the button is visible
     await expect(triggerButton).toBeVisible({ timeout: 5000 });
@@ -221,7 +221,7 @@ test.describe('Timezone Selector', () => {
     await page.waitForTimeout(2000);
 
     // Check that selection is preserved
-    const dropdownButton = page.locator('#timezone-dropdown sl-button');
+    const dropdownButton = page.locator('#timezone-dropdown wa-button');
     await expect(dropdownButton).toBeVisible({ timeout: 5000 });
 
     // Get text with retry logic

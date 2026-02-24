@@ -49,7 +49,7 @@ When adding new pages or interactive components, add both layers:
 - An axe scan for the new page using the shared `runAxeScan()` helper
 - Targeted assertions for any interactive elements, landmarks, or headings
 
-**Shoelace shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Shoelace web component buttons (`sl-button`, `sl-icon-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. The axe scan validates the actual computed accessible name.
+**Web component shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Web Awesome buttons (`wa-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. For icon-only buttons, check the child `wa-icon`'s `label` attribute. The axe scan validates the actual computed accessible name.
 
 ### Labeling Rules
 

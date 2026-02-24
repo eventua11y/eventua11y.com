@@ -16,16 +16,16 @@
             {{ filtersStore.nonDeadlineFutureCount }} upcoming events
           </small>
         </p>
-        <sl-button
+        <wa-button
           v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
-          type="primary"
+          variant="brand"
           name="filter-reset"
         >
-          <wa-icon name="filter-circle-xmark" auto-width></wa-icon> Reset
-          Filters
-        </sl-button>
+          <wa-icon slot="start" name="filter-circle-xmark" auto-width></wa-icon>
+          Reset Filters
+        </wa-button>
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
         <sl-switch
@@ -36,9 +36,13 @@
           >Awareness days</sl-switch
         >
         <div class="group">
-          <sl-button id="open-filter-drawer" @click="handleFilterClick">
-            <wa-icon name="filter" auto-width></wa-icon> Filter
-          </sl-button>
+          <wa-button
+            id="open-filter-drawer"
+            appearance="outlined"
+            @click="handleFilterClick"
+          >
+            <wa-icon slot="start" name="filter" auto-width></wa-icon> Filter
+          </wa-button>
           <TimezoneSelector />
         </div>
       </div>
