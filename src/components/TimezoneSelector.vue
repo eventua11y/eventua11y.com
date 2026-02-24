@@ -1,33 +1,20 @@
 <template>
   <div>
-    <label class="sr-only" for="timezone-dropdown">Timezone</label>
-    <wa-dropdown
-      id="timezone-dropdown"
-      distance="3"
-      placement="bottom-end"
-      @wa-select="updateTimezone"
+    <wa-select
+      id="timezone-select"
+      placement="bottom"
+      size="small"
+      :value="selectedValue"
+      @change="updateTimezone"
     >
-      <wa-button slot="trigger" appearance="outlined" with-caret>
-        {{ selectedTimezoneLabel }}
-      </wa-button>
-      <wa-dropdown-item
-        type="checkbox"
-        :value="userTimezone"
-        :checked="isLocalTimezone"
-        >{{ userTimezoneLabel }}</wa-dropdown-item
-      >
-      <wa-dropdown-item
-        type="checkbox"
-        value="event"
-        :checked="!isLocalTimezone"
-        >Event local times</wa-dropdown-item
-      >
-    </wa-dropdown>
+      <wa-option :value="userTimezone">{{ userTimezoneLabel }}</wa-option>
+      <wa-option value="event">Event local times</wa-option>
+    </wa-select>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -57,45 +44,25 @@ const userTimezoneLabel = computed(() => {
 });
 
 /**
- * Shows currently selected timezone option
- * Either user's local timezone or event local times
- * @returns {string} Selected timezone label
+ * The wa-select value: either the user's timezone IANA string or "event".
+ * Derived from the store so wa-select always reflects the current preference.
+ * @returns {string} Current select value
  */
-const selectedTimezoneLabel = computed(() => {
-  if (!userStore.geo?.timezone) return 'Loading timezone...';
-  return userStore.useLocalTimezone
-    ? userTimezoneLabel.value
-    : 'Event local times';
-});
+const selectedValue = computed(() =>
+  userStore.useLocalTimezone ? userTimezone.value : 'event'
+);
 
 /**
- * Updates timezone preference when user selects an option.
- * WA checkbox items toggle independently, so we enforce radio-like
- * mutual exclusivity by explicitly setting .checked on both items
- * after updating the store. nextTick ensures Vue's reactive cycle
- * completes before we reconcile with WA's internal state.
- * @param {CustomEvent} event - Dropdown select event
+ * Updates timezone preference when the user picks an option.
+ * Uses the :value + @change pattern recommended by the WA Vue docs
+ * (not v-model, which has inconsistent support on custom elements).
+ * @param {Event} event - Native change event from wa-select
  */
-function updateTimezone(event: CustomEvent) {
+function updateTimezone(event: Event) {
   if (!userStore.geo?.timezone) return;
-  const selectedIsLocal = event.detail.item.value === userTimezone.value;
-  userStore.setTimezone(
-    selectedIsLocal ? userTimezone.value : 'event',
-    selectedIsLocal
-  );
-
-  // Reconcile WA's internal checked state with our store
-  nextTick(() => {
-    const dropdown = document.getElementById('timezone-dropdown');
-    if (!dropdown) return;
-    const items = dropdown.querySelectorAll('wa-dropdown-item');
-    items.forEach((item: Element) => {
-      const el = item as HTMLElement & { checked: boolean; value: string };
-      el.checked = selectedIsLocal
-        ? el.value === userTimezone.value
-        : el.value === 'event';
-    });
-  });
+  const select = event.target as HTMLElement & { value: string };
+  const isLocal = select.value !== 'event';
+  userStore.setTimezone(isLocal ? userTimezone.value : 'event', isLocal);
 }
 
 /**
@@ -107,11 +74,4 @@ onMounted(() => {
     userStore.setTimezone(userTimezone.value, true);
   }
 });
-
-/**
- * Determines which timezone option is active
- * Only one option should be checked at a time
- * @returns {boolean} True if using local timezone
- */
-const isLocalTimezone = computed(() => userStore.useLocalTimezone === true);
 </script>
