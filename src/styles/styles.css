@@ -67,6 +67,17 @@ main {
   text-decoration: none !important;
 }
 
+/* Move wa-switch focus ring from thumb to track so it remains visible
+   when checked (WA's default puts it on the thumb, which is nearly the
+   same color as the brand-colored track in the checked state). */
+wa-switch:focus-within::part(thumb) {
+  outline: none;
+}
+wa-switch:focus-within::part(control) {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
+}
+
 /* Completely hides elements with the hidden attribute */
 [hidden] {
   display: none !important;
