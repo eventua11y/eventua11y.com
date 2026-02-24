@@ -34,7 +34,11 @@ const currentPath = Astro.url.pathname;
         </ul>
       </nav>
       <sl-dropdown id="theme-selector" placement="bottom-end" distance="3">
-        <wa-button slot="trigger" id="theme-selector-button" appearance="plain"
+        <wa-button
+          slot="trigger"
+          id="theme-selector-button"
+          variant="brand"
+          appearance="plain"
           ><wa-icon name="sun-bright" label="Light mode"></wa-icon></wa-button
         >
         <sl-menu>

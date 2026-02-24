@@ -62,10 +62,10 @@
   text-decoration: none;
 }
 
-/* Override button colors so the theme-selector icon is visible against the
-   masthead background in both themes. Uses ::part(base) to reach into
-   the wa-button shadow DOM. The hover/active overrides prevent WA's
-   default neutral hover background from hiding the icon. */
+/* The theme-selector uses variant="brand" appearance="plain". On the
+   masthead the brand color (purple) has no contrast against the purple
+   background, so we override to use the masthead foreground (white).
+   Hover/active get a semi-transparent white backdrop for visual feedback. */
 .masthead #theme-selector-button::part(base) {
   color: var(--c-masthead-color-fg);
 }
