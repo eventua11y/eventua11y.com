@@ -54,6 +54,8 @@ main {
     wa-dropdown-item,
     wa-icon,
     wa-option,
+    wa-radio,
+    wa-radio-group,
     wa-select,
     wa-switch
   ):focus-visible,

@@ -143,7 +143,7 @@ test('reset button clears filters', async ({ page }) => {
 
   // Add a failsafe - click the No preference option directly
   const preferenceRadio = page
-    .locator('sl-radio-group', {
+    .locator('wa-radio-group', {
       has: page.getByText('Call for speakers'),
     })
     .getByRole('radio', { name: 'No preference' });
