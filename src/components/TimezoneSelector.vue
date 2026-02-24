@@ -2,8 +2,10 @@
   <div>
     <wa-select
       id="timezone-select"
+      label="Timezone"
       placement="bottom"
       appearance="outlined"
+      class="wa-visually-hidden-label"
       :value="selectedValue"
       @change="updateTimezone"
     >
