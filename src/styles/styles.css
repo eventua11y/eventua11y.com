@@ -58,7 +58,8 @@ main {
    The global *:focus-visible above sets a large outline-offset that
    gets clipped by WA's dropdown panel overflow. WA's built-in focus
    ring (--wa-focus-ring) is designed to work within its own layout. */
-wa-dropdown-item:focus-visible {
+wa-dropdown-item:focus-visible,
+wa-option:focus-visible {
   outline: var(--wa-focus-ring);
   outline-offset: var(--wa-focus-ring-offset);
 }

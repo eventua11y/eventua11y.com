@@ -3,7 +3,6 @@
     <wa-select
       id="timezone-select"
       placement="bottom"
-      size="small"
       :value="selectedValue"
       @change="updateTimezone"
     >

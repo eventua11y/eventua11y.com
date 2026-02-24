@@ -27,10 +27,20 @@
       }
       > * {
         flex: 1;
+        min-width: 0;
+      }
+      > wa-select {
+        flex: 2;
       }
       wa-button,
-      wa-dropdown {
+      wa-dropdown,
+      wa-select {
         width: 100%;
+      }
+      wa-select::part(listbox) {
+        white-space: nowrap;
+        width: max-content;
+        min-width: 100%;
       }
     }
   }
