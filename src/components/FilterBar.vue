@@ -28,12 +28,12 @@
         </wa-button>
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
-        <sl-switch
+        <wa-switch
           ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
-          @sl-change="toggleAwarenessDays"
+          @change="toggleAwarenessDays"
           id="filter-show-awareness-days-bar"
-          >Awareness days</sl-switch
+          >Awareness days</wa-switch
         >
         <div class="group">
           <wa-button
