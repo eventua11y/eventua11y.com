@@ -185,7 +185,7 @@ const timeRemaining = computed(() => {
   if (endsToday.value) {
     const minutesLeft = Math.max(0, eventEnd.value.diff(now.value, 'minute'));
 
-    if (minutesLeft < 1) return 'Ends in < 1m';
+    if (minutesLeft < 1) return 'Ends in less than 1m';
     if (minutesLeft < 60) return `Ends in ${minutesLeft}m`;
 
     const hours = Math.floor(minutesLeft / 60);
