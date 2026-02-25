@@ -1,5 +1,10 @@
 <template>
-  <div v-if="isHappeningNow" class="event__progress">
+  <!-- Countdown: event hasn't started yet (Today section only) -->
+  <div v-if="isStartingSoon" class="event__progress">
+    <span class="event__progress-label text-muted">{{ countdownLabel }}</span>
+  </div>
+  <!-- Progress: event is in progress -->
+  <div v-else-if="isHappeningNow" class="event__progress">
     <wa-progress-bar
       :value="progress"
       :label="accessibleLabel"
@@ -30,11 +35,13 @@ const props = withDefaults(
     timezone?: string;
     day?: boolean;
     type?: string;
+    showCountdown?: boolean;
   }>(),
   {
     timezone: '',
     day: false,
     type: 'event',
+    showCountdown: false,
   }
 );
 
@@ -140,6 +147,39 @@ const isHappeningNow = computed(() => {
 
   const current = now.value;
   return current.isAfter(eventStart.value) && current.isBefore(eventEnd.value);
+});
+
+/**
+ * Whether the event hasn't started yet but starts later today.
+ * Only active when showCountdown is true (Today section).
+ * Excludes themes, deadlines, and all-day events (no specific start time).
+ */
+const isStartingSoon = computed(() => {
+  if (!props.showCountdown) return false;
+  if (props.type === 'theme') return false;
+  if (props.type === 'deadline') return false;
+  if (props.day) return false;
+
+  return now.value.isBefore(eventStart.value);
+});
+
+/**
+ * Countdown label for events that haven't started yet.
+ * Uses the same hours/minutes format as timeRemaining.
+ */
+const countdownLabel = computed(() => {
+  if (!isStartingSoon.value) return '';
+
+  const minutesUntil = Math.max(0, eventStart.value.diff(now.value, 'minute'));
+
+  if (minutesUntil < 1) return 'Starts in less than 1m';
+  if (minutesUntil < 60) return `Starts in ${minutesUntil}m`;
+
+  const hours = Math.floor(minutesUntil / 60);
+  const mins = minutesUntil % 60;
+
+  if (mins === 0) return `Starts in ${hours}hr`;
+  return `Starts in ${hours}hr ${mins}m`;
 });
 
 /**

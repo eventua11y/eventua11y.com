@@ -10,9 +10,11 @@ const props = withDefaults(
   defineProps<{
     event: EventType;
     showDate?: boolean;
+    showCountdown?: boolean;
   }>(),
   {
     showDate: true,
+    showCountdown: false,
   }
 );
 
@@ -186,6 +188,7 @@ const speakerDisplay = computed(() => {
       :timezone="event.timezone"
       :day="event.day"
       :type="event.type"
+      :showCountdown="showCountdown"
     />
 
     <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
