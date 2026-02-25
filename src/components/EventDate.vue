@@ -40,6 +40,7 @@
       :timezone="timezone"
       :day="day"
       :type="type"
+      :showCountdown="showCountdown"
     />
   </div>
 </template>
@@ -79,12 +80,14 @@ const props = withDefaults(
     day?: boolean;
     isDeadline?: boolean;
     type?: string;
+    showCountdown?: boolean;
   }>(),
   {
     timezone: '',
     day: false,
     isDeadline: false,
     type: 'event',
+    showCountdown: false,
   }
 );
 

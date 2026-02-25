@@ -26,6 +26,7 @@
               :event="event"
               class="readable"
               :showDate="shouldShowDate(event)"
+              :showCountdown="true"
             />
           </li>
         </ul>

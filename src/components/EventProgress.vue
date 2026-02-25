@@ -1,11 +1,22 @@
 <template>
-  <div v-if="isHappeningNow" class="event__progress">
+  <!-- Countdown: event hasn't started yet (Today section only) -->
+  <div v-if="isStartingSoon" class="event__progress">
+    <span
+      class="event__progress-label text-muted"
+      v-html="countdownLabel"
+    ></span>
+  </div>
+  <!-- Progress: event is in progress -->
+  <div v-else-if="isHappeningNow" class="event__progress">
     <wa-progress-bar
       :value="progress"
       :label="accessibleLabel"
       class="event__progress-bar"
     ></wa-progress-bar>
-    <span class="event__progress-label text-muted">{{ timeRemaining }}</span>
+    <span
+      class="event__progress-label text-muted"
+      v-html="timeRemaining"
+    ></span>
   </div>
 </template>
 
@@ -30,11 +41,13 @@ const props = withDefaults(
     timezone?: string;
     day?: boolean;
     type?: string;
+    showCountdown?: boolean;
   }>(),
   {
     timezone: '',
     day: false,
     type: 'event',
+    showCountdown: false,
   }
 );
 
@@ -143,6 +156,44 @@ const isHappeningNow = computed(() => {
 });
 
 /**
+ * Whether the event hasn't started yet but starts later today.
+ * Only active when showCountdown is true (Today section).
+ * Excludes themes, deadlines, and all-day events (no specific start time).
+ */
+const isStartingSoon = computed(() => {
+  if (!props.showCountdown) return false;
+  if (props.type === 'theme') return false;
+  if (props.type === 'deadline') return false;
+  if (props.day) return false;
+
+  return now.value.isBefore(eventStart.value);
+});
+
+/** Wraps time abbreviations in <abbr> elements. */
+const HR = '<abbr title="hours">hr</abbr>';
+const M = '<abbr title="minutes">m</abbr>';
+
+/**
+ * Countdown label for events that haven't started yet.
+ * Uses the same hours/minutes format as timeRemaining.
+ * Returns HTML with <abbr> elements for abbreviations.
+ */
+const countdownLabel = computed(() => {
+  if (!isStartingSoon.value) return '';
+
+  const minutesUntil = Math.max(0, eventStart.value.diff(now.value, 'minute'));
+
+  if (minutesUntil < 1) return `Starts in less than 1${M}`;
+  if (minutesUntil < 60) return `Starts in ${minutesUntil}${M}`;
+
+  const hours = Math.floor(minutesUntil / 60);
+  const mins = minutesUntil % 60;
+
+  if (mins === 0) return `Starts in ${hours}${HR}`;
+  return `Starts in ${hours}${HR} ${mins}${M}`;
+});
+
+/**
  * Percentage of the event's duration that has elapsed (0-100).
  * For multi-day all-day events, progress is measured against end-of-today.
  */
@@ -185,14 +236,14 @@ const timeRemaining = computed(() => {
   if (endsToday.value) {
     const minutesLeft = Math.max(0, eventEnd.value.diff(now.value, 'minute'));
 
-    if (minutesLeft < 1) return 'Ends in less than 1m';
-    if (minutesLeft < 60) return `Ends in ${minutesLeft}m`;
+    if (minutesLeft < 1) return `Ends in less than 1${M}`;
+    if (minutesLeft < 60) return `Ends in ${minutesLeft}${M}`;
 
     const hours = Math.floor(minutesLeft / 60);
     const mins = minutesLeft % 60;
 
-    if (mins === 0) return `Ends in ${hours}hr`;
-    return `Ends in ${hours}hr ${mins}m`;
+    if (mins === 0) return `Ends in ${hours}${HR}`;
+    return `Ends in ${hours}${HR} ${mins}${M}`;
   }
 
   // For timed events ending on a future day, show days
@@ -236,7 +287,6 @@ const accessibleLabel = computed(() => {
 }
 
 .event__progress-label {
-  font-size: var(--p-step--2);
   white-space: nowrap;
 }
 </style>
