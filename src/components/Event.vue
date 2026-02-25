@@ -243,7 +243,7 @@ const speakerDisplay = computed(() => {
 
     <div
       class="event__badges"
-      v-if="isDedicatedToAccessibility || callForSpeakersOpen"
+      v-if="isDedicatedToAccessibility || callForSpeakersOpen || event.isFree"
     >
       <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
         >Dedicated to accessibility</wa-badge
@@ -255,6 +255,7 @@ const speakerDisplay = computed(() => {
         v-if="callForSpeakersOpen"
         >Call for speakers</wa-badge
       >
+      <sl-badge variant="neutral" pill v-if="event.isFree">Free</sl-badge>
     </div>
   </article>
   <div v-else class="event event--loading">Loading...</div>

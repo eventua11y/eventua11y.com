@@ -191,9 +191,12 @@ const displayLocation = event.location || 'International';
         </details>
       )}
 
-      {callForSpeakersOpen && (
+      {(callForSpeakersOpen || event.isFree) && (
         <div class="event__badges">
-          <span class="badge badge--success">Call for speakers</span>
+          {callForSpeakersOpen && (
+            <span class="badge badge--success">Call for speakers</span>
+          )}
+          {event.isFree && <span class="badge">Free</span>}
         </div>
       )}
     </article>
