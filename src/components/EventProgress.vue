@@ -157,10 +157,22 @@ const progress = computed(() => {
 });
 
 /**
+ * Whether the event end falls on the same calendar day as right now
+ * in the resolved timezone.
+ */
+const endsToday = computed(() => {
+  const timezone = tz();
+  const todayInTz = now.value.tz(timezone);
+  return eventEnd.value.isSame(todayInTz, 'day');
+});
+
+/**
  * Human-readable time remaining label.
  *
- * - Timed events: "Ends in 2hr 15m", "Ends in 45m", "Ends in < 1m"
  * - Multi-day all-day events: "Ends today"
+ * - Timed events ending today: "Ends in 2hr 15m", "Ends in 45m"
+ * - Timed events ending tomorrow: "Ends tomorrow"
+ * - Timed events ending further out: "Ends in 3 days"
  */
 const timeRemaining = computed(() => {
   if (!isHappeningNow.value) return '';
@@ -169,16 +181,28 @@ const timeRemaining = computed(() => {
     return 'Ends today';
   }
 
-  const minutesLeft = Math.max(0, eventEnd.value.diff(now.value, 'minute'));
+  // For timed events ending today, show hours/minutes
+  if (endsToday.value) {
+    const minutesLeft = Math.max(0, eventEnd.value.diff(now.value, 'minute'));
 
-  if (minutesLeft < 1) return 'Ends in < 1m';
-  if (minutesLeft < 60) return `Ends in ${minutesLeft}m`;
+    if (minutesLeft < 1) return 'Ends in < 1m';
+    if (minutesLeft < 60) return `Ends in ${minutesLeft}m`;
 
-  const hours = Math.floor(minutesLeft / 60);
-  const mins = minutesLeft % 60;
+    const hours = Math.floor(minutesLeft / 60);
+    const mins = minutesLeft % 60;
 
-  if (mins === 0) return `Ends in ${hours}hr`;
-  return `Ends in ${hours}hr ${mins}m`;
+    if (mins === 0) return `Ends in ${hours}hr`;
+    return `Ends in ${hours}hr ${mins}m`;
+  }
+
+  // For timed events ending on a future day, show days
+  const timezone = tz();
+  const todayStart = now.value.tz(timezone).startOf('day');
+  const endDay = eventEnd.value.startOf('day');
+  const daysAway = endDay.diff(todayStart, 'day');
+
+  if (daysAway === 1) return 'Ends tomorrow';
+  return `Ends in ${daysAway} days`;
 });
 
 /**
