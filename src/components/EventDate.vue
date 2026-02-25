@@ -33,11 +33,20 @@
         </template>
       </time>
     </span>
+
+    <EventProgress
+      :dateStart="dateStart"
+      :dateEnd="dateEnd"
+      :timezone="timezone"
+      :day="day"
+      :type="type"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import EventProgress from './EventProgress.vue';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezonePlugin from 'dayjs/plugin/timezone';
