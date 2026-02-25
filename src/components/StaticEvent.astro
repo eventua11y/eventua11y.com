@@ -62,9 +62,10 @@ const displayLocation = event.location || 'International';
           datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
           itemprop="startDate"
           hidden
-        ></time>
+        />
         <span class="event__dateRange">
-          {formattedRange}{!isInternational && ' UTC'}
+          {formattedRange}
+          {!isInternational && ' UTC'}
         </span>
         <span class="badge badge--danger">Deadline</span>
       </div>
@@ -95,16 +96,17 @@ const displayLocation = event.location || 'International';
             datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
             itemprop="startDate"
             hidden
-          ></time>
+          />
           {event.dateEnd && (
             <time
               datetime={formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')}
               itemprop="endDate"
               hidden
-            ></time>
+            />
           )}
           <span class="event__dateRange">
-            {formattedRange}{!isInternational && ' UTC'}
+            {formattedRange}
+            {!isInternational && ' UTC'}
           </span>
         </div>
       )}
