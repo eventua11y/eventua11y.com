@@ -276,7 +276,6 @@ const accessibleLabel = computed(() => {
 }
 
 .event__progress-label {
-  font-size: var(--p-step--2);
   white-space: nowrap;
 }
 </style>
