@@ -153,7 +153,7 @@ const progress = computed(() => {
   if (total <= 0) return 0;
 
   const elapsed = now.value.diff(eventStart.value);
-  return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  return Math.round(Math.min(100, Math.max(0, (elapsed / total) * 100)));
 });
 
 /**
