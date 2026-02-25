@@ -217,10 +217,17 @@ const accessibleLabel = computed(() => {
 
 <style scoped>
 .event__progress {
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 0.5em;
+  flex-basis: 100%;
+}
+
+@media (min-width: 580px) {
+  .event__progress {
+    margin-left: auto;
+    flex-basis: auto;
+  }
 }
 
 .event__progress-bar {
