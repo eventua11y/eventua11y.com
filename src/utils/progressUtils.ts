@@ -102,16 +102,39 @@ export function isStartingSoon(now: Dayjs, options: ProgressOptions): boolean {
 }
 
 /**
+ * Whether today is the final calendar day of a multi-day all-day event.
+ *
+ * Because dateEnd for all-day events is an exclusive upper bound (midnight
+ * of the day *after* the last day), the last real day is the calendar day
+ * immediately before dateEnd.
+ */
+export function isLastDayOfAllDay(
+  now: Dayjs,
+  options: ProgressOptions
+): boolean {
+  if (!isMultiDayAllDay(options)) return false;
+  const tz = resolveTimezone(options);
+  const todayInTz = now.tz(tz);
+  const lastRealDay = getEventEnd(options).subtract(1, 'day');
+  return todayInTz.isSame(lastRealDay, 'day');
+}
+
+/**
  * The effective end point used for progress calculation.
  *
  * - Timed events: the actual end time.
- * - Multi-day all-day events: end-of-today (we know it ends today
- *   but not at what exact time).
+ * - Multi-day all-day events on their final day: end-of-today (we know
+ *   it ends today but not at what exact time).
+ * - Multi-day all-day events on earlier days: the actual dateEnd so the
+ *   progress bar reflects overall span progress.
  */
 export function getEffectiveEnd(now: Dayjs, options: ProgressOptions): Dayjs {
   if (isMultiDayAllDay(options)) {
-    const tz = resolveTimezone(options);
-    return now.tz(tz).endOf('day');
+    if (isLastDayOfAllDay(now, options)) {
+      const tz = resolveTimezone(options);
+      return now.tz(tz).endOf('day');
+    }
+    return getEventEnd(options);
   }
   return getEventEnd(options);
 }
@@ -159,7 +182,8 @@ function formatDuration(minutes: number): string {
 /**
  * Human-readable time remaining label (HTML with <abbr> elements).
  *
- * - Multi-day all-day events: "Ends today"
+ * - Multi-day all-day events on their final day: "Ends today"
+ * - Multi-day all-day events on earlier days: "Ends tomorrow" / "Ends in N days"
  * - Timed events ending today: "Ends in 2<abbr>hr</abbr> 15<abbr>m</abbr>"
  * - Timed events ending tomorrow: "Ends tomorrow"
  * - Timed events ending further out: "Ends in 3 days"
@@ -167,8 +191,21 @@ function formatDuration(minutes: number): string {
 export function getTimeRemaining(now: Dayjs, options: ProgressOptions): string {
   if (!isHappeningNow(now, options)) return '';
 
+  // Multi-day all-day: "Ends today" only on the final day,
+  // otherwise fall through to the days-away logic below.
   if (isMultiDayAllDay(options)) {
-    return 'Ends today';
+    if (isLastDayOfAllDay(now, options)) {
+      return 'Ends today';
+    }
+    // Fall through to days-away calculation.
+    // Use the last real day (dateEnd − 1) as the target.
+    const tz = resolveTimezone(options);
+    const todayStart = now.tz(tz).startOf('day');
+    const lastRealDay = getEventEnd(options).subtract(1, 'day').startOf('day');
+    const daysAway = lastRealDay.diff(todayStart, 'day');
+
+    if (daysAway === 1) return 'Ends tomorrow';
+    return `Ends in ${Math.max(2, daysAway)} days`;
   }
 
   if (endsToday(now, options)) {
@@ -179,7 +216,7 @@ export function getTimeRemaining(now: Dayjs, options: ProgressOptions): string {
   const tz = resolveTimezone(options);
   const todayStart = now.tz(tz).startOf('day');
   const endDay = getEventEnd(options).startOf('day');
-  const daysAway = endDay.diff(todayStart, 'day');
+  const daysAway = Math.max(1, endDay.diff(todayStart, 'day'));
 
   if (daysAway === 1) return 'Ends tomorrow';
   return `Ends in ${daysAway} days`;
