@@ -206,10 +206,12 @@ const timeRemaining = computed(() => {
 });
 
 /**
- * Accessible label combining progress percentage and time remaining.
+ * Accessible label for the progress bar. The percentage is already
+ * conveyed by the component's value/role semantics, so the label
+ * only needs the human-readable time remaining.
  */
 const accessibleLabel = computed(() => {
-  return `${Math.round(progress.value)}% elapsed. ${timeRemaining.value}`;
+  return `Event progress. ${timeRemaining.value}`;
 });
 </script>
 
