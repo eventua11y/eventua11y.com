@@ -37,7 +37,7 @@ function formatDate(date: string, format: string): string {
   return dayjs.utc(date).format(format);
 }
 
-// Human-readable date range using Intl.DateTimeFormat.formatRange()
+// Human-readable date range with locale-aware deduplication
 // SSR uses UTC since user timezone is unknown
 const formattedRange = formatDateRange({
   dateStart: event.dateStart,

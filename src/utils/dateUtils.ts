@@ -2,6 +2,10 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/en';
+import 'dayjs/locale/de';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/es';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -125,11 +129,50 @@ export function getYearMonth(
 }
 
 /**
- * Formats a date range using Intl.DateTimeFormat.formatRange() for
- * locale-aware deduplication of shared components (month, year).
+ * Locale-specific format strings for deduplicated date ranges.
+ *
+ * Each locale defines shortened formats for the start/end of a range
+ * when month or year can be omitted because it's shared. The full LL
+ * format is the dayjs localised long-date format used as fallback.
+ *
+ * Same month:     only the day changes (month + year shown once)
+ * Different month: month differs but year is shared (year shown once)
+ */
+const RANGE_FORMATS: Record<
+  string,
+  {
+    sameMonth: { start: string; end: string };
+    diffMonth: { start: string; end: string };
+  }
+> = {
+  // "March 8 – 13, 2026"
+  en: {
+    sameMonth: { start: 'MMMM D', end: 'D, YYYY' },
+    diffMonth: { start: 'MMMM D', end: 'MMMM D, YYYY' },
+  },
+  // "8. – 13. März 2026"
+  de: {
+    sameMonth: { start: 'D.', end: 'D. MMMM YYYY' },
+    diffMonth: { start: 'D. MMMM', end: 'D. MMMM YYYY' },
+  },
+  // "8 – 13 mars 2026"
+  fr: {
+    sameMonth: { start: 'D', end: 'D MMMM YYYY' },
+    diffMonth: { start: 'D MMMM', end: 'D MMMM YYYY' },
+  },
+  // "8 – 13 de marzo de 2026"
+  es: {
+    sameMonth: { start: 'D', end: 'D [de] MMMM [de] YYYY' },
+    diffMonth: { start: 'D [de] MMMM', end: 'D [de] MMMM [de] YYYY' },
+  },
+};
+
+/**
+ * Formats a date range using dayjs with locale-aware deduplication
+ * of shared date components (month, year).
  *
  * Examples (en locale):
- *   Same day, timed:    "March 8, 2026, 2:00 PM – 5:00 PM"
+ *   Same day, timed:    "March 8, 2026 2:00 PM – 5:00 PM"
  *   Same month:         "March 8 – 13, 2026"
  *   Different months:   "March 28 – April 2, 2026"
  *   Different years:    "December 28, 2026 – January 2, 2027"
@@ -155,43 +198,45 @@ export function formatDateRange(options: {
     return formatEventDate(options.dateStart, format, options);
   }
 
+  const isDateOnly =
+    options.day || options.type === 'theme' || options.isDeadline;
+
   const isInternational = !options.timezone;
   const tz = isInternational ? 'UTC' : resolveTimezone(options);
-  const showTime =
-    !options.day && options.type !== 'theme' && !options.isDeadline;
 
-  // Convert UTC dates to wall-clock Date objects in the target timezone.
-  // We use dayjs to get the wall-clock components, then construct Date
-  // objects where those components sit in UTC — so Intl.DateTimeFormat
-  // with timeZone: 'UTC' renders the correct local values.
-  const startWall = toWallClockDate(options.dateStart, tz);
-  const endWall = toWallClockDate(options.dateEnd, tz);
+  // Resolve dayjs instances in the target timezone
+  const start = isInternational
+    ? dayjs.utc(options.dateStart).locale(locale)
+    : dayjs.utc(options.dateStart).tz(tz).locale(locale);
+  const end = isInternational
+    ? dayjs.utc(options.dateEnd).locale(locale)
+    : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
 
-  const intlOptions: Intl.DateTimeFormatOptions = {
-    timeZone: 'UTC',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    ...(showTime && { hour: 'numeric', minute: '2-digit' }),
-  };
+  // Same day — timed events show "date time – time", date-only returns single date
+  if (start.isSame(end, 'day')) {
+    if (isDateOnly) {
+      return start.format('LL');
+    }
+    return `${start.format('LLL')} \u2013 ${end.format('LT')}`;
+  }
 
-  const formatter = new Intl.DateTimeFormat(locale, intlOptions);
-  return formatter.formatRange(startWall, endWall);
-}
+  // Timed multi-day events: no deduplication, full LLL on both sides
+  if (!isDateOnly) {
+    return `${start.format('LLL')} \u2013 ${end.format('LLL')}`;
+  }
 
-/**
- * Converts a UTC date string to a Date object whose UTC components
- * represent the wall-clock time in the given timezone.
- *
- * This lets Intl.DateTimeFormat with timeZone: 'UTC' display the
- * correct local time without the formatter needing to know the
- * original timezone.
- */
-function toWallClockDate(date: string, tz: string): Date {
-  const d = dayjs.utc(date).tz(tz);
-  return new Date(
-    Date.UTC(d.year(), d.month(), d.date(), d.hour(), d.minute(), d.second())
-  );
+  // Date-only multi-day ranges: deduplicate shared components
+  const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
+
+  if (start.isSame(end, 'year')) {
+    const fmt = start.isSame(end, 'month')
+      ? formats.sameMonth
+      : formats.diffMonth;
+    return `${start.format(fmt.start)} \u2013 ${end.format(fmt.end)}`;
+  }
+
+  // Different years: no deduplication possible
+  return `${start.format('LL')} \u2013 ${end.format('LL')}`;
 }
 
 /**

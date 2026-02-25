@@ -263,9 +263,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // Falls back to formatEventDate with LLL format
-      expect(result).toContain('March 8, 2026');
-      expect(result).toContain('2:00 PM');
+      expect(result).toBe('March 8, 2026 2:00 PM');
     });
 
     it('returns date-only for all-day events', () => {
@@ -297,12 +295,8 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // Intl produces: "March 8, 2026, 2:00 – 5:00 PM"
-      expect(result).toContain('March 8, 2026');
-      expect(result).toContain('2:00');
-      expect(result).toContain('5:00');
-      // Date should appear only once
-      expect(result.indexOf('March 8')).toBe(result.lastIndexOf('March 8'));
+      // "March 8, 2026 2:00 PM – 5:00 PM"
+      expect(result).toBe('March 8, 2026 2:00 PM \u2013 5:00 PM');
     });
 
     it('shows AM/PM on both times when they differ', () => {
@@ -312,14 +306,24 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // Intl produces: "March 8, 2026, 10:00 AM – 5:00 PM"
-      expect(result).toContain('AM');
-      expect(result).toContain('PM');
+      // "March 8, 2026 10:00 AM – 5:00 PM"
+      expect(result).toBe('March 8, 2026 10:00 AM \u2013 5:00 PM');
+    });
+
+    it('returns single date for same-day date-only events', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        dateEnd: '2026-03-08T23:59:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        day: true,
+      });
+      expect(result).toBe('March 8, 2026');
     });
   });
 
   describe('same-month date ranges (the key optimisation)', () => {
-    it('deduplicates month and year for date-only ranges', () => {
+    it('deduplicates month and year for date-only ranges (en)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -327,13 +331,12 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      // Intl produces: "March 8 – 13, 2026"
-      expect(result).toBe('March 8\u2009–\u200913, 2026');
+      expect(result).toBe('March 8 \u2013 13, 2026');
     });
   });
 
   describe('different-month, same-year ranges', () => {
-    it('deduplicates the year for date-only ranges', () => {
+    it('deduplicates the year for date-only ranges (en)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-28T00:00:00Z',
         dateEnd: '2026-04-02T00:00:00Z',
@@ -341,12 +344,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      // Intl produces: "March 28 – April 2, 2026"
-      expect(result).toContain('March');
-      expect(result).toContain('April');
-      // Year should appear only once
-      const yearMatches = result.match(/2026/g);
-      expect(yearMatches).toHaveLength(1);
+      expect(result).toBe('March 28 \u2013 April 2, 2026');
     });
   });
 
@@ -359,11 +357,21 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      // Intl produces: "December 28, 2026 – January 2, 2027"
-      expect(result).toContain('2026');
-      expect(result).toContain('2027');
-      expect(result).toContain('December');
-      expect(result).toContain('January');
+      expect(result).toBe('December 28, 2026 \u2013 January 2, 2027');
+    });
+  });
+
+  describe('multi-day timed events', () => {
+    it('shows full date+time on both sides', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T14:00:00Z',
+        dateEnd: '2026-03-10T17:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+      });
+      expect(result).toBe(
+        'March 8, 2026 2:00 PM \u2013 March 10, 2026 5:00 PM'
+      );
     });
   });
 
@@ -377,8 +385,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      // In EDT (UTC-4), these are Mar 8 and Mar 9
-      expect(result).toContain('March');
+      // In EDT (UTC-4 in March), these are Mar 8 and Mar 9
+      expect(result).toBe('March 8 \u2013 9, 2026');
     });
 
     it('uses user timezone when useLocalTimezone is true', () => {
@@ -391,9 +399,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // In London (GMT), these are 14:00–17:00 on Mar 8
-      expect(result).toContain('March 8, 2026');
-      expect(result).toContain('2:00');
-      expect(result).toContain('5:00');
+      expect(result).toBe('March 8, 2026 2:00 PM \u2013 5:00 PM');
     });
 
     it('uses UTC for international events (no timezone)', () => {
@@ -403,14 +409,12 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // No timezone = international, should use UTC values
-      expect(result).toContain('March 8, 2026');
-      expect(result).toContain('2:00');
-      expect(result).toContain('5:00');
+      expect(result).toBe('March 8, 2026 2:00 PM \u2013 5:00 PM');
     });
   });
 
   describe('locale support', () => {
-    it('formats in German', () => {
+    it('formats same-month range in German', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -418,11 +422,23 @@ describe('formatDateRange', () => {
         locale: 'de',
         day: true,
       });
-      // German: "8.–13. März 2026"
-      expect(result).toContain('März');
+      // "8. – 13. März 2026"
+      expect(result).toBe('8. \u2013 13. März 2026');
     });
 
-    it('formats in French', () => {
+    it('formats different-month range in German', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'de',
+        day: true,
+      });
+      // "28. März – 2. April 2026"
+      expect(result).toBe('28. März \u2013 2. April 2026');
+    });
+
+    it('formats same-month range in French', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -430,11 +446,23 @@ describe('formatDateRange', () => {
         locale: 'fr',
         day: true,
       });
-      // French: "8–13 mars 2026"
-      expect(result).toContain('mars');
+      // "8 – 13 mars 2026"
+      expect(result).toBe('8 \u2013 13 mars 2026');
     });
 
-    it('formats in Spanish', () => {
+    it('formats different-month range in French', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'fr',
+        day: true,
+      });
+      // "28 mars – 2 avril 2026"
+      expect(result).toBe('28 mars \u2013 2 avril 2026');
+    });
+
+    it('formats same-month range in Spanish', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -442,8 +470,20 @@ describe('formatDateRange', () => {
         locale: 'es',
         day: true,
       });
-      // Spanish: "8–13 de marzo de 2026"
-      expect(result).toContain('marzo');
+      // "8 – 13 de marzo de 2026"
+      expect(result).toBe('8 \u2013 13 de marzo de 2026');
+    });
+
+    it('formats different-month range in Spanish', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'es',
+        day: true,
+      });
+      // "28 de marzo – 2 de abril de 2026"
+      expect(result).toBe('28 de marzo \u2013 2 de abril de 2026');
     });
   });
 
@@ -457,8 +497,7 @@ describe('formatDateRange', () => {
         type: 'theme',
       });
       // Should be date-only: "March 8 – 13, 2026"
-      expect(result).not.toContain('PM');
-      expect(result).not.toContain('AM');
+      expect(result).toBe('March 8 \u2013 13, 2026');
     });
 
     it('omits time for deadlines', () => {
@@ -469,8 +508,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         isDeadline: true,
       });
-      expect(result).not.toContain('PM');
-      expect(result).not.toContain('AM');
+      expect(result).toBe('March 8 \u2013 13, 2026');
     });
 
     it('omits time for all-day events', () => {
@@ -481,9 +519,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).not.toContain('PM');
-      expect(result).not.toContain('AM');
-      expect(result).not.toContain('12:00');
+      expect(result).toBe('March 8 \u2013 13, 2026');
     });
   });
 });
