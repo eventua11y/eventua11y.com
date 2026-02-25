@@ -362,15 +362,38 @@ describe('formatDateRange', () => {
   });
 
   describe('multi-day timed events', () => {
-    it('shows full date+time on both sides', () => {
+    it('deduplicates year for same-year timed ranges', () => {
+      const result = formatDateRange({
+        dateStart: '2026-02-24T14:00:00Z',
+        dateEnd: '2026-02-25T21:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+      });
+      // Start omits year, end keeps it
+      expect(result).toBe(
+        'February 24 2:00 PM \u2013 February 25, 2026 9:00 PM'
+      );
+    });
+
+    it('deduplicates year across different months', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
-        dateEnd: '2026-03-10T17:00:00Z',
+        dateEnd: '2026-04-10T17:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+      });
+      expect(result).toBe('March 8 2:00 PM \u2013 April 10, 2026 5:00 PM');
+    });
+
+    it('shows full date+time on both sides for different years', () => {
+      const result = formatDateRange({
+        dateStart: '2026-12-30T14:00:00Z',
+        dateEnd: '2027-01-02T17:00:00Z',
         timezone: 'UTC',
         locale: 'en',
       });
       expect(result).toBe(
-        'March 8, 2026 2:00 PM \u2013 March 10, 2026 5:00 PM'
+        'December 30, 2026 2:00 PM \u2013 January 2, 2027 5:00 PM'
       );
     });
   });

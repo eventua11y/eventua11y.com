@@ -143,27 +143,33 @@ const RANGE_FORMATS: Record<
   {
     sameMonth: { start: string; end: string };
     diffMonth: { start: string; end: string };
+    timedSameYear: { start: string };
   }
 > = {
-  // "March 8 – 13, 2026"
+  // Date-only: "March 8 – 13, 2026" / "March 28 – April 2, 2026"
+  // Timed:     "February 24 2:00 PM – February 25, 2026 4:00 PM"
   en: {
     sameMonth: { start: 'MMMM D', end: 'D, YYYY' },
     diffMonth: { start: 'MMMM D', end: 'MMMM D, YYYY' },
+    timedSameYear: { start: 'MMMM D LT' },
   },
-  // "8. – 13. März 2026"
+  // "8. – 13. März 2026" / "24. Februar 14:00 – 25. Februar 2026 16:00"
   de: {
     sameMonth: { start: 'D.', end: 'D. MMMM YYYY' },
     diffMonth: { start: 'D. MMMM', end: 'D. MMMM YYYY' },
+    timedSameYear: { start: 'D. MMMM LT' },
   },
-  // "8 – 13 mars 2026"
+  // "8 – 13 mars 2026" / "24 février 14:00 – 25 février 2026 16:00"
   fr: {
     sameMonth: { start: 'D', end: 'D MMMM YYYY' },
     diffMonth: { start: 'D MMMM', end: 'D MMMM YYYY' },
+    timedSameYear: { start: 'D MMMM LT' },
   },
-  // "8 – 13 de marzo de 2026"
+  // "8 – 13 de marzo de 2026" / "24 de febrero 14:00 – 25 de febrero de 2026 16:00"
   es: {
     sameMonth: { start: 'D', end: 'D [de] MMMM [de] YYYY' },
     diffMonth: { start: 'D [de] MMMM', end: 'D [de] MMMM [de] YYYY' },
+    timedSameYear: { start: 'D [de] MMMM LT' },
   },
 };
 
@@ -172,10 +178,11 @@ const RANGE_FORMATS: Record<
  * of shared date components (month, year).
  *
  * Examples (en locale):
- *   Same day, timed:    "March 8, 2026 2:00 PM – 5:00 PM"
- *   Same month:         "March 8 – 13, 2026"
- *   Different months:   "March 28 – April 2, 2026"
- *   Different years:    "December 28, 2026 – January 2, 2027"
+ *   Same day, timed:       "March 8, 2026 2:00 PM – 5:00 PM"
+ *   Multi-day, timed:      "February 24 9:00 AM – February 25, 2026 4:00 PM"
+ *   Same month, date-only: "March 8 – 13, 2026"
+ *   Different months:      "March 28 – April 2, 2026"
+ *   Different years:       "December 28, 2026 – January 2, 2027"
  *
  * Falls back to formatEventDate() for single dates (no dateEnd).
  */
@@ -220,8 +227,12 @@ export function formatDateRange(options: {
     return `${start.format('LLL')} \u2013 ${end.format('LT')}`;
   }
 
-  // Timed multi-day events: no deduplication, full LLL on both sides
+  // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
+    const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
+    if (start.isSame(end, 'year')) {
+      return `${start.format(formats.timedSameYear.start)} \u2013 ${end.format('LLL')}`;
+    }
     return `${start.format('LLL')} \u2013 ${end.format('LLL')}`;
   }
 
