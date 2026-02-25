@@ -255,7 +255,7 @@ const speakerDisplay = computed(() => {
         v-if="callForSpeakersOpen"
         >Call for speakers</wa-badge
       >
-      <sl-badge variant="neutral" pill v-if="event.isFree">Free</sl-badge>
+      <wa-badge variant="neutral" pill v-if="event.isFree">Free</wa-badge>
     </div>
   </article>
   <div v-else class="event event--loading">Loading...</div>
