@@ -243,7 +243,11 @@ const speakerDisplay = computed(() => {
 
     <div
       class="event__badges"
-      v-if="isDedicatedToAccessibility || callForSpeakersOpen"
+      v-if="
+        isDedicatedToAccessibility ||
+        callForSpeakersOpen ||
+        (event.isFree && event.type !== 'theme')
+      "
     >
       <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
         >Dedicated to accessibility</wa-badge
@@ -254,6 +258,12 @@ const speakerDisplay = computed(() => {
         attention="pulse"
         v-if="callForSpeakersOpen"
         >Call for speakers</wa-badge
+      >
+      <wa-badge
+        variant="neutral"
+        pill
+        v-if="event.isFree && event.type !== 'theme'"
+        >Free</wa-badge
       >
     </div>
   </article>
