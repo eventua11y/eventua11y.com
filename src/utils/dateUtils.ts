@@ -125,6 +125,76 @@ export function getYearMonth(
 }
 
 /**
+ * Formats a date range using Intl.DateTimeFormat.formatRange() for
+ * locale-aware deduplication of shared components (month, year).
+ *
+ * Examples (en locale):
+ *   Same day, timed:    "March 8, 2026, 2:00 PM – 5:00 PM"
+ *   Same month:         "March 8 – 13, 2026"
+ *   Different months:   "March 28 – April 2, 2026"
+ *   Different years:    "December 28, 2026 – January 2, 2027"
+ *
+ * Falls back to formatEventDate() for single dates (no dateEnd).
+ */
+export function formatDateRange(options: {
+  dateStart: string;
+  dateEnd?: string;
+  timezone?: string;
+  useLocalTimezone?: boolean;
+  userTimezone?: string;
+  locale?: string;
+  day?: boolean;
+  type?: string;
+  isDeadline?: boolean;
+}): string {
+  const locale = options.locale || 'en';
+
+  // No end date — return a single formatted date
+  if (!options.dateEnd) {
+    const format = getStartDateFormat(options);
+    return formatEventDate(options.dateStart, format, options);
+  }
+
+  const isInternational = !options.timezone;
+  const tz = isInternational ? 'UTC' : resolveTimezone(options);
+  const showTime =
+    !options.day && options.type !== 'theme' && !options.isDeadline;
+
+  // Convert UTC dates to wall-clock Date objects in the target timezone.
+  // We use dayjs to get the wall-clock components, then construct Date
+  // objects where those components sit in UTC — so Intl.DateTimeFormat
+  // with timeZone: 'UTC' renders the correct local values.
+  const startWall = toWallClockDate(options.dateStart, tz);
+  const endWall = toWallClockDate(options.dateEnd, tz);
+
+  const intlOptions: Intl.DateTimeFormatOptions = {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    ...(showTime && { hour: 'numeric', minute: '2-digit' }),
+  };
+
+  const formatter = new Intl.DateTimeFormat(locale, intlOptions);
+  return formatter.formatRange(startWall, endWall);
+}
+
+/**
+ * Converts a UTC date string to a Date object whose UTC components
+ * represent the wall-clock time in the given timezone.
+ *
+ * This lets Intl.DateTimeFormat with timeZone: 'UTC' display the
+ * correct local time without the formatter needing to know the
+ * original timezone.
+ */
+function toWallClockDate(date: string, tz: string): Date {
+  const d = dayjs.utc(date).tz(tz);
+  return new Date(
+    Date.UTC(d.year(), d.month(), d.date(), d.hour(), d.minute(), d.second())
+  );
+}
+
+/**
  * Resolves which timezone to use based on user preference.
  *
  * If useLocalTimezone is true, uses the user's timezone.
