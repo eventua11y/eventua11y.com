@@ -61,7 +61,7 @@ const allSpeakers = (() => {
       );
   }
   return (event.speakers ?? []).filter((s) => s?.name && s?._id);
-})();
+})().sort((a, b) => a.name.localeCompare(b.name));
 
 // Enumerate child event types for summary
 const enumeratedChildTypes = (() => {
@@ -228,12 +228,21 @@ const jsonLd = {
       }
 
       {
+        event.description && (
+          <div class="event-detail__description">
+            <h2 class="text-large">Description</h2>
+            <p itemprop="description">{event.description}</p>
+          </div>
+        )
+      }
+
+      {
         allSpeakers.length > 0 && (
           <div class="event-detail__speakers">
             <h2 class="text-large">
               {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
             </h2>
-            <ul role="list" class="flow flow-3xs">
+            <ul role="list" class="event-detail__speaker-list">
               {allSpeakers.map((speaker) => (
                 <li
                   itemprop="performer"
@@ -244,15 +253,6 @@ const jsonLd = {
                 </li>
               ))}
             </ul>
-          </div>
-        )
-      }
-
-      {
-        event.description && (
-          <div class="event-detail__description">
-            <h2 class="text-large">Description</h2>
-            <p itemprop="description">{event.description}</p>
           </div>
         )
       }
@@ -329,6 +329,17 @@ const jsonLd = {
     display: flex;
     flex-wrap: wrap;
     gap: var(--p-space-3xs);
+  }
+
+  .event-detail__speaker-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .event-detail__speaker-list li:not(:last-child) [itemprop='name']::after {
+    content: ',\00a0';
   }
 
   .event-detail__children h2 {
