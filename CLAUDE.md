@@ -127,6 +127,15 @@ When adding new pages or interactive components, add both layers:
 - Regular accessibility testing with automated and manual methods
 - Skip link implementation and proper semantic markup
 
+## Sanity CMS Datasets
+
+This project uses two Sanity datasets:
+
+- **`production`** — Live data that powers the public site. **Never** create dummy, test, placeholder, or seed data in the production dataset.
+- **`test`** — Dedicated dataset for testing and development. All dummy, test, or placeholder documents **must** be created here.
+
+When using Sanity MCP tools (e.g. `create_documents_from_json`, `create_documents_from_markdown`, `patch_document_from_json`), always confirm the target dataset before writing. If the purpose of the data is testing, experimentation, or development, the dataset **must** be `test`.
+
 ## Important Project Specifics
 
 ### Event Processing Logic

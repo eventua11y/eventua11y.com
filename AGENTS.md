@@ -51,6 +51,14 @@ When adding new pages or interactive components, add both layers:
 
 **Web component shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Web Awesome buttons (`wa-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. For icon-only buttons, check the child `wa-icon`'s `label` attribute. The axe scan validates the actual computed accessible name.
 
+## Sanity CMS Datasets
+
+This project has two Sanity datasets: **`production`** and **`test`**.
+
+- **Never** create dummy, test, placeholder, or seed data in the `production` dataset. The production dataset contains only real, editorial content that powers the live site.
+- All test or dummy documents **must** be created in the **`test`** dataset.
+- When using Sanity MCP tools, always verify the `dataset` parameter before any write operation. If the data is for testing, experimentation, or development, set the dataset to `test`.
+
 ### Labeling Rules
 
 1. Apply **at least one** label to every issue and PR.
