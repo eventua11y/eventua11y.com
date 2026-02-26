@@ -17,17 +17,15 @@
 
     <!-- Human-readable date range with locale-aware deduplication -->
     <span class="event__dateRange">
-      {{ formattedRange }}
-      <template v-if="!isInternational">
-        <span> </span>
-        <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
-          {{ currentTimezone }}
-        </abbr>
-      </template>
-      <template v-if="isDeadline">
-        <span> </span>
-        <wa-badge variant="danger" pill>Deadline</wa-badge>
-      </template>
+      {{ formattedRange
+      }}<template v-if="!isInternational"
+        >{{ ' '
+        }}<abbr :title="getFullTimezoneName(currentTimezone) || undefined">{{
+          currentTimezone
+        }}</abbr></template
+      ><template v-if="isDeadline"
+        >{{ ' ' }}<wa-badge variant="danger" pill>Deadline</wa-badge></template
+      >
     </span>
 
     <EventProgress
