@@ -24,6 +24,7 @@ const { event } = Astro.props;
 
 const isDeadline = event.type === 'deadline';
 const isTheme = event.type === 'theme';
+const headingId = `event-title-${event._id}`;
 const isAllDay = event.day === true;
 const isInternational = !event.timezone;
 
@@ -92,7 +93,7 @@ const displayLocation = event.location || 'International';
       itemtype="https://schema.org/Event"
       data-event-type={event.type}
     >
-      <h3 class="event__title" itemprop="name">
+      <h3 id={headingId} class="event__title" itemprop="name">
         {isTheme && event.website ? (
           <a href={event.website} rel="noopener noreferrer">
             {event.title}
@@ -185,6 +186,7 @@ const displayLocation = event.location || 'International';
                 href={event.website}
                 rel="noopener noreferrer"
                 class="event__website-link"
+                aria-describedby={headingId}
               >
                 Event website<span class="sr-only"> (opens external site)</span>
               </a>
@@ -211,6 +213,7 @@ const displayLocation = event.location || 'International';
                 href={event.website}
                 rel="noopener noreferrer"
                 class="event__website-link"
+                aria-describedby={headingId}
               >
                 Event website<span class="sr-only"> (opens external site)</span>
               </a>

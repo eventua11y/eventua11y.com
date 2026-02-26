@@ -111,6 +111,11 @@ const isDedicatedToAccessibility = computed(() => {
 const eventUrl = computed(() => getEventUrl(props.event));
 
 /**
+ * Unique ID for the event heading, used by aria-describedby on the website link.
+ */
+const headingId = computed(() => `event-title-${props.event._id}`);
+
+/**
  * Formats speaker list for display
  * If more than 3 speakers, randomly selects 3 to display and shows count of remaining.
  * This avoids giving preferential visibility to any particular speaker.
@@ -182,7 +187,7 @@ const speakerDisplay = computed(() => {
     itemtype="https://schema.org/Event"
     :data-event-type="event.type"
   >
-    <h3 class="event__title" itemprop="name">
+    <h3 :id="headingId" class="event__title" itemprop="name">
       <a
         v-if="event.type === 'theme' && event.website"
         :href="event.website"
@@ -213,6 +218,7 @@ const speakerDisplay = computed(() => {
       :attendanceMode="event.attendanceMode"
       :location="event.location"
       :website="event.type !== 'theme' ? event.website : undefined"
+      :headingId="headingId"
       v-if="event.type !== 'deadline'"
     />
 
