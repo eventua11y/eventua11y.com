@@ -7,7 +7,7 @@
  * topic name. This component renders h2 blocks as <h3> to maintain correct
  * heading hierarchy.
  */
-const { node, index, isInline, ...attrs } = Astro.props;
+const { node, index, isInline } = Astro.props;
 ---
 
-<h3 {...attrs}><slot /></h3>
+<h3><slot /></h3>
