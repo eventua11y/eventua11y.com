@@ -264,9 +264,11 @@ function deduplicateAmPm(
   end: dayjs.Dayjs,
   locale: string
 ): string {
-  const localeData = dayjs.Ls[locale];
-  const ltFormat = localeData?.formats?.LT || '';
-  const uses12Hour = ltFormat.includes('A');
+  // Detect 12-hour locale by checking if LT output contains AM/PM.
+  // We test against a known PM time rather than relying on internal
+  // dayjs.Ls which may not survive bundling.
+  const probe = dayjs.utc('2000-01-01T13:00:00Z').locale(locale).format('LT');
+  const uses12Hour = /AM|PM/i.test(probe);
 
   if (uses12Hour && start.format('A') === end.format('A')) {
     return start.format('h:mm');
