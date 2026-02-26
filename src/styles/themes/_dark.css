@@ -30,7 +30,7 @@ html[data-theme='dark'] {
   /* Masthead */
   --c-masthead-color-bg: var(--p-color-black);
   --c-masthead-color-fg: var(--p-color-white);
-  --c-masthead-logo-color: var(--c-masthead-color-fg);
+  --c-masthead-logo-color: var(--p-color-grey-200);
   --c-masthead-color-border: var(--s-color-border);
   --c-masthead-focus-ring-color: var(--p-color-white);
 
