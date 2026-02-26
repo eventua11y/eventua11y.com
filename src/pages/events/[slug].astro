@@ -323,7 +323,7 @@ const jsonLd = {
         hasTopics &&
           event.topics!.map((topic) => (
             <section class="event-detail__topic flow">
-              <h2 class="text-large">{topic.name}</h2>
+              <h2>{topic.name}</h2>
               <PortableText
                 value={topic.body}
                 components={{ block: { h2: TopicHeading } }}
