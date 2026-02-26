@@ -7,11 +7,18 @@ export interface Speaker {
   name: string;
 }
 
+export interface Organizer {
+  _id: string;
+  name: string;
+  website?: string;
+}
+
 export interface Event {
   _id: string;
   _type?: string;
   type: string;
   title: string;
+  slug?: { current: string };
   description?: string;
   dateStart: string;
   dateEnd?: string;
@@ -24,14 +31,17 @@ export interface Event {
   isFree?: boolean;
   website?: string;
   parent?: { _ref: string };
+  parentEvent?: { title: string; slug?: { current: string } };
   children?: ChildEvent[];
   isParent?: boolean;
   speakers?: Speaker[];
+  organizer?: Organizer;
 }
 
 export interface ChildEvent {
   _id: string;
   title: string;
+  slug?: { current: string };
   type?: string;
   dateStart?: string;
   dateEnd?: string;

@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import type { Event } from '../types/event';
+import { getEventUrl } from '../utils/eventUtils';
 import { formatDateRange } from '../utils/dateUtils';
 
 dayjs.extend(utc);
@@ -49,6 +50,9 @@ const formattedRange = formatDateRange({
   locale: 'en',
 });
 
+// Internal event page URL (if slug exists)
+const eventUrl = getEventUrl(event);
+
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
 const displayLocation = event.location || 'International';
@@ -77,7 +81,8 @@ const displayLocation = event.location || 'International';
         </span>
       </div>
       <span class="event__title">
-        Submit proposals for <a href={event.website}>{event.title}</a>
+        Submit proposals for{' '}
+        <a href={eventUrl || event.website}>{event.title}</a>
       </span>
     </div>
   ) : event.type ? (
@@ -88,14 +93,17 @@ const displayLocation = event.location || 'International';
       data-event-type={event.type}
     >
       <h3 class="event__title" itemprop="name">
-        {event.website ? (
-          <a href={event.website} itemprop="url">
+        {isTheme && event.website ? (
+          <a href={event.website} rel="noopener noreferrer">
             {event.title}
           </a>
+        ) : eventUrl ? (
+          <a href={eventUrl}>{event.title}</a>
         ) : (
           <span>{event.title}</span>
         )}
       </h3>
+      {event.website && <meta itemprop="url" content={event.website} />}
 
       {event.dateStart && (
         <div class="event__dates">
@@ -170,6 +178,18 @@ const displayLocation = event.location || 'International';
               <span class="event__online">Online</span>
             </div>
           )}
+          {event.website && !isTheme && (
+            <Fragment>
+              <span aria-hidden="true"> · </span>
+              <a
+                href={event.website}
+                rel="noopener noreferrer"
+                class="event__website-link"
+              >
+                Event website<span class="sr-only"> (opens external site)</span>
+              </a>
+            </Fragment>
+          )}
         </div>
       )}
 
@@ -184,6 +204,18 @@ const displayLocation = event.location || 'International';
               {displayLocation}
             </span>
           </span>
+          {event.website && !isTheme && (
+            <Fragment>
+              <span aria-hidden="true"> · </span>
+              <a
+                href={event.website}
+                rel="noopener noreferrer"
+                class="event__website-link"
+              >
+                Event website<span class="sr-only"> (opens external site)</span>
+              </a>
+            </Fragment>
+          )}
         </div>
       )}
 

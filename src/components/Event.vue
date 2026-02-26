@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { isCallForSpeakersOpen } from '../utils/eventUtils';
+import { isCallForSpeakersOpen, getEventUrl } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
@@ -106,6 +106,11 @@ const isDedicatedToAccessibility = computed(() => {
 });
 
 /**
+ * Internal URL for the event detail page, or undefined if no slug.
+ */
+const eventUrl = computed(() => getEventUrl(props.event));
+
+/**
  * Formats speaker list for display
  * If more than 3 speakers, randomly selects 3 to display and shows count of remaining.
  * This avoids giving preferential visibility to any particular speaker.
@@ -166,7 +171,8 @@ const speakerDisplay = computed(() => {
       :isDeadline="true"
     />
     <span class="event__title"
-      >Submit proposals for <a :href="event.website">{{ event.title }}</a></span
+      >Submit proposals for
+      <a :href="eventUrl || event.website">{{ event.title }}</a></span
     >
   </div>
   <article
@@ -177,11 +183,16 @@ const speakerDisplay = computed(() => {
     :data-event-type="event.type"
   >
     <h3 class="event__title" itemprop="name">
-      <a v-if="event.website" :href="event.website" itemprop="url">{{
-        event.title
-      }}</a>
+      <a
+        v-if="event.type === 'theme' && event.website"
+        :href="event.website"
+        rel="noopener noreferrer"
+        >{{ event.title }}</a
+      >
+      <a v-else-if="eventUrl" :href="eventUrl">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
     </h3>
+    <meta v-if="event.website" itemprop="url" :content="event.website" />
 
     <EventDate
       v-if="showDate && event.dateStart"
@@ -201,6 +212,7 @@ const speakerDisplay = computed(() => {
     <EventDelivery
       :attendanceMode="event.attendanceMode"
       :location="event.location"
+      :website="event.type !== 'theme' ? event.website : undefined"
       v-if="event.type !== 'deadline'"
     />
 

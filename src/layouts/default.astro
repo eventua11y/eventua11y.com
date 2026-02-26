@@ -4,7 +4,11 @@ import '@awesome.me/webawesome/dist/styles/utilities/visually-hidden.css';
 import '../styles/styles.css';
 import TheFooter from '../components/TheFooter.astro';
 import TheHeader from '../components/TheHeader.astro';
-const { title } = Astro.props.frontmatter || Astro.props;
+const { title, description, ogType } = Astro.props.frontmatter || Astro.props;
+const defaultDescription =
+  'The calendar of digital accessibility and inclusive design events, curated by Matt Obee.';
+const metaDescription = description || defaultDescription;
+const metaOgType = ogType || 'website';
 const faKitCode = import.meta.env.FA_KIT_CODE || '';
 ---
 
@@ -15,10 +19,7 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content="Astro" />
-    <meta
-      name="description"
-      content="The calendar of digital accessibility and inclusive design events, curated by Matt Obee."
-    />
+    <meta name="description" content={metaDescription} />
     <meta name="keywords" content="accessibility, a11y, events, calendar" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Matt Obee" />
@@ -36,15 +37,12 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
     />
     <meta property="og:site_name" content="Eventua11y" />
     <meta property="og:author" content="Matt Obee" />
-    <meta
-      property="og:description"
-      content="The calendar of digital accessibility and inclusive design events, curated by Matt Obee."
-    />
+    <meta property="og:description" content={metaDescription} />
     <meta
       property="og:image"
       content="https://eventua11y.com/favicon/eventua11y_og_min.png"
     />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={metaOgType} />
     <meta property="og:url" content={Astro.url} />
     <script is:inline>
       (function () {
@@ -127,6 +125,7 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
   import '@awesome.me/webawesome/dist/components/badge/badge.js';
   import '@awesome.me/webawesome/dist/components/button/button.js';
   import '@awesome.me/webawesome/dist/components/callout/callout.js';
+  import '@awesome.me/webawesome/dist/components/card/card.js';
   import '@awesome.me/webawesome/dist/components/divider/divider.js';
   import '@awesome.me/webawesome/dist/components/drawer/drawer.js';
   import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import dayjs from 'dayjs';
+import { getEventUrl } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
 import type { ChildEvent } from '../types/event';
@@ -86,6 +87,11 @@ const formatPreposition = computed(() => {
   return (props.event.format && prepositions[props.event.format]) || 'by';
 });
 
+/**
+ * Internal URL for the child event detail page, or undefined if no slug.
+ */
+const childEventUrl = computed(() => getEventUrl(props.event));
+
 const speakersList = computed(() => {
   if (!props.event.speakers?.length) return '';
   return props.event.speakers
@@ -105,7 +111,8 @@ const speakersList = computed(() => {
     itemtype="https://schema.org/Event"
   >
     <span class="child-event__title" itemprop="name">
-      <a v-if="event.website" :href="event.website">{{ event.title }}</a>
+      <a v-if="childEventUrl" :href="childEventUrl">{{ event.title }}</a>
+      <a v-else-if="event.website" :href="event.website">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
     </span>
 

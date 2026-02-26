@@ -6,6 +6,7 @@
       placement="bottom"
       appearance="outlined"
       class="wa-visually-hidden-label"
+      :size="size"
       :value="selectedValue"
       @change="updateTimezone"
     >
@@ -24,6 +25,15 @@ import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+withDefaults(
+  defineProps<{
+    size?: 'small' | 'medium' | 'large';
+  }>(),
+  {
+    size: 'medium',
+  }
+);
 
 // Default timezone if user's timezone cannot be detected
 const defaultTimezone = 'UTC';
@@ -68,10 +78,24 @@ function updateTimezone(event: Event) {
 }
 
 /**
- * Initialize timezone on component mount
- * Sets user's detected timezone if useLocalTimezone is true
+ * Initialize timezone on component mount.
+ * Fetches user info from the edge function if not already available
+ * (e.g. when landing directly on an event detail page).
+ * Then restores the user's previous timezone preference if applicable.
  */
-onMounted(() => {
+onMounted(async () => {
+  if (!userStore.geo?.timezone && !userStore.userInfoFetched) {
+    try {
+      const response = await fetch('/api/get-user-info');
+      if (response.ok) {
+        const data = await response.json();
+        userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+      }
+    } catch {
+      // Silently fall back to UTC if the fetch fails
+    }
+  }
+
   if (userStore.useLocalTimezone && userStore.geo?.timezone) {
     userStore.setTimezone(userTimezone.value, true);
   }

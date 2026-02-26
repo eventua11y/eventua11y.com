@@ -19,10 +19,12 @@ const props = withDefaults(
   defineProps<{
     attendanceMode?: AttendanceMode;
     location?: string;
+    website?: string;
   }>(),
   {
     attendanceMode: 'none',
     location: 'International',
+    website: undefined,
   }
 );
 
@@ -92,5 +94,12 @@ const locationIcon = computed(() =>
         </span>
       </span>
     </div>
+
+    <template v-if="website">
+      <span aria-hidden="true"> · </span>
+      <a :href="website" rel="noopener noreferrer" class="event__website-link"
+        >Event website<span class="sr-only"> (opens external site)</span></a
+      >
+    </template>
   </div>
 </template>

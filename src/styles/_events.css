@@ -11,19 +11,26 @@
 .event__title {
   font-size: var(--p-step-2);
   margin-bottom: var(--p-space-3xs);
-  order: 2;
   text-wrap: balance;
+}
+
+.event > .event__title {
+  order: 2;
 }
 
 .event__dates {
   display: flex;
   flex-wrap: wrap;
+  column-gap: var(--p-space-m);
   font-size: var(--p-step--1);
   align-items: center;
 }
 
 .event__speakers {
   margin-top: var(--p-space-3xs);
+}
+
+.event > .event__speakers {
   order: 3;
 }
 
@@ -38,8 +45,11 @@
   font-size: var(--p-step--1);
   margin-bottom: var(--p-space-xs);
   margin-top: var(--p-space-3xs);
-  order: 4;
   white-space: pre-wrap;
+}
+
+.event > .event__delivery {
+  order: 4;
 }
 
 .event--theme .event__delivery {
@@ -69,22 +79,22 @@
 }
 
 .event__dateRange {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .event__meta .event__dates:has(.event__progress) {
   flex: 1 1 100%;
 }
 
-.event__description {
+.event > .event__description {
   order: 4;
 }
 
-.event__children {
+.event > .event__children {
   order: 5;
 }
 
-.event__badges {
+.event > .event__badges {
   order: 6;
 }
 

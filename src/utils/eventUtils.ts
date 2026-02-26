@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import type { Event } from '../types/event';
+import type { Event, ChildEvent } from '../types/event';
 
 /**
  * Checks if the call for speakers is open for a given event.
@@ -16,4 +16,18 @@ export const isCallForSpeakersOpen = (
   if (!event.callForSpeakers) return false;
   if (!event.callForSpeakersClosingDate) return true;
   return dayjs().isBefore(dayjs(event.callForSpeakersClosingDate));
+};
+
+/**
+ * Returns the internal URL for an event's detail page, or undefined
+ * if the event has no slug (e.g. synthetic CFS deadline events).
+ *
+ * @param event - The event or child event to get the URL for
+ * @returns The internal URL path (e.g. "/events/my-event") or undefined
+ */
+export const getEventUrl = (
+  event: Pick<Event | ChildEvent, 'slug'>
+): string | undefined => {
+  if (!event.slug?.current) return undefined;
+  return `/events/${event.slug.current}`;
 };
