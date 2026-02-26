@@ -153,6 +153,30 @@ const jsonLd = {
         type={event.type}
       />
 
+      <div class="event-detail__badges">
+        {
+          isDedicatedToAccessibility && (
+            <wa-badge pill variant="neutral">
+              Dedicated to accessibility
+            </wa-badge>
+          )
+        }
+        {
+          callForSpeakersOpen && (
+            <wa-badge variant="success" pill attention="pulse">
+              Call for speakers
+            </wa-badge>
+          )
+        }
+        {
+          event.isFree && event.type !== 'theme' && (
+            <wa-badge pill variant="neutral">
+              Free
+            </wa-badge>
+          )
+        }
+      </div>
+
       <EventDelivery
         client:load
         attendanceMode={event.attendanceMode as any}
@@ -188,30 +212,6 @@ const jsonLd = {
           </div>
         )
       }
-
-      <div class="event-detail__badges">
-        {
-          isDedicatedToAccessibility && (
-            <wa-badge pill variant="neutral">
-              Dedicated to accessibility
-            </wa-badge>
-          )
-        }
-        {
-          callForSpeakersOpen && (
-            <wa-badge variant="success" pill attention="pulse">
-              Call for speakers
-            </wa-badge>
-          )
-        }
-        {
-          event.isFree && event.type !== 'theme' && (
-            <wa-badge pill variant="neutral">
-              Free
-            </wa-badge>
-          )
-        }
-      </div>
 
       {
         event.website && (
