@@ -183,7 +183,13 @@ const speakerDisplay = computed(() => {
     :data-event-type="event.type"
   >
     <h3 class="event__title" itemprop="name">
-      <a v-if="eventUrl" :href="eventUrl">{{ event.title }}</a>
+      <a
+        v-if="event.type === 'theme' && event.website"
+        :href="event.website"
+        rel="noopener noreferrer"
+        >{{ event.title }}</a
+      >
+      <a v-else-if="eventUrl" :href="eventUrl">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
     </h3>
     <meta v-if="event.website" itemprop="url" :content="event.website" />
@@ -206,6 +212,7 @@ const speakerDisplay = computed(() => {
     <EventDelivery
       :attendanceMode="event.attendanceMode"
       :location="event.location"
+      :website="event.type !== 'theme' ? event.website : undefined"
       v-if="event.type !== 'deadline'"
     />
 

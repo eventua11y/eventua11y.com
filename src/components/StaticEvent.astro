@@ -93,7 +93,9 @@ const displayLocation = event.location || 'International';
       data-event-type={event.type}
     >
       <h3 class="event__title" itemprop="name">
-        {eventUrl ? (
+        {isTheme && event.website ? (
+          <a href={event.website} rel="noopener noreferrer">{event.title}</a>
+        ) : eventUrl ? (
           <a href={eventUrl}>{event.title}</a>
         ) : (
           <span>{event.title}</span>
@@ -174,6 +176,12 @@ const displayLocation = event.location || 'International';
               <span class="event__online">Online</span>
             </div>
           )}
+          {event.website && !isTheme && (
+            <Fragment>
+              <span aria-hidden="true"> · </span>
+              <a href={event.website} rel="noopener noreferrer" class="event__website-link">Event website<span class="sr-only"> (opens external site)</span></a>
+            </Fragment>
+          )}
         </div>
       )}
 
@@ -188,6 +196,12 @@ const displayLocation = event.location || 'International';
               {displayLocation}
             </span>
           </span>
+          {event.website && !isTheme && (
+            <Fragment>
+              <span aria-hidden="true"> · </span>
+              <a href={event.website} rel="noopener noreferrer" class="event__website-link">Event website<span class="sr-only"> (opens external site)</span></a>
+            </Fragment>
+          )}
         </div>
       )}
 
