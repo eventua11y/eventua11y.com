@@ -13,6 +13,13 @@ export interface Organizer {
   website?: string;
 }
 
+export interface Topic {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  body: any[];
+}
+
 export interface Event {
   _id: string;
   _type?: string;
@@ -37,6 +44,7 @@ export interface Event {
   format?: string;
   speakers?: Speaker[];
   organizer?: Organizer;
+  topics?: Topic[];
 }
 
 export interface ChildEvent {

@@ -1,0 +1,13 @@
+---
+/**
+ * Custom Portable Text block component that downshifts h2 headings by one level.
+ *
+ * Topic body content authored in Sanity uses h2 for sub-headings, but on the
+ * event detail page each topic section is introduced with an <h2> for the
+ * topic name. This component renders h2 blocks as <h3> to maintain correct
+ * heading hierarchy.
+ */
+const { node, index, isInline, ...attrs } = Astro.props;
+---
+
+<h3 {...attrs}><slot /></h3>

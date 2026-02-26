@@ -66,6 +66,7 @@
     "@sanity/client": "^7.13.2",
     "@sentry/astro": "^10.30.0",
     "@sentry/cli": "^3.2.1",
+    "astro-portabletext": "^0.13.0",
     "dayjs": "^1.11.13",
     "vue": "^3.5.25"
   }

@@ -10,9 +10,11 @@
  */
 import DefaultLayout from '../../layouts/default.astro';
 import { getEventBySlug } from '../../lib/sanity';
+import { PortableText } from 'astro-portabletext';
 import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
+import TopicHeading from '../../components/TopicHeading.astro';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
 
 export const prerender = false;
@@ -37,6 +39,7 @@ const metaDescription = event.description
 
 // Check states
 const callForSpeakersOpen = isCallForSpeakersOpen(event);
+const hasTopics = Array.isArray(event.topics) && event.topics.length > 0;
 const hasChildren = Array.isArray(event.children) && event.children.length > 0;
 const isChildEvent = !!event.parent;
 const parentUrl = event.parentEvent?.slug?.current
@@ -314,6 +317,19 @@ const jsonLd = {
             </ul>
           </div>
         )
+      }
+
+      {
+        hasTopics &&
+          event.topics!.map((topic) => (
+            <section class="event-detail__topic flow">
+              <h2 class="text-large">{topic.name}</h2>
+              <PortableText
+                value={topic.body}
+                components={{ block: { h2: TopicHeading } }}
+              />
+            </section>
+          ))
       }
 
       {
