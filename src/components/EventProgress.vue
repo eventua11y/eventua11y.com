@@ -133,6 +133,26 @@ const accessibleLabel = computed(() => `${progress.value}% complete`);
   --indicator-color: var(--wa-color-brand-fill-loud);
   --track-color: var(--wa-color-neutral-fill-normal);
   width: 4rem;
+  border-radius: var(--wa-border-radius-pill);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--wa-color-brand-fill-loud);
+  }
+  70% {
+    box-shadow: 0 0 0 0.5rem transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event__progress-bar {
+    animation: none;
+  }
 }
 
 .event__progress-label {
