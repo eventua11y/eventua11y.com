@@ -7,7 +7,7 @@
       :day="day"
       :type="type"
     />
-    <TimezoneSelector size="small" />
+    <!-- <TimezoneSelector size="small" /> -->
   </div>
 </template>
 

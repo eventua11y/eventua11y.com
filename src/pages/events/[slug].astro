@@ -44,6 +44,10 @@ const parentUrl = event.parentEvent?.slug?.current
   : undefined;
 const isDedicatedToAccessibility =
   !event.isParent && !event.parent && event.type !== 'theme';
+const hasBadges =
+  isDedicatedToAccessibility ||
+  callForSpeakersOpen ||
+  (event.isFree && event.type !== 'theme');
 
 // All speakers (from children or event itself)
 const allSpeakers = (() => {
@@ -134,46 +138,56 @@ const jsonLd = {
       itemscope
       itemtype="https://schema.org/Event"
     >
-      <h1 class="event-detail__title" itemprop="name">
-        {event.title}
-      </h1>
-
       {
-        isChildEvent && event.parentEvent && (
-          <p class="event-detail__parent text-small text-muted">
-            Part of{' '}
-            {parentUrl ? (
-              <a href={parentUrl}>{event.parentEvent.title}</a>
-            ) : (
-              <span>{event.parentEvent.title}</span>
-            )}
-          </p>
+        (isChildEvent && event.parentEvent) || event.organizer ? (
+          <hgroup role="group" aria-roledescription="Heading group">
+            <h1 class="event-detail__title" itemprop="name">
+              {event.title}
+            </h1>
+            <p aria-roledescription="subtitle" class="text-muted">
+              {isChildEvent && event.parentEvent && (
+                <span>
+                  Part of{' '}
+                  {parentUrl ? (
+                    <a href={parentUrl}>{event.parentEvent.title}</a>
+                  ) : (
+                    <span>{event.parentEvent.title}</span>
+                  )}
+                </span>
+              )}
+              {isChildEvent && event.parentEvent && event.organizer && (
+                <span aria-hidden="true"> · </span>
+              )}
+              {event.organizer && (
+                <span
+                  itemprop="organizer"
+                  itemscope
+                  itemtype="https://schema.org/Organization"
+                >
+                  Organised by{' '}
+                  {event.organizer.website ? (
+                    <a
+                      href={event.organizer.website}
+                      itemprop="url"
+                      rel="noopener noreferrer"
+                    >
+                      <span itemprop="name">{event.organizer.name}</span>
+                    </a>
+                  ) : (
+                    <span itemprop="name">{event.organizer.name}</span>
+                  )}
+                </span>
+              )}
+            </p>
+          </hgroup>
+        ) : (
+          <h1 class="event-detail__title" itemprop="name">
+            {event.title}
+          </h1>
         )
       }
 
-      {
-        event.organizer && (
-          <p
-            class="event-detail__organizer text-small text-muted"
-            itemprop="organizer"
-            itemscope
-            itemtype="https://schema.org/Organization"
-          >
-            Organised by{' '}
-            {event.organizer.website ? (
-              <a
-                href={event.organizer.website}
-                itemprop="url"
-                rel="noopener noreferrer"
-              >
-                <span itemprop="name">{event.organizer.name}</span>
-              </a>
-            ) : (
-              <span itemprop="name">{event.organizer.name}</span>
-            )}
-          </p>
-        )
-      }
+      <wa-divider></wa-divider>
 
       <EventDateWithTimezone
         client:only="vue"
@@ -188,31 +202,30 @@ const jsonLd = {
         client:load
         attendanceMode={event.attendanceMode as any}
         location={event.location}
+        website={event.website}
       />
 
-      <div class="event-detail__badges">
-        {
-          isDedicatedToAccessibility && (
-            <wa-badge pill variant="neutral">
-              Dedicated to accessibility
-            </wa-badge>
-          )
-        }
-        {
-          callForSpeakersOpen && (
-            <wa-badge variant="success" pill attention="pulse">
-              Call for speakers
-            </wa-badge>
-          )
-        }
-        {
-          event.isFree && event.type !== 'theme' && (
-            <wa-badge pill variant="neutral">
-              Free
-            </wa-badge>
-          )
-        }
-      </div>
+      {
+        hasBadges && (
+          <div class="event-detail__badges">
+            {isDedicatedToAccessibility && (
+              <wa-badge pill variant="neutral">
+                Dedicated to accessibility
+              </wa-badge>
+            )}
+            {callForSpeakersOpen && (
+              <wa-badge variant="success" pill attention="pulse">
+                Call for speakers
+              </wa-badge>
+            )}
+            {event.isFree && event.type !== 'theme' && (
+              <wa-badge pill variant="neutral">
+                Free
+              </wa-badge>
+            )}
+          </div>
+        )
+      }
 
       {
         allSpeakers.length > 0 && (
@@ -244,16 +257,7 @@ const jsonLd = {
         )
       }
 
-      {
-        event.website && (
-          <div class="event-detail__cta">
-            <a href={event.website} class="btn" rel="noopener noreferrer">
-              Visit event website
-              <span class="sr-only">(opens external site)</span>
-            </a>
-          </div>
-        )
-      }
+
 
       {
         !isDedicatedToAccessibility && hasChildren && (
@@ -277,6 +281,13 @@ const jsonLd = {
                 </li>
               ))}
             </ol>
+            {event.website && (
+              <p>
+                Refer to the{' '}
+                <a href={event.website} rel="noopener noreferrer">official event website</a>{' '}
+                for the full schedule.
+              </p>
+            )}
           </section>
         )
       }
@@ -305,10 +316,16 @@ const jsonLd = {
     text-wrap: balance;
   }
 
+  .event-detail > wa-divider {
+    margin-block: var(--p-space-s);
+  }
+
   .event-detail :global(.event__dates),
   .event-detail :global(.event__delivery) {
     font-size: var(--p-step-0);
   }
+
+
 
   .event-detail__badges {
     display: flex;
@@ -316,13 +333,7 @@ const jsonLd = {
     gap: var(--p-space-3xs);
   }
 
-  .event-detail__badges:empty {
-    display: none;
-  }
 
-  .event-detail__cta {
-    margin-block: var(--p-space-xs);
-  }
 
   .event-detail__children h2 {
     font-size: var(--p-step-2);
