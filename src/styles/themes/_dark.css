@@ -17,6 +17,9 @@ html[data-theme='dark'] {
   color-scheme: dark;
   accent-color: var(--s-color-primary);
 
+  /* Align WA's surface color with the project's dark background */
+  --wa-color-surface-default: var(--p-color-black);
+
   /* Body */
   --c-body-color-bg: var(--s-color-bg);
   --c-body-color-fg: var(--s-color-fg);
@@ -39,7 +42,7 @@ html[data-theme='dark'] {
   /* Footer */
   --c-footer-color-bg: var(--p-color-purple-950);
   --c-footer-color-muted-fg: var(--p-color-grey-400);
-  --c-footer-color-link: var(--color-primary);
+  --c-footer-color-link: var(--s-color-primary);
   --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
@@ -47,9 +50,4 @@ html[data-theme='dark'] {
   /* --page-header-color-bg: var(--color-primary);
   --page-header-color-fg: var(--color-fg);
   --page-header-accent-color: var(--color-fg); */
-}
-
-/* Shoelace */
-.sl-theme-dark {
-  /* --sl-focus-ring-color: var(--c-color-focus-ring); */
 }

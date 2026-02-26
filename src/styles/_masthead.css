@@ -62,7 +62,23 @@
   text-decoration: none;
 }
 
-/* Ensure Shoelace components inside .masthead use the focus ring color */
-.masthead sl-button::part(base):focus-visible {
+/* The theme-selector uses variant="brand" appearance="plain". On the
+   masthead the brand color (purple) has no contrast against the purple
+   background, so we override the WA component-scoped color tokens.
+   This follows WA's recommended customization approach (design tokens)
+   and lets WA's own hover/active logic work naturally. */
+.masthead #theme-selector-button {
+  /* Override brand text color → masthead foreground (white) */
+  --wa-color-on-quiet: var(--c-masthead-color-fg);
+  /* Override brand fill-quiet → semi-transparent white for hover/active */
+  --wa-color-fill-quiet: color-mix(
+    in oklab,
+    var(--c-masthead-color-fg) 15%,
+    transparent
+  );
+}
+
+/* Ensure Web Awesome buttons inside .masthead use the focus ring color */
+.masthead wa-button::part(base):focus-visible {
   outline-color: var(--c-focus-ring-color);
 }

@@ -1,6 +1,6 @@
 ---
-import '@shoelace-style/shoelace/dist/themes/light.css';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@awesome.me/webawesome/dist/styles/themes/default.css';
+import '@awesome.me/webawesome/dist/styles/utilities/visually-hidden.css';
 import '../styles/styles.css';
 import TheFooter from '../components/TheFooter.astro';
 import TheHeader from '../components/TheHeader.astro';
@@ -9,10 +9,11 @@ const defaultDescription =
   'The calendar of digital accessibility and inclusive design events, curated by Matt Obee.';
 const metaDescription = description || defaultDescription;
 const metaOgType = ogType || 'website';
+const faKitCode = import.meta.env.FA_KIT_CODE || '';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="wa-brand-purple">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -91,6 +92,7 @@ const metaOgType = ogType || 'website';
     />
     <link rel="manifest" href="/favicon/site.webmanifest" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    {faKitCode && <meta data-fa-kit-code={faKitCode} />}
   </head>
   <body>
     <a href="#main" class="skip">
@@ -119,27 +121,21 @@ const metaOgType = ogType || 'website';
 </html>
 
 <script>
-  // Import Shoelace components after hydration
-  import '@shoelace-style/shoelace/dist/components/button/button.js';
-  import '@shoelace-style/shoelace/dist/components/badge/badge.js';
-  import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-  import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-  import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
-  import '@shoelace-style/shoelace/dist/components/menu/menu.js';
-  import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
-  import '@shoelace-style/shoelace/dist/components/alert/alert.js';
-  import '@shoelace-style/shoelace/dist/components/drawer/drawer.js';
-  import '@shoelace-style/shoelace/dist/components/switch/switch.js';
-  // sl-skeleton removed — replaced with native CSS skeleton in Skeleton.vue
-  import '@shoelace-style/shoelace/dist/components/radio/radio.js';
-  import '@shoelace-style/shoelace/dist/components/radio-group/radio-group.js';
-  import '@shoelace-style/shoelace/dist/components/divider/divider.js';
-
-  // Set base path for Shoelace assets
-  import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-  setBasePath(
-    'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/'
-  );
+  // Web Awesome component imports (cherry-picked for tree-shaking)
+  import '@awesome.me/webawesome/dist/components/badge/badge.js';
+  import '@awesome.me/webawesome/dist/components/button/button.js';
+  import '@awesome.me/webawesome/dist/components/callout/callout.js';
+  import '@awesome.me/webawesome/dist/components/divider/divider.js';
+  import '@awesome.me/webawesome/dist/components/drawer/drawer.js';
+  import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
+  import '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js';
+  import '@awesome.me/webawesome/dist/components/icon/icon.js';
+  import '@awesome.me/webawesome/dist/components/option/option.js';
+  import '@awesome.me/webawesome/dist/components/radio/radio.js';
+  import '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
+  import '@awesome.me/webawesome/dist/components/select/select.js';
+  import '@awesome.me/webawesome/dist/components/switch/switch.js';
+  import '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';
 
   import '../scripts/main.ts';
 </script>

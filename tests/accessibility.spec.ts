@@ -12,11 +12,41 @@ import AxeBuilder from '@axe-core/playwright';
  */
 
 // Helper: run an axe scan scoped to WCAG 2.2 Level AA
+// Excludes iframes to avoid false positives from third-party toolbars (#549)
 async function runAxeScan(page: Page) {
   const results = await new AxeBuilder({ page })
+    .exclude('iframe')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
   return results;
+}
+
+// Helper: parse an rgb/rgba color string into { r, g, b } values (0–255)
+function parseColor(color: string): { r: number; g: number; b: number } {
+  const match = color.match(
+    /rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/
+  );
+  if (!match) throw new Error(`Could not parse color: ${color}`);
+  return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]) };
+}
+
+// Helper: calculate relative luminance per WCAG 2.x
+// https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+function luminance({ r, g, b }: { r: number; g: number; b: number }): number {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
+    const s = c / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+// Helper: calculate contrast ratio between two colors
+function contrastRatio(fg: string, bg: string): number {
+  const l1 = luminance(parseColor(fg));
+  const l2 = luminance(parseColor(bg));
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
 }
 
 // ---------------------------------------------------------------------------
@@ -26,11 +56,13 @@ test.describe('Homepage accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('#upcoming-events');
+    // wa-drawer uses <dialog showModal()> which renders in the top layer;
+    // the host element has height: 0 so isVisible() is unreliable.
+    // Check the open attribute instead.
     const filterDrawer = page.locator('#filter-drawer');
-    const isVisible = await filterDrawer.isVisible();
-    if (isVisible) {
+    if ((await filterDrawer.getAttribute('open')) !== null) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toBeVisible();
+      await expect(filterDrawer).not.toHaveAttribute('open');
     }
   });
 
@@ -77,11 +109,12 @@ test.describe('Homepage accessibility', () => {
 
   test('theme selector button has accessible name', async ({ page }) => {
     const themeButton = page.locator('#theme-selector-button');
-    // sl-icon-button provides its accessible name via the label attribute,
-    // which is applied to the inner <button> in shadow DOM. Playwright's
-    // toHaveAccessibleName cannot pierce shadow DOM, so we verify the
-    // label attribute directly. The axe scan confirms the button is accessible.
-    await expect(themeButton).toHaveAttribute('label', /.+/);
+    // wa-button gets its accessible name from the child wa-icon's label
+    // attribute. Playwright's toHaveAccessibleName cannot pierce shadow DOM,
+    // so we verify the wa-icon label attribute directly. The axe scan
+    // confirms the button is accessible.
+    const icon = themeButton.locator('wa-icon');
+    await expect(icon).toHaveAttribute('label', /.+/);
   });
 
   test('upcoming events heading exists (visually hidden)', async ({ page }) => {
@@ -110,7 +143,7 @@ test.describe('Homepage accessibility', () => {
   });
 
   test('filter button has accessible name', async ({ page }) => {
-    // The sl-button gets its accessible name from the slotted text "Filter".
+    // The wa-button gets its accessible name from the slotted text "Filter".
     // Playwright's toHaveAccessibleName cannot pierce shadow DOM to read
     // the computed name, but the axe scan confirms the button is accessible.
     // Here we verify the button text content directly.
@@ -319,10 +352,9 @@ test.describe('Shared component accessibility', () => {
     await page.goto('/');
     await page.waitForSelector('#upcoming-events');
     const filterDrawer = page.locator('#filter-drawer');
-    const isVisible = await filterDrawer.isVisible();
-    if (isVisible) {
+    if ((await filterDrawer.getAttribute('open')) !== null) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toBeVisible();
+      await expect(filterDrawer).not.toHaveAttribute('open');
     }
   });
 
@@ -351,12 +383,19 @@ test.describe('Shared component accessibility', () => {
   });
 
   test('filter drawer has accessible label when opened', async ({ page }) => {
+    const drawer = page.locator('#filter-drawer');
+    const afterShow = drawer.evaluate(
+      (el) =>
+        new Promise<void>((resolve) =>
+          el.addEventListener('wa-after-show', () => resolve(), { once: true })
+        )
+    );
     const filterButton = page.locator('#open-filter-drawer');
     await filterButton.waitFor({ state: 'visible', timeout: 5000 });
     await filterButton.click();
+    await afterShow;
 
-    const drawer = page.locator('#filter-drawer');
-    await expect(drawer).toBeVisible();
+    await expect(drawer).toHaveAttribute('open', '');
     await expect(drawer).toHaveAttribute('label', 'Filters');
   });
 
@@ -364,3 +403,100 @@ test.describe('Shared component accessibility', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Axe scans in explicit light and dark modes
+// ---------------------------------------------------------------------------
+// The tests above run with the system default (typically light). These tests
+// explicitly force each color mode via localStorage and emulateMedia to catch
+// contrast regressions that only surface in a specific theme.
+const pages = [
+  { name: 'Homepage', path: '/', waitSelector: '#upcoming-events' },
+  { name: 'Past Events', path: '/past-events', waitSelector: '#past-events' },
+  { name: 'Accessibility Statement', path: '/accessibility' },
+  { name: 'Curation Policy', path: '/curation-policy' },
+  { name: '404', path: '/404' },
+];
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`Axe scans in ${colorScheme} mode`, () => {
+    for (const { name, path, waitSelector } of pages) {
+      test(`${name} (${path}) has no WCAG 2.2 AA violations in ${colorScheme} mode`, async ({
+        context,
+        page,
+      }) => {
+        await page.emulateMedia({ colorScheme });
+        await context.addInitScript((theme: string) => {
+          window.localStorage.setItem('theme', theme);
+        }, colorScheme);
+
+        await page.goto(path);
+        if (waitSelector) {
+          await page.waitForSelector(waitSelector);
+        }
+
+        // Close filter drawer if open (homepage only)
+        const filterDrawer = page.locator('#filter-drawer');
+        if (
+          (await filterDrawer.count()) > 0 &&
+          (await filterDrawer.getAttribute('open')) !== null
+        ) {
+          await page.keyboard.press('Escape');
+          await expect(filterDrawer).not.toHaveAttribute('open');
+        }
+
+        await expect(page.locator('html')).toHaveAttribute(
+          'data-theme',
+          colorScheme
+        );
+
+        const results = await runAxeScan(page);
+        expect(results.violations).toEqual([]);
+      });
+    }
+
+    // Axe cannot check contrast on SVG icons inside Web Awesome shadow DOM,
+    // so we manually verify the theme selector icon meets WCAG 2.x
+    // non-text contrast (3:1 minimum for UI components).
+    test(`theme selector icon meets 3:1 contrast in ${colorScheme} mode`, async ({
+      context,
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme });
+      await context.addInitScript((theme: string) => {
+        window.localStorage.setItem('theme', theme);
+      }, colorScheme);
+
+      await page.goto('/');
+      // Only wait for the masthead — event content requires the API
+      await page.waitForSelector('.masthead');
+
+      const masthead = page.locator('.masthead');
+      const themeButton = page.locator('#theme-selector-button');
+
+      const bgColor = await masthead.evaluate(
+        (el) => getComputedStyle(el).backgroundColor
+      );
+      const fgColor = await themeButton.evaluate(
+        (el) => getComputedStyle(el).color
+      );
+
+      const ratio = contrastRatio(fgColor, bgColor);
+      expect(
+        ratio,
+        `Theme selector icon contrast ratio is ${ratio.toFixed(2)}:1 (${fgColor} on ${bgColor}), expected at least 3:1`
+      ).toBeGreaterThanOrEqual(3);
+
+      // Also check hover state
+      await themeButton.hover();
+      const hoverFgColor = await themeButton.evaluate(
+        (el) => getComputedStyle(el).color
+      );
+      const hoverRatio = contrastRatio(hoverFgColor, bgColor);
+      expect(
+        hoverRatio,
+        `Theme selector icon hover contrast ratio is ${hoverRatio.toFixed(2)}:1 (${hoverFgColor} on ${bgColor}), expected at least 3:1`
+      ).toBeGreaterThanOrEqual(3);
+    });
+  });
+}

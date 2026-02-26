@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { isCallForSpeakersOpen, getEventUrl } from '../utils/eventUtils';
-import Icon from './Icon.vue';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
-import type { Event as EventType, Speaker } from '../types/event';
+import type { Event as EventType } from '../types/event';
 
 const props = withDefaults(
   defineProps<{
     event: EventType;
     showDate?: boolean;
+    showCountdown?: boolean;
+    showEnded?: boolean;
   }>(),
   {
     showDate: true,
+    showCountdown: false,
+    showEnded: false,
   }
 );
 
@@ -192,6 +195,8 @@ const speakerDisplay = computed(() => {
       :timezone="event.timezone"
       :day="event.day"
       :type="event.type"
+      :showCountdown="showCountdown"
+      :showEnded="showEnded"
     />
 
     <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
@@ -209,7 +214,7 @@ const speakerDisplay = computed(() => {
       class="event__children flow"
     >
       <summary>
-        <Icon name="caret-right" />
+        <wa-icon name="caret-right" auto-width></wa-icon>
         Description
       </summary>
       <p class="event__description" itemprop="description">
@@ -220,7 +225,7 @@ const speakerDisplay = computed(() => {
     <template v-if="!isDedicatedToAccessibility">
       <details v-if="hasChildren" class="event__children flow flow-xs">
         <summary>
-          <Icon name="caret-right" />
+          <wa-icon name="caret-right" auto-width></wa-icon>
           Accessibility highlights: {{ enumeratedChildTypes }}
         </summary>
         <ol
@@ -229,13 +234,13 @@ const speakerDisplay = computed(() => {
           :aria-label="`Accessibility highlights for ${event.title}`"
         >
           <li v-for="child in event.children" :key="child._id">
-            <EventChild :event="child" />
+            <EventChild :event="child" :showEnded="showEnded" />
           </li>
         </ol>
       </details>
       <details v-else-if="event.isParent" class="event__children flow">
         <summary>
-          <Icon name="caret-right" />
+          <wa-icon name="caret-right" auto-width></wa-icon>
           Schedule not yet announced
         </summary>
         <p>
@@ -249,13 +254,27 @@ const speakerDisplay = computed(() => {
 
     <div
       class="event__badges"
-      v-if="isDedicatedToAccessibility || callForSpeakersOpen"
+      v-if="
+        isDedicatedToAccessibility ||
+        callForSpeakersOpen ||
+        (event.isFree && event.type !== 'theme')
+      "
     >
-      <sl-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
-        >Dedicated to accessibility</sl-badge
+      <wa-badge pill variant="neutral" v-if="isDedicatedToAccessibility"
+        >Dedicated to accessibility</wa-badge
       >
-      <sl-badge variant="success" pill v-if="callForSpeakersOpen"
-        >Call for speakers</sl-badge
+      <wa-badge
+        variant="success"
+        pill
+        attention="pulse"
+        v-if="callForSpeakersOpen"
+        >Call for speakers</wa-badge
+      >
+      <wa-badge
+        variant="neutral"
+        pill
+        v-if="event.isFree && event.type !== 'theme'"
+        >Free</wa-badge
       >
     </div>
   </article>

@@ -16,28 +16,33 @@
             {{ filtersStore.nonDeadlineFutureCount }} upcoming events
           </small>
         </p>
-        <sl-button
+        <wa-button
           v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
-          type="primary"
+          variant="brand"
           name="filter-reset"
         >
-          <Icon name="filter-circle-xmark" /> Reset Filters
-        </sl-button>
+          <wa-icon slot="start" name="filter-circle-xmark" auto-width></wa-icon>
+          Reset Filters
+        </wa-button>
       </div>
       <div class="filters__controls d-flex gap-xs items-center">
-        <sl-switch
+        <wa-switch
           ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
-          @sl-change="toggleAwarenessDays"
+          @change="toggleAwarenessDays"
           id="filter-show-awareness-days-bar"
-          >Awareness days</sl-switch
+          >Awareness days</wa-switch
         >
         <div class="group">
-          <sl-button id="open-filter-drawer" @click="handleFilterClick">
-            <Icon name="filter" /> Filter
-          </sl-button>
+          <wa-button
+            id="open-filter-drawer"
+            appearance="outlined"
+            data-drawer="open filter-drawer"
+          >
+            <wa-icon slot="start" name="filter" auto-width></wa-icon> Filter
+          </wa-button>
           <TimezoneSelector />
         </div>
       </div>
@@ -47,7 +52,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
-import Icon from './Icon.vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 
@@ -75,15 +79,6 @@ const awarenessDaysSwitch = ref(null);
  */
 function resetFilters() {
   filtersStore.resetFilters();
-}
-
-/**
- * Handles filter button click
- * Dispatches custom event to open filter drawer
- */
-function handleFilterClick() {
-  const event = new CustomEvent('filters:open');
-  document.dispatchEvent(event);
 }
 
 /**

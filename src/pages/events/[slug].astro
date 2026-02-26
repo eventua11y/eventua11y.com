@@ -13,7 +13,6 @@ import { getEventBySlug } from '../../lib/sanity';
 import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
-import EventDuration from '../../components/EventDuration.vue';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
 
 export const prerender = false;
@@ -131,7 +130,7 @@ const jsonLd = {
 
       <EventDelivery
         client:load
-        attendanceMode={event.attendanceMode}
+        attendanceMode={event.attendanceMode as any}
         location={event.location}
       />
 
@@ -168,23 +167,23 @@ const jsonLd = {
       <div class="event-detail__badges">
         {
           isDedicatedToAccessibility && (
-            <sl-badge pill variant="neutral">
+            <wa-badge pill variant="neutral">
               Dedicated to accessibility
-            </sl-badge>
+            </wa-badge>
           )
         }
         {
           callForSpeakersOpen && (
-            <sl-badge variant="success" pill>
+            <wa-badge variant="success" pill attention="pulse">
               Call for speakers
-            </sl-badge>
+            </wa-badge>
           )
         }
         {
-          event.isFree && (
-            <sl-badge pill variant="neutral">
+          event.isFree && event.type !== 'theme' && (
+            <wa-badge pill variant="neutral">
               Free
-            </sl-badge>
+            </wa-badge>
           )
         }
       </div>

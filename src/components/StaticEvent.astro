@@ -11,6 +11,7 @@ import utc from 'dayjs/plugin/utc';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import type { Event } from '../types/event';
 import { getEventUrl } from '../utils/eventUtils';
+import { formatDateRange } from '../utils/dateUtils';
 
 dayjs.extend(utc);
 dayjs.extend(localizedFormat);
@@ -32,27 +33,22 @@ const callForSpeakersOpen =
   (!event.callForSpeakersClosingDate ||
     new Date() < new Date(event.callForSpeakersClosingDate));
 
-// Date formatting using UTC (mirrors dateUtils.ts logic)
+// Machine-readable datetime formatting (UTC)
 function formatDate(date: string, format: string): string {
   return dayjs.utc(date).format(format);
 }
 
-function getStartFormat(): string {
-  if (isTheme || isDeadline || isAllDay) return 'LL [UTC]';
-  return 'LLL [UTC]';
-}
-
-function getEndFormat(): string {
-  if (isAllDay) return 'LL [UTC]';
-  // Same-day check in UTC
-  if (
-    event.dateEnd &&
-    dayjs.utc(event.dateStart).isSame(dayjs.utc(event.dateEnd), 'day')
-  ) {
-    return 'LT [UTC]';
-  }
-  return 'LLL [UTC]';
-}
+// Human-readable date range with locale-aware deduplication
+// SSR uses UTC since user timezone is unknown
+const formattedRange = formatDateRange({
+  dateStart: event.dateStart,
+  dateEnd: event.dateEnd,
+  timezone: event.timezone,
+  day: isAllDay,
+  type: event.type,
+  isDeadline,
+  locale: 'en',
+});
 
 // Internal event page URL (if slug exists)
 const eventUrl = getEventUrl(event);
@@ -66,14 +62,21 @@ const displayLocation = event.location || 'International';
   isDeadline ? (
     <div class="event event--deadline">
       <div class="event__dates">
-        <span class="event__dateStart">
-          <span class="sr-only">Starts</span>
-          <time
-            datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
-            itemprop="startDate"
-          >
-            {formatDate(event.dateStart, getStartFormat())}
-          </time>
+        <time
+          datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
+          itemprop="startDate"
+          hidden
+        />
+        <span class="event__dateRange">
+          {formattedRange[0]}
+          {formattedRange[1] && (
+            <>
+              <span aria-hidden="true"> &ndash; </span>
+              <span class="sr-only">to</span>
+              {formattedRange[1]}
+            </>
+          )}
+          {!isInternational && ' UTC'}{' '}
           <span class="badge badge--danger">Deadline</span>
         </span>
       </div>
@@ -100,27 +103,29 @@ const displayLocation = event.location || 'International';
 
       {event.dateStart && (
         <div class="event__dates">
-          <span class="event__dateStart">
-            <span class="sr-only">Starts</span>
-            <time
-              datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
-              itemprop="startDate"
-            >
-              {formatDate(event.dateStart, getStartFormat())}
-            </time>
-          </span>
+          <time
+            datetime={formatDate(event.dateStart, 'YYYY-MM-DDTHH:mm:ssZ')}
+            itemprop="startDate"
+            hidden
+          />
           {event.dateEnd && (
-            <span class="event__dateEnd">
-              <span class="sr-only">Ends</span>
-              <span aria-hidden="true">&rarr;</span>
-              <time
-                datetime={formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')}
-                itemprop="endDate"
-              >
-                {formatDate(event.dateEnd, getEndFormat())}
-              </time>
-            </span>
+            <time
+              datetime={formatDate(event.dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')}
+              itemprop="endDate"
+              hidden
+            />
           )}
+          <span class="event__dateRange">
+            {formattedRange[0]}
+            {formattedRange[1] && (
+              <>
+                <span aria-hidden="true"> &ndash; </span>
+                <span class="sr-only">to</span>
+                {formattedRange[1]}
+              </>
+            )}
+            {!isInternational && ' UTC'}
+          </span>
         </div>
       )}
 
@@ -195,9 +200,12 @@ const displayLocation = event.location || 'International';
         </details>
       )}
 
-      {callForSpeakersOpen && (
+      {(callForSpeakersOpen || (event.isFree && !isTheme)) && (
         <div class="event__badges">
-          <span class="badge badge--success">Call for speakers</span>
+          {callForSpeakersOpen && (
+            <span class="badge badge--success">Call for speakers</span>
+          )}
+          {event.isFree && !isTheme && <span class="badge">Free</span>}
         </div>
       )}
     </article>

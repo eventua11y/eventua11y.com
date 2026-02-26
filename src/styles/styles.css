@@ -14,7 +14,14 @@
 @import url('_forms.css');
 @import url('_footer.css');
 @import url('_utilities.css');
-@import url('_shoelace.css');
+/* Base SVG icon sizing (previously in Icon.vue, still used by footer/skip-link SVGs) */
+.icon {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  vertical-align: -0.125em;
+  overflow: visible;
+}
 
 .container {
   margin: 0 auto;
@@ -36,13 +43,38 @@ main {
   background-color: var(--s-color-background);
 }
 
-*:focus-visible,
+*:not(
+    wa-badge,
+    wa-button,
+    wa-callout,
+    wa-divider,
+    wa-drawer,
+    wa-dropdown,
+    wa-dropdown-item,
+    wa-icon,
+    wa-option,
+    wa-radio,
+    wa-radio-group,
+    wa-select,
+    wa-switch
+  ):focus-visible,
 .masthead__logo > a:focus-visible {
   outline-color: var(--c-focus-ring-color);
   outline-style: solid;
   outline-offset: var(--c-focus-ring-offset);
   outline-width: var(--c-focus-ring-width);
   text-decoration: none !important;
+}
+
+/* Move wa-switch focus ring from thumb to track so it remains visible
+   when checked (WA's default puts it on the thumb, which is nearly the
+   same color as the brand-colored track in the checked state). */
+wa-switch:focus-within::part(thumb) {
+  outline: none;
+}
+wa-switch:focus-within::part(control) {
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
 }
 
 /* Completely hides elements with the hidden attribute */

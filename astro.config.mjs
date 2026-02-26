@@ -16,7 +16,9 @@ export default defineConfig({
   integrations: [
     vue({
       template: {
-        compilerOptions: { isCustomElement: (tag) => tag.startsWith('sl-') },
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('wa-'),
+        },
       },
       devtools: false,
     }),

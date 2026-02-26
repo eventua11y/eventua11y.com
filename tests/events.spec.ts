@@ -6,10 +6,9 @@ test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
   // await page.waitForLoadState('networkidle');
   const filterDrawer = page.locator('#filter-drawer');
-  const isVisible = await filterDrawer.isVisible();
-  if (isVisible) {
+  if ((await filterDrawer.getAttribute('open')) !== null) {
     await page.keyboard.press('Escape');
-    await expect(filterDrawer).not.toBeVisible();
+    await expect(filterDrawer).not.toHaveAttribute('open');
   }
   await page.waitForSelector('#upcoming-events');
 });
@@ -32,6 +31,7 @@ test('footer is visible', async ({ page }) => {
 
 test('has no accessibility violations', async ({ page }) => {
   const accessibilityScanResults = await new AxeBuilder({ page })
+    .exclude('iframe')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
   expect(accessibilityScanResults.violations).toEqual([]);

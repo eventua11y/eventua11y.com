@@ -28,9 +28,21 @@
       > * {
         flex: 1;
       }
-      sl-button,
-      sl-dropdown {
+      wa-button,
+      wa-dropdown {
         width: 100%;
+      }
+      @media (min-width: 700px) {
+        > wa-button,
+        > wa-dropdown {
+          flex: 0 0 auto;
+          width: auto;
+        }
+      }
+      wa-select::part(listbox) {
+        white-space: nowrap;
+        width: max-content;
+        min-width: 100%;
       }
     }
   }
@@ -83,6 +95,6 @@
   align-items: flex-start;
 }
 
-#filter-drawer sl-button::part(base):focus-visible {
+#filter-drawer wa-button::part(base):focus-visible {
   outline-color: var(--c-focus-ring-color);
 }

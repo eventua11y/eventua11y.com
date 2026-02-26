@@ -37,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Framework**: Astro 5.x with server-side rendering
 - **Frontend**: Vue 3 components with TypeScript
-- **UI Components**: Shoelace web components
+- **UI Components**: Web Awesome web components
 - **Content Management**: Sanity CMS for events data
 - **Deployment**: Netlify with edge functions
 - **Testing**: Playwright for E2E testing; axe-core for automated accessibility scans
@@ -74,7 +74,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - CSS custom properties for theming (light/dark modes)
 - Utility-first approach with CSS utility classes
-- Shoelace component theming
+- Web Awesome component theming via design tokens
 - Theme switching handled by inline script to prevent FOUC
 
 ### Edge Functions
@@ -107,7 +107,7 @@ When adding new pages or interactive components, add both layers:
 - An axe scan for the new page using the shared `runAxeScan()` helper
 - Targeted assertions for any interactive elements, landmarks, or headings
 
-**Shoelace shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Shoelace web component buttons (`sl-button`, `sl-icon-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. The axe scan validates the actual computed accessible name.
+**Web component shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Web Awesome buttons (`wa-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. For icon-only buttons, check the child `wa-icon`'s `label` attribute. The axe scan validates the actual computed accessible name.
 
 ## Development Notes
 
@@ -119,13 +119,22 @@ When adding new pages or interactive components, add both layers:
 ### Browser Support
 
 - Primary testing on Chromium
-- Custom element support required for Shoelace components
+- Custom element support required for Web Awesome components
 
 ### Accessibility Requirements
 
 - All pages must conform to WCAG 2.2 Level AA
 - Regular accessibility testing with automated and manual methods
 - Skip link implementation and proper semantic markup
+
+## Sanity CMS Datasets
+
+This project uses two Sanity datasets:
+
+- **`production`** — Live data that powers the public site. **Never** create dummy, test, placeholder, or seed data in the production dataset.
+- **`test`** — Dedicated dataset for testing and development. All dummy, test, or placeholder documents **must** be created here.
+
+When using Sanity MCP tools (e.g. `create_documents_from_json`, `create_documents_from_markdown`, `patch_document_from_json`), always confirm the target dataset before writing. If the purpose of the data is testing, experimentation, or development, the dataset **must** be `test`.
 
 ## Important Project Specifics
 

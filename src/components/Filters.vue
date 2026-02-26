@@ -1,87 +1,90 @@
 <template>
-  <sl-drawer id="filter-drawer" label="Filters" @sl-after-hide="emitCloseEvent">
+  <wa-drawer id="filter-drawer" label="Filters">
     <div class="flow flow-l">
       <div class="flow flow-xs">
-        <sl-radio-group
+        <wa-radio-group
           label="Attendance mode"
           name="attendance"
+          size="medium"
           :value="filtersStore.filters.attendance"
-          @sl-change="(e) => updateFilter('attendance', e)"
+          @change="(e) => updateFilter('attendance', e)"
         >
-          <sl-radio value="any">No preference</sl-radio>
-          <sl-radio value="online">Online</sl-radio>
-          <sl-radio value="offline">In-person</sl-radio>
-        </sl-radio-group>
+          <wa-radio value="any">No preference</wa-radio>
+          <wa-radio value="online">Online</wa-radio>
+          <wa-radio value="offline">In-person</wa-radio>
+        </wa-radio-group>
 
-        <sl-radio-group
+        <wa-radio-group
           label="Ticket cost"
           name="cost"
+          size="medium"
           :value="filtersStore.filters.cost"
-          @sl-change="(e) => updateFilter('cost', e)"
+          @change="(e) => updateFilter('cost', e)"
         >
-          <sl-radio value="any">No preference</sl-radio>
-          <sl-radio value="free">Free</sl-radio>
-          <sl-radio value="paid">Paid</sl-radio>
-        </sl-radio-group>
+          <wa-radio value="any">No preference</wa-radio>
+          <wa-radio value="free">Free</wa-radio>
+          <wa-radio value="paid">Paid</wa-radio>
+        </wa-radio-group>
 
-        <sl-radio-group
+        <wa-radio-group
           label="Call for speakers"
           name="cfs"
+          size="medium"
           :value="filtersStore.filters.cfs"
-          @sl-change="(e) => updateFilter('cfs', e)"
+          @change="(e) => updateFilter('cfs', e)"
         >
-          <sl-radio value="any">No preference</sl-radio>
-          <sl-radio value="open">Accepting talks</sl-radio>
-          <sl-radio value="closed">Not accepting talks</sl-radio>
-        </sl-radio-group>
+          <wa-radio value="any">No preference</wa-radio>
+          <wa-radio value="open">Accepting talks</wa-radio>
+          <wa-radio value="closed">Not accepting talks</wa-radio>
+        </wa-radio-group>
       </div>
 
       <div class="flow flow-xs">
-        <sl-switch
+        <wa-switch
           ref="awarenessDaysSwitch"
           :checked="filtersStore.filters.showAwarenessDays"
-          @sl-change="toggleAwarenessDays"
+          @change="toggleAwarenessDays"
           id="filter-show-awareness-days-drawer"
-          >Show awareness days</sl-switch
+          >Show awareness days</wa-switch
         >
-        <sl-switch
+        <wa-switch
           ref="booksSwitch"
           :checked="filtersStore.filters.showBooks"
-          @sl-change="toggleBooks"
+          @change="toggleBooks"
           id="filter-show-books-drawer"
-          >Show Book Club</sl-switch
+          >Show Book Club</wa-switch
         >
-        <sl-switch
+        <wa-switch
           ref="deadlinesSwitch"
           :checked="filtersStore.filters.showDeadlines"
-          @sl-change="toggleDeadlines"
+          @change="toggleDeadlines"
           id="filter-show-deadlines-drawer"
-          >Show speaker deadlines</sl-switch
+          >Show speaker deadlines</wa-switch
         >
       </div>
       <div class="d-flex flex-col items-start gap-xs">
-        <sl-button variant="primary" size="large" @click="closeDrawer"
+        <wa-button variant="brand" size="large" data-drawer="close"
           >Show {{ filtersStore.nonDeadlineFilteredCount }} of
-          {{ filtersStore.nonDeadlineFutureCount }} events</sl-button
+          {{ filtersStore.nonDeadlineFutureCount }} events</wa-button
         >
-        <sl-button
+        <wa-button
           v-if="filtersStore.isChanged"
           id="filter-reset"
           @click="resetFilters"
-          type="primary"
+          variant="brand"
           name="filter-reset"
           data-testid="drawer-reset"
         >
-          <Icon name="filter-circle-xmark" /> Reset Filters
-        </sl-button>
+          <wa-icon slot="start" name="filter-circle-xmark" auto-width></wa-icon>
+          Reset Filters
+        </wa-button>
       </div>
     </div>
-  </sl-drawer>
+  </wa-drawer>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import Icon from './Icon.vue';
 import filtersStore from '../store/filtersStore';
 
 const awarenessDaysSwitch = ref(null);
@@ -103,15 +106,6 @@ onMounted(() => {
     }
   });
 });
-
-function emitCloseEvent() {
-  const event = new CustomEvent('filters:close');
-  document.dispatchEvent(event);
-}
-
-function closeDrawer() {
-  emitCloseEvent();
-}
 
 function resetFilters() {
   filtersStore.resetFilters();
@@ -139,7 +133,7 @@ function updateFilter(
 </script>
 
 <style scoped>
-sl-radio-group {
+wa-radio-group {
   border: 1px solid var(--s-color-border);
   border-radius: var(--p-space-2xs);
   padding: var(--p-space-xs);

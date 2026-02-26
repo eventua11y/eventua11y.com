@@ -49,7 +49,15 @@ When adding new pages or interactive components, add both layers:
 - An axe scan for the new page using the shared `runAxeScan()` helper
 - Targeted assertions for any interactive elements, landmarks, or headings
 
-**Shoelace shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Shoelace web component buttons (`sl-button`, `sl-icon-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. The axe scan validates the actual computed accessible name.
+**Web component shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Web Awesome buttons (`wa-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. For icon-only buttons, check the child `wa-icon`'s `label` attribute. The axe scan validates the actual computed accessible name.
+
+## Sanity CMS Datasets
+
+This project has two Sanity datasets: **`production`** and **`test`**.
+
+- **Never** create dummy, test, placeholder, or seed data in the `production` dataset. The production dataset contains only real, editorial content that powers the live site.
+- All test or dummy documents **must** be created in the **`test`** dataset.
+- When using Sanity MCP tools, always verify the `dataset` parameter before any write operation. If the data is for testing, experimentation, or development, set the dataset to `test`.
 
 ### Labeling Rules
 
