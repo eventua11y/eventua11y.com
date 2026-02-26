@@ -69,8 +69,6 @@
 }
 
 .event__dateRange {
-  display: inline-flex;
-  gap: 0.3em;
   white-space: nowrap;
 }
 
