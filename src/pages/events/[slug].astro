@@ -153,6 +153,12 @@ const jsonLd = {
         type={event.type}
       />
 
+      <EventDelivery
+        client:load
+        attendanceMode={event.attendanceMode as any}
+        location={event.location}
+      />
+
       <div class="event-detail__badges">
         {
           isDedicatedToAccessibility && (
@@ -176,12 +182,6 @@ const jsonLd = {
           )
         }
       </div>
-
-      <EventDelivery
-        client:load
-        attendanceMode={event.attendanceMode as any}
-        location={event.location}
-      />
 
       {
         allSpeakers.length > 0 && (
