@@ -21,6 +21,7 @@
 .event__dates {
   display: flex;
   flex-wrap: wrap;
+  column-gap: var(--p-space-m);
   font-size: var(--p-step--1);
   align-items: center;
 }
@@ -78,7 +79,7 @@
 }
 
 .event__dateRange {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .event__meta .event__dates:has(.event__progress) {
