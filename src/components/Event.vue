@@ -11,10 +11,12 @@ const props = withDefaults(
     event: EventType;
     showDate?: boolean;
     showCountdown?: boolean;
+    showEnded?: boolean;
   }>(),
   {
     showDate: true,
     showCountdown: false,
+    showEnded: false,
   }
 );
 
@@ -189,6 +191,7 @@ const speakerDisplay = computed(() => {
       :day="event.day"
       :type="event.type"
       :showCountdown="showCountdown"
+      :showEnded="showEnded"
     />
 
     <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
@@ -226,7 +229,7 @@ const speakerDisplay = computed(() => {
           :aria-label="`Accessibility highlights for ${event.title}`"
         >
           <li v-for="child in event.children" :key="child._id">
-            <EventChild :event="child" />
+            <EventChild :event="child" :showEnded="showEnded" />
           </li>
         </ol>
       </details>

@@ -6,8 +6,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 /** Wraps time abbreviations in <abbr> elements. */
-const HR = '<abbr title="hours">hr</abbr>';
-const M = '<abbr title="minutes">m</abbr>';
+const HR = ' <abbr title="hours">hr</abbr>';
+const M = ' <abbr title="minutes">m</abbr>';
 
 export interface ProgressOptions {
   dateStart: string;
@@ -16,6 +16,7 @@ export interface ProgressOptions {
   day?: boolean;
   type?: string;
   showCountdown?: boolean;
+  showEnded?: boolean;
   useLocalTimezone?: boolean;
   userTimezone?: string;
 }
@@ -234,4 +235,47 @@ export function getCountdownLabel(
 
   const minutesUntil = Math.max(0, getEventStart(options).diff(now, 'minute'));
   return `Starts in ${formatDuration(minutesUntil)}`;
+}
+
+/**
+ * Whether the event has ended (now is after the event end).
+ *
+ * Excluded (same as isHappeningNow):
+ * - Theme/awareness days and deadlines
+ * - Single-day all-day events
+ * - Events without a dateEnd
+ *
+ * Only returns true when showEnded is enabled (Today section only).
+ */
+export function hasEnded(now: Dayjs, options: ProgressOptions): boolean {
+  if (!options.showEnded) return false;
+  if (options.type === 'theme') return false;
+  if (options.type === 'deadline') return false;
+  if (options.day && !isMultiDayAllDay(options)) return false;
+  if (!options.dateEnd) return false;
+
+  return now.isAfter(getEventEnd(options));
+}
+
+/**
+ * Human-readable time-since-ended label (HTML with <abbr> elements).
+ *
+ * - "Ended less than 1 m ago"
+ * - "Ended 5 m ago"
+ * - "Ended 2 hr 15 m ago"
+ */
+export function getTimeSinceEnded(
+  now: Dayjs,
+  options: ProgressOptions
+): string {
+  if (!hasEnded(now, options)) return '';
+
+  const minutesSince = Math.max(0, now.diff(getEventEnd(options), 'minute'));
+
+  // Less precise than "time remaining": just show hours once past 60 m
+  if (minutesSince >= 60) {
+    const hours = Math.floor(minutesSince / 60);
+    return `Ended ${hours}${HR} ago`;
+  }
+  return `Ended ${formatDuration(minutesSince)} ago`;
 }

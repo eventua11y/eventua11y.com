@@ -9,12 +9,14 @@ import {
   isMultiDayAllDay,
   isHappeningNow,
   isStartingSoon,
+  hasEnded,
   isLastDayOfAllDay,
   getEffectiveEnd,
   getProgress,
   endsToday,
   getTimeRemaining,
   getCountdownLabel,
+  getTimeSinceEnded,
   type ProgressOptions,
 } from './progressUtils';
 
@@ -29,8 +31,8 @@ dayjs.extend(timezone);
 const now = (iso: string) => dayjs.utc(iso);
 
 /** <abbr> helpers matching the module constants. */
-const HR = '<abbr title="hours">hr</abbr>';
-const M = '<abbr title="minutes">m</abbr>';
+const HR = ' <abbr title="hours">hr</abbr>';
+const M = ' <abbr title="minutes">m</abbr>';
 
 // ---------------------------------------------------------------------------
 // resolveTimezone
@@ -753,5 +755,146 @@ describe('getCountdownLabel', () => {
     const result = getCountdownLabel(now('2026-06-15T10:45:00Z'), futureEvent);
     expect(result).toContain('<abbr title="hours">hr</abbr>');
     expect(result).toContain('<abbr title="minutes">m</abbr>');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// hasEnded
+// ---------------------------------------------------------------------------
+
+describe('hasEnded', () => {
+  const endedEvent: ProgressOptions = {
+    dateStart: '2026-06-15T14:00:00Z',
+    dateEnd: '2026-06-15T16:00:00Z',
+    timezone: 'UTC',
+    showEnded: true,
+  };
+
+  it('returns false when showEnded is off', () => {
+    expect(
+      hasEnded(now('2026-06-15T17:00:00Z'), { ...endedEvent, showEnded: false })
+    ).toBe(false);
+  });
+
+  it('returns false when showEnded is not set', () => {
+    const { showEnded: _, ...noFlag } = endedEvent;
+    expect(hasEnded(now('2026-06-15T17:00:00Z'), noFlag)).toBe(false);
+  });
+
+  it('returns true after the event has ended', () => {
+    expect(hasEnded(now('2026-06-15T17:00:00Z'), endedEvent)).toBe(true);
+  });
+
+  it('returns false while the event is still in progress', () => {
+    expect(hasEnded(now('2026-06-15T15:00:00Z'), endedEvent)).toBe(false);
+  });
+
+  it('returns false before the event starts', () => {
+    expect(hasEnded(now('2026-06-15T13:00:00Z'), endedEvent)).toBe(false);
+  });
+
+  it('excludes themes', () => {
+    expect(
+      hasEnded(now('2026-06-15T17:00:00Z'), { ...endedEvent, type: 'theme' })
+    ).toBe(false);
+  });
+
+  it('excludes deadlines', () => {
+    expect(
+      hasEnded(now('2026-06-15T17:00:00Z'), {
+        ...endedEvent,
+        type: 'deadline',
+      })
+    ).toBe(false);
+  });
+
+  it('excludes single-day all-day events', () => {
+    expect(
+      hasEnded(now('2026-06-15T17:00:00Z'), { ...endedEvent, day: true })
+    ).toBe(false);
+  });
+
+  it('returns false when dateEnd is missing', () => {
+    const { dateEnd: _, ...noEnd } = endedEvent;
+    expect(hasEnded(now('2026-06-15T17:00:00Z'), noEnd)).toBe(false);
+  });
+
+  it('works for multi-day all-day events after their end date', () => {
+    const multiDay: ProgressOptions = {
+      dateStart: '2026-06-15T00:00:00Z',
+      dateEnd: '2026-06-18T00:00:00Z',
+      day: true,
+      showEnded: true,
+    };
+    expect(hasEnded(now('2026-06-19T12:00:00Z'), multiDay)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getTimeSinceEnded
+// ---------------------------------------------------------------------------
+
+describe('getTimeSinceEnded', () => {
+  const endedEvent: ProgressOptions = {
+    dateStart: '2026-06-15T14:00:00Z',
+    dateEnd: '2026-06-15T16:00:00Z',
+    timezone: 'UTC',
+    showEnded: true,
+  };
+
+  it('returns empty string when event has not ended', () => {
+    expect(getTimeSinceEnded(now('2026-06-15T15:00:00Z'), endedEvent)).toBe('');
+  });
+
+  it('returns empty string when showEnded is off', () => {
+    expect(
+      getTimeSinceEnded(now('2026-06-15T17:00:00Z'), {
+        ...endedEvent,
+        showEnded: false,
+      })
+    ).toBe('');
+  });
+
+  it('returns "Ended less than 1 m ago" when under a minute has passed', () => {
+    expect(getTimeSinceEnded(now('2026-06-15T16:00:20Z'), endedEvent)).toBe(
+      `Ended less than 1${M} ago`
+    );
+  });
+
+  it('returns minutes when under an hour has passed', () => {
+    expect(getTimeSinceEnded(now('2026-06-15T16:05:00Z'), endedEvent)).toBe(
+      `Ended 5${M} ago`
+    );
+  });
+
+  it('returns only hours (rounded down) when over an hour has passed', () => {
+    expect(getTimeSinceEnded(now('2026-06-15T18:15:00Z'), endedEvent)).toBe(
+      `Ended 2${HR} ago`
+    );
+  });
+
+  it('returns only hours when minutes are zero', () => {
+    expect(getTimeSinceEnded(now('2026-06-15T18:00:00Z'), endedEvent)).toBe(
+      `Ended 2${HR} ago`
+    );
+  });
+
+  it('includes <abbr> element for hours in output', () => {
+    const result = getTimeSinceEnded(now('2026-06-15T18:15:00Z'), endedEvent);
+    expect(result).toContain('<abbr title="hours">hr</abbr>');
+    expect(result).not.toContain('<abbr title="minutes">m</abbr>');
+  });
+
+  it('uses timezone when calculating time since ended', () => {
+    const tzEvent: ProgressOptions = {
+      dateStart: '2026-06-15T14:00:00Z',
+      dateEnd: '2026-06-15T16:00:00Z',
+      timezone: 'America/New_York',
+      showEnded: true,
+    };
+    // 30 minutes after end
+    expect(getTimeSinceEnded(now('2026-06-15T16:30:00Z'), tzEvent)).toBe(
+      `Ended 30${M} ago`
+    );
   });
 });
