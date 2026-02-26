@@ -72,6 +72,10 @@
   white-space: nowrap;
 }
 
+.event__meta .event__dates:has(.event__progress) {
+  flex: 1 1 100%;
+}
+
 .event__description {
   order: 4;
 }

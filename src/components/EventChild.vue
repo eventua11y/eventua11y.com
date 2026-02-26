@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import dayjs from 'dayjs';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
 import type { ChildEvent } from '../types/event';
+import { isHappeningNow } from '../utils/progressUtils';
 
 const props = defineProps<{
   event: ChildEvent;
 }>();
+
+const now = ref(dayjs());
+let timer: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+  timer = setInterval(() => {
+    now.value = dayjs();
+  }, 60_000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+
+/** Whether the child event is currently in progress (hides duration). */
+const inProgress = computed(() =>
+  isHappeningNow(now.value, {
+    dateStart: props.event.dateStart || '',
+    dateEnd: props.event.dateEnd,
+    timezone: props.event.timezone,
+    day: props.event.day,
+    type: props.event.type,
+  })
+);
 
 /** Mapping of event format codes to display strings. */
 const formatStrings: Record<string, string> = {
@@ -88,7 +114,7 @@ const speakersList = computed(() => {
           :day="event.day"
           :type="event.type"
         />
-        <template v-if="event.dateEnd">
+        <template v-if="event.dateEnd && !inProgress">
           · <EventDuration :event="event" />
         </template>
       </template>

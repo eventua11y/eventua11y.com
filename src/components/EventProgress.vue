@@ -105,7 +105,7 @@ const accessibleLabel = computed(() => `${progress.value}% complete`);
   flex-basis: 100%;
 }
 
-@media (min-width: 580px) {
+@media (min-width: 768px) {
   .event__progress {
     margin-left: auto;
     flex-basis: auto;

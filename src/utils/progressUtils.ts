@@ -6,8 +6,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 /** Wraps time abbreviations in <abbr> elements. */
-const HR = '<abbr title="hours">hr</abbr>';
-const M = '<abbr title="minutes">m</abbr>';
+const HR = ' <abbr title="hours">hr</abbr>';
+const M = ' <abbr title="minutes">m</abbr>';
 
 export interface ProgressOptions {
   dateStart: string;
