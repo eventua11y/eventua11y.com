@@ -25,6 +25,7 @@ export interface Event {
   isFree?: boolean;
   website?: string;
   parent?: { _ref: string };
+  parentEvent?: { title: string; slug?: { current: string } };
   children?: ChildEvent[];
   isParent?: boolean;
   speakers?: Speaker[];

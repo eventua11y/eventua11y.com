@@ -38,6 +38,10 @@ const metaDescription = event.description
 // Check states
 const callForSpeakersOpen = isCallForSpeakersOpen(event);
 const hasChildren = Array.isArray(event.children) && event.children.length > 0;
+const isChildEvent = !!event.parent;
+const parentUrl = event.parentEvent?.slug?.current
+  ? `/events/${event.parentEvent.slug.current}`
+  : undefined;
 const isDedicatedToAccessibility =
   !event.isParent && !event.parent && event.type !== 'theme';
 
@@ -105,6 +109,13 @@ const jsonLd = {
   ...(event.isFree && {
     isAccessibleForFree: true,
   }),
+  ...(isChildEvent && event.parentEvent && {
+    superEvent: {
+      '@type': 'Event',
+      name: event.parentEvent.title,
+      ...(parentUrl && { url: `https://eventua11y.com${parentUrl}` }),
+    },
+  }),
 };
 ---
 
@@ -118,6 +129,19 @@ const jsonLd = {
       <h1 class="event-detail__title" itemprop="name">
         {event.title}
       </h1>
+
+      {
+        isChildEvent && event.parentEvent && (
+          <p class="event-detail__parent text-small text-muted">
+            Part of{' '}
+            {parentUrl ? (
+              <a href={parentUrl}>{event.parentEvent.title}</a>
+            ) : (
+              <span>{event.parentEvent.title}</span>
+            )}
+          </p>
+        )
+      }
 
       <EventDateWithTimezone
         client:only="vue"
