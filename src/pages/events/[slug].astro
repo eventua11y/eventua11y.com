@@ -227,7 +227,12 @@ const jsonLd = {
       {
         !isDedicatedToAccessibility && hasChildren && (
           <section class="event-detail__children flow flow-s">
-            <h2>Accessibility highlights: {enumeratedChildTypes}</h2>
+            <hgroup role="group" aria-roledescription="Heading group">
+              <h2>Accessibility highlights</h2>
+              <p aria-roledescription="subtitle" class="text-muted">
+                {enumeratedChildTypes}
+              </p>
+            </hgroup>
             <ol
               role="list"
               class="event-detail__children-list"
