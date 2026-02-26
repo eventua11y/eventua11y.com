@@ -18,6 +18,13 @@
       v-html="timeRemaining"
     ></span>
   </div>
+  <!-- Ended: event finished earlier today (Today section only) -->
+  <div v-else-if="hasEnded" class="event__progress">
+    <span
+      class="event__progress-label text-muted"
+      v-html="timeSinceEnded"
+    ></span>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -29,9 +36,11 @@ import userStore from '../store/userStore';
 import {
   isHappeningNow as _isHappeningNow,
   isStartingSoon as _isStartingSoon,
+  hasEnded as _hasEnded,
   getProgress,
   getTimeRemaining,
   getCountdownLabel,
+  getTimeSinceEnded,
   type ProgressOptions,
 } from '../utils/progressUtils';
 
@@ -46,12 +55,14 @@ const props = withDefaults(
     day?: boolean;
     type?: string;
     showCountdown?: boolean;
+    showEnded?: boolean;
   }>(),
   {
     timezone: '',
     day: false,
     type: 'event',
     showCountdown: false,
+    showEnded: false,
   }
 );
 
@@ -77,6 +88,7 @@ const options = computed<ProgressOptions>(() => ({
   day: props.day,
   type: props.type,
   showCountdown: props.showCountdown,
+  showEnded: props.showEnded,
   useLocalTimezone: userStore.useLocalTimezone,
   userTimezone: userStore.timezone,
 }));
@@ -93,6 +105,10 @@ const timeRemaining = computed(() =>
 );
 const countdownLabel = computed(() =>
   getCountdownLabel(now.value, options.value)
+);
+const hasEnded = computed(() => _hasEnded(now.value, options.value));
+const timeSinceEnded = computed(() =>
+  getTimeSinceEnded(now.value, options.value)
 );
 const accessibleLabel = computed(() => `${progress.value}% complete`);
 </script>
