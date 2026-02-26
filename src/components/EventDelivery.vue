@@ -20,11 +20,13 @@ const props = withDefaults(
     attendanceMode?: AttendanceMode;
     location?: string;
     website?: string;
+    headingId?: string;
   }>(),
   {
     attendanceMode: 'none',
     location: 'International',
     website: undefined,
+    headingId: undefined,
   }
 );
 
@@ -99,7 +101,11 @@ const locationIcon = computed(() =>
 
     <template v-if="website">
       <span aria-hidden="true"> · </span>
-      <a :href="website" rel="noopener noreferrer" class="event__website-link"
+      <a
+        :href="website"
+        rel="noopener noreferrer"
+        class="event__website-link"
+        :aria-describedby="headingId"
         >Event website<span class="sr-only"> (opens external site)</span></a
       >
     </template>
