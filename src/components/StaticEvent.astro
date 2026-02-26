@@ -94,7 +94,9 @@ const displayLocation = event.location || 'International';
     >
       <h3 class="event__title" itemprop="name">
         {isTheme && event.website ? (
-          <a href={event.website} rel="noopener noreferrer">{event.title}</a>
+          <a href={event.website} rel="noopener noreferrer">
+            {event.title}
+          </a>
         ) : eventUrl ? (
           <a href={eventUrl}>{event.title}</a>
         ) : (
@@ -179,7 +181,13 @@ const displayLocation = event.location || 'International';
           {event.website && !isTheme && (
             <Fragment>
               <span aria-hidden="true"> · </span>
-              <a href={event.website} rel="noopener noreferrer" class="event__website-link">Event website<span class="sr-only"> (opens external site)</span></a>
+              <a
+                href={event.website}
+                rel="noopener noreferrer"
+                class="event__website-link"
+              >
+                Event website<span class="sr-only"> (opens external site)</span>
+              </a>
             </Fragment>
           )}
         </div>
@@ -199,7 +207,13 @@ const displayLocation = event.location || 'International';
           {event.website && !isTheme && (
             <Fragment>
               <span aria-hidden="true"> · </span>
-              <a href={event.website} rel="noopener noreferrer" class="event__website-link">Event website<span class="sr-only"> (opens external site)</span></a>
+              <a
+                href={event.website}
+                rel="noopener noreferrer"
+                class="event__website-link"
+              >
+                Event website<span class="sr-only"> (opens external site)</span>
+              </a>
             </Fragment>
           )}
         </div>

@@ -257,8 +257,6 @@ const jsonLd = {
         )
       }
 
-
-
       {
         !isDedicatedToAccessibility && hasChildren && (
           <section class="event-detail__children flow flow-s">
@@ -284,7 +282,9 @@ const jsonLd = {
             {event.website && (
               <p>
                 Refer to the{' '}
-                <a href={event.website} rel="noopener noreferrer">official event website</a>{' '}
+                <a href={event.website} rel="noopener noreferrer">
+                  official event website
+                </a>{' '}
                 for the full schedule.
               </p>
             )}
@@ -325,15 +325,11 @@ const jsonLd = {
     font-size: var(--p-step-0);
   }
 
-
-
   .event-detail__badges {
     display: flex;
     flex-wrap: wrap;
     gap: var(--p-space-3xs);
   }
-
-
 
   .event-detail__children h2 {
     font-size: var(--p-step-2);
