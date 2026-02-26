@@ -230,12 +230,14 @@ const jsonLd = {
             <h2>Accessibility highlights: {enumeratedChildTypes}</h2>
             <ol
               role="list"
-              class="flow flow-xs"
+              class="event-detail__children-list"
               aria-label={`Accessibility sessions for ${event.title}`}
             >
               {event.children!.map((child) => (
                 <li>
-                  <EventChild client:load event={child} />
+                  <wa-card appearance="outlined">
+                    <EventChild client:load event={child} />
+                  </wa-card>
                 </li>
               ))}
             </ol>
@@ -283,5 +285,16 @@ const jsonLd = {
 
   .event-detail__children h2 {
     font-size: var(--p-step-2);
+  }
+
+  .event-detail__children-list {
+    display: grid;
+    gap: var(--p-space-xs);
+    list-style: none;
+    padding: 0;
+  }
+
+  .event-detail__children-list wa-card {
+    --spacing: var(--p-space-s);
   }
 </style>
