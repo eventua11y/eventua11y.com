@@ -185,6 +185,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
     `
     *[_type == "event" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
       ...,
+      "website": coalesce(website, parent->website),
       "attendanceMode": coalesce(attendanceMode, parent->attendanceMode),
       "location": coalesce(location, parent->location),
       "parentEvent": parent->{ title, slug },
