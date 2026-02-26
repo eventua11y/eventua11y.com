@@ -24,9 +24,11 @@
           {{ currentTimezone }}
         </abbr>
       </template>
+      <template v-if="isDeadline">
+        <span> </span>
+        <wa-badge variant="danger" pill>Deadline</wa-badge>
+      </template>
     </span>
-
-    <wa-badge v-if="isDeadline" variant="danger" pill>Deadline</wa-badge>
 
     <EventProgress
       :dateStart="dateStart"

@@ -65,9 +65,9 @@ const displayLocation = event.location || 'International';
         />
         <span class="event__dateRange">
           {formattedRange}
-          {!isInternational && ' UTC'}
+          {!isInternational && ' UTC'}{' '}
+          <span class="badge badge--danger">Deadline</span>
         </span>
-        <span class="badge badge--danger">Deadline</span>
       </div>
       <span class="event__title">
         Submit proposals for <a href={event.website}>{event.title}</a>
