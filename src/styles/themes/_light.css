@@ -27,6 +27,7 @@
   /* Masthead */
   --c-masthead-color-bg: var(--s-color-primary);
   --c-masthead-color-fg: var(--s-color-on-primary);
+  --c-masthead-logo-color: var(--c-masthead-color-fg);
   --c-masthead-focus-ring-color: var(--p-color-white);
 
   /* Navigation */
@@ -37,6 +38,7 @@
 
   /* Footer */
   --c-footer-color-bg: var(--p-color-grey-900);
+  --c-footer-logo-color: var(--p-color-grey-200);
   --c-footer-color-muted-fg: var(--p-color-grey-400);
   --c-footer-color-link: var(--s-color-primary);
   --c-footer-color-link-hover: var(--s-color-secondary);

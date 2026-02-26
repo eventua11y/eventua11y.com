@@ -37,6 +37,7 @@
 }
 
 .masthead .logo {
+  color: var(--c-masthead-logo-color);
   max-width: 12rem;
 }
 
