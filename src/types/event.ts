@@ -7,6 +7,12 @@ export interface Speaker {
   name: string;
 }
 
+export interface Organizer {
+  _id: string;
+  name: string;
+  website?: string;
+}
+
 export interface Event {
   _id: string;
   _type?: string;
@@ -29,6 +35,7 @@ export interface Event {
   children?: ChildEvent[];
   isParent?: boolean;
   speakers?: Speaker[];
+  organizer?: Organizer;
 }
 
 export interface ChildEvent {

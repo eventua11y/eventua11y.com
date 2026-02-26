@@ -56,6 +56,7 @@ interface RawEvent {
   children?: RawEvent[];
   isParent?: boolean;
   speakers?: Array<{ _id: string; name: string }>;
+  organizer?: { _id: string; name: string; website?: string };
 }
 
 /**
@@ -188,6 +189,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "location": coalesce(location, parent->location),
       "parentEvent": parent->{ title, slug },
       "speakers": speakers[]->{ _id, name },
+      "organizer": organizer->{ _id, name, website },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
         ...,
         "speakers": speakers[]->{ _id, name }

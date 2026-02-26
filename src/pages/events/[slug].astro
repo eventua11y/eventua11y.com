@@ -109,6 +109,13 @@ const jsonLd = {
   ...(event.isFree && {
     isAccessibleForFree: true,
   }),
+  ...(event.organizer && {
+    organizer: {
+      '@type': 'Organization',
+      name: event.organizer.name,
+      ...(event.organizer.website && { url: event.organizer.website }),
+    },
+  }),
   ...(isChildEvent &&
     event.parentEvent && {
       superEvent: {
@@ -139,6 +146,30 @@ const jsonLd = {
               <a href={parentUrl}>{event.parentEvent.title}</a>
             ) : (
               <span>{event.parentEvent.title}</span>
+            )}
+          </p>
+        )
+      }
+
+      {
+        event.organizer && (
+          <p
+            class="event-detail__organizer text-small text-muted"
+            itemprop="organizer"
+            itemscope
+            itemtype="https://schema.org/Organization"
+          >
+            Organised by{' '}
+            {event.organizer.website ? (
+              <a
+                href={event.organizer.website}
+                itemprop="url"
+                rel="noopener noreferrer"
+              >
+                <span itemprop="name">{event.organizer.name}</span>
+              </a>
+            ) : (
+              <span itemprop="name">{event.organizer.name}</span>
             )}
           </p>
         )
