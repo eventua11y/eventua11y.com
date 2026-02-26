@@ -19,7 +19,6 @@
   display: flex;
   flex-wrap: wrap;
   font-size: var(--p-step--1);
-  gap: 0.3em;
   align-items: center;
 }
 

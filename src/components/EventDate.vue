@@ -26,6 +26,7 @@
       </template>
     </span>
 
+    <span v-if="isDeadline"> </span>
     <wa-badge v-if="isDeadline" variant="danger" pill>Deadline</wa-badge>
 
     <EventProgress
