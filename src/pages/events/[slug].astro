@@ -109,13 +109,14 @@ const jsonLd = {
   ...(event.isFree && {
     isAccessibleForFree: true,
   }),
-  ...(isChildEvent && event.parentEvent && {
-    superEvent: {
-      '@type': 'Event',
-      name: event.parentEvent.title,
-      ...(parentUrl && { url: `https://eventua11y.com${parentUrl}` }),
-    },
-  }),
+  ...(isChildEvent &&
+    event.parentEvent && {
+      superEvent: {
+        '@type': 'Event',
+        name: event.parentEvent.title,
+        ...(parentUrl && { url: `https://eventua11y.com${parentUrl}` }),
+      },
+    }),
 };
 ---
 
