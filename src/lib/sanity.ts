@@ -173,6 +173,9 @@ export async function getEvents(): Promise<{
 /**
  * Fetches a single event by its slug, including resolved speakers
  * and child events. Returns null if no matching event is found.
+ *
+ * Child events (those with a parent reference) inherit attendanceMode
+ * and location from their parent when their own values are not set.
  */
 export async function getEventBySlug(slug: string): Promise<Event | null> {
   const client = getSanityClient();
@@ -181,6 +184,8 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
     `
     *[_type == "event" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
       ...,
+      "attendanceMode": coalesce(attendanceMode, parent->attendanceMode),
+      "location": coalesce(location, parent->location),
       "speakers": speakers[]->{ _id, name },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
         ...,
