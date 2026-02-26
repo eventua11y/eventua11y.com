@@ -94,11 +94,7 @@ const displayLocation = event.location || 'International';
       data-event-type={event.type}
     >
       <h3 id={headingId} class="event__title" itemprop="name">
-        {isTheme && event.website ? (
-          <a href={event.website} rel="noopener noreferrer">
-            {event.title}
-          </a>
-        ) : eventUrl ? (
+        {eventUrl ? (
           <a href={eventUrl}>{event.title}</a>
         ) : (
           <span>{event.title}</span>
