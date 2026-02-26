@@ -236,7 +236,7 @@ const jsonLd = {
               {event.children!.map((child) => (
                 <li>
                   <wa-card appearance="outlined">
-                    <EventChild client:load event={child} />
+                    <EventChild client:load event={child} showEnded={true} />
                   </wa-card>
                 </li>
               ))}
