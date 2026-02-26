@@ -271,5 +271,11 @@ export function getTimeSinceEnded(
   if (!hasEnded(now, options)) return '';
 
   const minutesSince = Math.max(0, now.diff(getEventEnd(options), 'minute'));
+
+  // Less precise than "time remaining": just show hours once past 60 m
+  if (minutesSince >= 60) {
+    const hours = Math.floor(minutesSince / 60);
+    return `Ended ${hours}${HR} ago`;
+  }
   return `Ended ${formatDuration(minutesSince)} ago`;
 }

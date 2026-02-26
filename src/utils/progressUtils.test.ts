@@ -867,9 +867,9 @@ describe('getTimeSinceEnded', () => {
     );
   });
 
-  it('returns hours and minutes', () => {
+  it('returns only hours (rounded down) when over an hour has passed', () => {
     expect(getTimeSinceEnded(now('2026-06-15T18:15:00Z'), endedEvent)).toBe(
-      `Ended 2${HR} 15${M} ago`
+      `Ended 2${HR} ago`
     );
   });
 
@@ -879,10 +879,10 @@ describe('getTimeSinceEnded', () => {
     );
   });
 
-  it('includes <abbr> elements in output', () => {
+  it('includes <abbr> element for hours in output', () => {
     const result = getTimeSinceEnded(now('2026-06-15T18:15:00Z'), endedEvent);
     expect(result).toContain('<abbr title="hours">hr</abbr>');
-    expect(result).toContain('<abbr title="minutes">m</abbr>');
+    expect(result).not.toContain('<abbr title="minutes">m</abbr>');
   });
 
   it('uses timezone when calculating time since ended', () => {

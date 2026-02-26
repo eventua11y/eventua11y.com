@@ -4,11 +4,17 @@ import dayjs from 'dayjs';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
 import type { ChildEvent } from '../types/event';
-import { isHappeningNow } from '../utils/progressUtils';
+import { isHappeningNow, hasEnded as _hasEnded } from '../utils/progressUtils';
 
-const props = defineProps<{
-  event: ChildEvent;
-}>();
+const props = withDefaults(
+  defineProps<{
+    event: ChildEvent;
+    showEnded?: boolean;
+  }>(),
+  {
+    showEnded: false,
+  }
+);
 
 const now = ref(dayjs());
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -23,16 +29,23 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 
+/** Common progress options for this child event. */
+const progressOptions = computed(() => ({
+  dateStart: props.event.dateStart || '',
+  dateEnd: props.event.dateEnd,
+  timezone: props.event.timezone,
+  day: props.event.day,
+  type: props.event.type,
+  showEnded: props.showEnded,
+}));
+
 /** Whether the child event is currently in progress (hides duration). */
 const inProgress = computed(() =>
-  isHappeningNow(now.value, {
-    dateStart: props.event.dateStart || '',
-    dateEnd: props.event.dateEnd,
-    timezone: props.event.timezone,
-    day: props.event.day,
-    type: props.event.type,
-  })
+  isHappeningNow(now.value, progressOptions.value)
 );
+
+/** Whether the child event has ended (hides duration in Today section). */
+const ended = computed(() => _hasEnded(now.value, progressOptions.value));
 
 /** Mapping of event format codes to display strings. */
 const formatStrings: Record<string, string> = {
@@ -113,8 +126,9 @@ const speakersList = computed(() => {
           :timezone="event.timezone"
           :day="event.day"
           :type="event.type"
+          :showEnded="showEnded"
         />
-        <template v-if="event.dateEnd && !inProgress">
+        <template v-if="event.dateEnd && !inProgress && !ended">
           · <EventDuration :event="event" />
         </template>
       </template>
