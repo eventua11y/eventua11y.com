@@ -288,15 +288,15 @@ describe('formatDateRange', () => {
   });
 
   describe('same-day timed events', () => {
-    it('deduplicates the date, showing time range only', () => {
+    it('deduplicates AM/PM when both times are in the same period', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
         dateEnd: '2026-03-08T17:00:00Z',
         timezone: 'UTC',
         locale: 'en',
       });
-      // "March 8, 2026 2:00 PM – 5:00 PM"
-      expect(result).toBe('March 8, 2026 2:00 PM \u2013 5:00 PM');
+      // Both PM — AM/PM shown only on end time
+      expect(result).toBe('March 8, 2026 2:00 \u2013 5:00 PM');
     });
 
     it('shows AM/PM on both times when they differ', () => {
@@ -306,8 +306,30 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // "March 8, 2026 10:00 AM – 5:00 PM"
+      // AM → PM — both shown
       expect(result).toBe('March 8, 2026 10:00 AM \u2013 5:00 PM');
+    });
+
+    it('deduplicates AM/PM for morning events', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T08:00:00Z',
+        dateEnd: '2026-03-08T11:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+      });
+      // Both AM — AM/PM shown only on end time
+      expect(result).toBe('March 8, 2026 8:00 \u2013 11:00 AM');
+    });
+
+    it('skips AM/PM dedup for 24-hour locales', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T14:00:00Z',
+        dateEnd: '2026-03-08T17:00:00Z',
+        timezone: 'UTC',
+        locale: 'de',
+      });
+      // 24-hour locale — no AM/PM to deduplicate
+      expect(result).toBe('8. März 2026 14:00 \u2013 17:00');
     });
 
     it('returns single date for same-day date-only events', () => {
@@ -421,8 +443,8 @@ describe('formatDateRange', () => {
         userTimezone: 'Europe/London',
         locale: 'en',
       });
-      // In London (GMT), these are 14:00–17:00 on Mar 8
-      expect(result).toBe('March 8, 2026 2:00 PM \u2013 5:00 PM');
+      // In London (GMT), these are 14:00–17:00 on Mar 8 (both PM)
+      expect(result).toBe('March 8, 2026 2:00 \u2013 5:00 PM');
     });
 
     it('uses UTC for international events (no timezone)', () => {
@@ -431,8 +453,8 @@ describe('formatDateRange', () => {
         dateEnd: '2026-03-08T17:00:00Z',
         locale: 'en',
       });
-      // No timezone = international, should use UTC values
-      expect(result).toBe('March 8, 2026 2:00 PM \u2013 5:00 PM');
+      // No timezone = international, should use UTC values (both PM)
+      expect(result).toBe('March 8, 2026 2:00 \u2013 5:00 PM');
     });
   });
 

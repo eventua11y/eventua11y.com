@@ -17,10 +17,12 @@ Event dates are formatted by `formatDateRange()` in `src/utils/dateUtils.ts`. Th
 
 | Scenario                   | English example                                     | What's deduplicated |
 | -------------------------- | --------------------------------------------------- | ------------------- |
-| Same day                   | March 8, 2026 2:00 PM – 5:00 PM                     | Date (shown once)   |
-| Same day, AM/PM differs    | March 8, 2026 10:00 AM – 5:00 PM                    | Date (shown once)   |
+| Same day, same AM/PM       | March 8, 2026 2:00–5:00 PM                          | Date + AM/PM        |
+| Same day, AM/PM differs    | March 8, 2026 10:00 AM – 5:00 PM                    | Date                |
 | Multi-day, same year       | February 24 9:00 AM – February 25, 2026 4:00 PM     | Year (on end only)  |
 | Multi-day, different years | December 30, 2026 2:00 PM – January 2, 2027 5:00 PM | Nothing             |
+
+AM/PM deduplication only applies to 12-hour locales (English). 24-hour locales (German, French, Spanish) have no AM/PM to deduplicate.
 
 ### Date-only events (all-day, themes, deadlines)
 
@@ -65,4 +67,4 @@ All ranges use an en-dash (`–`, U+2013) with regular spaces on either side.
 
 ## Implementation
 
-The `RANGE_FORMATS` lookup table in `dateUtils.ts` maps each locale to dayjs format strings for the start and end of deduplicated ranges. The function checks whether the start and end dates share the same day, month, or year, and selects the appropriate format pair. See `src/utils/dateUtils.ts` for the full implementation and `src/utils/dateUtils.test.ts` for 52 test cases covering all scenarios.
+The `RANGE_FORMATS` lookup table in `dateUtils.ts` maps each locale to dayjs format strings for the start and end of deduplicated ranges. The function checks whether the start and end dates share the same day, month, or year, and selects the appropriate format pair. For same-day timed events, `deduplicateAmPm()` checks whether both times share the same AM/PM period and omits it from the start time when they do. See `src/utils/dateUtils.ts` for the full implementation and `src/utils/dateUtils.test.ts` for 54 test cases covering all scenarios.

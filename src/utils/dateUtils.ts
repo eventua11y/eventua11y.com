@@ -178,7 +178,8 @@ const RANGE_FORMATS: Record<
  * of shared date components (month, year).
  *
  * Examples (en locale):
- *   Same day, timed:       "March 8, 2026 2:00 PM – 5:00 PM"
+ *   Same day, same period:  "March 8, 2026 2:00–5:00 PM"
+ *   Same day, diff period:  "March 8, 2026 10:00 AM – 5:00 PM"
  *   Multi-day, timed:      "February 24 9:00 AM – February 25, 2026 4:00 PM"
  *   Same month, date-only: "March 8 – 13, 2026"
  *   Different months:      "March 28 – April 2, 2026"
@@ -224,7 +225,8 @@ export function formatDateRange(options: {
     if (isDateOnly) {
       return start.format('LL');
     }
-    return `${start.format('LLL')} \u2013 ${end.format('LT')}`;
+    const startTime = deduplicateAmPm(start, end, locale);
+    return `${start.format('LL')} ${startTime} \u2013 ${end.format('LT')}`;
   }
 
   // Timed multi-day events: deduplicate year when same year
@@ -248,6 +250,28 @@ export function formatDateRange(options: {
 
   // Different years: no deduplication possible
   return `${start.format('LL')} \u2013 ${end.format('LL')}`;
+}
+
+/**
+ * Returns the formatted start time for a same-day range.
+ *
+ * For 12-hour locales (where LT contains AM/PM), omits AM/PM from the
+ * start time when both times share the same period — e.g. "2:00–5:00 PM"
+ * instead of "2:00 PM – 5:00 PM". For 24-hour locales this is a no-op.
+ */
+function deduplicateAmPm(
+  start: dayjs.Dayjs,
+  end: dayjs.Dayjs,
+  locale: string
+): string {
+  const localeData = dayjs.Ls[locale];
+  const ltFormat = localeData?.formats?.LT || '';
+  const uses12Hour = ltFormat.includes('A');
+
+  if (uses12Hour && start.format('A') === end.format('A')) {
+    return start.format('h:mm');
+  }
+  return start.format('LT');
 }
 
 /**
