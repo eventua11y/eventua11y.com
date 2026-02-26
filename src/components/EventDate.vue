@@ -1,37 +1,34 @@
 <template>
   <div class="event__dates">
-    <span class="event__dateStart">
-      <span class="sr-only">Starts</span>
-      <time
-        :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
-        itemprop="startDate"
-      >
-        {{ formatDate(dateStart, getStartDateFormat()) }}
-        <template v-if="!dateEnd && !isInternational">
-          <span> </span>
-          <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
-            {{ currentTimezone }}
-          </abbr>
-        </template>
-      </time>
-      <wa-badge v-if="isDeadline" variant="danger" pill>Deadline</wa-badge>
-    </span>
+    <!-- Machine-readable start date for Schema.org -->
+    <time
+      :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
+      itemprop="startDate"
+      hidden
+    ></time>
 
-    <span v-if="dateEnd" class="event__dateEnd">
-      <span class="sr-only">Ends</span>
-      <wa-icon name="arrow-right-long" auto-width></wa-icon>
-      <time
-        :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
-        itemprop="endDate"
+    <!-- Machine-readable end date for Schema.org -->
+    <time
+      v-if="dateEnd"
+      :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
+      itemprop="endDate"
+      hidden
+    ></time>
+
+    <!-- Human-readable date range with locale-aware deduplication -->
+    <span class="event__dateRange">
+      {{ formattedRange[0]
+      }}<template v-if="formattedRange[1]"
+        ><span aria-hidden="true"> &ndash; </span><span class="sr-only">to</span
+        >{{ formattedRange[1] }}</template
+      ><template v-if="!isInternational"
+        >{{ ' '
+        }}<abbr :title="getFullTimezoneName(currentTimezone) || undefined">{{
+          currentTimezone
+        }}</abbr></template
+      ><template v-if="isDeadline"
+        >{{ ' ' }}<wa-badge variant="danger" pill>Deadline</wa-badge></template
       >
-        {{ formatDate(dateEnd, getEndDateFormat()) }}
-        <template v-if="!isInternational">
-          <span> </span>
-          <abbr :title="getFullTimezoneName(currentTimezone) || undefined">
-            {{ currentTimezone }}
-          </abbr>
-        </template>
-      </time>
     </span>
 
     <EventProgress
@@ -54,11 +51,7 @@ import timezonePlugin from 'dayjs/plugin/timezone';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import userStore from '../store/userStore';
-import {
-  getStartDateFormat as _getStartDateFormat,
-  getEndDateFormat as _getEndDateFormat,
-  formatEventDate,
-} from '../utils/dateUtils';
+import { formatEventDate, formatDateRange } from '../utils/dateUtils';
 import 'dayjs/locale/en';
 import 'dayjs/locale/es';
 import 'dayjs/locale/fr';
@@ -134,7 +127,7 @@ function getFullTimezoneName(abbreviation: string): string | null {
   return timezoneFullNames[abbreviation] || null;
 }
 
-/** Delegates to the shared formatEventDate utility */
+/** Delegates to the shared formatEventDate utility (used for machine-readable datetimes) */
 function formatDate(date: string | Date, format: string): string {
   return formatEventDate(date, format, {
     timezone: props.timezone,
@@ -144,26 +137,20 @@ function formatDate(date: string | Date, format: string): string {
   });
 }
 
-/** Delegates to the shared getStartDateFormat utility */
-function getStartDateFormat(): string {
-  return _getStartDateFormat({
-    type: props.type,
-    isDeadline: props.isDeadline,
-    day: props.day,
-  });
-}
-
-/** Delegates to the shared getEndDateFormat utility */
-function getEndDateFormat(): string {
-  return _getEndDateFormat({
-    day: props.day,
+/** Locale-aware formatted date range, reactive to timezone preference */
+const formattedRange = computed(() =>
+  formatDateRange({
     dateStart: props.dateStart,
     dateEnd: props.dateEnd,
     timezone: props.timezone,
     useLocalTimezone: userStore.useLocalTimezone,
     userTimezone: userStore.timezone || undefined,
-  });
-}
+    locale: userStore.locale || 'en',
+    day: props.day,
+    type: props.type,
+    isDeadline: props.isDeadline,
+  })
+);
 
 /**
  * Computes current timezone abbreviation based on user preferences

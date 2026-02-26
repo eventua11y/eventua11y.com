@@ -2,44 +2,67 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/en';
+import 'dayjs/locale/de';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/es';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(localizedFormat);
 
 /**
+ * Returns the day-of-week prefix for a given locale.
+ *
+ * French convention omits the comma after the day name
+ * ("dimanche 8 mars 2026"), while English, German, and Spanish
+ * use a comma ("Sunday, March 8, 2026").
+ */
+function dayPrefix(locale: string): string {
+  return locale === 'fr' ? 'dddd ' : 'dddd, ';
+}
+
+/**
  * Determines the dayjs format pattern for an event's start date.
  *
- * Date-only (LL, e.g. "January 15, 2026"):
+ * Date-only (dddd, LL — e.g. "Sunday, March 8, 2026"):
  *   - Awareness days/weeks (type === 'theme')
  *   - CFS deadlines (isDeadline)
  *   - All-day events (day)
  *
- * Date and time (LLL, e.g. "January 15, 2026 2:00 PM"):
+ * Date and time (LLLL — e.g. "Sunday, March 8, 2026 2:00 PM"):
  *   - All other timed events
+ *
+ * The locale parameter controls comma convention (French omits
+ * the comma after the day name).
  */
 export function getStartDateFormat(options: {
   type?: string;
   isDeadline?: boolean;
   day?: boolean;
+  locale?: string;
 }): string {
-  if (options.type === 'theme') return 'LL';
-  if (options.isDeadline) return 'LL';
-  if (options.day) return 'LL';
-  return 'LLL';
+  const locale = options.locale || 'en';
+  if (options.type === 'theme') return `${dayPrefix(locale)}LL`;
+  if (options.isDeadline) return `${dayPrefix(locale)}LL`;
+  if (options.day) return `${dayPrefix(locale)}LL`;
+  return 'LLLL';
 }
 
 /**
  * Determines the dayjs format pattern for an event's end date.
  *
- * Date-only (LL, e.g. "January 18, 2026"):
+ * Date-only (dddd, LL — e.g. "Wednesday, January 18, 2026"):
  *   - All-day events (day)
  *
  * Time-only (LT, e.g. "5:00 PM"):
  *   - Same-day events (avoids repeating the date from the start)
  *
- * Date and time (LLL, e.g. "January 18, 2026 5:00 PM"):
+ * Date and time (LLLL — e.g. "Wednesday, January 18, 2026 5:00 PM"):
  *   - Multi-day timed events
+ *
+ * The locale parameter controls comma convention (French omits
+ * the comma after the day name).
  */
 export function getEndDateFormat(options: {
   day?: boolean;
@@ -48,10 +71,12 @@ export function getEndDateFormat(options: {
   timezone?: string;
   useLocalTimezone?: boolean;
   userTimezone?: string;
+  locale?: string;
 }): string {
-  if (options.day) return 'LL';
+  const locale = options.locale || 'en';
+  if (options.day) return `${dayPrefix(locale)}LL`;
   if (isSameDay(options.dateStart, options.dateEnd, options)) return 'LT';
-  return 'LLL';
+  return 'LLLL';
 }
 
 /**
@@ -122,6 +147,210 @@ export function getYearMonth(
   const tz = resolveTimezone(options);
   const d = dayjs.utc(dateStart).tz(tz);
   return `${d.year()}-${d.month() + 1}`;
+}
+
+/**
+ * Locale-specific format strings for deduplicated date ranges.
+ *
+ * Each locale defines shortened formats for the start/end of a range
+ * when month or year can be omitted because it's shared. The full LL
+ * format is the dayjs localised long-date format used as fallback.
+ *
+ * Day names are included in every format. French omits the comma
+ * after the day name; English, German, and Spanish include it.
+ *
+ * Same month:     only the day changes (month + year shown once)
+ * Different month: month differs but year is shared (year shown once)
+ */
+const RANGE_FORMATS: Record<
+  string,
+  {
+    sameMonth: { start: string; end: string };
+    diffMonth: { start: string; end: string };
+    timedSameYear: { start: string; end: string };
+    timedDiffYear: { start: string; end: string };
+    dateOnlyDiffYear: { start: string; end: string };
+  }
+> = {
+  // Date-only: "Sunday, March 8 – Friday, March 13, 2026"
+  // Timed:     "Tuesday, February 24 2:00 PM – Wednesday, February 25, 2026 4:00 PM"
+  en: {
+    sameMonth: { start: 'dddd, MMMM D', end: 'dddd, MMMM D, YYYY' },
+    diffMonth: { start: 'dddd, MMMM D', end: 'dddd, MMMM D, YYYY' },
+    timedSameYear: {
+      start: 'dddd, MMMM D LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd, LL', end: 'dddd, LL' },
+  },
+  // "Sonntag, 8. – Freitag, 13. März 2026"
+  de: {
+    sameMonth: { start: 'dddd, D.', end: 'dddd, D. MMMM YYYY' },
+    diffMonth: { start: 'dddd, D. MMMM', end: 'dddd, D. MMMM YYYY' },
+    timedSameYear: {
+      start: 'dddd, D. MMMM LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd, LL', end: 'dddd, LL' },
+  },
+  // "dimanche 8 – vendredi 13 mars 2026"
+  fr: {
+    sameMonth: { start: 'dddd D', end: 'dddd D MMMM YYYY' },
+    diffMonth: { start: 'dddd D MMMM', end: 'dddd D MMMM YYYY' },
+    timedSameYear: {
+      start: 'dddd D MMMM LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd LL', end: 'dddd LL' },
+  },
+  // "domingo, 8 – viernes, 13 de marzo de 2026"
+  es: {
+    sameMonth: { start: 'dddd, D', end: 'dddd, D [de] MMMM [de] YYYY' },
+    diffMonth: {
+      start: 'dddd, D [de] MMMM',
+      end: 'dddd, D [de] MMMM [de] YYYY',
+    },
+    timedSameYear: {
+      start: 'dddd, D [de] MMMM LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd, LL', end: 'dddd, LL' },
+  },
+};
+
+/**
+ * A formatted date range split into parts for accessible rendering.
+ *
+ * - Single element: no range (single date, or same-day date-only)
+ * - Two elements: [startText, endText] — the template renders an
+ *   accessible separator between them (en-dash hidden from AT,
+ *   "to" visible only to screen readers)
+ */
+export type DateRangeParts = [string] | [string, string];
+
+/**
+ * Formats a date range using dayjs with locale-aware deduplication
+ * of shared date components (month, year).
+ *
+ * Returns a `DateRangeParts` tuple so templates can insert an
+ * accessible separator between the start and end parts:
+ *
+ *   <span aria-hidden="true"> – </span>
+ *   <span class="sr-only">to</span>
+ *
+ * Examples (en locale, showing the two parts):
+ *   Same day, same period:  ["Sunday, March 8, 2026 2:00", "5:00 PM"]
+ *   Same day, diff period:  ["Sunday, March 8, 2026 10:00 AM", "5:00 PM"]
+ *   Multi-day, timed:       ["Tuesday, February 24 2:00 PM", "Wednesday, February 25, 2026 9:00 PM"]
+ *   Same month, date-only:  ["Sunday, March 8", "Friday, March 13, 2026"]
+ *   Different months:       ["Saturday, March 28", "Thursday, April 2, 2026"]
+ *   Different years:        ["Monday, December 28, 2026", "Saturday, January 2, 2027"]
+ *   Single date:            ["Sunday, March 8, 2026 2:00 PM"]
+ *
+ * Falls back to a single-element tuple for single dates (no dateEnd)
+ * or same-day date-only events.
+ */
+export function formatDateRange(options: {
+  dateStart: string;
+  dateEnd?: string;
+  timezone?: string;
+  useLocalTimezone?: boolean;
+  userTimezone?: string;
+  locale?: string;
+  day?: boolean;
+  type?: string;
+  isDeadline?: boolean;
+}): DateRangeParts {
+  const locale = options.locale || 'en';
+
+  // No end date — return a single formatted date
+  if (!options.dateEnd) {
+    const format = getStartDateFormat(options);
+    return [formatEventDate(options.dateStart, format, options)];
+  }
+
+  const isDateOnly =
+    options.day || options.type === 'theme' || options.isDeadline;
+
+  const isInternational = !options.timezone;
+  const tz = isInternational ? 'UTC' : resolveTimezone(options);
+
+  // Resolve dayjs instances in the target timezone
+  const start = isInternational
+    ? dayjs.utc(options.dateStart).locale(locale)
+    : dayjs.utc(options.dateStart).tz(tz).locale(locale);
+  const end = isInternational
+    ? dayjs.utc(options.dateEnd).locale(locale)
+    : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
+
+  const dp = dayPrefix(locale);
+
+  // Same day — timed events show "date time" / "time", date-only returns single date
+  if (start.isSame(end, 'day')) {
+    if (isDateOnly) {
+      return [start.format(`${dp}LL`)];
+    }
+    const startTime = deduplicateAmPm(start, end, locale);
+    return [`${start.format(`${dp}LL`)} ${startTime}`, end.format('LT')];
+  }
+
+  const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
+
+  // Timed multi-day events: deduplicate year when same year
+  if (!isDateOnly) {
+    if (start.isSame(end, 'year')) {
+      return [
+        start.format(formats.timedSameYear.start),
+        end.format(formats.timedSameYear.end),
+      ];
+    }
+    return [
+      start.format(formats.timedDiffYear.start),
+      end.format(formats.timedDiffYear.end),
+    ];
+  }
+
+  // Date-only multi-day ranges: deduplicate shared components
+  if (start.isSame(end, 'year')) {
+    const fmt = start.isSame(end, 'month')
+      ? formats.sameMonth
+      : formats.diffMonth;
+    return [start.format(fmt.start), end.format(fmt.end)];
+  }
+
+  // Different years: no deduplication possible
+  return [
+    start.format(formats.dateOnlyDiffYear.start),
+    end.format(formats.dateOnlyDiffYear.end),
+  ];
+}
+
+/**
+ * Returns the formatted start time for a same-day range.
+ *
+ * For 12-hour locales (where LT contains AM/PM), omits AM/PM from the
+ * start time when both times share the same period — e.g. "2:00–5:00 PM"
+ * instead of "2:00 PM – 5:00 PM". For 24-hour locales this is a no-op.
+ */
+function deduplicateAmPm(
+  start: dayjs.Dayjs,
+  end: dayjs.Dayjs,
+  locale: string
+): string {
+  // Detect 12-hour locale by checking if LT output contains AM/PM.
+  // We test against a known PM time rather than relying on internal
+  // dayjs.Ls which may not survive bundling.
+  const probe = dayjs.utc('2000-01-01T13:00:00Z').locale(locale).format('LT');
+  const uses12Hour = /AM|PM/i.test(probe);
+
+  if (uses12Hour && start.format('A') === end.format('A')) {
+    return start.format('h:mm');
+  }
+  return start.format('LT');
 }
 
 /**

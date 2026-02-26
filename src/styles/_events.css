@@ -19,11 +19,7 @@
   display: flex;
   flex-wrap: wrap;
   font-size: var(--p-step--1);
-  /* gap: 0.2rem; */
-  .event__dateEnd > .icon,
-  .event__dateEnd > wa-icon {
-    margin: 0 0.3rem;
-  }
+  align-items: center;
 }
 
 .event__speakers {
@@ -72,13 +68,7 @@
   white-space: nowrap;
 }
 
-.event__dateStart {
-  display: inline-flex;
-  gap: 0.3em;
-  white-space: nowrap;
-}
-
-.event__dateEnd {
+.event__dateRange {
   white-space: nowrap;
 }
 
