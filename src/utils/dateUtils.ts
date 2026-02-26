@@ -223,18 +223,36 @@ const RANGE_FORMATS: Record<
 };
 
 /**
+ * A formatted date range split into parts for accessible rendering.
+ *
+ * - Single element: no range (single date, or same-day date-only)
+ * - Two elements: [startText, endText] — the template renders an
+ *   accessible separator between them (en-dash hidden from AT,
+ *   "to" visible only to screen readers)
+ */
+export type DateRangeParts = [string] | [string, string];
+
+/**
  * Formats a date range using dayjs with locale-aware deduplication
  * of shared date components (month, year).
  *
- * Examples (en locale):
- *   Same day, same period:  "March 8, 2026 2:00–5:00 PM"
- *   Same day, diff period:  "March 8, 2026 10:00 AM – 5:00 PM"
- *   Multi-day, timed:      "February 24 9:00 AM – February 25, 2026 4:00 PM"
- *   Same month, date-only: "March 8 – 13, 2026"
- *   Different months:      "March 28 – April 2, 2026"
- *   Different years:       "December 28, 2026 – January 2, 2027"
+ * Returns a `DateRangeParts` tuple so templates can insert an
+ * accessible separator between the start and end parts:
  *
- * Falls back to formatEventDate() for single dates (no dateEnd).
+ *   <span aria-hidden="true"> – </span>
+ *   <span class="sr-only">to</span>
+ *
+ * Examples (en locale, showing the two parts):
+ *   Same day, same period:  ["Sunday, March 8, 2026 2:00", "5:00 PM"]
+ *   Same day, diff period:  ["Sunday, March 8, 2026 10:00 AM", "5:00 PM"]
+ *   Multi-day, timed:       ["Tuesday, February 24 2:00 PM", "Wednesday, February 25, 2026 9:00 PM"]
+ *   Same month, date-only:  ["Sunday, March 8", "Friday, March 13, 2026"]
+ *   Different months:       ["Saturday, March 28", "Thursday, April 2, 2026"]
+ *   Different years:        ["Monday, December 28, 2026", "Saturday, January 2, 2027"]
+ *   Single date:            ["Sunday, March 8, 2026 2:00 PM"]
+ *
+ * Falls back to a single-element tuple for single dates (no dateEnd)
+ * or same-day date-only events.
  */
 export function formatDateRange(options: {
   dateStart: string;
@@ -246,13 +264,13 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
-}): string {
+}): DateRangeParts {
   const locale = options.locale || 'en';
 
   // No end date — return a single formatted date
   if (!options.dateEnd) {
     const format = getStartDateFormat(options);
-    return formatEventDate(options.dateStart, format, options);
+    return [formatEventDate(options.dateStart, format, options)];
   }
 
   const isDateOnly =
@@ -271,13 +289,13 @@ export function formatDateRange(options: {
 
   const dp = dayPrefix(locale);
 
-  // Same day — timed events show "date time – time", date-only returns single date
+  // Same day — timed events show "date time" / "time", date-only returns single date
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
-      return start.format(`${dp}LL`);
+      return [start.format(`${dp}LL`)];
     }
     const startTime = deduplicateAmPm(start, end, locale);
-    return `${start.format(`${dp}LL`)} ${startTime} \u2013 ${end.format('LT')}`;
+    return [`${start.format(`${dp}LL`)} ${startTime}`, end.format('LT')];
   }
 
   const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
@@ -285,9 +303,15 @@ export function formatDateRange(options: {
   // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
     if (start.isSame(end, 'year')) {
-      return `${start.format(formats.timedSameYear.start)} \u2013 ${end.format(formats.timedSameYear.end)}`;
+      return [
+        start.format(formats.timedSameYear.start),
+        end.format(formats.timedSameYear.end),
+      ];
     }
-    return `${start.format(formats.timedDiffYear.start)} \u2013 ${end.format(formats.timedDiffYear.end)}`;
+    return [
+      start.format(formats.timedDiffYear.start),
+      end.format(formats.timedDiffYear.end),
+    ];
   }
 
   // Date-only multi-day ranges: deduplicate shared components
@@ -295,11 +319,14 @@ export function formatDateRange(options: {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
-    return `${start.format(fmt.start)} \u2013 ${end.format(fmt.end)}`;
+    return [start.format(fmt.start), end.format(fmt.end)];
   }
 
   // Different years: no deduplication possible
-  return `${start.format(formats.dateOnlyDiffYear.start)} \u2013 ${end.format(formats.dateOnlyDiffYear.end)}`;
+  return [
+    start.format(formats.dateOnlyDiffYear.start),
+    end.format(formats.dateOnlyDiffYear.end),
+  ];
 }
 
 /**

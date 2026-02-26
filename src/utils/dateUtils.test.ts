@@ -280,33 +280,33 @@ describe('getYearMonth', () => {
 
 describe('formatDateRange', () => {
   describe('single date (no end date)', () => {
-    it('returns a single formatted date with day name for timed events', () => {
+    it('returns a single-element tuple for timed events', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
         timezone: 'UTC',
         locale: 'en',
       });
-      expect(result).toBe('Sunday, March 8, 2026 2:00 PM');
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00 PM']);
     });
 
-    it('returns date-only with day name for all-day events', () => {
+    it('returns a single-element tuple for all-day events', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         timezone: 'UTC',
         locale: 'en',
         day: true,
       });
-      expect(result).toBe('Sunday, March 8, 2026');
+      expect(result).toEqual(['Sunday, March 8, 2026']);
     });
 
-    it('returns date-only with day name for themes', () => {
+    it('returns a single-element tuple for themes', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         timezone: 'UTC',
         locale: 'en',
         type: 'theme',
       });
-      expect(result).toBe('Sunday, March 8, 2026');
+      expect(result).toEqual(['Sunday, March 8, 2026']);
     });
   });
 
@@ -319,7 +319,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // Both PM — AM/PM shown only on end time
-      expect(result).toBe('Sunday, March 8, 2026 2:00 \u2013 5:00 PM');
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', '5:00 PM']);
     });
 
     it('shows AM/PM on both times when they differ', () => {
@@ -330,7 +330,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // AM → PM — both shown
-      expect(result).toBe('Sunday, March 8, 2026 10:00 AM \u2013 5:00 PM');
+      expect(result).toEqual(['Sunday, March 8, 2026 10:00 AM', '5:00 PM']);
     });
 
     it('deduplicates AM/PM for morning events', () => {
@@ -341,7 +341,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // Both AM — AM/PM shown only on end time
-      expect(result).toBe('Sunday, March 8, 2026 8:00 \u2013 11:00 AM');
+      expect(result).toEqual(['Sunday, March 8, 2026 8:00', '11:00 AM']);
     });
 
     it('skips AM/PM dedup for 24-hour locales', () => {
@@ -352,10 +352,10 @@ describe('formatDateRange', () => {
         locale: 'de',
       });
       // 24-hour locale — no AM/PM to deduplicate
-      expect(result).toBe('Sonntag, 8. März 2026 14:00 \u2013 17:00');
+      expect(result).toEqual(['Sonntag, 8. März 2026 14:00', '17:00']);
     });
 
-    it('returns single date with day name for same-day date-only events', () => {
+    it('returns single-element tuple for same-day date-only events', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-08T23:59:00Z',
@@ -363,7 +363,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toBe('Sunday, March 8, 2026');
+      expect(result).toEqual(['Sunday, March 8, 2026']);
     });
   });
 
@@ -376,7 +376,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toBe('Sunday, March 8 \u2013 Friday, March 13, 2026');
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
   });
 
@@ -389,7 +389,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toBe('Saturday, March 28 \u2013 Thursday, April 2, 2026');
+      expect(result).toEqual(['Saturday, March 28', 'Thursday, April 2, 2026']);
     });
   });
 
@@ -402,9 +402,10 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toBe(
-        'Monday, December 28, 2026 \u2013 Saturday, January 2, 2027'
-      );
+      expect(result).toEqual([
+        'Monday, December 28, 2026',
+        'Saturday, January 2, 2027',
+      ]);
     });
   });
 
@@ -417,9 +418,10 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // Start omits year, end keeps it (both have day names)
-      expect(result).toBe(
-        'Tuesday, February 24 2:00 PM \u2013 Wednesday, February 25, 2026 9:00 PM'
-      );
+      expect(result).toEqual([
+        'Tuesday, February 24 2:00 PM',
+        'Wednesday, February 25, 2026 9:00 PM',
+      ]);
     });
 
     it('deduplicates year across different months', () => {
@@ -429,9 +431,10 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      expect(result).toBe(
-        'Sunday, March 8 2:00 PM \u2013 Friday, April 10, 2026 5:00 PM'
-      );
+      expect(result).toEqual([
+        'Sunday, March 8 2:00 PM',
+        'Friday, April 10, 2026 5:00 PM',
+      ]);
     });
 
     it('shows full date+time with day names for different years', () => {
@@ -441,9 +444,10 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      expect(result).toBe(
-        'Wednesday, December 30, 2026 2:00 PM \u2013 Saturday, January 2, 2027 5:00 PM'
-      );
+      expect(result).toEqual([
+        'Wednesday, December 30, 2026 2:00 PM',
+        'Saturday, January 2, 2027 5:00 PM',
+      ]);
     });
   });
 
@@ -458,7 +462,7 @@ describe('formatDateRange', () => {
         day: true,
       });
       // In EDT (UTC-4 in March), these are Mar 8 (Sun) and Mar 9 (Mon)
-      expect(result).toBe('Sunday, March 8 \u2013 Monday, March 9, 2026');
+      expect(result).toEqual(['Sunday, March 8', 'Monday, March 9, 2026']);
     });
 
     it('uses user timezone when useLocalTimezone is true', () => {
@@ -471,7 +475,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // In London (GMT), these are 14:00–17:00 on Mar 8 (both PM)
-      expect(result).toBe('Sunday, March 8, 2026 2:00 \u2013 5:00 PM');
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', '5:00 PM']);
     });
 
     it('uses UTC for international events (no timezone)', () => {
@@ -481,7 +485,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // No timezone = international, should use UTC values (both PM)
-      expect(result).toBe('Sunday, March 8, 2026 2:00 \u2013 5:00 PM');
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', '5:00 PM']);
     });
   });
 
@@ -494,8 +498,8 @@ describe('formatDateRange', () => {
         locale: 'de',
         day: true,
       });
-      // "Sonntag, 8. – Freitag, 13. März 2026"
-      expect(result).toBe('Sonntag, 8. \u2013 Freitag, 13. März 2026');
+      // "Sonntag, 8." / "Freitag, 13. März 2026"
+      expect(result).toEqual(['Sonntag, 8.', 'Freitag, 13. März 2026']);
     });
 
     it('formats different-month range in German', () => {
@@ -506,8 +510,11 @@ describe('formatDateRange', () => {
         locale: 'de',
         day: true,
       });
-      // "Samstag, 28. März – Donnerstag, 2. April 2026"
-      expect(result).toBe('Samstag, 28. März \u2013 Donnerstag, 2. April 2026');
+      // "Samstag, 28. März" / "Donnerstag, 2. April 2026"
+      expect(result).toEqual([
+        'Samstag, 28. März',
+        'Donnerstag, 2. April 2026',
+      ]);
     });
 
     it('formats same-month range in French', () => {
@@ -518,8 +525,8 @@ describe('formatDateRange', () => {
         locale: 'fr',
         day: true,
       });
-      // "dimanche 8 – vendredi 13 mars 2026"
-      expect(result).toBe('dimanche 8 \u2013 vendredi 13 mars 2026');
+      // "dimanche 8" / "vendredi 13 mars 2026"
+      expect(result).toEqual(['dimanche 8', 'vendredi 13 mars 2026']);
     });
 
     it('formats different-month range in French', () => {
@@ -530,8 +537,8 @@ describe('formatDateRange', () => {
         locale: 'fr',
         day: true,
       });
-      // "samedi 28 mars – jeudi 2 avril 2026"
-      expect(result).toBe('samedi 28 mars \u2013 jeudi 2 avril 2026');
+      // "samedi 28 mars" / "jeudi 2 avril 2026"
+      expect(result).toEqual(['samedi 28 mars', 'jeudi 2 avril 2026']);
     });
 
     it('formats same-month range in Spanish', () => {
@@ -542,8 +549,8 @@ describe('formatDateRange', () => {
         locale: 'es',
         day: true,
       });
-      // "domingo, 8 – viernes, 13 de marzo de 2026"
-      expect(result).toBe('domingo, 8 \u2013 viernes, 13 de marzo de 2026');
+      // "domingo, 8" / "viernes, 13 de marzo de 2026"
+      expect(result).toEqual(['domingo, 8', 'viernes, 13 de marzo de 2026']);
     });
 
     it('formats different-month range in Spanish', () => {
@@ -554,10 +561,11 @@ describe('formatDateRange', () => {
         locale: 'es',
         day: true,
       });
-      // "sábado, 28 de marzo – jueves, 2 de abril de 2026"
-      expect(result).toBe(
-        'sábado, 28 de marzo \u2013 jueves, 2 de abril de 2026'
-      );
+      // "sábado, 28 de marzo" / "jueves, 2 de abril de 2026"
+      expect(result).toEqual([
+        'sábado, 28 de marzo',
+        'jueves, 2 de abril de 2026',
+      ]);
     });
   });
 
@@ -571,7 +579,7 @@ describe('formatDateRange', () => {
         type: 'theme',
       });
       // Should be date-only with day names
-      expect(result).toBe('Sunday, March 8 \u2013 Friday, March 13, 2026');
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
 
     it('omits time for deadlines', () => {
@@ -582,7 +590,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         isDeadline: true,
       });
-      expect(result).toBe('Sunday, March 8 \u2013 Friday, March 13, 2026');
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
 
     it('omits time for all-day events', () => {
@@ -593,7 +601,7 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toBe('Sunday, March 8 \u2013 Friday, March 13, 2026');
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
   });
 });

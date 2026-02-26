@@ -76,7 +76,24 @@ All examples use same-month and different-month date-only ranges.
 
 ## Separator
 
-All ranges use an en-dash (`–`, U+2013) with regular spaces on either side.
+Visually, all ranges use an en-dash (`–`, U+2013) with regular spaces on either side. Screen readers handle en-dashes inconsistently (some skip them, some read "dash", some create run-on text), so the separator is rendered as two elements:
+
+```html
+<span aria-hidden="true"> – </span> <span class="sr-only">to</span>
+```
+
+- The en-dash is hidden from assistive technology via `aria-hidden="true"`
+- The word "to" is visible only to screen readers via the `.sr-only` class (defined in `src/styles/utils/_a11y.css`)
+- The `.sr-only` class uses `position: absolute` with clipping — not `display: none` or `visibility: hidden`, which would hide the element from screen readers too
+
+### Return type
+
+`formatDateRange()` returns a `DateRangeParts` tuple instead of a plain string:
+
+- **Single date** (no range): `["Sunday, March 8, 2026 2:00 PM"]` — one element
+- **Range**: `["Sunday, March 8, 2026 2:00", "5:00 PM"]` — two elements
+
+Templates check for the second element. If present, they render the accessible separator markup between the two parts. If absent, they render the single date as-is.
 
 ## Implementation
 

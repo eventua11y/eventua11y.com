@@ -64,7 +64,14 @@ const displayLocation = event.location || 'International';
           hidden
         />
         <span class="event__dateRange">
-          {formattedRange}
+          {formattedRange[0]}
+          {formattedRange[1] && (
+            <>
+              <span aria-hidden="true"> &ndash; </span>
+              <span class="sr-only">to</span>
+              {formattedRange[1]}
+            </>
+          )}
           {!isInternational && ' UTC'}{' '}
           <span class="badge badge--danger">Deadline</span>
         </span>
@@ -105,7 +112,14 @@ const displayLocation = event.location || 'International';
             />
           )}
           <span class="event__dateRange">
-            {formattedRange}
+            {formattedRange[0]}
+            {formattedRange[1] && (
+              <>
+                <span aria-hidden="true"> &ndash; </span>
+                <span class="sr-only">to</span>
+                {formattedRange[1]}
+              </>
+            )}
             {!isInternational && ' UTC'}
           </span>
         </div>

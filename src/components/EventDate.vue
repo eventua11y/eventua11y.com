@@ -17,8 +17,11 @@
 
     <!-- Human-readable date range with locale-aware deduplication -->
     <span class="event__dateRange">
-      {{ formattedRange
-      }}<template v-if="!isInternational"
+      {{ formattedRange[0]
+      }}<template v-if="formattedRange[1]"
+        ><span aria-hidden="true"> &ndash; </span><span class="sr-only">to</span
+        >{{ formattedRange[1] }}</template
+      ><template v-if="!isInternational"
         >{{ ' '
         }}<abbr :title="getFullTimezoneName(currentTimezone) || undefined">{{
           currentTimezone
