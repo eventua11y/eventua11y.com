@@ -12,38 +12,57 @@ dayjs.extend(timezone);
 dayjs.extend(localizedFormat);
 
 /**
+ * Returns the day-of-week prefix for a given locale.
+ *
+ * French convention omits the comma after the day name
+ * ("dimanche 8 mars 2026"), while English, German, and Spanish
+ * use a comma ("Sunday, March 8, 2026").
+ */
+function dayPrefix(locale: string): string {
+  return locale === 'fr' ? 'dddd ' : 'dddd, ';
+}
+
+/**
  * Determines the dayjs format pattern for an event's start date.
  *
- * Date-only (LL, e.g. "January 15, 2026"):
+ * Date-only (dddd, LL — e.g. "Sunday, March 8, 2026"):
  *   - Awareness days/weeks (type === 'theme')
  *   - CFS deadlines (isDeadline)
  *   - All-day events (day)
  *
- * Date and time (LLL, e.g. "January 15, 2026 2:00 PM"):
+ * Date and time (LLLL — e.g. "Sunday, March 8, 2026 2:00 PM"):
  *   - All other timed events
+ *
+ * The locale parameter controls comma convention (French omits
+ * the comma after the day name).
  */
 export function getStartDateFormat(options: {
   type?: string;
   isDeadline?: boolean;
   day?: boolean;
+  locale?: string;
 }): string {
-  if (options.type === 'theme') return 'LL';
-  if (options.isDeadline) return 'LL';
-  if (options.day) return 'LL';
-  return 'LLL';
+  const locale = options.locale || 'en';
+  if (options.type === 'theme') return `${dayPrefix(locale)}LL`;
+  if (options.isDeadline) return `${dayPrefix(locale)}LL`;
+  if (options.day) return `${dayPrefix(locale)}LL`;
+  return 'LLLL';
 }
 
 /**
  * Determines the dayjs format pattern for an event's end date.
  *
- * Date-only (LL, e.g. "January 18, 2026"):
+ * Date-only (dddd, LL — e.g. "Wednesday, January 18, 2026"):
  *   - All-day events (day)
  *
  * Time-only (LT, e.g. "5:00 PM"):
  *   - Same-day events (avoids repeating the date from the start)
  *
- * Date and time (LLL, e.g. "January 18, 2026 5:00 PM"):
+ * Date and time (LLLL — e.g. "Wednesday, January 18, 2026 5:00 PM"):
  *   - Multi-day timed events
+ *
+ * The locale parameter controls comma convention (French omits
+ * the comma after the day name).
  */
 export function getEndDateFormat(options: {
   day?: boolean;
@@ -52,10 +71,12 @@ export function getEndDateFormat(options: {
   timezone?: string;
   useLocalTimezone?: boolean;
   userTimezone?: string;
+  locale?: string;
 }): string {
-  if (options.day) return 'LL';
+  const locale = options.locale || 'en';
+  if (options.day) return `${dayPrefix(locale)}LL`;
   if (isSameDay(options.dateStart, options.dateEnd, options)) return 'LT';
-  return 'LLL';
+  return 'LLLL';
 }
 
 /**
@@ -135,6 +156,9 @@ export function getYearMonth(
  * when month or year can be omitted because it's shared. The full LL
  * format is the dayjs localised long-date format used as fallback.
  *
+ * Day names are included in every format. French omits the comma
+ * after the day name; English, German, and Spanish include it.
+ *
  * Same month:     only the day changes (month + year shown once)
  * Different month: month differs but year is shared (year shown once)
  */
@@ -143,33 +167,58 @@ const RANGE_FORMATS: Record<
   {
     sameMonth: { start: string; end: string };
     diffMonth: { start: string; end: string };
-    timedSameYear: { start: string };
+    timedSameYear: { start: string; end: string };
+    timedDiffYear: { start: string; end: string };
+    dateOnlyDiffYear: { start: string; end: string };
   }
 > = {
-  // Date-only: "March 8 – 13, 2026" / "March 28 – April 2, 2026"
-  // Timed:     "February 24 2:00 PM – February 25, 2026 4:00 PM"
+  // Date-only: "Sunday, March 8 – Friday, March 13, 2026"
+  // Timed:     "Tuesday, February 24 2:00 PM – Wednesday, February 25, 2026 4:00 PM"
   en: {
-    sameMonth: { start: 'MMMM D', end: 'D, YYYY' },
-    diffMonth: { start: 'MMMM D', end: 'MMMM D, YYYY' },
-    timedSameYear: { start: 'MMMM D LT' },
+    sameMonth: { start: 'dddd, MMMM D', end: 'dddd, MMMM D, YYYY' },
+    diffMonth: { start: 'dddd, MMMM D', end: 'dddd, MMMM D, YYYY' },
+    timedSameYear: {
+      start: 'dddd, MMMM D LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd, LL', end: 'dddd, LL' },
   },
-  // "8. – 13. März 2026" / "24. Februar 14:00 – 25. Februar 2026 16:00"
+  // "Sonntag, 8. – Freitag, 13. März 2026"
   de: {
-    sameMonth: { start: 'D.', end: 'D. MMMM YYYY' },
-    diffMonth: { start: 'D. MMMM', end: 'D. MMMM YYYY' },
-    timedSameYear: { start: 'D. MMMM LT' },
+    sameMonth: { start: 'dddd, D.', end: 'dddd, D. MMMM YYYY' },
+    diffMonth: { start: 'dddd, D. MMMM', end: 'dddd, D. MMMM YYYY' },
+    timedSameYear: {
+      start: 'dddd, D. MMMM LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd, LL', end: 'dddd, LL' },
   },
-  // "8 – 13 mars 2026" / "24 février 14:00 – 25 février 2026 16:00"
+  // "dimanche 8 – vendredi 13 mars 2026"
   fr: {
-    sameMonth: { start: 'D', end: 'D MMMM YYYY' },
-    diffMonth: { start: 'D MMMM', end: 'D MMMM YYYY' },
-    timedSameYear: { start: 'D MMMM LT' },
+    sameMonth: { start: 'dddd D', end: 'dddd D MMMM YYYY' },
+    diffMonth: { start: 'dddd D MMMM', end: 'dddd D MMMM YYYY' },
+    timedSameYear: {
+      start: 'dddd D MMMM LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd LL', end: 'dddd LL' },
   },
-  // "8 – 13 de marzo de 2026" / "24 de febrero 14:00 – 25 de febrero de 2026 16:00"
+  // "domingo, 8 – viernes, 13 de marzo de 2026"
   es: {
-    sameMonth: { start: 'D', end: 'D [de] MMMM [de] YYYY' },
-    diffMonth: { start: 'D [de] MMMM', end: 'D [de] MMMM [de] YYYY' },
-    timedSameYear: { start: 'D [de] MMMM LT' },
+    sameMonth: { start: 'dddd, D', end: 'dddd, D [de] MMMM [de] YYYY' },
+    diffMonth: {
+      start: 'dddd, D [de] MMMM',
+      end: 'dddd, D [de] MMMM [de] YYYY',
+    },
+    timedSameYear: {
+      start: 'dddd, D [de] MMMM LT',
+      end: 'LLLL',
+    },
+    timedDiffYear: { start: 'LLLL', end: 'LLLL' },
+    dateOnlyDiffYear: { start: 'dddd, LL', end: 'dddd, LL' },
   },
 };
 
@@ -220,27 +269,28 @@ export function formatDateRange(options: {
     ? dayjs.utc(options.dateEnd).locale(locale)
     : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
 
+  const dp = dayPrefix(locale);
+
   // Same day — timed events show "date time – time", date-only returns single date
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
-      return start.format('LL');
+      return start.format(`${dp}LL`);
     }
     const startTime = deduplicateAmPm(start, end, locale);
-    return `${start.format('LL')} ${startTime} \u2013 ${end.format('LT')}`;
+    return `${start.format(`${dp}LL`)} ${startTime} \u2013 ${end.format('LT')}`;
   }
+
+  const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
 
   // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
-    const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
     if (start.isSame(end, 'year')) {
-      return `${start.format(formats.timedSameYear.start)} \u2013 ${end.format('LLL')}`;
+      return `${start.format(formats.timedSameYear.start)} \u2013 ${end.format(formats.timedSameYear.end)}`;
     }
-    return `${start.format('LLL')} \u2013 ${end.format('LLL')}`;
+    return `${start.format(formats.timedDiffYear.start)} \u2013 ${end.format(formats.timedDiffYear.end)}`;
   }
 
   // Date-only multi-day ranges: deduplicate shared components
-  const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
-
   if (start.isSame(end, 'year')) {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
@@ -249,7 +299,7 @@ export function formatDateRange(options: {
   }
 
   // Different years: no deduplication possible
-  return `${start.format('LL')} \u2013 ${end.format('LL')}`;
+  return `${start.format(formats.dateOnlyDiffYear.start)} \u2013 ${end.format(formats.dateOnlyDiffYear.end)}`;
 }
 
 /**
