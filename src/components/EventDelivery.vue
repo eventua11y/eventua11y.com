@@ -21,12 +21,14 @@ const props = withDefaults(
     location?: string;
     website?: string;
     headingId?: string;
+    showWebsiteLink?: boolean;
   }>(),
   {
     attendanceMode: 'none',
     location: 'International',
     website: undefined,
     headingId: undefined,
+    showWebsiteLink: true,
   }
 );
 
@@ -105,7 +107,7 @@ const locationIcon = computed(() =>
       </span>
     </div>
 
-    <template v-if="website">
+    <template v-if="website && showWebsiteLink">
       <span aria-hidden="true"> · </span>
       <a
         :href="website"
