@@ -370,11 +370,11 @@ const jsonLd = {
       </article>
 
       {
-        event.website && event.organizer && (
+        event.website && (
           <aside class="event-detail-sidebar">
             <wa-card class="event-detail-sidebar__card" appearance="outlined">
               <p>
-                {isChildEvent && event.parentEvent ? (
+                {isChildEvent && event.parentEvent && event.organizer ? (
                   <Fragment>
                     This event is part of{' '}
                     {parentUrl ? (
@@ -382,12 +382,24 @@ const jsonLd = {
                     ) : (
                       event.parentEvent.title
                     )}
-                    , organised by {event.organizer!.name}.
+                    , organised by {event.organizer.name}.
+                  </Fragment>
+                ) : isChildEvent && event.parentEvent ? (
+                  <Fragment>
+                    This event is part of{' '}
+                    {parentUrl ? (
+                      <a href={parentUrl}>{event.parentEvent.title}</a>
+                    ) : (
+                      event.parentEvent.title
+                    )}
+                    .
+                  </Fragment>
+                ) : event.organizer ? (
+                  <Fragment>
+                    This event is organised by {event.organizer.name}.
                   </Fragment>
                 ) : (
-                  <Fragment>
-                    This event is organised by {event.organizer!.name}.
-                  </Fragment>
+                  ''
                 )}{' '}
                 Refer to the official event website for the most accurate and
                 up-to-date information.
