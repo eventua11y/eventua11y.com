@@ -56,7 +56,7 @@
   margin-bottom: 0;
 }
 
-[itemprop='eventAttendanceMode'] {
+.event__attendance-mode {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -64,11 +64,11 @@
   max-width: 100%; /* Contain within parent width */
 }
 
-[itemprop='eventAttendanceMode'] > * {
+.event__attendance-mode > * {
   flex: 0 0 auto;
 }
 
-[itemprop='eventAttendanceMode'] > span {
+.event__attendance-mode > span {
   display: inline-block; /* Allow text wrapping within spans */
   max-width: 100%; /* Ensure spans don't overflow */
   overflow-wrap: break-word; /* Break long words if needed */
