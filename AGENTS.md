@@ -59,6 +59,12 @@ This project has two Sanity datasets: **`production`** and **`test`**.
 - All test or dummy documents **must** be created in the **`test`** dataset.
 - When using Sanity MCP tools, always verify the `dataset` parameter before any write operation. If the data is for testing, experimentation, or development, set the dataset to `test`.
 
+### Sub-Issues
+
+When creating an `Epic` issue with child tasks, add the child issues as **sub-issues** using the GitHub GraphQL API rather than listing them manually in the epic body. GitHub renders sub-issues natively with progress tracking.
+
+Do **not** duplicate the sub-issue list in the epic's body text — the native sub-issues view is the source of truth.
+
 ### Labeling Rules
 
 1. Apply **at least one** label to every issue and PR.
