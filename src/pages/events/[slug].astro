@@ -370,7 +370,7 @@ const jsonLd = {
       </article>
 
       {
-        event.website && (
+        (event.website || event.organizer) && (
           <aside class="event-detail-sidebar">
             <wa-card class="event-detail-sidebar__card" appearance="outlined">
               <p>
@@ -400,17 +400,24 @@ const jsonLd = {
                   </Fragment>
                 ) : (
                   ''
-                )}{' '}
-                Refer to the official event website for the most accurate and
-                up-to-date information.
+                )}
+                {event.website && (
+                  <Fragment>
+                    {' '}
+                    Refer to the official event website for the most accurate
+                    and up-to-date information.
+                  </Fragment>
+                )}
               </p>
-              <a
-                href={event.website}
-                class="btn btn--block"
-                rel="noopener noreferrer"
-              >
-                Event website
-              </a>
+              {event.website && (
+                <a
+                  href={event.website}
+                  class="btn btn--block"
+                  rel="noopener noreferrer"
+                >
+                  Event website
+                </a>
+              )}
             </wa-card>
           </aside>
         )
