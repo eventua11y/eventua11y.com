@@ -382,18 +382,17 @@ const jsonLd = {
                     ) : (
                       event.parentEvent.title
                     )}
-                    , organised by{' '}
+                    {`, organised by `}
                     {event.organizer.website ? (
                       <a
                         href={event.organizer.website}
                         rel="noopener noreferrer"
-                      >
-                        {event.organizer.name}
-                      </a>
+                        set:text={event.organizer.name}
+                      />
                     ) : (
                       event.organizer.name
                     )}
-                    .
+                    {`.`}
                   </Fragment>
                 ) : isChildEvent && event.parentEvent ? (
                   <Fragment>
@@ -407,18 +406,17 @@ const jsonLd = {
                   </Fragment>
                 ) : event.organizer ? (
                   <Fragment>
-                    This event is organised by{' '}
+                    {`This event is organised by `}
                     {event.organizer.website ? (
                       <a
                         href={event.organizer.website}
                         rel="noopener noreferrer"
-                      >
-                        {event.organizer.name}
-                      </a>
+                        set:text={event.organizer.name}
+                      />
                     ) : (
                       event.organizer.name
                     )}
-                    .
+                    {`.`}
                   </Fragment>
                 ) : (
                   ''
@@ -436,7 +434,7 @@ const jsonLd = {
                   href={event.website}
                   rel="noopener noreferrer"
                   target="_blank"
-                  variant="brand"
+                  variant="neutral"
                   appearance="accent"
                   style="width: 100%;"
                 >
