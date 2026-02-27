@@ -172,33 +172,48 @@ const jsonLd = {
         itemtype="https://schema.org/Event"
       >
         {
-          displayFormat ? (
+          displayFormat || (isChildEvent && event.parentEvent) ? (
             <hgroup role="group" aria-roledescription="Heading group">
               <h1 class="event-detail__title" itemprop="name">
                 {event.title}
               </h1>
               <p aria-roledescription="subtitle" class="text-muted">
-                <span>
-                  {displayFormat}
-                  {allSpeakers.length > 0 && (
-                    <Fragment>
-                      {' '}
-                      {formatPreposition}{' '}
-                      {allSpeakers.map((speaker, i) => (
-                        <Fragment>
-                          {i > 0 && ', '}
-                          <span
-                            itemprop="performer"
-                            itemscope
-                            itemtype="https://schema.org/Person"
-                          >
-                            <span itemprop="name">{speaker.name}</span>
-                          </span>
-                        </Fragment>
-                      ))}
-                    </Fragment>
-                  )}
-                </span>
+                {displayFormat && (
+                  <span>
+                    {displayFormat}
+                    {allSpeakers.length > 0 && (
+                      <Fragment>
+                        {' '}
+                        {formatPreposition}{' '}
+                        {allSpeakers.map((speaker, i) => (
+                          <Fragment>
+                            {i > 0 && ', '}
+                            <span
+                              itemprop="performer"
+                              itemscope
+                              itemtype="https://schema.org/Person"
+                            >
+                              <span itemprop="name">{speaker.name}</span>
+                            </span>
+                          </Fragment>
+                        ))}
+                      </Fragment>
+                    )}
+                  </span>
+                )}
+                {displayFormat && isChildEvent && event.parentEvent && (
+                  <span aria-hidden="true"> · </span>
+                )}
+                {isChildEvent && event.parentEvent && (
+                  <span>
+                    Part of{' '}
+                    {parentUrl ? (
+                      <a href={parentUrl}>{event.parentEvent.title}</a>
+                    ) : (
+                      <span>{event.parentEvent.title}</span>
+                    )}
+                  </span>
+                )}
               </p>
             </hgroup>
           ) : (
