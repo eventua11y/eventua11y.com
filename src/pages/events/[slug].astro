@@ -410,13 +410,16 @@ const jsonLd = {
                 )}
               </p>
               {event.website && (
-                <a
+                <wa-button
                   href={event.website}
-                  class="btn btn--block"
                   rel="noopener noreferrer"
+                  target="_blank"
+                  variant="brand"
+                  appearance="accent"
+                  style="width: 100%;"
                 >
                   Event website
-                </a>
+                </wa-button>
               )}
             </wa-card>
           </aside>
@@ -483,7 +486,7 @@ const jsonLd = {
     font-size: var(--p-step--1);
   }
 
-  .event-detail-sidebar__card .btn {
+  .event-detail-sidebar__card wa-button {
     margin-top: var(--p-space-xs);
   }
 
