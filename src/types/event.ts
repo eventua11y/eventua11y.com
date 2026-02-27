@@ -34,6 +34,7 @@ export interface Event {
   parentEvent?: { title: string; slug?: { current: string } };
   children?: ChildEvent[];
   isParent?: boolean;
+  format?: string;
   speakers?: Speaker[];
   organizer?: Organizer;
 }

@@ -42,6 +42,38 @@ const isChildEvent = !!event.parent;
 const parentUrl = event.parentEvent?.slug?.current
   ? `/events/${event.parentEvent.slug.current}`
   : undefined;
+// Format and speaker subtitle for child events (e.g. "Talk by Speaker Name")
+const formatStrings: Record<string, string> = {
+  talk: 'Talk',
+  tutorial: 'Tutorial',
+  workshop: 'Workshop',
+  webinar: 'Webinar',
+  panel: 'Panel',
+  meetup: 'Meetup',
+  interview: 'Interview',
+  qna: 'Q&A',
+  keynote: 'Keynote',
+  roundtable: 'Roundtable',
+};
+const formatPrepositions: Record<string, string> = {
+  talk: 'by',
+  tutorial: 'by',
+  workshop: 'with',
+  webinar: 'with',
+  panel: 'with',
+  meetup: 'with',
+  interview: 'with',
+  qna: 'with',
+  keynote: 'by',
+  roundtable: 'with',
+};
+const displayFormat = event.format
+  ? formatStrings[event.format] || event.format
+  : undefined;
+const formatPreposition = event.format
+  ? formatPrepositions[event.format] || 'by'
+  : 'by';
+
 const isDedicatedToAccessibility =
   !event.isParent && !event.parent && event.type !== 'theme';
 const hasBadges =
@@ -139,12 +171,40 @@ const jsonLd = {
       itemtype="https://schema.org/Event"
     >
       {
-        (isChildEvent && event.parentEvent) || event.organizer ? (
+        (isChildEvent && event.parentEvent) ||
+        displayFormat ||
+        event.organizer ? (
           <hgroup role="group" aria-roledescription="Heading group">
             <h1 class="event-detail__title" itemprop="name">
               {event.title}
             </h1>
             <p aria-roledescription="subtitle" class="text-muted">
+              {displayFormat && (
+                <span>
+                  {displayFormat}
+                  {allSpeakers.length > 0 && (
+                    <Fragment>
+                      {' '}
+                      {formatPreposition}{' '}
+                      {allSpeakers.map((speaker, i) => (
+                        <Fragment>
+                          {i > 0 && ', '}
+                          <span
+                            itemprop="performer"
+                            itemscope
+                            itemtype="https://schema.org/Person"
+                          >
+                            <span itemprop="name">{speaker.name}</span>
+                          </span>
+                        </Fragment>
+                      ))}
+                    </Fragment>
+                  )}
+                </span>
+              )}
+              {displayFormat && isChildEvent && event.parentEvent && (
+                <span aria-hidden="true"> · </span>
+              )}
               {isChildEvent && event.parentEvent && (
                 <span>
                   Part of{' '}
@@ -155,9 +215,8 @@ const jsonLd = {
                   )}
                 </span>
               )}
-              {isChildEvent && event.parentEvent && event.organizer && (
-                <span aria-hidden="true"> · </span>
-              )}
+              {((isChildEvent && event.parentEvent) || displayFormat) &&
+                event.organizer && <span aria-hidden="true"> · </span>}
               {event.organizer && (
                 <span
                   itemprop="organizer"
@@ -237,7 +296,7 @@ const jsonLd = {
       }
 
       {
-        allSpeakers.length > 0 && (
+        allSpeakers.length > 0 && !displayFormat && (
           <div class="event-detail__speakers">
             <h2 class="text-large">
               {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
