@@ -6,6 +6,13 @@ import StaticEventList from '../components/StaticEventList.astro';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
+
+// Cache the response to reduce origin hits, matching the
+// strategy used by the get-events edge function.
+Astro.response.headers.set(
+  'Cache-Control',
+  'private, max-age=300, stale-while-revalidate=60'
+);
 ---
 
 <DefaultLayout title="Past accessibility events">
