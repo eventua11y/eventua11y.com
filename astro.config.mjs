@@ -13,6 +13,11 @@ export default defineConfig({
   site: 'https://eventua11y.com',
   output: 'server',
   adapter: netlify(),
+  compressHTML: true,
+  prefetch: {
+    defaultStrategy: 'hover',
+    prefetchAll: true,
+  },
   integrations: [
     vue({
       template: {
