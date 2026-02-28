@@ -1,20 +1,5 @@
 <template>
   <div class="event__dates">
-    <!-- Machine-readable start date for Schema.org -->
-    <time
-      :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
-      itemprop="startDate"
-      hidden
-    ></time>
-
-    <!-- Machine-readable end date for Schema.org -->
-    <time
-      v-if="dateEnd"
-      :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
-      itemprop="endDate"
-      hidden
-    ></time>
-
     <!-- Human-readable date range with locale-aware deduplication -->
     <span class="event__dateRange">
       {{ formattedRange[0]

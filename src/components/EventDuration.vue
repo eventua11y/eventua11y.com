@@ -1,7 +1,7 @@
 <template>
   <span class="event__duration">
     <span class="sr-only">Duration</span>
-    <time :datetime="`PT${duration}M`" itemprop="duration">
+    <time :datetime="`PT${duration}M`">
       <wa-icon name="timer" auto-width></wa-icon>
       {{ formattedDuration }}
     </time>

@@ -117,6 +117,8 @@ const jsonLd = {
   startDate: event.dateStart,
   ...(event.dateEnd && { endDate: event.dateEnd }),
   ...(event.website && { url: event.website }),
+  eventStatus: 'https://schema.org/EventScheduled',
+  inLanguage: 'en',
   ...(event.attendanceMode === 'online' && {
     eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
     location: { '@type': 'VirtualLocation', url: event.website },
@@ -124,18 +126,38 @@ const jsonLd = {
   ...(event.attendanceMode === 'offline' && {
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     ...(event.location && {
-      location: { '@type': 'Place', name: event.location },
+      location: {
+        '@type': 'Place',
+        name: event.location,
+        address: { '@type': 'PostalAddress', name: event.location },
+      },
     }),
   }),
   ...(event.attendanceMode === 'mixed' && {
     eventAttendanceMode: 'https://schema.org/MixedEventAttendanceMode',
     location: [
-      ...(event.location ? [{ '@type': 'Place', name: event.location }] : []),
+      ...(event.location
+        ? [
+            {
+              '@type': 'Place',
+              name: event.location,
+              address: { '@type': 'PostalAddress', name: event.location },
+            },
+          ]
+        : []),
       ...(event.website
         ? [{ '@type': 'VirtualLocation', url: event.website }]
         : []),
     ],
   }),
+  ...((!event.attendanceMode || event.attendanceMode === 'none') &&
+    event.location && {
+      location: {
+        '@type': 'Place',
+        name: event.location,
+        address: { '@type': 'PostalAddress', name: event.location },
+      },
+    }),
   ...(allSpeakers.length > 0 && {
     performer: allSpeakers.map((s) => ({
       '@type': 'Person',
@@ -144,6 +166,13 @@ const jsonLd = {
   }),
   ...(event.isFree && {
     isAccessibleForFree: true,
+    offers: {
+      '@type': 'Offer',
+      price: 0,
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      ...(event.website && { url: event.website }),
+    },
   }),
   ...(event.organizer && {
     organizer: {
@@ -160,23 +189,28 @@ const jsonLd = {
         ...(parentUrl && { url: `https://eventua11y.com${parentUrl}` }),
       },
     }),
+  ...(hasChildren && {
+    subEvent: (event.children ?? []).map((child) => ({
+      '@type': 'Event',
+      name: child.title,
+      ...(child.dateStart && { startDate: child.dateStart }),
+      ...(child.dateEnd && { endDate: child.dateEnd }),
+      ...(child.slug?.current && {
+        url: `https://eventua11y.com/events/${child.slug.current}`,
+      }),
+    })),
+  }),
 };
 ---
 
 <DefaultLayout title={event.title} description={metaDescription} ogType="event">
   <div class="container py-l">
     <div class="event-detail-layout">
-      <article
-        class="event-detail flow flow-m"
-        itemscope
-        itemtype="https://schema.org/Event"
-      >
+      <article class="event-detail flow flow-m">
         {
           displayFormat || (isChildEvent && event.parentEvent) ? (
             <hgroup role="group" aria-roledescription="Heading group">
-              <h1 class="event-detail__title" itemprop="name">
-                {event.title}
-              </h1>
+              <h1 class="event-detail__title">{event.title}</h1>
               <p aria-roledescription="subtitle" class="text-muted">
                 {displayFormat && (
                   <span>
@@ -188,13 +222,7 @@ const jsonLd = {
                         {allSpeakers.map((speaker, i) => (
                           <Fragment>
                             {i > 0 && ', '}
-                            <span
-                              itemprop="performer"
-                              itemscope
-                              itemtype="https://schema.org/Person"
-                            >
-                              <span itemprop="name">{speaker.name}</span>
-                            </span>
+                            <span>{speaker.name}</span>
                           </Fragment>
                         ))}
                       </Fragment>
@@ -217,9 +245,7 @@ const jsonLd = {
               </p>
             </hgroup>
           ) : (
-            <h1 class="event-detail__title" itemprop="name">
-              {event.title}
-            </h1>
+            <h1 class="event-detail__title">{event.title}</h1>
           )
         }
 
@@ -268,7 +294,7 @@ const jsonLd = {
           event.description && (
             <div class="event-detail__description">
               <h2 class="text-large">Description</h2>
-              <p itemprop="description">{event.description}</p>
+              <p>{event.description}</p>
             </div>
           )
         }
@@ -281,12 +307,8 @@ const jsonLd = {
               </h2>
               <ul role="list" class="event-detail__speaker-list">
                 {allSpeakers.map((speaker) => (
-                  <li
-                    itemprop="performer"
-                    itemscope
-                    itemtype="https://schema.org/Person"
-                  >
-                    <span itemprop="name">{speaker.name}</span>
+                  <li>
+                    <span>{speaker.name}</span>
                   </li>
                 ))}
               </ul>
@@ -460,7 +482,7 @@ const jsonLd = {
     flex-wrap: wrap;
   }
 
-  .event-detail__speaker-list li:not(:last-child) [itemprop='name']::after {
+  .event-detail__speaker-list li:not(:last-child) span::after {
     content: ',\00a0';
   }
 

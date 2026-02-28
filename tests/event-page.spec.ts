@@ -59,13 +59,6 @@ test.describe('Event detail page', () => {
     await expect(footer).toBeVisible();
   });
 
-  test('article has Schema.org Event markup', async ({ page }) => {
-    const article = page.locator(
-      'article[itemtype="https://schema.org/Event"]'
-    );
-    await expect(article).toBeVisible();
-  });
-
   test('page contains JSON-LD structured data', async ({ page }) => {
     const jsonLd = page.locator('script[type="application/ld+json"]');
     await expect(jsonLd).toBeAttached();
