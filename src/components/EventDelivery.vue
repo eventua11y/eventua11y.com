@@ -53,8 +53,6 @@ const locationIcon = computed(() =>
     <div
       v-if="attendanceMode === ATTENDANCE_MODES.ONLINE"
       class="event__attendance-mode"
-      itemprop="eventAttendanceMode"
-      content="https://schema.org/OnlineEventAttendanceMode"
     >
       <span class="event__online">
         <wa-icon name="laptop" auto-width></wa-icon>
@@ -65,28 +63,20 @@ const locationIcon = computed(() =>
     <div
       v-else-if="attendanceMode === ATTENDANCE_MODES.OFFLINE"
       class="event__attendance-mode"
-      itemprop="eventAttendanceMode"
-      content="https://schema.org/OfflineEventAttendanceMode"
     >
       <span class="event__location">
         <wa-icon name="location-dot"></wa-icon>
-        <span itemprop="location" itemscope itemtype="https://schema.org/Place">
-          {{ displayLocation }}
-        </span>
+        <span>{{ displayLocation }}</span>
       </span>
     </div>
 
     <div
       v-else-if="attendanceMode === ATTENDANCE_MODES.MIXED"
       class="event__attendance-mode"
-      itemprop="eventAttendanceMode"
-      content="https://schema.org/MixedEventAttendanceMode"
     >
       <span class="event__location">
         <wa-icon name="location-dot"></wa-icon>
-        <span itemprop="location" itemscope itemtype="https://schema.org/Place">
-          {{ displayLocation }}
-        </span>
+        <span>{{ displayLocation }}</span>
       </span>
       <span class="text-muted">and</span>
       <span class="event__online">
@@ -101,9 +91,7 @@ const locationIcon = computed(() =>
     >
       <span class="event__location">
         <wa-icon :name="locationIcon"></wa-icon>
-        <span itemprop="location" itemscope itemtype="https://schema.org/Place">
-          {{ displayLocation }}
-        </span>
+        <span>{{ displayLocation }}</span>
       </span>
     </div>
 

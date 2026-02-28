@@ -95,22 +95,14 @@ const childEventUrl = computed(() => getEventUrl(props.event));
 const speakersList = computed(() => {
   if (!props.event.speakers?.length) return '';
   return props.event.speakers
-    .map(
-      (speaker) =>
-        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
-    )
+    .map((speaker) => `<span>${speaker.name}</span>`)
     .join(', ');
 });
 </script>
 
 <template>
-  <article
-    class="child-event"
-    itemprop="subEvent"
-    itemscope
-    itemtype="https://schema.org/Event"
-  >
-    <span class="child-event__title" itemprop="name">
+  <article class="child-event">
+    <span class="child-event__title">
       <a v-if="childEventUrl" :href="childEventUrl">{{ event.title }}</a>
       <a v-else-if="event.website" :href="event.website">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
