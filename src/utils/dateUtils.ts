@@ -117,11 +117,11 @@ export function formatEventDate(
   const isInternational = !options.timezone;
 
   if (isInternational) {
-    return utcDate.locale(locale).format(format);
+    return nonBreakingTime(utcDate.locale(locale).format(format));
   }
 
   const tz = resolveTimezone(options);
-  return utcDate.tz(tz).locale(locale).format(format);
+  return nonBreakingTime(utcDate.tz(tz).locale(locale).format(format));
 }
 
 /**
@@ -292,10 +292,13 @@ export function formatDateRange(options: {
   // Same day — timed events show "date time" / "time", date-only returns single date
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
-      return [start.format(`${dp}LL`)];
+      return [nonBreakingTime(start.format(`${dp}LL`))];
     }
     const startTime = deduplicateAmPm(start, end, locale);
-    return [`${start.format(`${dp}LL`)} ${startTime}`, end.format('LT')];
+    return [
+      nonBreakingTime(`${start.format(`${dp}LL`)} ${startTime}`),
+      nonBreakingTime(end.format('LT')),
+    ];
   }
 
   const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
@@ -304,13 +307,13 @@ export function formatDateRange(options: {
   if (!isDateOnly) {
     if (start.isSame(end, 'year')) {
       return [
-        start.format(formats.timedSameYear.start),
-        end.format(formats.timedSameYear.end),
+        nonBreakingTime(start.format(formats.timedSameYear.start)),
+        nonBreakingTime(end.format(formats.timedSameYear.end)),
       ];
     }
     return [
-      start.format(formats.timedDiffYear.start),
-      end.format(formats.timedDiffYear.end),
+      nonBreakingTime(start.format(formats.timedDiffYear.start)),
+      nonBreakingTime(end.format(formats.timedDiffYear.end)),
     ];
   }
 
@@ -319,13 +322,16 @@ export function formatDateRange(options: {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
-    return [start.format(fmt.start), end.format(fmt.end)];
+    return [
+      nonBreakingTime(start.format(fmt.start)),
+      nonBreakingTime(end.format(fmt.end)),
+    ];
   }
 
   // Different years: no deduplication possible
   return [
-    start.format(formats.dateOnlyDiffYear.start),
-    end.format(formats.dateOnlyDiffYear.end),
+    nonBreakingTime(start.format(formats.dateOnlyDiffYear.start)),
+    nonBreakingTime(end.format(formats.dateOnlyDiffYear.end)),
   ];
 }
 
@@ -351,6 +357,14 @@ function deduplicateAmPm(
     return start.format('h:mm');
   }
   return start.format('LT');
+}
+
+/**
+ * Replaces the space before AM/PM with a non-breaking space so that
+ * times like "2:00 PM" never wrap between the digits and the period.
+ */
+function nonBreakingTime(formatted: string): string {
+  return formatted.replace(/(\d)\s+(AM|PM)/gi, '$1\u00A0$2');
 }
 
 /**

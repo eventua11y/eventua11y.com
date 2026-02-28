@@ -1,4 +1,8 @@
 import { describe, it, expect } from 'vitest';
+
+/** Non-breaking space used between time digits and AM/PM */
+const nbsp = '\u00A0';
+
 import {
   getStartDateFormat,
   getEndDateFormat,
@@ -182,7 +186,7 @@ describe('formatEventDate', () => {
     });
     // Should show 9:00 AM (the UTC time, no conversion)
     expect(result).toContain('March 15, 2026');
-    expect(result).toContain('9:00 AM');
+    expect(result).toContain(`9:00${nbsp}AM`);
   });
 
   it('converts local events to event timezone', () => {
@@ -192,7 +196,7 @@ describe('formatEventDate', () => {
       locale: 'en',
     });
     expect(result).toContain('March 15, 2026');
-    expect(result).toContain('10:00 AM'); // EDT in March
+    expect(result).toContain(`10:00${nbsp}AM`); // EDT in March
   });
 
   it('converts to user timezone when useLocalTimezone is true', () => {
@@ -204,7 +208,7 @@ describe('formatEventDate', () => {
       locale: 'en',
     });
     expect(result).toContain('March 15, 2026');
-    expect(result).toContain('2:00 PM'); // UTC+0 (GMT in March)
+    expect(result).toContain(`2:00${nbsp}PM`); // UTC+0 (GMT in March)
   });
 
   it('falls back to UTC when timezone is missing', () => {
@@ -212,7 +216,7 @@ describe('formatEventDate', () => {
       timezone: 'UTC',
       locale: 'en',
     });
-    expect(result).toBe('2:00 PM');
+    expect(result).toBe(`2:00${nbsp}PM`);
   });
 });
 
@@ -286,7 +290,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00 PM']);
+      expect(result).toEqual([`Sunday, March 8, 2026 2:00${nbsp}PM`]);
     });
 
     it('returns a single-element tuple for all-day events', () => {
@@ -319,7 +323,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // Both PM — AM/PM shown only on end time
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00', '5:00 PM']);
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
     });
 
     it('shows AM/PM on both times when they differ', () => {
@@ -330,7 +334,10 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // AM → PM — both shown
-      expect(result).toEqual(['Sunday, March 8, 2026 10:00 AM', '5:00 PM']);
+      expect(result).toEqual([
+        `Sunday, March 8, 2026 10:00${nbsp}AM`,
+        `5:00${nbsp}PM`,
+      ]);
     });
 
     it('deduplicates AM/PM for morning events', () => {
@@ -341,7 +348,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // Both AM — AM/PM shown only on end time
-      expect(result).toEqual(['Sunday, March 8, 2026 8:00', '11:00 AM']);
+      expect(result).toEqual(['Sunday, March 8, 2026 8:00', `11:00${nbsp}AM`]);
     });
 
     it('skips AM/PM dedup for 24-hour locales', () => {
@@ -419,8 +426,8 @@ describe('formatDateRange', () => {
       });
       // Start omits year, end keeps it (both have day names)
       expect(result).toEqual([
-        'Tuesday, February 24 2:00 PM',
-        'Wednesday, February 25, 2026 9:00 PM',
+        `Tuesday, February 24 2:00${nbsp}PM`,
+        `Wednesday, February 25, 2026 9:00${nbsp}PM`,
       ]);
     });
 
@@ -432,8 +439,8 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       expect(result).toEqual([
-        'Sunday, March 8 2:00 PM',
-        'Friday, April 10, 2026 5:00 PM',
+        `Sunday, March 8 2:00${nbsp}PM`,
+        `Friday, April 10, 2026 5:00${nbsp}PM`,
       ]);
     });
 
@@ -445,8 +452,8 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       expect(result).toEqual([
-        'Wednesday, December 30, 2026 2:00 PM',
-        'Saturday, January 2, 2027 5:00 PM',
+        `Wednesday, December 30, 2026 2:00${nbsp}PM`,
+        `Saturday, January 2, 2027 5:00${nbsp}PM`,
       ]);
     });
   });
@@ -475,7 +482,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // In London (GMT), these are 14:00–17:00 on Mar 8 (both PM)
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00', '5:00 PM']);
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
     });
 
     it('uses UTC for international events (no timezone)', () => {
@@ -485,7 +492,7 @@ describe('formatDateRange', () => {
         locale: 'en',
       });
       // No timezone = international, should use UTC values (both PM)
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00', '5:00 PM']);
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
     });
   });
 
