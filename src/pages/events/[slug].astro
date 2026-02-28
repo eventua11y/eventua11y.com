@@ -300,7 +300,7 @@ const jsonLd = {
         }
 
         {
-          allSpeakers.length > 0 && !displayFormat && (
+          allSpeakers.length > 0 && !displayFormat && !hasChildren && (
             <div class="event-detail__speakers">
               <h2 class="text-large">
                 {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
