@@ -4,3 +4,10 @@
 # Edge functions are auto-discovered from netlify/edge-functions/
 # Each function exports its own config with the path, so no explicit
 # [[edge_functions]] entries are needed here.
+
+# Redirect /events to the homepage at the CDN edge,
+# avoiding a serverless function invocation.
+[[redirects]]
+  from = "/events"
+  to = "/"
+  status = 301
