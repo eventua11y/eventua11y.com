@@ -20,7 +20,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 
-import type { Event, Book } from '../types/event';
+import type { Event, Book, EventDescription } from '../types/event';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ interface RawEvent {
   type: string;
   title: string;
   slug?: { current: string };
-  description?: string;
+  description?: EventDescription;
   dateStart: string;
   dateEnd?: string;
   timezone?: string;

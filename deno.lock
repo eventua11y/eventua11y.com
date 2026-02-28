@@ -253,7 +253,6 @@
         "npm:@sanity/client@^7.13.2",
         "npm:@sentry/astro@^10.30.0",
         "npm:@sentry/cli@^3.2.1",
-        "npm:@shoelace-style/shoelace@^2.20.1",
         "npm:@types/node@25",
         "npm:astro@^5.16.5",
         "npm:autoprefixer@^10.4.22",
