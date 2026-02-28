@@ -2,6 +2,8 @@
  * Shared type definitions for events across the application.
  */
 
+import type { PortableTextBlock } from '@portabletext/types';
+
 export interface Speaker {
   _id: string;
   name: string;
@@ -20,6 +22,7 @@ export interface Event {
   title: string;
   slug?: { current: string };
   description?: string;
+  richDescription?: PortableTextBlock[];
   dateStart: string;
   dateEnd?: string;
   timezone?: string;

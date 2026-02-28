@@ -14,6 +14,7 @@ import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
+import { PortableText } from 'astro-portabletext';
 
 export const prerender = false;
 
@@ -291,10 +292,14 @@ const jsonLd = {
         }
 
         {
-          event.description && (
+          (event.richDescription || event.description) && (
             <div class="event-detail__description">
               <h2 class="text-large">Description</h2>
-              <p>{event.description}</p>
+              {event.richDescription ? (
+                <PortableText value={event.richDescription} />
+              ) : (
+                <p>{event.description}</p>
+              )}
             </div>
           )
         }
