@@ -12,7 +12,6 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import type { Event } from '../types/event';
 import { getEventUrl } from '../utils/eventUtils';
 import { formatDateRange } from '../utils/dateUtils';
-import { descriptionToPlainText } from '../utils/portableTextUtils';
 
 dayjs.extend(utc);
 dayjs.extend(localizedFormat);
@@ -167,9 +166,7 @@ const displayLocation = event.location || 'International';
       {event.description && !isTheme && (
         <details class="event__children flow">
           <summary>Description</summary>
-          <p class="event__description">
-            {descriptionToPlainText(event.description)}
-          </p>
+          <p class="event__description">{event.description}</p>
         </details>
       )}
 

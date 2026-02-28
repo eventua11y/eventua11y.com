@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { isCallForSpeakersOpen, getEventUrl } from '../utils/eventUtils';
-import { descriptionToPlainText } from '../utils/portableTextUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
@@ -212,7 +211,7 @@ const speakerDisplay = computed(() => {
         Description
       </summary>
       <p class="event__description">
-        {{ descriptionToPlainText(event.description) }}
+        {{ event.description }}
       </p>
     </details>
 

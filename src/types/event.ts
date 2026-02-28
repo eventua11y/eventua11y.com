@@ -4,9 +4,6 @@
 
 import type { PortableTextBlock } from '@portabletext/types';
 
-/** Description may be a Portable Text block array (new) or plain string (legacy). */
-export type EventDescription = PortableTextBlock[] | string;
-
 export interface Speaker {
   _id: string;
   name: string;
@@ -24,7 +21,8 @@ export interface Event {
   type: string;
   title: string;
   slug?: { current: string };
-  description?: EventDescription;
+  description?: string;
+  richDescription?: PortableTextBlock[];
   dateStart: string;
   dateEnd?: string;
   timezone?: string;

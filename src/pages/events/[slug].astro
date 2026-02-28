@@ -15,10 +15,6 @@ import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
-import {
-  descriptionToPlainText,
-  isPortableText,
-} from '../../utils/portableTextUtils';
 
 export const prerender = false;
 
@@ -35,10 +31,9 @@ if (!event) {
 }
 
 // Build meta description from event data
-const plainDescription = descriptionToPlainText(event.description);
-const metaDescription = plainDescription
-  ? plainDescription.slice(0, 160) +
-    (plainDescription.length > 160 ? '...' : '')
+const metaDescription = event.description
+  ? event.description.slice(0, 160) +
+    (event.description.length > 160 ? '...' : '')
   : `${event.title} — a digital accessibility event on Eventua11y.`;
 
 // Check states
@@ -119,7 +114,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Event',
   name: event.title,
-  ...(plainDescription && { description: plainDescription }),
+  ...(event.description && { description: event.description }),
   startDate: event.dateStart,
   ...(event.dateEnd && { endDate: event.dateEnd }),
   ...(event.website && { url: event.website }),
@@ -297,11 +292,11 @@ const jsonLd = {
         }
 
         {
-          event.description && (
+          (event.richDescription || event.description) && (
             <div class="event-detail__description">
               <h2 class="text-large">Description</h2>
-              {isPortableText(event.description) ? (
-                <PortableText value={event.description} />
+              {event.richDescription ? (
+                <PortableText value={event.richDescription} />
               ) : (
                 <p>{event.description}</p>
               )}

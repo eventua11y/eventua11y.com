@@ -20,7 +20,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 
-import type { Event, Book, EventDescription } from '../types/event';
+import type { PortableTextBlock } from '@portabletext/types';
+import type { Event, Book } from '../types/event';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
@@ -41,7 +42,8 @@ interface RawEvent {
   type: string;
   title: string;
   slug?: { current: string };
-  description?: EventDescription;
+  description?: string;
+  richDescription?: PortableTextBlock[];
   dateStart: string;
   dateEnd?: string;
   timezone?: string;
