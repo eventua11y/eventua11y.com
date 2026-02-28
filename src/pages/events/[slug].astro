@@ -30,6 +30,13 @@ if (!event) {
   return Astro.redirect('/404');
 }
 
+// Cache the response to reduce Sanity API calls, matching the
+// strategy used by the get-events edge function.
+Astro.response.headers.set(
+  'Cache-Control',
+  'private, max-age=300, stale-while-revalidate=60'
+);
+
 // Build meta description from event data
 const metaDescription = event.description
   ? event.description.slice(0, 160) +
