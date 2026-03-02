@@ -183,7 +183,7 @@ function processEventsForTimezone(
         // Convert event time to user timezone first
         const eventDateInEventTz = event.timezone
           ? dayjs(event.dateStart).tz(event.timezone)
-          : dayjs.utc(event.dateStart).tz(userTimezone, true);
+          : dayjs.tz(event.dateStart, userTimezone);
         const eventDateInUserTz = eventDateInEventTz.tz(userTimezone);
 
         // Add debug logging
