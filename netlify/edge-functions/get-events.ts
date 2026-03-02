@@ -114,20 +114,8 @@ function createSanityClient(): SanityClient {
     const config = getConfig();
     return createClient(config);
   } catch (error) {
-    console.error('[handler] Failed:', error);
-    const cause = (error as Error)?.cause as Error | undefined;
-    return new Response(
-      JSON.stringify({
-        error: 'Internal Server Error',
-        message: (error as Error)?.message,
-        cause: cause?.message,
-        causeStack: cause?.stack,
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    console.error('Failed to create Sanity client:', error);
+    throw new Error('Sanity client initialization failed', { cause: error });
   }
 }
 
@@ -193,7 +181,9 @@ function processEventsForTimezone(
       // For CFS deadlines, only check if they fall within today
       if (event.type === 'deadline') {
         // Convert event time to user timezone first
-        const eventDateInEventTz = dayjs(event.dateStart).tz(event.timezone);
+        const eventDateInEventTz = event.timezone
+          ? dayjs(event.dateStart).tz(event.timezone)
+          : dayjs.utc(event.dateStart).tz(userTimezone, true);
         const eventDateInUserTz = eventDateInEventTz.tz(userTimezone);
 
         // Add debug logging
@@ -303,7 +293,7 @@ function processEventsForTimezone(
       '[processEventsForTimezone] Failed:',
       (error as unknown as { message?: string })?.message || error
     );
-    throw error;
+    throw new Error('Failed to process events for timezone', { cause: error });
   }
 }
 
@@ -475,17 +465,10 @@ export default async function handler(
     });
   } catch (error) {
     console.error('[handler] Failed:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal Server Error',
-        message: (error as Error)?.message,
-        stack: (error as Error)?.stack,
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
