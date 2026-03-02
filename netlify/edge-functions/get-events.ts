@@ -303,7 +303,7 @@ function processEventsForTimezone(
       '[processEventsForTimezone] Failed:',
       (error as unknown as { message?: string })?.message || error
     );
-    throw new Error('Failed to process events for timezone', { cause: error });
+    throw error;
   }
 }
 
