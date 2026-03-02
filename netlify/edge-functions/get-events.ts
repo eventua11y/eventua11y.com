@@ -114,8 +114,20 @@ function createSanityClient(): SanityClient {
     const config = getConfig();
     return createClient(config);
   } catch (error) {
-    console.error('Failed to create Sanity client:', error);
-    throw new Error('Sanity client initialization failed', { cause: error });
+    console.error('[handler] Failed:', error);
+    const cause = (error as Error)?.cause as Error | undefined;
+    return new Response(
+      JSON.stringify({
+        error: 'Internal Server Error',
+        message: (error as Error)?.message,
+        cause: cause?.message,
+        causeStack: cause?.stack,
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 }
 
