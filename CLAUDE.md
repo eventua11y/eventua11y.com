@@ -57,6 +57,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Client-side state management using Vue's reactive system
 - Timezone conversion and localization handled by edge functions using Day.js
 
+#### GROQ Query Projections
+
+Event listing queries in `src/lib/sanity.ts` and `netlify/edge-functions/get-events.ts` use **explicit field projections** — not the `...` spread operator. This is intentional to reduce payload sizes by excluding fields only needed on detail pages (e.g. `description`, `organizer`, `topics`, `geopoint`, `keywords`).
+
+- **Do not** replace explicit field lists with `...` in listing queries.
+- The single-event detail query (`getEventBySlug`) keeps `...` at the root level since the detail page uses nearly all fields, but its children sub-query uses explicit fields.
+- When adding a new field to the Sanity schema, add it to the relevant GROQ projections only if the listing UI actually needs it.
+- Note that explicit projections return `null` for unset fields, whereas `...` omits them (resulting in `undefined` in JS). Code that consumes query results must handle `null` values — e.g. `dayjs().tz(null)` throws, but `dayjs().tz(undefined)` does not.
+
 #### Component Structure
 
 - **Layout**: Single `default.astro` layout with theme switching and meta tags

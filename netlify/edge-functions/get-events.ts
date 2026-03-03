@@ -181,7 +181,9 @@ function processEventsForTimezone(
       // For CFS deadlines, only check if they fall within today
       if (event.type === 'deadline') {
         // Convert event time to user timezone first
-        const eventDateInEventTz = dayjs(event.dateStart).tz(event.timezone);
+        const eventDateInEventTz = event.timezone
+          ? dayjs(event.dateStart).tz(event.timezone)
+          : dayjs.tz(event.dateStart, userTimezone);
         const eventDateInUserTz = eventDateInEventTz.tz(userTimezone);
 
         // Add debug logging
@@ -317,13 +319,41 @@ async function getRawEvents(client: SanityClient): Promise<Event[]> {
   const [parentEvents, childEvents]: [Event[], Event[]] = await Promise.all([
     client.fetch(`
       *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
-        ...,
+        _id,
+        _type,
+        type,
+        title,
+        slug,
+        description,
+        dateStart,
+        dateEnd,
+        timezone,
+        website,
+        attendanceMode,
+        callForSpeakers,
+        callForSpeakersClosingDate,
+        parent,
+        day,
+        isFree,
+        isParent,
+        location,
         "speakers": speakers[]->{ _id, name }
       }
     `),
     client.fetch(`
       *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
-        ...,
+        _id,
+        title,
+        slug,
+        type,
+        dateStart,
+        dateEnd,
+        timezone,
+        day,
+        website,
+        format,
+        scheduled,
+        parent,
         "speakers": speakers[]->{ _id, name }
       } | order(dateStart asc)
     `),
