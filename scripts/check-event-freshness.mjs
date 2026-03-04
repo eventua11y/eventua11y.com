@@ -212,7 +212,7 @@ Respond with ONLY a JSON object (no markdown fences) in this exact format:
 {
   "changes": [
     {
-      "field": "dateStart|dateEnd|eventStatus|callForSpeakers|callForSpeakersClosingDate|location|attendanceMode|isParent|other",
+      "field": "dateStart|dateEnd|eventStatus|callForSpeakers|callForSpeakersClosingDate|location|attendanceMode|other",
       "severity": "warning|info",
       "current": "What our database currently has for this field",
       "suggested": "What the website suggests it should be, or 'unknown' if unclear",
@@ -230,7 +230,8 @@ Rules:
 - For date fields, use the format the website shows (e.g. "23 June 2026") in the "suggested" value.
 - For boolean fields (callForSpeakers, isParent), use "true" or "false" as strings in "suggested".
 - Be conservative: only flag genuine discrepancies, not ambiguities.
-- Do not invent changes. If the page is unclear, say so in "notes" instead.`;
+- Do not invent changes. If the page is unclear, say so in "notes" instead.
+- NEVER suggest changing isParent. This is an editorial decision about how we curate events, not something that can be inferred from a website. Events dedicated to accessibility (like CSUN, AccessU, Inclusive Design 24) are listed as standalone events, not parent events with children. Only broad multi-topic conferences that happen to include some accessibility content (like UX London, Figma Config) are marked as parent events so we can list their individual accessibility-relevant sessions.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
