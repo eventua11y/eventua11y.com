@@ -1,4 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 /** Non-breaking space used between time digits and AM/PM */
 const nbsp = '\u00A0';
@@ -10,6 +14,7 @@ import {
   formatEventDate,
   formatDateRange,
   getYearMonth,
+  isFullMonth,
 } from './dateUtils';
 
 describe('getStartDateFormat', () => {
@@ -576,6 +581,156 @@ describe('formatDateRange', () => {
     });
   });
 
+  describe('full-month events', () => {
+    it('displays "October 2026" for a full October (en)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+      });
+      expect(result).toEqual(['October 2026']);
+    });
+
+    it('displays "February 2026" for a full February (en)', () => {
+      // February 2026 has 28 days
+      const result = formatDateRange({
+        dateStart: '2026-02-01T00:00:00Z',
+        dateEnd: '2026-02-28T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+      });
+      expect(result).toEqual(['February 2026']);
+    });
+
+    it('displays "February 2028" for a full leap-year February (en)', () => {
+      // February 2028 has 29 days (leap year)
+      const result = formatDateRange({
+        dateStart: '2028-02-01T00:00:00Z',
+        dateEnd: '2028-02-29T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+      });
+      expect(result).toEqual(['February 2028']);
+    });
+
+    it('works for all-day events (day: true)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-06-01T00:00:00Z',
+        dateEnd: '2026-06-30T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        day: true,
+      });
+      expect(result).toEqual(['June 2026']);
+    });
+
+    it('does not apply to partial-month ranges', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-30T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+      });
+      // Oct 1–30 is not the full month (31 days), should show normal range
+      expect(result).toEqual([
+        'Thursday, October 1',
+        'Friday, October 30, 2026',
+      ]);
+    });
+
+    it('does not apply to ranges starting after the 1st', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-02T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+      });
+      expect(result).toEqual([
+        'Friday, October 2',
+        'Saturday, October 31, 2026',
+      ]);
+    });
+
+    it('does not apply to cross-month ranges', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-11-30T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+      });
+      // Oct 1 – Nov 30 spans two months
+      expect(result).toEqual([
+        'Thursday, October 1',
+        'Monday, November 30, 2026',
+      ]);
+    });
+
+    it('does not apply to timed events (not date-only)', () => {
+      // Full month dates but with times — this is a timed event, not date-only
+      const result = formatDateRange({
+        dateStart: '2026-10-01T09:00:00Z',
+        dateEnd: '2026-10-31T17:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+      });
+      // Should show as a timed range, not "October 2026"
+      expect(result).toEqual([
+        `Thursday, October 1 9:00${nbsp}AM`,
+        `Saturday, October 31, 2026 5:00${nbsp}PM`,
+      ]);
+    });
+
+    it('formats full month in German', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'de',
+        type: 'theme',
+      });
+      expect(result).toEqual(['Oktober 2026']);
+    });
+
+    it('formats full month in French', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'fr',
+        type: 'theme',
+      });
+      expect(result).toEqual(['octobre 2026']);
+    });
+
+    it('formats full month in Spanish', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'es',
+        type: 'theme',
+      });
+      expect(result).toEqual(['octubre de 2026']);
+    });
+
+    it('works for international events (no timezone)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        locale: 'en',
+        type: 'theme',
+      });
+      expect(result).toEqual(['October 2026']);
+    });
+  });
+
   describe('event type handling', () => {
     it('omits time for themes even with time in the data', () => {
       const result = formatDateRange({
@@ -610,5 +765,49 @@ describe('formatDateRange', () => {
       });
       expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
+  });
+});
+
+describe('isFullMonth', () => {
+  it('returns true for Oct 1 – Oct 31', () => {
+    const start = dayjs.utc('2026-10-01');
+    const end = dayjs.utc('2026-10-31');
+    expect(isFullMonth(start, end)).toBe(true);
+  });
+
+  it('returns true for Feb 1 – Feb 28 (non-leap year)', () => {
+    const start = dayjs.utc('2026-02-01');
+    const end = dayjs.utc('2026-02-28');
+    expect(isFullMonth(start, end)).toBe(true);
+  });
+
+  it('returns true for Feb 1 – Feb 29 (leap year)', () => {
+    const start = dayjs.utc('2028-02-01');
+    const end = dayjs.utc('2028-02-29');
+    expect(isFullMonth(start, end)).toBe(true);
+  });
+
+  it('returns false for Oct 1 – Oct 30 (not last day)', () => {
+    const start = dayjs.utc('2026-10-01');
+    const end = dayjs.utc('2026-10-30');
+    expect(isFullMonth(start, end)).toBe(false);
+  });
+
+  it('returns false for Oct 2 – Oct 31 (not first day)', () => {
+    const start = dayjs.utc('2026-10-02');
+    const end = dayjs.utc('2026-10-31');
+    expect(isFullMonth(start, end)).toBe(false);
+  });
+
+  it('returns false for cross-month ranges', () => {
+    const start = dayjs.utc('2026-10-01');
+    const end = dayjs.utc('2026-11-30');
+    expect(isFullMonth(start, end)).toBe(false);
+  });
+
+  it('returns false for same-day ranges', () => {
+    const start = dayjs.utc('2026-10-01');
+    const end = dayjs.utc('2026-10-01');
+    expect(isFullMonth(start, end)).toBe(false);
   });
 });
