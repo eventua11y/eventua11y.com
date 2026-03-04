@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { isCallForSpeakersOpen } from './eventUtils';
+import { isCallForSpeakersOpen, getEventUrl } from './eventUtils';
 
 describe('isCallForSpeakersOpen', () => {
   afterEach(() => {
@@ -61,5 +61,31 @@ describe('isCallForSpeakersOpen', () => {
         callForSpeakersClosingDate: '2026-02-01T00:00:00Z',
       })
     ).toBe(false);
+  });
+});
+
+describe('getEventUrl', () => {
+  it('returns URL path when slug is present', () => {
+    expect(getEventUrl({ slug: { current: 'my-event' } })).toBe(
+      '/events/my-event'
+    );
+  });
+
+  it('returns undefined when slug is undefined', () => {
+    expect(getEventUrl({ slug: undefined })).toBeUndefined();
+  });
+
+  it('returns undefined when slug is null', () => {
+    expect(getEventUrl({ slug: null } as any)).toBeUndefined();
+  });
+
+  it('returns undefined when slug.current is undefined', () => {
+    expect(getEventUrl({ slug: {} } as any)).toBeUndefined();
+  });
+
+  it('handles slugs with special characters', () => {
+    expect(getEventUrl({ slug: { current: 'a11y-conf-2026' } })).toBe(
+      '/events/a11y-conf-2026'
+    );
   });
 });
