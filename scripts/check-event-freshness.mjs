@@ -451,18 +451,30 @@ function buildReport(results) {
 
 async function createGitHubIssue(title, body) {
   const { execSync } = await import('child_process');
+  const { writeFileSync, unlinkSync } = await import('fs');
+  const { tmpdir } = await import('os');
+  const { join } = await import('path');
 
-  // Use gh CLI which handles auth via GH_TOKEN or gh auth
-  const result = execSync(
-    `gh issue create --repo eventua11y/eventua11y.com --title "${title.replace(/"/g, '\\"')}" --label "content" --body -`,
-    {
-      input: body,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+  // Write body to a temp file to avoid stdin piping issues in CI
+  const tmpFile = join(tmpdir(), `freshness-report-${Date.now()}.md`);
+  try {
+    writeFileSync(tmpFile, body, 'utf-8');
+
+    const result = execSync(
+      `gh issue create --repo eventua11y/eventua11y.com --title "${title.replace(/"/g, '\\"')}" --label "content" --body-file "${tmpFile}"`,
+      {
+        encoding: 'utf-8',
+      }
+    );
+
+    return result.trim();
+  } finally {
+    try {
+      unlinkSync(tmpFile);
+    } catch {
+      // ignore cleanup errors
     }
-  );
-
-  return result.trim();
+  }
 }
 
 // ---------------------------------------------------------------------------
