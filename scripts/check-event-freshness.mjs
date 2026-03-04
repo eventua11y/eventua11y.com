@@ -196,33 +196,41 @@ ${pageText}
 
 ## Your task
 
-Analyse the website text and identify any discrepancies or noteworthy changes compared to our database record. Focus on:
+Analyse the website text and identify any fields in our database that need updating. Focus on:
 
-1. **Date discrepancies**: Do the dates on the website match our record? The dates in our database record above have already been converted to the event's local timezone, so you can compare them directly against dates shown on the website (which will also be in local time). Look for event dates in any format (e.g. "June 23-25, 2026", "23-25 June 2026", "23/06/2026", "2026-06-23", etc.). Be careful to distinguish the actual event dates from other dates on the page (such as CFS deadlines, early-bird deadlines, or dates of blog posts). Only flag a discrepancy if you are confident the website shows different event dates than our record.
+1. **Dates**: The dates above are already in the event's local timezone, so compare them directly against what the website shows. Be careful to distinguish actual event dates from other dates on the page (CFS deadlines, early-bird dates, blog post dates). Only flag if you are confident the website shows different event dates.
 
-2. **Event status**: Is there any indication the event has been cancelled, postponed, rescheduled, or sold out? Only flag this if the language clearly refers to this specific event, not past editions.
+2. **Event status**: Any indication the event has been cancelled, postponed, rescheduled, or sold out (for this edition, not past ones).
 
-3. **Call for speakers/proposals**: Is there a call for speakers, proposals, or papers mentioned? Is it open, closed, or has a deadline? Compare with our CFS record.
+3. **Call for speakers/proposals**: Is a CFS mentioned? Is it open, closed, or does it have a deadline? Compare with our record.
 
-4. **Location changes**: Has the venue or city changed from what we have?
+4. **Location**: Has the venue or city changed?
 
-5. **Other notable changes**: Anything else that looks like it might need updating in our database (e.g. the event has been renamed, the website is a placeholder, or the content doesn't match the event at all).
+5. **Other**: Anything else that needs updating (renamed, placeholder page, content mismatch).
 
 Respond with ONLY a JSON object (no markdown fences) in this exact format:
 {
-  "findings": [
-    {"type": "date_mismatch|status_change|cfs_update|location_change|website_issue|other", "severity": "warning|info", "detail": "Human-readable description of the finding"}
+  "changes": [
+    {
+      "field": "dateStart|dateEnd|eventStatus|callForSpeakers|callForSpeakersClosingDate|location|attendanceMode|isParent|other",
+      "severity": "warning|info",
+      "current": "What our database currently has for this field",
+      "suggested": "What the website suggests it should be, or 'unknown' if unclear",
+      "reason": "One sentence explaining the evidence from the website"
+    }
   ],
-  "eventDatesOnPage": "The event dates as stated on the website, or null if not found",
-  "summary": "One sentence summary: either 'No issues found' or a brief description of what needs attention"
+  "noChanges": true|false,
+  "notes": "Optional one-sentence note about anything worth mentioning that does not require a database change, or null"
 }
 
 Rules:
-- Return an empty "findings" array if everything looks consistent.
-- Use "warning" severity for things that likely need a database update (date mismatch, cancellation, etc.).
-- Use "info" severity for things worth noting but not necessarily requiring action (e.g. CFS deadline approaching, sold out).
-- Be conservative: only flag genuine discrepancies, not ambiguities. If you can't tell whether dates match because the website doesn't show dates, don't flag it.
-- Do not invent findings. If the page text is too short or unclear, say so.`;
+- Set "noChanges" to true and return an empty "changes" array if everything looks consistent.
+- Use "warning" severity for changes that likely need a database update.
+- Use "info" severity for things worth flagging but that may not need action.
+- For date fields, use the format the website shows (e.g. "23 June 2026") in the "suggested" value.
+- For boolean fields (callForSpeakers, isParent), use "true" or "false" as strings in "suggested".
+- Be conservative: only flag genuine discrepancies, not ambiguities.
+- Do not invent changes. If the page is unclear, say so in "notes" instead.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -334,23 +342,19 @@ async function checkEvent(event) {
 
   const analysis = await analyseWithClaude(event, plainText);
 
-  if (analysis.findings && analysis.findings.length > 0) {
-    for (const finding of analysis.findings) {
-      findings.push(finding.detail);
-      if (finding.severity === 'warning' && severity !== 'error') {
+  if (analysis.changes && analysis.changes.length > 0) {
+    for (const change of analysis.changes) {
+      findings.push(change);
+      if (change.severity === 'warning' && severity !== 'error') {
         severity = 'warning';
-      } else if (finding.severity === 'info' && severity === 'ok') {
+      } else if (change.severity === 'info' && severity === 'ok') {
         severity = 'info';
       }
     }
   }
 
-  if (analysis.eventDatesOnPage) {
-    findings.push(`Dates on website: ${analysis.eventDatesOnPage}`);
-  }
-
-  if (findings.length === 0) {
-    findings.push('No issues detected');
+  if (analysis.notes) {
+    findings.push({ note: analysis.notes });
   }
 
   return { event, findings, severity, analysis };
@@ -367,6 +371,37 @@ function formatDate(isoString) {
     month: 'short',
     year: 'numeric',
   });
+}
+
+function formatFindings(findings) {
+  const lines = [];
+  const changes = findings.filter((f) => f.field);
+  const notes = findings.filter((f) => f.note);
+  const plain = findings.filter((f) => typeof f === 'string');
+
+  // Plain string findings (from redirect/HTTP checks)
+  for (const f of plain) {
+    lines.push(`- ${f}`);
+  }
+
+  // Structured changes as a table
+  if (changes.length > 0) {
+    lines.push('| Field | Current | Suggested | Reason |');
+    lines.push('| --- | --- | --- | --- |');
+    for (const c of changes) {
+      const sev = c.severity === 'warning' ? '**' : '';
+      lines.push(
+        `| ${sev}\`${c.field}\`${sev} | ${c.current || '-'} | ${c.suggested || '-'} | ${c.reason || '-'} |`
+      );
+    }
+  }
+
+  // Notes
+  for (const n of notes) {
+    lines.push(`> ${n.note}`);
+  }
+
+  return lines;
 }
 
 function buildReport(results) {
@@ -401,9 +436,8 @@ function buildReport(results) {
       lines.push(
         `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
       );
-      for (const f of findings) {
-        lines.push(`- ${f}`);
-      }
+      lines.push('');
+      lines.push(...formatFindings(findings));
       lines.push('');
     }
   }
@@ -417,9 +451,8 @@ function buildReport(results) {
       lines.push(
         `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
       );
-      for (const f of findings) {
-        lines.push(`- ${f}`);
-      }
+      lines.push('');
+      lines.push(...formatFindings(findings));
       lines.push('');
     }
   }
@@ -498,7 +531,12 @@ async function main() {
   for (const event of events) {
     process.stdout.write(`Checking: ${event.title}... `);
     const result = await checkEvent(event);
-    const summary = result.analysis?.summary || result.severity;
+    const changeCount = result.analysis?.changes?.length || 0;
+    const note = result.analysis?.notes || '';
+    const summary =
+      changeCount > 0
+        ? `${changeCount} change${changeCount === 1 ? '' : 's'} suggested`
+        : note || 'no changes';
     console.log(`${result.severity} - ${summary}`);
     results.push(result);
 
