@@ -399,7 +399,7 @@ function buildReport(results) {
       const icon = severity === 'error' ? '**' : '';
       lines.push(`### ${icon}${event.title}${icon}`);
       lines.push(
-        `${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
+        `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
       );
       for (const f of findings) {
         lines.push(`- ${f}`);
@@ -415,7 +415,7 @@ function buildReport(results) {
     for (const { event, findings } of infos) {
       lines.push(`### ${event.title}`);
       lines.push(
-        `${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
+        `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
       );
       for (const f of findings) {
         lines.push(`- ${f}`);
