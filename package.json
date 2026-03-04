@@ -16,7 +16,8 @@
     "check": "prettier --check .",
     "check:watch": "concurrently \"prettier --watch . --write\" \"eslint . --fix --watch\"",
     "format": "prettier --write .",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "check:freshness": "node scripts/check-event-freshness.mjs --dry-run"
   },
   "repository": {
     "type": "git",
