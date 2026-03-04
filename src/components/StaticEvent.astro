@@ -54,6 +54,14 @@ const formattedRange = formatDateRange({
 // Internal event page URL (if slug exists)
 const eventUrl = getEventUrl(event);
 
+// Machine-readable datetime values for <time> elements
+const isDateOnly = isAllDay || isTheme || isDeadline;
+const machineFormat = isDateOnly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZ';
+const machineStart = formatDate(event.dateStart, machineFormat);
+const machineEnd = event.dateEnd
+  ? formatDate(event.dateEnd, machineFormat)
+  : undefined;
+
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
 const displayLocation = event.location || 'International';
@@ -64,12 +72,12 @@ const displayLocation = event.location || 'International';
     <div class="event event--deadline">
       <div class="event__dates">
         <span class="event__dateRange">
-          {formattedRange[0]}
-          {formattedRange[1] && (
+          <time datetime={machineStart}>{formattedRange[0]}</time>
+          {formattedRange[1] && machineEnd && (
             <>
               <span aria-hidden="true"> &ndash; </span>
               <span class="sr-only">to</span>
-              {formattedRange[1]}
+              <time datetime={machineEnd}>{formattedRange[1]}</time>
             </>
           )}
           {!isInternational && ' UTC'}{' '}
@@ -94,12 +102,12 @@ const displayLocation = event.location || 'International';
       {event.dateStart && (
         <div class="event__dates">
           <span class="event__dateRange">
-            {formattedRange[0]}
-            {formattedRange[1] && (
+            <time datetime={machineStart}>{formattedRange[0]}</time>
+            {formattedRange[1] && machineEnd && (
               <>
                 <span aria-hidden="true"> &ndash; </span>
                 <span class="sr-only">to</span>
-                {formattedRange[1]}
+                <time datetime={machineEnd}>{formattedRange[1]}</time>
               </>
             )}
             {!isInternational && ' UTC'}
