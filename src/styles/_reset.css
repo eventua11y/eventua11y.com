@@ -74,11 +74,3 @@ select {
     scroll-behavior: auto !important;
   }
 }
-
-/* Hide custom elements that are not yet registered to prevent FOUCE.
-   Skeleton placeholders use native HTML/CSS so they are unaffected by
-   this rule and render immediately. */
-:not(:defined) {
-  display: none;
-  visibility: hidden;
-}
