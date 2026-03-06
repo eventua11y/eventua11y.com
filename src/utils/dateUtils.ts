@@ -223,6 +223,38 @@ const RANGE_FORMATS: Record<
 };
 
 /**
+ * Locale-specific format strings for full-month display.
+ *
+ * When an event spans an entire calendar month (1st to last day),
+ * we display just the month and year instead of a verbose date range.
+ *
+ * English:  "October 2026"
+ * German:   "Oktober 2026"
+ * French:   "octobre 2026"
+ * Spanish:  "octubre de 2026"
+ */
+const FULL_MONTH_FORMATS: Record<string, string> = {
+  en: 'MMMM YYYY',
+  de: 'MMMM YYYY',
+  fr: 'MMMM YYYY',
+  es: 'MMMM [de] YYYY',
+};
+
+/**
+ * Checks if a date range spans an entire calendar month.
+ *
+ * Returns true when the start date is the 1st and the end date is
+ * the last day of the same month and year.
+ */
+export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
+  return (
+    start.date() === 1 &&
+    end.date() === end.daysInMonth() &&
+    start.isSame(end, 'month')
+  );
+}
+
+/**
  * A formatted date range split into parts for accessible rendering.
  *
  * - Single element: no range (single date, or same-day date-only)
@@ -246,6 +278,7 @@ export type DateRangeParts = [string] | [string, string];
  *   Same day, same period:  ["Sunday, March 8, 2026 2:00", "5:00 PM"]
  *   Same day, diff period:  ["Sunday, March 8, 2026 10:00 AM", "5:00 PM"]
  *   Multi-day, timed:       ["Tuesday, February 24 2:00 PM", "Wednesday, February 25, 2026 9:00 PM"]
+ *   Full month:             ["October 2026"]
  *   Same month, date-only:  ["Sunday, March 8", "Friday, March 13, 2026"]
  *   Different months:       ["Saturday, March 28", "Thursday, April 2, 2026"]
  *   Different years:        ["Monday, December 28, 2026", "Saturday, January 2, 2027"]
@@ -315,6 +348,12 @@ export function formatDateRange(options: {
       nonBreakingTime(start.format(formats.timedDiffYear.start)),
       nonBreakingTime(end.format(formats.timedDiffYear.end)),
     ];
+  }
+
+  // Full-month events: display as "October 2026" instead of a verbose range
+  if (isFullMonth(start, end)) {
+    const fullMonthFmt = FULL_MONTH_FORMATS[locale] || FULL_MONTH_FORMATS.en;
+    return [start.format(fullMonthFmt)];
   }
 
   // Date-only multi-day ranges: deduplicate shared components

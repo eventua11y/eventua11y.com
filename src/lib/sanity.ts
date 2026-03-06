@@ -75,13 +75,41 @@ export async function getEvents(): Promise<{
     await Promise.all([
       client.fetch(`
         *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
-          ...,
+          _id,
+          _type,
+          type,
+          title,
+          slug,
+          description,
+          dateStart,
+          dateEnd,
+          timezone,
+          website,
+          attendanceMode,
+          callForSpeakers,
+          callForSpeakersClosingDate,
+          parent,
+          day,
+          isFree,
+          isParent,
+          location,
           "speakers": speakers[]->{ _id, name }
         }
       `),
       client.fetch(`
         *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
-          ...,
+          _id,
+          title,
+          slug,
+          type,
+          dateStart,
+          dateEnd,
+          timezone,
+          day,
+          website,
+          format,
+          scheduled,
+          parent,
           "speakers": speakers[]->{ _id, name }
         } | order(dateStart asc)
       `),
@@ -211,7 +239,17 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "speakers": speakers[]->{ _id, name },
       "organizer": coalesce(organizer, parent->organizer)->{ _id, name, website },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
-        ...,
+        _id,
+        title,
+        slug,
+        type,
+        dateStart,
+        dateEnd,
+        timezone,
+        day,
+        website,
+        format,
+        scheduled,
         "speakers": speakers[]->{ _id, name }
       } | order(dateStart asc)
     }

@@ -269,7 +269,7 @@ const jsonLd = {
         />
 
         <EventDelivery
-          client:load
+          client:idle
           attendanceMode={event.attendanceMode as any}
           location={event.location}
           website={event.website}
@@ -345,7 +345,11 @@ const jsonLd = {
                 {event.children!.map((child) => (
                   <li>
                     <wa-card appearance="outlined">
-                      <EventChild client:load event={child} showEnded={true} />
+                      <EventChild
+                        client:visible
+                        event={child}
+                        showEnded={true}
+                      />
                     </wa-card>
                   </li>
                 ))}
