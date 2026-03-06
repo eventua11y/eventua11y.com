@@ -74,3 +74,10 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* Hide custom elements that are not yet registered to prevent FOUCE.
+   Uses opacity instead of display:none so elements still occupy their
+   layout space and don't cause a content shift once they upgrade. */
+:not(:defined) {
+  opacity: 0;
+}
