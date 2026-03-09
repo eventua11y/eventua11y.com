@@ -1,0 +1,158 @@
+---
+import Layout from '../layouts/default.astro';
+
+const title = 'Log in';
+const description = 'Log in to your Eventua11y account.';
+
+// If already logged in, redirect to account page
+if (Astro.locals.user) {
+  return Astro.redirect('/account');
+}
+
+const errorParam = Astro.url.searchParams.get('error');
+const signedOut = Astro.url.searchParams.get('signed-out');
+---
+
+<Layout title={title} description={description}>
+  <div class="auth-page">
+    <wa-card>
+      <div class="wa-stack">
+        <h1 class="wa-heading-l">Log in</h1>
+
+        {
+          errorParam === 'auth-code-error' && (
+            <wa-callout variant="danger">
+              <wa-icon slot="icon" name="circle-exclamation" />
+              There was a problem signing you in. Please try again.
+            </wa-callout>
+          )
+        }
+
+        {
+          signedOut && (
+            <wa-callout variant="neutral">
+              <wa-icon slot="icon" name="circle-check" />
+              You have been signed out.
+            </wa-callout>
+          )
+        }
+
+        <form id="login-form" novalidate>
+          <div class="wa-stack">
+            <wa-input
+              id="email"
+              label="Email"
+              type="email"
+              required
+              autocomplete="email"
+            />
+            <wa-input
+              id="password"
+              label="Password"
+              type="password"
+              required
+              autocomplete="current-password"
+            />
+            <wa-button id="login-button" type="submit">Log in</wa-button>
+          </div>
+        </form>
+
+        <div id="login-error" hidden>
+          <wa-callout variant="danger">
+            <wa-icon slot="icon" name="circle-exclamation" />
+            <span id="login-error-message">Invalid email or password.</span>
+          </wa-callout>
+        </div>
+
+        <wa-divider></wa-divider>
+
+        <p>Or log in with:</p>
+        <div class="wa-grid" style="--min-column-size: 12ch;">
+          <wa-button id="github-login" appearance="outlined">
+            <wa-icon slot="start" name="github" family="brands"></wa-icon>
+            GitHub
+          </wa-button>
+          <wa-button id="linkedin-login" appearance="outlined">
+            <wa-icon slot="start" name="linkedin" family="brands"></wa-icon>
+            LinkedIn
+          </wa-button>
+        </div>
+
+        <p>
+          Don&rsquo;t have an account? <a href="/signup">Create one</a>
+        </p>
+      </div>
+    </wa-card>
+  </div>
+</Layout>
+
+<script>
+  import { createSupabaseBrowserClient } from '../lib/supabase/client';
+
+  const supabase = createSupabaseBrowserClient();
+
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement & {
+    value: string;
+  };
+  const passwordInput = document.getElementById(
+    'password',
+  ) as HTMLInputElement & { value: string };
+  const loginButton = document.getElementById('login-button') as HTMLElement;
+  const loginError = document.getElementById('login-error') as HTMLElement;
+  const loginErrorMessage = document.getElementById(
+    'login-error-message',
+  ) as HTMLElement;
+
+  form?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    loginError.hidden = true;
+    loginButton.setAttribute('loading', '');
+
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      loginErrorMessage.textContent = 'Please enter your email and password.';
+      loginError.hidden = false;
+      loginButton.removeAttribute('loading');
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      loginErrorMessage.textContent =
+        error.message || 'Invalid email or password.';
+      loginError.hidden = false;
+      loginButton.removeAttribute('loading');
+    } else {
+      window.location.href = '/account';
+    }
+  });
+
+  document
+    .getElementById('github-login')
+    ?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+
+  document
+    .getElementById('linkedin-login')
+    ?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+</script>

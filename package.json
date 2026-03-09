@@ -70,6 +70,8 @@
     "@sanity/client": "^7.16.0",
     "@sentry/astro": "^10.43.0",
     "@sentry/cli": "^3.3.3",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.99.0",
     "astro-portabletext": "^0.13.0",
     "dayjs": "^1.11.13",
     "vue": "^3.5.25"
