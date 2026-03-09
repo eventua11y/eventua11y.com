@@ -223,6 +223,44 @@ const RANGE_FORMATS: Record<
 };
 
 /**
+ * Locale-specific label for "Today".
+ *
+ * Used by formatDateRange to replace the day-of-week and date portion
+ * when a start or end date falls on the current calendar day in the
+ * resolved timezone.
+ */
+const TODAY_LABELS: Record<string, string> = {
+  en: 'Today',
+  de: 'Heute',
+  fr: "Aujourd'hui",
+  es: 'Hoy',
+};
+
+/**
+ * Checks whether a date falls on today's calendar day in the given timezone.
+ *
+ * Accepts an optional `now` parameter for testability; defaults to the
+ * real current time.
+ */
+export function isToday(
+  date: string | Date,
+  options: {
+    timezone?: string;
+    useLocalTimezone?: boolean;
+    userTimezone?: string;
+  },
+  now?: dayjs.Dayjs
+): boolean {
+  const tz = resolveTimezone(options);
+  const today = (now || dayjs()).tz(tz);
+  const isInternational = !options.timezone;
+  const target = isInternational
+    ? dayjs.utc(date).tz(tz)
+    : dayjs.utc(date).tz(tz);
+  return target.isSame(today, 'day');
+}
+
+/**
  * Locale-specific format strings for full-month display.
  *
  * When an event spans an entire calendar month (1st to last day),
@@ -297,20 +335,78 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
+  /** Injected "now" for testability; defaults to the real current time. */
+  now?: dayjs.Dayjs;
 }): DateRangeParts {
   const locale = options.locale || 'en';
+  const todayLabel = TODAY_LABELS[locale] || TODAY_LABELS.en;
+
+  const isInternational = !options.timezone;
+  const tz = isInternational ? 'UTC' : resolveTimezone(options);
+  const nowInTz = (options.now || dayjs()).tz(tz);
+
+  /**
+   * Replaces the day-of-week + date portion of a formatted string with
+   * "Today" (or its locale equivalent) when `dateObj` falls on today.
+   *
+   * Accepts the dayjs format string used to produce `formatted` so it
+   * can strip the date-only prefix precisely for any locale. It removes
+   * the time tokens (LT / h:mm / H:mm / HH:mm) from the format to
+   * isolate the date prefix, then replaces that prefix in the output.
+   */
+  function today(
+    dateObj: dayjs.Dayjs,
+    formatted: string,
+    fmt?: string
+  ): string {
+    if (!dateObj.isSame(nowInTz, 'day')) return formatted;
+
+    // If we know the exact format, strip time tokens to get the date prefix
+    if (fmt) {
+      const dateOnlyFmt = fmt
+        .replace(/\s*LT$/, '')
+        .replace(/\s*h:mm\s*(A)?$/i, '')
+        .replace(/\s*H{1,2}:mm$/i, '')
+        .trim();
+      const datePrefix = dateObj.format(dateOnlyFmt);
+      if (formatted.startsWith(datePrefix)) {
+        return todayLabel + formatted.slice(datePrefix.length);
+      }
+    }
+
+    // Fallback: try common date-only patterns from longest to shortest
+    const dp = dayPrefix(locale);
+    const candidates = [
+      dateObj.format(`${dp}LL`), // "Sunday, March 8, 2026"
+      dateObj.format(`${dp}MMMM D, YYYY`), // explicit with year
+      dateObj.format(`${dp}MMMM D`), // without year
+    ];
+
+    for (const candidate of candidates) {
+      if (candidate && formatted.startsWith(candidate)) {
+        return todayLabel + formatted.slice(candidate.length);
+      }
+    }
+    return formatted;
+  }
 
   // No end date — return a single formatted date
   if (!options.dateEnd) {
     const format = getStartDateFormat(options);
-    return [formatEventDate(options.dateStart, format, options)];
+    const startDj = isInternational
+      ? dayjs.utc(options.dateStart).locale(locale)
+      : dayjs.utc(options.dateStart).tz(tz).locale(locale);
+    return [
+      today(
+        startDj,
+        formatEventDate(options.dateStart, format, options),
+        format
+      ),
+    ];
   }
 
   const isDateOnly =
     options.day || options.type === 'theme' || options.isDeadline;
-
-  const isInternational = !options.timezone;
-  const tz = isInternational ? 'UTC' : resolveTimezone(options);
 
   // Resolve dayjs instances in the target timezone
   const start = isInternational
@@ -325,11 +421,17 @@ export function formatDateRange(options: {
   // Same day — timed events show "date time" / "time", date-only returns single date
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
-      return [nonBreakingTime(start.format(`${dp}LL`))];
+      return [
+        today(start, nonBreakingTime(start.format(`${dp}LL`)), `${dp}LL`),
+      ];
     }
     const startTime = deduplicateAmPm(start, end, locale);
     return [
-      nonBreakingTime(`${start.format(`${dp}LL`)} ${startTime}`),
+      today(
+        start,
+        nonBreakingTime(`${start.format(`${dp}LL`)} ${startTime}`),
+        `${dp}LL`
+      ),
       nonBreakingTime(end.format('LT')),
     ];
   }
@@ -340,13 +442,29 @@ export function formatDateRange(options: {
   if (!isDateOnly) {
     if (start.isSame(end, 'year')) {
       return [
-        nonBreakingTime(start.format(formats.timedSameYear.start)),
-        nonBreakingTime(end.format(formats.timedSameYear.end)),
+        today(
+          start,
+          nonBreakingTime(start.format(formats.timedSameYear.start)),
+          formats.timedSameYear.start
+        ),
+        today(
+          end,
+          nonBreakingTime(end.format(formats.timedSameYear.end)),
+          formats.timedSameYear.end
+        ),
       ];
     }
     return [
-      nonBreakingTime(start.format(formats.timedDiffYear.start)),
-      nonBreakingTime(end.format(formats.timedDiffYear.end)),
+      today(
+        start,
+        nonBreakingTime(start.format(formats.timedDiffYear.start)),
+        formats.timedDiffYear.start
+      ),
+      today(
+        end,
+        nonBreakingTime(end.format(formats.timedDiffYear.end)),
+        formats.timedDiffYear.end
+      ),
     ];
   }
 
@@ -362,15 +480,23 @@ export function formatDateRange(options: {
       ? formats.sameMonth
       : formats.diffMonth;
     return [
-      nonBreakingTime(start.format(fmt.start)),
-      nonBreakingTime(end.format(fmt.end)),
+      today(start, nonBreakingTime(start.format(fmt.start)), fmt.start),
+      today(end, nonBreakingTime(end.format(fmt.end)), fmt.end),
     ];
   }
 
   // Different years: no deduplication possible
   return [
-    nonBreakingTime(start.format(formats.dateOnlyDiffYear.start)),
-    nonBreakingTime(end.format(formats.dateOnlyDiffYear.end)),
+    today(
+      start,
+      nonBreakingTime(start.format(formats.dateOnlyDiffYear.start)),
+      formats.dateOnlyDiffYear.start
+    ),
+    today(
+      end,
+      nonBreakingTime(end.format(formats.dateOnlyDiffYear.end)),
+      formats.dateOnlyDiffYear.end
+    ),
   ];
 }
 
