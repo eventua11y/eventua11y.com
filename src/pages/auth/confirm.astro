@@ -1,0 +1,32 @@
+---
+import Layout from '../../layouts/default.astro';
+
+const title = 'Check your email';
+const description = 'A confirmation email has been sent to your address.';
+---
+
+<Layout title={title} description={description}>
+  <div class="auth-page">
+    <wa-card>
+      <div class="wa-stack">
+        <h1 class="wa-heading-l">Check your email</h1>
+        <wa-callout variant="success">
+          <wa-icon slot="icon" name="envelope" />
+          <div class="wa-stack">
+            <p>
+              We&rsquo;ve sent a confirmation link to your email address. Please
+              click the link to verify your account.
+            </p>
+          </div>
+        </wa-callout>
+        <p>
+          Once verified, you can <a href="/login">log in</a> to your account.
+        </p>
+        <p>
+          Didn&rsquo;t receive the email? Check your spam folder, or{' '}
+          <a href="/signup">try signing up again</a>.
+        </p>
+      </div>
+    </wa-card>
+  </div>
+</Layout>

@@ -1,0 +1,54 @@
+/* Auth pages (login, signup, account) */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding: var(--p-space-xs-m);
+  padding-top: var(--p-space-l);
+  padding-bottom: var(--p-space-l);
+}
+
+.auth-page wa-card {
+  max-width: 45ch;
+  width: 100%;
+}
+
+/* Account page details list */
+.account-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--p-space-2xs) var(--p-space-m);
+  margin: 0;
+}
+
+.account-details dt {
+  font-weight: 700;
+}
+
+.account-details dd {
+  margin: 0;
+}
+
+/* Account avatar */
+.account-avatar img {
+  border-radius: 50%;
+  display: block;
+}
+
+/* Provider name formatting */
+.provider-name {
+  text-transform: capitalize;
+}
+
+/* Header account link */
+.masthead__account-link {
+  color: inherit;
+  display: flex;
+  align-items: center;
+  padding: var(--p-space-2xs);
+  text-decoration: none;
+}
+
+.masthead__account-link wa-icon {
+  font-size: 1.25rem;
+}
