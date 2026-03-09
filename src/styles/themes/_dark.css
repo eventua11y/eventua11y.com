@@ -48,6 +48,9 @@ html[data-theme='dark'] {
   --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
+  /* Progress */
+  --c-progress-color-indicator: var(--p-color-purple-100);
+
   /* Page header */
   /* --page-header-color-bg: var(--color-primary);
   --page-header-color-fg: var(--color-fg);

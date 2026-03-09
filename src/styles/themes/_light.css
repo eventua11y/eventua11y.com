@@ -44,6 +44,9 @@
   --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
 
+  /* Progress */
+  --c-progress-color-indicator: var(--p-color-purple-600);
+
   /* Panel */
   --c-panel-color-bg: var(--s-color-surface);
 
