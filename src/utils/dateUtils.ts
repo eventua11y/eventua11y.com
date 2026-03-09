@@ -223,17 +223,24 @@ const RANGE_FORMATS: Record<
 };
 
 /**
- * Locale-specific label for "Today".
+ * Locale-specific labels for "Today" and "Tomorrow".
  *
  * Used by formatDateRange to replace the day-of-week and date portion
- * when a start or end date falls on the current calendar day in the
- * resolved timezone.
+ * when a start or end date falls on the current or next calendar day
+ * in the resolved timezone.
  */
 const TODAY_LABELS: Record<string, string> = {
   en: 'Today',
   de: 'Heute',
   fr: "Aujourd'hui",
   es: 'Hoy',
+};
+
+const TOMORROW_LABELS: Record<string, string> = {
+  en: 'Tomorrow',
+  de: 'Morgen',
+  fr: 'Demain',
+  es: 'Mañana',
 };
 
 /**
@@ -258,6 +265,27 @@ export function isToday(
     ? dayjs.utc(date).tz(tz)
     : dayjs.utc(date).tz(tz);
   return target.isSame(today, 'day');
+}
+
+/**
+ * Checks whether a date falls on tomorrow's calendar day in the given timezone.
+ *
+ * Accepts an optional `now` parameter for testability; defaults to the
+ * real current time.
+ */
+export function isTomorrow(
+  date: string | Date,
+  options: {
+    timezone?: string;
+    useLocalTimezone?: boolean;
+    userTimezone?: string;
+  },
+  now?: dayjs.Dayjs
+): boolean {
+  const tz = resolveTimezone(options);
+  const tomorrow = (now || dayjs()).tz(tz).add(1, 'day');
+  const target = dayjs.utc(date).tz(tz);
+  return target.isSame(tomorrow, 'day');
 }
 
 /**
@@ -340,26 +368,35 @@ export function formatDateRange(options: {
 }): DateRangeParts {
   const locale = options.locale || 'en';
   const todayLabel = TODAY_LABELS[locale] || TODAY_LABELS.en;
+  const tomorrowLabel = TOMORROW_LABELS[locale] || TOMORROW_LABELS.en;
 
   const isInternational = !options.timezone;
   const tz = isInternational ? 'UTC' : resolveTimezone(options);
   const nowInTz = (options.now || dayjs()).tz(tz);
+  const tomorrowInTz = nowInTz.add(1, 'day');
 
   /**
    * Replaces the day-of-week + date portion of a formatted string with
-   * "Today" (or its locale equivalent) when `dateObj` falls on today.
+   * "Today" or "Tomorrow" (or their locale equivalents) when `dateObj`
+   * falls on the current or next calendar day.
    *
    * Accepts the dayjs format string used to produce `formatted` so it
    * can strip the date-only prefix precisely for any locale. It removes
    * the time tokens (LT / h:mm / H:mm / HH:mm) from the format to
    * isolate the date prefix, then replaces that prefix in the output.
    */
-  function today(
+  function relativeDay(
     dateObj: dayjs.Dayjs,
     formatted: string,
     fmt?: string
   ): string {
-    if (!dateObj.isSame(nowInTz, 'day')) return formatted;
+    let label: string | undefined;
+    if (dateObj.isSame(nowInTz, 'day')) {
+      label = todayLabel;
+    } else if (dateObj.isSame(tomorrowInTz, 'day')) {
+      label = tomorrowLabel;
+    }
+    if (!label) return formatted;
 
     // If we know the exact format, strip time tokens to get the date prefix
     if (fmt) {
@@ -370,7 +407,7 @@ export function formatDateRange(options: {
         .trim();
       const datePrefix = dateObj.format(dateOnlyFmt);
       if (formatted.startsWith(datePrefix)) {
-        return todayLabel + formatted.slice(datePrefix.length);
+        return label + formatted.slice(datePrefix.length);
       }
     }
 
@@ -384,7 +421,7 @@ export function formatDateRange(options: {
 
     for (const candidate of candidates) {
       if (candidate && formatted.startsWith(candidate)) {
-        return todayLabel + formatted.slice(candidate.length);
+        return label + formatted.slice(candidate.length);
       }
     }
     return formatted;
@@ -397,7 +434,7 @@ export function formatDateRange(options: {
       ? dayjs.utc(options.dateStart).locale(locale)
       : dayjs.utc(options.dateStart).tz(tz).locale(locale);
     return [
-      today(
+      relativeDay(
         startDj,
         formatEventDate(options.dateStart, format, options),
         format
@@ -422,12 +459,12 @@ export function formatDateRange(options: {
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
       return [
-        today(start, nonBreakingTime(start.format(`${dp}LL`)), `${dp}LL`),
+        relativeDay(start, nonBreakingTime(start.format(`${dp}LL`)), `${dp}LL`),
       ];
     }
     const startTime = deduplicateAmPm(start, end, locale);
     return [
-      today(
+      relativeDay(
         start,
         nonBreakingTime(`${start.format(`${dp}LL`)} ${startTime}`),
         `${dp}LL`
@@ -442,12 +479,12 @@ export function formatDateRange(options: {
   if (!isDateOnly) {
     if (start.isSame(end, 'year')) {
       return [
-        today(
+        relativeDay(
           start,
           nonBreakingTime(start.format(formats.timedSameYear.start)),
           formats.timedSameYear.start
         ),
-        today(
+        relativeDay(
           end,
           nonBreakingTime(end.format(formats.timedSameYear.end)),
           formats.timedSameYear.end
@@ -455,12 +492,12 @@ export function formatDateRange(options: {
       ];
     }
     return [
-      today(
+      relativeDay(
         start,
         nonBreakingTime(start.format(formats.timedDiffYear.start)),
         formats.timedDiffYear.start
       ),
-      today(
+      relativeDay(
         end,
         nonBreakingTime(end.format(formats.timedDiffYear.end)),
         formats.timedDiffYear.end
@@ -480,19 +517,19 @@ export function formatDateRange(options: {
       ? formats.sameMonth
       : formats.diffMonth;
     return [
-      today(start, nonBreakingTime(start.format(fmt.start)), fmt.start),
-      today(end, nonBreakingTime(end.format(fmt.end)), fmt.end),
+      relativeDay(start, nonBreakingTime(start.format(fmt.start)), fmt.start),
+      relativeDay(end, nonBreakingTime(end.format(fmt.end)), fmt.end),
     ];
   }
 
   // Different years: no deduplication possible
   return [
-    today(
+    relativeDay(
       start,
       nonBreakingTime(start.format(formats.dateOnlyDiffYear.start)),
       formats.dateOnlyDiffYear.start
     ),
-    today(
+    relativeDay(
       end,
       nonBreakingTime(end.format(formats.dateOnlyDiffYear.end)),
       formats.dateOnlyDiffYear.end
