@@ -17,6 +17,9 @@
   color-scheme: light;
   accent-color: var(--s-color-primary);
 
+  /* Align WA's border color with the project's border token */
+  --wa-color-surface-border: var(--s-color-border);
+
   /* Body */
   --c-body-color-bg: var(--s-color-bg);
   --c-body-color-fg: var(--s-color-fg);
