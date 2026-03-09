@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /** Non-breaking space used between time digits and AM/PM */
 const nbsp = '\u00A0';
@@ -11,6 +13,7 @@ import {
   getStartDateFormat,
   getEndDateFormat,
   isSameDay,
+  isToday,
   formatEventDate,
   formatDateRange,
   getYearMonth,
@@ -171,6 +174,46 @@ describe('isSameDay', () => {
         useLocalTimezone: true,
         userTimezone: 'Europe/Paris',
       })
+    ).toBe(true);
+  });
+});
+
+describe('isToday', () => {
+  it('returns true when the date is today in UTC', () => {
+    const now = dayjs.utc('2026-03-09T12:00:00Z');
+    expect(
+      isToday('2026-03-09T14:00:00Z', { timezone: 'UTC' }, now.tz('UTC'))
+    ).toBe(true);
+  });
+
+  it('returns false when the date is not today in UTC', () => {
+    const now = dayjs.utc('2026-03-09T12:00:00Z');
+    expect(
+      isToday('2026-03-10T14:00:00Z', { timezone: 'UTC' }, now.tz('UTC'))
+    ).toBe(false);
+  });
+
+  it('respects timezone when determining today', () => {
+    // 2026-03-09T23:00:00Z is Mar 10 in UTC+2 (Helsinki)
+    const now = dayjs.utc('2026-03-10T01:00:00Z').tz('Europe/Helsinki');
+    expect(
+      isToday('2026-03-09T23:00:00Z', { timezone: 'Europe/Helsinki' }, now)
+    ).toBe(true); // Both are Mar 10 in Helsinki
+  });
+
+  it('uses user timezone when useLocalTimezone is true', () => {
+    // 2026-03-09T23:00:00Z is still Mar 9 in UTC, but Mar 10 in Helsinki
+    const now = dayjs.utc('2026-03-10T01:00:00Z').tz('Europe/Helsinki');
+    expect(
+      isToday(
+        '2026-03-09T23:00:00Z',
+        {
+          timezone: 'UTC',
+          useLocalTimezone: true,
+          userTimezone: 'Europe/Helsinki',
+        },
+        now
+      )
     ).toBe(true);
   });
 });
@@ -466,12 +509,15 @@ describe('formatDateRange', () => {
   describe('timezone handling', () => {
     it('converts to event timezone', () => {
       // UTC 23:00 Mar 8 = EDT 19:00 Mar 8; UTC 03:00 Mar 10 = EDT 23:00 Mar 9
+      // Inject a "now" on a different day so the "Today" label doesn't trigger
+      const notToday = dayjs.utc('2026-01-01T12:00:00Z').tz('America/New_York');
       const result = formatDateRange({
         dateStart: '2026-03-08T23:00:00Z',
         dateEnd: '2026-03-10T03:00:00Z',
         timezone: 'America/New_York',
         locale: 'en',
         day: true,
+        now: notToday,
       });
       // In EDT (UTC-4 in March), these are Mar 8 (Sun) and Mar 9 (Mon)
       expect(result).toEqual(['Sunday, March 8', 'Monday, March 9, 2026']);
@@ -764,6 +810,223 @@ describe('formatDateRange', () => {
         day: true,
       });
       expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
+    });
+  });
+
+  describe('"Today" label', () => {
+    // Use a fixed "now" of Monday, March 9, 2026 12:00 UTC for all tests
+    const now = dayjs.utc('2026-03-09T12:00:00Z').tz('UTC');
+
+    describe('single date (no end date)', () => {
+      it('shows "Today" for a timed event starting today', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T14:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          now,
+        });
+        expect(result).toEqual([`Today 2:00${nbsp}PM`]);
+      });
+
+      it('shows "Today" for an all-day event today', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T00:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          day: true,
+          now,
+        });
+        expect(result).toEqual(['Today']);
+      });
+
+      it('does not show "Today" when date is not today', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-10T14:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          now,
+        });
+        expect(result).toEqual([`Tuesday, March 10, 2026 2:00${nbsp}PM`]);
+      });
+    });
+
+    describe('same-day timed events', () => {
+      it('replaces day name with "Today" for a same-day timed range', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T14:00:00Z',
+          dateEnd: '2026-03-09T17:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          now,
+        });
+        expect(result).toEqual(['Today 2:00', `5:00${nbsp}PM`]);
+      });
+
+      it('shows "Today" for same-day all-day event', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T00:00:00Z',
+          dateEnd: '2026-03-09T23:59:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          day: true,
+          now,
+        });
+        expect(result).toEqual(['Today']);
+      });
+    });
+
+    describe('multi-day ranges with "Today" on start', () => {
+      it('shows "Today" on start of a date-only multi-day range', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T00:00:00Z',
+          dateEnd: '2026-03-13T00:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          day: true,
+          now,
+        });
+        expect(result).toEqual(['Today', 'Friday, March 13, 2026']);
+      });
+
+      it('shows "Today" on start of a timed multi-day range', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T07:00:00Z',
+          dateEnd: '2026-03-13T17:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          now,
+        });
+        expect(result).toEqual([
+          `Today 7:00${nbsp}AM`,
+          `Friday, March 13, 2026 5:00${nbsp}PM`,
+        ]);
+      });
+    });
+
+    describe('multi-day ranges with "Today" on end', () => {
+      it('shows "Today" on end of a date-only multi-day range', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-07T00:00:00Z',
+          dateEnd: '2026-03-09T00:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          day: true,
+          now,
+        });
+        expect(result).toEqual(['Saturday, March 7', 'Today']);
+      });
+
+      it('shows "Today" on end of a timed multi-day range', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-07T10:00:00Z',
+          dateEnd: '2026-03-09T17:00:00Z',
+          timezone: 'UTC',
+          locale: 'en',
+          now,
+        });
+        expect(result).toEqual([
+          `Saturday, March 7 10:00${nbsp}AM`,
+          `Today 5:00${nbsp}PM`,
+        ]);
+      });
+    });
+
+    describe('timezone awareness', () => {
+      it('uses event timezone to determine "Today"', () => {
+        // 2026-03-09T23:00:00Z is still Mar 9 in UTC
+        // but it is Mar 10 in Helsinki (UTC+2)
+        const nowHel = dayjs.utc('2026-03-09T23:30:00Z').tz('Europe/Helsinki');
+        const result = formatDateRange({
+          dateStart: '2026-03-09T23:00:00Z',
+          timezone: 'Europe/Helsinki',
+          locale: 'en',
+          now: nowHel,
+        });
+        // In Helsinki this is Mar 10, and "now" is also Mar 10 in Helsinki
+        expect(result[0]).toMatch(/^Today/);
+      });
+
+      it('uses user timezone when useLocalTimezone is true', () => {
+        // Event is in UTC, but user is in US Pacific (UTC-7 in March)
+        // 2026-03-09T03:00:00Z is still Mar 8 in Pacific
+        const nowPac = dayjs
+          .utc('2026-03-09T09:00:00Z')
+          .tz('America/Los_Angeles');
+        const result = formatDateRange({
+          dateStart: '2026-03-09T03:00:00Z',
+          timezone: 'UTC',
+          useLocalTimezone: true,
+          userTimezone: 'America/Los_Angeles',
+          locale: 'en',
+          now: nowPac,
+        });
+        // In Pacific, the event is Mar 8 (8 PM), now is Mar 9 (2 AM)
+        // So this should NOT show "Today"
+        expect(result[0]).not.toMatch(/^Today/);
+      });
+
+      it('shows "Today" when event is today in user timezone', () => {
+        const nowPac = dayjs
+          .utc('2026-03-09T20:00:00Z')
+          .tz('America/Los_Angeles');
+        const result = formatDateRange({
+          dateStart: '2026-03-09T20:00:00Z',
+          timezone: 'Europe/London',
+          useLocalTimezone: true,
+          userTimezone: 'America/Los_Angeles',
+          locale: 'en',
+          now: nowPac,
+        });
+        // In Pacific, 20:00 UTC = 1:00 PM Mar 9, and now is also Mar 9
+        expect(result[0]).toMatch(/^Today/);
+      });
+    });
+
+    describe('locale support', () => {
+      it('shows "Heute" in German', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T14:00:00Z',
+          dateEnd: '2026-03-09T17:00:00Z',
+          timezone: 'UTC',
+          locale: 'de',
+          now,
+        });
+        expect(result[0]).toMatch(/^Heute/);
+      });
+
+      it('shows "Aujourd\'hui" in French', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T14:00:00Z',
+          dateEnd: '2026-03-09T17:00:00Z',
+          timezone: 'UTC',
+          locale: 'fr',
+          now,
+        });
+        expect(result[0]).toMatch(/^Aujourd'hui/);
+      });
+
+      it('shows "Hoy" in Spanish', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T14:00:00Z',
+          dateEnd: '2026-03-09T17:00:00Z',
+          timezone: 'UTC',
+          locale: 'es',
+          now,
+        });
+        expect(result[0]).toMatch(/^Hoy/);
+      });
+
+      it('shows "Heute" for multi-day date-only start in German', () => {
+        const result = formatDateRange({
+          dateStart: '2026-03-09T00:00:00Z',
+          dateEnd: '2026-03-13T00:00:00Z',
+          timezone: 'UTC',
+          locale: 'de',
+          day: true,
+          now,
+        });
+        expect(result).toEqual(['Heute', 'Freitag, 13. März 2026']);
+      });
     });
   });
 });
