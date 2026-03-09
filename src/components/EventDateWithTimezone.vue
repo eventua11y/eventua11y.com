@@ -6,6 +6,8 @@
       :timezone="timezone"
       :day="day"
       :type="type"
+      :showCountdown="showCountdown"
+      :showEnded="showEnded"
     />
     <!-- <TimezoneSelector size="small" /> -->
   </div>
@@ -22,11 +24,15 @@ withDefaults(
     timezone?: string;
     day?: boolean;
     type?: string;
+    showCountdown?: boolean;
+    showEnded?: boolean;
   }>(),
   {
     timezone: '',
     day: false,
     type: 'event',
+    showCountdown: false,
+    showEnded: false,
   }
 );
 </script>
