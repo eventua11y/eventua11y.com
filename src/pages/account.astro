@@ -25,8 +25,7 @@ const displayName =
   user.user_metadata?.full_name ||
   user.user_metadata?.name ||
   '';
-const avatarUrl =
-  profile?.avatar_url || user.user_metadata?.avatar_url || '';
+const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url || '';
 const email = user.email || '';
 const provider = user.app_metadata?.provider || 'email';
 const isEmailUser = provider === 'email';
@@ -40,14 +39,14 @@ const isEmailUser = provider === 'email';
 
         <div id="update-success" hidden>
           <wa-callout variant="success">
-            <wa-icon slot="icon" name="circle-check" />
+            <wa-icon slot="icon" name="circle-check"></wa-icon>
             Your profile has been updated.
           </wa-callout>
         </div>
 
         <div id="update-error" hidden>
           <wa-callout variant="danger">
-            <wa-icon slot="icon" name="circle-exclamation" />
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
             <span id="update-error-message"
               >There was a problem updating your profile.</span
             >
@@ -75,8 +74,10 @@ const isEmailUser = provider === 'email';
             {provider === 'github' && 'GitHub'}
             {provider === 'linkedin_oidc' && 'LinkedIn'}
             {provider === 'email' && 'Email and password'}
-            {!['github', 'linkedin_oidc', 'email'].includes(provider) &&
-              provider}
+            {
+              !['github', 'linkedin_oidc', 'email'].includes(provider) &&
+                provider
+            }
           </dd>
         </dl>
 
@@ -91,8 +92,7 @@ const isEmailUser = provider === 'email';
               label="Display name"
               type="text"
               value={displayName}
-              autocomplete="name"
-            />
+              autocomplete="name"></wa-input>
             <wa-button id="save-profile" type="submit">Save changes</wa-button>
           </div>
         </form>
@@ -151,20 +151,20 @@ const isEmailUser = provider === 'email';
 
   // Profile form
   const profileForm = document.getElementById(
-    'profile-form',
+    'profile-form'
   ) as HTMLFormElement;
   const displayNameInput = document.getElementById(
-    'display-name',
+    'display-name'
   ) as HTMLInputElement & { value: string };
   const saveProfileButton = document.getElementById(
-    'save-profile',
+    'save-profile'
   ) as HTMLElement;
   const updateSuccess = document.getElementById(
-    'update-success',
+    'update-success'
   ) as HTMLElement;
   const updateError = document.getElementById('update-error') as HTMLElement;
   const updateErrorMessage = document.getElementById(
-    'update-error-message',
+    'update-error-message'
   ) as HTMLElement;
 
   profileForm?.addEventListener('submit', async (e: Event) => {
@@ -200,22 +200,22 @@ const isEmailUser = provider === 'email';
 
   // Password form
   const passwordForm = document.getElementById(
-    'password-form',
+    'password-form'
   ) as HTMLFormElement | null;
-  const newPasswordInput = document.getElementById(
-    'new-password',
-  ) as (HTMLInputElement & { value: string }) | null;
+  const newPasswordInput = document.getElementById('new-password') as
+    | (HTMLInputElement & { value: string })
+    | null;
   const savePasswordButton = document.getElementById(
-    'save-password',
+    'save-password'
   ) as HTMLElement | null;
   const passwordSuccess = document.getElementById(
-    'password-success',
+    'password-success'
   ) as HTMLElement | null;
   const passwordError = document.getElementById(
-    'password-error',
+    'password-error'
   ) as HTMLElement | null;
   const passwordErrorMessage = document.getElementById(
-    'password-error-message',
+    'password-error-message'
   ) as HTMLElement | null;
 
   passwordForm?.addEventListener('submit', async (e: Event) => {

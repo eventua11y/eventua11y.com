@@ -24,16 +24,14 @@ if (Astro.locals.user) {
                 label="Email"
                 type="email"
                 required
-                autocomplete="email"
-              />
+                autocomplete="email"></wa-input>
               <wa-input
                 id="password"
                 label="Password"
                 type="password"
                 required
                 autocomplete="new-password"
-                password-toggle
-              />
+                password-toggle></wa-input>
               <wa-button id="signup-button" type="submit"
                 >Create account</wa-button
               >
@@ -42,7 +40,7 @@ if (Astro.locals.user) {
 
           <div id="signup-error" hidden>
             <wa-callout variant="danger">
-              <wa-icon slot="icon" name="circle-exclamation" />
+              <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
               <span id="signup-error-message"
                 >There was a problem creating your account.</span
               >
@@ -70,7 +68,7 @@ if (Astro.locals.user) {
 
         <div id="signup-success" hidden>
           <wa-callout variant="success">
-            <wa-icon slot="icon" name="circle-check" />
+            <wa-icon slot="icon" name="circle-check"></wa-icon>
             <div class="wa-stack">
               <strong>Check your email</strong>
               <p>
@@ -95,21 +93,21 @@ if (Astro.locals.user) {
 
   const form = document.getElementById('signup-form') as HTMLFormElement;
   const formContainer = document.getElementById(
-    'signup-form-container',
+    'signup-form-container'
   ) as HTMLElement;
   const emailInput = document.getElementById('email') as HTMLInputElement & {
     value: string;
   };
   const passwordInput = document.getElementById(
-    'password',
+    'password'
   ) as HTMLInputElement & { value: string };
   const signupButton = document.getElementById('signup-button') as HTMLElement;
   const signupError = document.getElementById('signup-error') as HTMLElement;
   const signupErrorMessage = document.getElementById(
-    'signup-error-message',
+    'signup-error-message'
   ) as HTMLElement;
   const signupSuccess = document.getElementById(
-    'signup-success',
+    'signup-success'
   ) as HTMLElement;
 
   /**
@@ -135,7 +133,8 @@ if (Astro.locals.user) {
           /* ignore malformed JSON */
         }
       }
-      if (useLocalTimezone) preferences.useLocalTimezone = useLocalTimezone === 'true';
+      if (useLocalTimezone)
+        preferences.useLocalTimezone = useLocalTimezone === 'true';
       if (theme) preferences.theme = theme;
       if (filters) {
         try {
