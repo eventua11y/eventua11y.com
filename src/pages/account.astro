@@ -37,21 +37,17 @@ const isEmailUser = provider === 'email';
       <div class="wa-stack">
         <h1 class="wa-heading-l">Your account</h1>
 
-        <div id="update-success" hidden>
-          <wa-callout variant="success">
-            <wa-icon slot="icon" name="circle-check"></wa-icon>
-            Your profile has been updated.
-          </wa-callout>
-        </div>
+        <wa-callout id="update-success" variant="success" hidden>
+          <wa-icon slot="icon" name="circle-check"></wa-icon>
+          Your profile has been updated.
+        </wa-callout>
 
-        <div id="update-error" hidden>
-          <wa-callout variant="danger">
-            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-            <span id="update-error-message"
-              >There was a problem updating your profile.</span
-            >
-          </wa-callout>
-        </div>
+        <wa-callout id="update-error" variant="danger" hidden>
+          <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+          <span id="update-error-message"
+            >There was a problem updating your profile.</span
+          >
+        </wa-callout>
 
         {
           avatarUrl && (
@@ -85,51 +81,39 @@ const isEmailUser = provider === 'email';
 
         <h2 class="wa-heading-m">Edit profile</h2>
 
-        <form id="profile-form" novalidate>
-          <div class="wa-stack">
-            <wa-input
-              id="display-name"
-              label="Display name"
-              type="text"
-              value={displayName}
-              autocomplete="name"></wa-input>
-            <wa-button id="save-profile" type="submit">Save changes</wa-button>
-          </div>
-        </form>
+        <wa-input
+          id="display-name"
+          label="Display name"
+          type="text"
+          value={displayName}
+          autocomplete="name"></wa-input>
+        <wa-button id="save-profile" type="button">Save changes</wa-button>
 
         {
           isEmailUser && (
             <>
               <wa-divider />
               <h2 class="wa-heading-m">Change password</h2>
-              <form id="password-form" novalidate>
-                <div class="wa-stack">
-                  <wa-input
-                    id="new-password"
-                    label="New password"
-                    type="password"
-                    autocomplete="new-password"
-                    password-toggle
-                  />
-                  <wa-button id="save-password" type="submit">
-                    Update password
-                  </wa-button>
-                </div>
-              </form>
-              <div id="password-success" hidden>
-                <wa-callout variant="success">
-                  <wa-icon slot="icon" name="circle-check" />
-                  Your password has been updated.
-                </wa-callout>
-              </div>
-              <div id="password-error" hidden>
-                <wa-callout variant="danger">
-                  <wa-icon slot="icon" name="circle-exclamation" />
-                  <span id="password-error-message">
-                    There was a problem updating your password.
-                  </span>
-                </wa-callout>
-              </div>
+              <wa-input
+                id="new-password"
+                label="New password"
+                type="password"
+                autocomplete="new-password"
+                password-toggle
+              />
+              <wa-button id="save-password" type="button">
+                Update password
+              </wa-button>
+              <wa-callout id="password-success" variant="success" hidden>
+                <wa-icon slot="icon" name="circle-check" />
+                Your password has been updated.
+              </wa-callout>
+              <wa-callout id="password-error" variant="danger" hidden>
+                <wa-icon slot="icon" name="circle-exclamation" />
+                <span id="password-error-message">
+                  There was a problem updating your password.
+                </span>
+              </wa-callout>
             </>
           )
         }
@@ -149,10 +133,7 @@ const isEmailUser = provider === 'email';
 
   const supabase = createSupabaseBrowserClient();
 
-  // Profile form
-  const profileForm = document.getElementById(
-    'profile-form'
-  ) as HTMLFormElement;
+  // Profile save
   const displayNameInput = document.getElementById(
     'display-name'
   ) as HTMLInputElement & { value: string };
@@ -167,8 +148,7 @@ const isEmailUser = provider === 'email';
     'update-error-message'
   ) as HTMLElement;
 
-  profileForm?.addEventListener('submit', async (e: Event) => {
-    e.preventDefault();
+  saveProfileButton?.addEventListener('click', async () => {
     updateSuccess.hidden = true;
     updateError.hidden = true;
     saveProfileButton.setAttribute('loading', '');
@@ -198,10 +178,7 @@ const isEmailUser = provider === 'email';
     }
   });
 
-  // Password form
-  const passwordForm = document.getElementById(
-    'password-form'
-  ) as HTMLFormElement | null;
+  // Password change
   const newPasswordInput = document.getElementById('new-password') as
     | (HTMLInputElement & { value: string })
     | null;
@@ -218,8 +195,7 @@ const isEmailUser = provider === 'email';
     'password-error-message'
   ) as HTMLElement | null;
 
-  passwordForm?.addEventListener('submit', async (e: Event) => {
-    e.preventDefault();
+  savePasswordButton?.addEventListener('click', async () => {
     if (passwordSuccess) passwordSuccess.hidden = true;
     if (passwordError) passwordError.hidden = true;
     savePasswordButton?.setAttribute('loading', '');
