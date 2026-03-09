@@ -55,7 +55,7 @@
     "eslint-plugin-playwright": "^2.9.0",
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^17.0.0",
-    "netlify-cli": "^23.12.3",
+    "netlify-cli": "^24.0.1",
     "playwright-chromium": "^1.57.0",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
