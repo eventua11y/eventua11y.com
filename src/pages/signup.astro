@@ -13,60 +13,60 @@ if (Astro.locals.user) {
 <Layout title={title} description={description}>
   <div class="auth-page">
     <wa-card>
-      <div class="wa-stack">
+      <form id="signup-form" class="wa-stack" novalidate>
         <h1 class="wa-heading-l">Create an account</h1>
 
-        <div id="signup-form-container">
-          <form id="signup-form" novalidate>
-            <div class="wa-stack">
-              <wa-input
-                id="email"
-                label="Email"
-                type="email"
-                required
-                autocomplete="email"></wa-input>
-              <wa-input
-                id="password"
-                label="Password"
-                type="password"
-                required
-                autocomplete="new-password"
-                password-toggle></wa-input>
-              <wa-button id="signup-button" type="submit"
-                >Create account</wa-button
-              >
-            </div>
-          </form>
+        <div id="signup-form-fields">
+          <div class="wa-stack">
+            <wa-input
+              id="email"
+              label="Email"
+              type="email"
+              required
+              autocomplete="email"></wa-input>
+            <wa-input
+              id="password"
+              label="Password"
+              type="password"
+              required
+              autocomplete="new-password"
+              password-toggle></wa-input>
+            <wa-button id="signup-button" type="submit"
+              >Create account</wa-button
+            >
 
-          <div id="signup-error" hidden>
-            <wa-callout variant="danger">
+            <wa-callout id="signup-error" variant="danger" hidden>
               <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
               <span id="signup-error-message"
                 >There was a problem creating your account.</span
               >
             </wa-callout>
+
+            <wa-divider></wa-divider>
+
+            <p>Or sign up with:</p>
+            <div class="wa-grid" style="--min-column-size: 12ch;">
+              <wa-button id="github-signup" appearance="outlined" type="button">
+                <wa-icon slot="start" name="github" family="brands"></wa-icon>
+                GitHub
+              </wa-button>
+              <wa-button
+                id="linkedin-signup"
+                appearance="outlined"
+                type="button"
+              >
+                <wa-icon slot="start" name="linkedin" family="brands"></wa-icon>
+                LinkedIn
+              </wa-button>
+            </div>
+
+            <p>
+              Already have an account? <a href="/login">Log in</a>
+            </p>
           </div>
-
-          <wa-divider></wa-divider>
-
-          <p>Or sign up with:</p>
-          <div class="wa-grid" style="--min-column-size: 12ch;">
-            <wa-button id="github-signup" appearance="outlined">
-              <wa-icon slot="start" name="github" family="brands"></wa-icon>
-              GitHub
-            </wa-button>
-            <wa-button id="linkedin-signup" appearance="outlined">
-              <wa-icon slot="start" name="linkedin" family="brands"></wa-icon>
-              LinkedIn
-            </wa-button>
-          </div>
-
-          <p>
-            Already have an account? <a href="/login">Log in</a>
-          </p>
         </div>
 
-        <div id="signup-success" hidden>
+        <div id="signup-success" class="wa-stack" hidden>
           <wa-callout variant="success">
             <wa-icon slot="icon" name="circle-check"></wa-icon>
             <div class="wa-stack">
@@ -77,11 +77,11 @@ if (Astro.locals.user) {
               </p>
             </div>
           </wa-callout>
-          <p style="margin-top: var(--wa-space-m);">
+          <p>
             <a href="/login">Go to log in</a>
           </p>
         </div>
-      </div>
+      </form>
     </wa-card>
   </div>
 </Layout>
@@ -92,8 +92,8 @@ if (Astro.locals.user) {
   const supabase = createSupabaseBrowserClient();
 
   const form = document.getElementById('signup-form') as HTMLFormElement;
-  const formContainer = document.getElementById(
-    'signup-form-container'
+  const formFields = document.getElementById(
+    'signup-form-fields'
   ) as HTMLElement;
   const emailInput = document.getElementById('email') as HTMLInputElement & {
     value: string;
@@ -199,7 +199,7 @@ if (Astro.locals.user) {
       }
 
       // Show success message
-      formContainer.hidden = true;
+      formFields.hidden = true;
       signupSuccess.hidden = false;
     }
   });

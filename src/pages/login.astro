@@ -16,7 +16,7 @@ const signedOut = Astro.url.searchParams.get('signed-out');
 <Layout title={title} description={description}>
   <div class="auth-page">
     <wa-card>
-      <div class="wa-stack">
+      <form id="login-form" class="wa-stack" novalidate>
         <h1 class="wa-heading-l">Log in</h1>
 
         {
@@ -37,40 +37,34 @@ const signedOut = Astro.url.searchParams.get('signed-out');
           )
         }
 
-        <form id="login-form" novalidate>
-          <div class="wa-stack">
-            <wa-input
-              id="email"
-              label="Email"
-              type="email"
-              required
-              autocomplete="email"></wa-input>
-            <wa-input
-              id="password"
-              label="Password"
-              type="password"
-              required
-              autocomplete="current-password"></wa-input>
-            <wa-button id="login-button" type="submit">Log in</wa-button>
-          </div>
-        </form>
+        <wa-input
+          id="email"
+          label="Email"
+          type="email"
+          required
+          autocomplete="email"></wa-input>
+        <wa-input
+          id="password"
+          label="Password"
+          type="password"
+          required
+          autocomplete="current-password"></wa-input>
+        <wa-button id="login-button" type="submit">Log in</wa-button>
 
-        <div id="login-error" hidden>
-          <wa-callout variant="danger">
-            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-            <span id="login-error-message">Invalid email or password.</span>
-          </wa-callout>
-        </div>
+        <wa-callout id="login-error" variant="danger" hidden>
+          <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+          <span id="login-error-message">Invalid email or password.</span>
+        </wa-callout>
 
         <wa-divider></wa-divider>
 
         <p>Or log in with:</p>
         <div class="wa-grid" style="--min-column-size: 12ch;">
-          <wa-button id="github-login" appearance="outlined">
+          <wa-button id="github-login" appearance="outlined" type="button">
             <wa-icon slot="start" name="github" family="brands"></wa-icon>
             GitHub
           </wa-button>
-          <wa-button id="linkedin-login" appearance="outlined">
+          <wa-button id="linkedin-login" appearance="outlined" type="button">
             <wa-icon slot="start" name="linkedin" family="brands"></wa-icon>
             LinkedIn
           </wa-button>
@@ -79,7 +73,7 @@ const signedOut = Astro.url.searchParams.get('signed-out');
         <p>
           Don&rsquo;t have an account? <a href="/signup">Create one</a>
         </p>
-      </div>
+      </form>
     </wa-card>
   </div>
 </Layout>
