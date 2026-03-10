@@ -867,13 +867,13 @@ describe('getTimeSinceEnded', () => {
     );
   });
 
-  it('returns only hours (rounded down) when over an hour has passed', () => {
+  it('returns hours (rounded down) when between 1 and 24 hours', () => {
     expect(getTimeSinceEnded(now('2026-06-15T18:15:00Z'), endedEvent)).toBe(
       `Ended 2${HR} ago`
     );
   });
 
-  it('returns only hours when minutes are zero', () => {
+  it('returns hours when minutes are zero', () => {
     expect(getTimeSinceEnded(now('2026-06-15T18:00:00Z'), endedEvent)).toBe(
       `Ended 2${HR} ago`
     );
@@ -883,6 +883,59 @@ describe('getTimeSinceEnded', () => {
     const result = getTimeSinceEnded(now('2026-06-15T18:15:00Z'), endedEvent);
     expect(result).toContain('<abbr title="hours">hr</abbr>');
     expect(result).not.toContain('<abbr title="minutes">m</abbr>');
+  });
+
+  it('returns "Ended yesterday" when 1 day has passed', () => {
+    expect(getTimeSinceEnded(now('2026-06-16T18:00:00Z'), endedEvent)).toBe(
+      'Ended yesterday'
+    );
+  });
+
+  it('returns days when between 2 and 29 days', () => {
+    expect(getTimeSinceEnded(now('2026-06-20T16:00:00Z'), endedEvent)).toBe(
+      'Ended 5 days ago'
+    );
+  });
+
+  it('returns "1 month" singular when roughly 1 month has passed', () => {
+    expect(getTimeSinceEnded(now('2026-07-20T16:00:00Z'), endedEvent)).toBe(
+      'Ended 1 month ago'
+    );
+  });
+
+  it('returns months when a few months have passed', () => {
+    // ~3 months after end
+    expect(getTimeSinceEnded(now('2026-09-20T16:00:00Z'), endedEvent)).toBe(
+      'Ended 3 months ago'
+    );
+  });
+
+  it('stays in months beyond 12 months for precision', () => {
+    // ~13 months after end — should say "13 months" not "1 year"
+    expect(getTimeSinceEnded(now('2027-07-20T16:00:00Z'), endedEvent)).toBe(
+      'Ended 13 months ago'
+    );
+  });
+
+  it('stays in months up to 23 months', () => {
+    // ~20 months after end (e.g. UX London 2024 scenario)
+    expect(getTimeSinceEnded(now('2028-02-20T16:00:00Z'), endedEvent)).toBe(
+      'Ended 20 months ago'
+    );
+  });
+
+  it('switches to years at 24 months', () => {
+    // exactly 2 years after end
+    expect(getTimeSinceEnded(now('2028-06-15T16:00:00Z'), endedEvent)).toBe(
+      'Ended 2 years ago'
+    );
+  });
+
+  it('returns higher year counts for older events', () => {
+    // ~3 years after end
+    expect(getTimeSinceEnded(now('2029-07-15T16:00:00Z'), endedEvent)).toBe(
+      'Ended 3 years ago'
+    );
   });
 
   it('uses timezone when calculating time since ended', () => {
