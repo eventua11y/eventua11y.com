@@ -84,7 +84,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
         <dl class="account-details">
           <dt>Email</dt>
           <dd>{email}</dd>
-          <dt>Login method</dt>
+          <dt>Sign-in method</dt>
           <dd class="provider-name">
             {provider === 'github' && 'GitHub'}
             {provider === 'linkedin_oidc' && 'LinkedIn'}
@@ -95,18 +95,6 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
             }
           </dd>
         </dl>
-
-        <wa-divider></wa-divider>
-
-        <h2 class="wa-heading-m">Edit profile</h2>
-
-        <wa-input
-          id="display-name"
-          label="Display name"
-          type="text"
-          value={displayName}
-          autocomplete="name"></wa-input>
-        <wa-button id="save-profile" type="button">Save changes</wa-button>
 
         {
           isEmailUser && (
@@ -147,7 +135,12 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
                 type="password"
                 autocomplete="new-password"
                 password-toggle
+                minlength="6"
+                aria-describedby="password-hint"
               />
+              <p id="password-hint" class="wa-text-s wa-text-muted">
+                Must be at least 6 characters.
+              </p>
               <wa-button id="save-password" type="button">
                 Update password
               </wa-button>
@@ -248,13 +241,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
 
   const supabase = createSupabaseBrowserClient();
 
-  // Profile save
-  const displayNameInput = document.getElementById(
-    'display-name'
-  ) as HTMLInputElement & { value: string };
-  const saveProfileButton = document.getElementById(
-    'save-profile'
-  ) as HTMLElement;
+  // Profile update callouts
   const updateSuccess = document.getElementById(
     'update-success'
   ) as HTMLElement;
@@ -263,10 +250,16 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
     'update-error-message'
   ) as HTMLElement;
 
-  saveProfileButton?.addEventListener('click', async () => {
+  // Save display name
+  const nameInput = document.getElementById(
+    'display-name'
+  ) as HTMLInputElement & { value: string };
+  const saveNameButton = document.getElementById('save-name') as HTMLElement;
+
+  saveNameButton?.addEventListener('click', async () => {
     updateSuccess.hidden = true;
     updateError.hidden = true;
-    saveProfileButton.setAttribute('loading', '');
+    saveNameButton.setAttribute('loading', '');
 
     const {
       data: { user },
@@ -279,10 +272,10 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
 
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: displayNameInput.value })
+      .update({ display_name: nameInput.value })
       .eq('id', user.id);
 
-    saveProfileButton.removeAttribute('loading');
+    saveNameButton.removeAttribute('loading');
 
     if (error) {
       updateErrorMessage.textContent =

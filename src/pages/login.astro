@@ -3,8 +3,8 @@ export const prerender = false;
 
 import Layout from '../layouts/default.astro';
 
-const title = 'Log in';
-const description = 'Log in to your Eventua11y account.';
+const title = 'Sign in';
+const description = 'Sign in to your Eventua11y account.';
 
 // If already logged in, redirect to account page
 if (Astro.locals.user) {
@@ -19,7 +19,7 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
   <div class="auth-page">
     <wa-card>
       <form id="login-form" class="wa-stack" novalidate>
-        <h1 class="wa-heading-l">Log in</h1>
+        <h1 class="wa-heading-l">Sign in</h1>
 
         {
           errorParam === 'auth-code-error' && (
@@ -51,7 +51,7 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
           type="password"
           required
           autocomplete="current-password"></wa-input>
-        <wa-button id="login-button" type="submit">Log in</wa-button>
+        <wa-button id="login-button" type="submit">Sign in</wa-button>
 
         <p>
           <a href="/forgot-password">Forgot your password?</a>
@@ -66,7 +66,7 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
 
         <wa-divider></wa-divider>
 
-        <p>Or log in with:</p>
+        <p>Or sign in with:</p>
         <div class="wa-grid" style="--min-column-size: 12ch;">
           <wa-button id="github-login" appearance="outlined" type="button">
             <wa-icon slot="start" name="github" family="brands"></wa-icon>

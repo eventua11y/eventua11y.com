@@ -358,7 +358,7 @@ test.describe('Login page accessibility', () => {
   });
 
   test('page has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle(/Log in.*Eventua11y/);
+    await expect(page).toHaveTitle(/Sign in.*Eventua11y/);
   });
 
   test('main landmark is present', async ({ page }) => {
@@ -368,7 +368,7 @@ test.describe('Login page accessibility', () => {
   test('h1 heading is visible', async ({ page }) => {
     const h1 = page.getByRole('heading', { level: 1 });
     await expect(h1).toBeVisible();
-    await expect(h1).toHaveAccessibleName('Log in');
+    await expect(h1).toHaveAccessibleName('Sign in');
   });
 
   test('email input has accessible label', async ({ page }) => {
@@ -457,7 +457,7 @@ test.describe('Signup page accessibility', () => {
 
   test('link to login page exists', async ({ page }) => {
     const main = page.getByRole('main');
-    const loginLink = main.getByRole('link', { name: /Log in/i });
+    const loginLink = main.getByRole('link', { name: /Sign in/i });
     await expect(loginLink).toBeVisible();
     await expect(loginLink).toHaveAttribute('href', '/login');
   });
