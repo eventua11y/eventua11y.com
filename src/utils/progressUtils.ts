@@ -260,9 +260,12 @@ export function hasEnded(now: Dayjs, options: ProgressOptions): boolean {
 /**
  * Human-readable time-since-ended label (HTML with <abbr> elements).
  *
- * - "Ended less than 1 m ago"
- * - "Ended 5 m ago"
- * - "Ended 2 hr 15 m ago"
+ * Escalates through increasingly coarse units:
+ * - Under 60 m:  "Ended 5 m ago"
+ * - Under 24 hr: "Ended 3 hr ago"
+ * - Under 30 d:  "Ended 4 days ago" / "Ended yesterday"
+ * - Under 12 mo: "Ended 3 months ago" / "Ended 1 month ago"
+ * - 12 mo+:      "Ended 2 years ago" / "Ended 1 year ago"
  */
 export function getTimeSinceEnded(
   now: Dayjs,
@@ -270,12 +273,31 @@ export function getTimeSinceEnded(
 ): string {
   if (!hasEnded(now, options)) return '';
 
-  const minutesSince = Math.max(0, now.diff(getEventEnd(options), 'minute'));
+  const end = getEventEnd(options);
+  const minutesSince = Math.max(0, now.diff(end, 'minute'));
 
-  // Less precise than "time remaining": just show hours once past 60 m
-  if (minutesSince >= 60) {
-    const hours = Math.floor(minutesSince / 60);
-    return `Ended ${hours}${HR} ago`;
+  if (minutesSince < 60) {
+    return `Ended ${formatDuration(minutesSince)} ago`;
   }
-  return `Ended ${formatDuration(minutesSince)} ago`;
+
+  const hoursSince = Math.floor(minutesSince / 60);
+  if (hoursSince < 24) {
+    return `Ended ${hoursSince}${HR} ago`;
+  }
+
+  const daysSince = Math.max(1, now.diff(end, 'day'));
+  if (daysSince === 1) {
+    return 'Ended yesterday';
+  }
+  if (daysSince < 30) {
+    return `Ended ${daysSince} days ago`;
+  }
+
+  const monthsSince = Math.max(1, now.diff(end, 'month'));
+  if (monthsSince < 12) {
+    return `Ended ${monthsSince} ${monthsSince === 1 ? 'month' : 'months'} ago`;
+  }
+
+  const yearsSince = Math.max(1, now.diff(end, 'year'));
+  return `Ended ${yearsSince} ${yearsSince === 1 ? 'year' : 'years'} ago`;
 }
