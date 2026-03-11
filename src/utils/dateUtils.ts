@@ -117,11 +117,11 @@ export function formatEventDate(
   const isInternational = !options.timezone;
 
   if (isInternational) {
-    return utcDate.locale(locale).format(format);
+    return nonBreakingTime(utcDate.locale(locale).format(format));
   }
 
   const tz = resolveTimezone(options);
-  return utcDate.tz(tz).locale(locale).format(format);
+  return nonBreakingTime(utcDate.tz(tz).locale(locale).format(format));
 }
 
 /**
@@ -223,6 +223,104 @@ const RANGE_FORMATS: Record<
 };
 
 /**
+ * Locale-specific labels for "Today" and "Tomorrow".
+ *
+ * Used by formatDateRange to replace the day-of-week and date portion
+ * when a start or end date falls on the current or next calendar day
+ * in the resolved timezone.
+ */
+const TODAY_LABELS: Record<string, string> = {
+  en: 'Today',
+  de: 'Heute',
+  fr: "Aujourd'hui",
+  es: 'Hoy',
+};
+
+const TOMORROW_LABELS: Record<string, string> = {
+  en: 'Tomorrow',
+  de: 'Morgen',
+  fr: 'Demain',
+  es: 'Mañana',
+};
+
+/**
+ * Checks whether a date falls on today's calendar day in the given timezone.
+ *
+ * Accepts an optional `now` parameter for testability; defaults to the
+ * real current time.
+ */
+export function isToday(
+  date: string | Date,
+  options: {
+    timezone?: string;
+    useLocalTimezone?: boolean;
+    userTimezone?: string;
+  },
+  now?: dayjs.Dayjs
+): boolean {
+  const tz = resolveTimezone(options);
+  const today = (now || dayjs()).tz(tz);
+  const isInternational = !options.timezone;
+  const target = isInternational
+    ? dayjs.utc(date).tz(tz)
+    : dayjs.utc(date).tz(tz);
+  return target.isSame(today, 'day');
+}
+
+/**
+ * Checks whether a date falls on tomorrow's calendar day in the given timezone.
+ *
+ * Accepts an optional `now` parameter for testability; defaults to the
+ * real current time.
+ */
+export function isTomorrow(
+  date: string | Date,
+  options: {
+    timezone?: string;
+    useLocalTimezone?: boolean;
+    userTimezone?: string;
+  },
+  now?: dayjs.Dayjs
+): boolean {
+  const tz = resolveTimezone(options);
+  const tomorrow = (now || dayjs()).tz(tz).add(1, 'day');
+  const target = dayjs.utc(date).tz(tz);
+  return target.isSame(tomorrow, 'day');
+}
+
+/**
+ * Locale-specific format strings for full-month display.
+ *
+ * When an event spans an entire calendar month (1st to last day),
+ * we display just the month and year instead of a verbose date range.
+ *
+ * English:  "October 2026"
+ * German:   "Oktober 2026"
+ * French:   "octobre 2026"
+ * Spanish:  "octubre de 2026"
+ */
+const FULL_MONTH_FORMATS: Record<string, string> = {
+  en: 'MMMM YYYY',
+  de: 'MMMM YYYY',
+  fr: 'MMMM YYYY',
+  es: 'MMMM [de] YYYY',
+};
+
+/**
+ * Checks if a date range spans an entire calendar month.
+ *
+ * Returns true when the start date is the 1st and the end date is
+ * the last day of the same month and year.
+ */
+export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
+  return (
+    start.date() === 1 &&
+    end.date() === end.daysInMonth() &&
+    start.isSame(end, 'month')
+  );
+}
+
+/**
  * A formatted date range split into parts for accessible rendering.
  *
  * - Single element: no range (single date, or same-day date-only)
@@ -246,6 +344,7 @@ export type DateRangeParts = [string] | [string, string];
  *   Same day, same period:  ["Sunday, March 8, 2026 2:00", "5:00 PM"]
  *   Same day, diff period:  ["Sunday, March 8, 2026 10:00 AM", "5:00 PM"]
  *   Multi-day, timed:       ["Tuesday, February 24 2:00 PM", "Wednesday, February 25, 2026 9:00 PM"]
+ *   Full month:             ["October 2026"]
  *   Same month, date-only:  ["Sunday, March 8", "Friday, March 13, 2026"]
  *   Different months:       ["Saturday, March 28", "Thursday, April 2, 2026"]
  *   Different years:        ["Monday, December 28, 2026", "Saturday, January 2, 2027"]
@@ -264,20 +363,87 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
+  /** Injected "now" for testability; defaults to the real current time. */
+  now?: dayjs.Dayjs;
 }): DateRangeParts {
   const locale = options.locale || 'en';
+  const todayLabel = TODAY_LABELS[locale] || TODAY_LABELS.en;
+  const tomorrowLabel = TOMORROW_LABELS[locale] || TOMORROW_LABELS.en;
+
+  const isInternational = !options.timezone;
+  const tz = isInternational ? 'UTC' : resolveTimezone(options);
+  const nowInTz = (options.now || dayjs()).tz(tz);
+  const tomorrowInTz = nowInTz.add(1, 'day');
+
+  /**
+   * Replaces the day-of-week + date portion of a formatted string with
+   * "Today" or "Tomorrow" (or their locale equivalents) when `dateObj`
+   * falls on the current or next calendar day.
+   *
+   * Accepts the dayjs format string used to produce `formatted` so it
+   * can strip the date-only prefix precisely for any locale. It removes
+   * the time tokens (LT / h:mm / H:mm / HH:mm) from the format to
+   * isolate the date prefix, then replaces that prefix in the output.
+   */
+  function relativeDay(
+    dateObj: dayjs.Dayjs,
+    formatted: string,
+    fmt?: string
+  ): string {
+    let label: string | undefined;
+    if (dateObj.isSame(nowInTz, 'day')) {
+      label = todayLabel;
+    } else if (dateObj.isSame(tomorrowInTz, 'day')) {
+      label = tomorrowLabel;
+    }
+    if (!label) return formatted;
+
+    // If we know the exact format, strip time tokens to get the date prefix
+    if (fmt) {
+      const dateOnlyFmt = fmt
+        .replace(/\s*LT$/, '')
+        .replace(/\s*h:mm\s*(A)?$/i, '')
+        .replace(/\s*H{1,2}:mm$/i, '')
+        .trim();
+      const datePrefix = dateObj.format(dateOnlyFmt);
+      if (formatted.startsWith(datePrefix)) {
+        return label + formatted.slice(datePrefix.length);
+      }
+    }
+
+    // Fallback: try common date-only patterns from longest to shortest
+    const dp = dayPrefix(locale);
+    const candidates = [
+      dateObj.format(`${dp}LL`), // "Sunday, March 8, 2026"
+      dateObj.format(`${dp}MMMM D, YYYY`), // explicit with year
+      dateObj.format(`${dp}MMMM D`), // without year
+    ];
+
+    for (const candidate of candidates) {
+      if (candidate && formatted.startsWith(candidate)) {
+        return label + formatted.slice(candidate.length);
+      }
+    }
+    return formatted;
+  }
 
   // No end date — return a single formatted date
   if (!options.dateEnd) {
     const format = getStartDateFormat(options);
-    return [formatEventDate(options.dateStart, format, options)];
+    const startDj = isInternational
+      ? dayjs.utc(options.dateStart).locale(locale)
+      : dayjs.utc(options.dateStart).tz(tz).locale(locale);
+    return [
+      relativeDay(
+        startDj,
+        formatEventDate(options.dateStart, format, options),
+        format
+      ),
+    ];
   }
 
   const isDateOnly =
     options.day || options.type === 'theme' || options.isDeadline;
-
-  const isInternational = !options.timezone;
-  const tz = isInternational ? 'UTC' : resolveTimezone(options);
 
   // Resolve dayjs instances in the target timezone
   const start = isInternational
@@ -292,10 +458,19 @@ export function formatDateRange(options: {
   // Same day — timed events show "date time" / "time", date-only returns single date
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
-      return [start.format(`${dp}LL`)];
+      return [
+        relativeDay(start, nonBreakingTime(start.format(`${dp}LL`)), `${dp}LL`),
+      ];
     }
     const startTime = deduplicateAmPm(start, end, locale);
-    return [`${start.format(`${dp}LL`)} ${startTime}`, end.format('LT')];
+    return [
+      relativeDay(
+        start,
+        nonBreakingTime(`${start.format(`${dp}LL`)} ${startTime}`),
+        `${dp}LL`
+      ),
+      nonBreakingTime(end.format('LT')),
+    ];
   }
 
   const formats = RANGE_FORMATS[locale] || RANGE_FORMATS.en;
@@ -304,14 +479,36 @@ export function formatDateRange(options: {
   if (!isDateOnly) {
     if (start.isSame(end, 'year')) {
       return [
-        start.format(formats.timedSameYear.start),
-        end.format(formats.timedSameYear.end),
+        relativeDay(
+          start,
+          nonBreakingTime(start.format(formats.timedSameYear.start)),
+          formats.timedSameYear.start
+        ),
+        relativeDay(
+          end,
+          nonBreakingTime(end.format(formats.timedSameYear.end)),
+          formats.timedSameYear.end
+        ),
       ];
     }
     return [
-      start.format(formats.timedDiffYear.start),
-      end.format(formats.timedDiffYear.end),
+      relativeDay(
+        start,
+        nonBreakingTime(start.format(formats.timedDiffYear.start)),
+        formats.timedDiffYear.start
+      ),
+      relativeDay(
+        end,
+        nonBreakingTime(end.format(formats.timedDiffYear.end)),
+        formats.timedDiffYear.end
+      ),
     ];
+  }
+
+  // Full-month events: display as "October 2026" instead of a verbose range
+  if (isFullMonth(start, end)) {
+    const fullMonthFmt = FULL_MONTH_FORMATS[locale] || FULL_MONTH_FORMATS.en;
+    return [start.format(fullMonthFmt)];
   }
 
   // Date-only multi-day ranges: deduplicate shared components
@@ -319,13 +516,24 @@ export function formatDateRange(options: {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
-    return [start.format(fmt.start), end.format(fmt.end)];
+    return [
+      relativeDay(start, nonBreakingTime(start.format(fmt.start)), fmt.start),
+      relativeDay(end, nonBreakingTime(end.format(fmt.end)), fmt.end),
+    ];
   }
 
   // Different years: no deduplication possible
   return [
-    start.format(formats.dateOnlyDiffYear.start),
-    end.format(formats.dateOnlyDiffYear.end),
+    relativeDay(
+      start,
+      nonBreakingTime(start.format(formats.dateOnlyDiffYear.start)),
+      formats.dateOnlyDiffYear.start
+    ),
+    relativeDay(
+      end,
+      nonBreakingTime(end.format(formats.dateOnlyDiffYear.end)),
+      formats.dateOnlyDiffYear.end
+    ),
   ];
 }
 
@@ -351,6 +559,14 @@ function deduplicateAmPm(
     return start.format('h:mm');
   }
   return start.format('LT');
+}
+
+/**
+ * Replaces the space before AM/PM with a non-breaking space so that
+ * times like "2:00 PM" never wrap between the digits and the period.
+ */
+function nonBreakingTime(formatted: string): string {
+  return formatted.replace(/(\d)\s+(AM|PM)/gi, '$1\u00A0$2');
 }
 
 /**

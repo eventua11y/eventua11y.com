@@ -17,6 +17,9 @@
   color-scheme: light;
   accent-color: var(--s-color-primary);
 
+  /* Align WA's border color with the project's border token */
+  --wa-color-surface-border: var(--s-color-border);
+
   /* Body */
   --c-body-color-bg: var(--s-color-bg);
   --c-body-color-fg: var(--s-color-fg);
@@ -43,6 +46,9 @@
   --c-footer-color-link: var(--s-color-primary);
   --c-footer-color-link-hover: var(--s-color-secondary);
   --c-footer-color-fg-muted: var(--p-color-grey-400);
+
+  /* Progress */
+  --c-progress-color-indicator: var(--p-color-purple-600);
 
   /* Panel */
   --c-panel-color-bg: var(--s-color-surface);

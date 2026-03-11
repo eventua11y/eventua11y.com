@@ -129,27 +129,19 @@ const speakerDisplay = computed(() => {
   if (speakers.length === 0) return '';
 
   if (speakers.length === 1) {
-    return `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speakers[0].name}</span></span>`;
+    return speakers[0].name;
   }
 
   if (speakers.length === 2) {
-    return speakers
-      .map(
-        (speaker) =>
-          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
-      )
-      .join(' and ');
+    return speakers.map((speaker) => speaker.name).join(' and ');
   }
 
   if (speakers.length === MAX_DISPLAYED_SPEAKERS) {
     const first = speakers
       .slice(0, MAX_DISPLAYED_SPEAKERS - 1)
-      .map(
-        (speaker) =>
-          `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
-      )
+      .map((speaker) => speaker.name)
       .join(', ');
-    return `${first} and <span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}</span></span>`;
+    return `${first} and ${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}`;
   }
 
   // Randomise which speakers are shown to avoid favouring any individual
@@ -157,10 +149,7 @@ const speakerDisplay = computed(() => {
 
   const firstSpeakers = shuffled
     .slice(0, MAX_DISPLAYED_SPEAKERS)
-    .map(
-      (speaker) =>
-        `<span itemprop="performer" itemscope itemtype="https://schema.org/Person"><span itemprop="name">${speaker.name}</span></span>`
-    )
+    .map((speaker) => speaker.name)
     .join(', ');
 
   return `${firstSpeakers}, and ${speakers.length - MAX_DISPLAYED_SPEAKERS} other speaker${speakers.length - MAX_DISPLAYED_SPEAKERS > 1 ? 's' : ''}`;
@@ -183,15 +172,12 @@ const speakerDisplay = computed(() => {
   <article
     v-else-if="event && event.type"
     :class="`event event--${event.type}`"
-    itemscope
-    itemtype="https://schema.org/Event"
     :data-event-type="event.type"
   >
-    <h3 :id="headingId" class="event__title" itemprop="name">
+    <h3 :id="headingId" class="event__title">
       <a v-if="eventUrl" :href="eventUrl">{{ event.title }}</a>
       <span v-else>{{ event.title }}</span>
     </h3>
-    <meta v-if="event.website" itemprop="url" :content="event.website" />
 
     <EventDate
       v-if="showDate && event.dateStart"
@@ -224,7 +210,7 @@ const speakerDisplay = computed(() => {
         <wa-icon name="caret-right" auto-width></wa-icon>
         Description
       </summary>
-      <p class="event__description" itemprop="description">
+      <p class="event__description">
         {{ event.description }}
       </p>
     </details>

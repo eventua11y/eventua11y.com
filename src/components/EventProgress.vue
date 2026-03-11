@@ -130,7 +130,7 @@ const accessibleLabel = computed(() => `${progress.value}% complete`);
 
 .event__progress-bar {
   --track-height: 0.35rem;
-  --indicator-color: var(--wa-color-brand-fill-loud);
+  --indicator-color: var(--c-progress-color-indicator);
   --track-color: var(--wa-color-neutral-fill-normal);
   width: 4rem;
   border-radius: var(--wa-border-radius-pill);
@@ -139,7 +139,7 @@ const accessibleLabel = computed(() => `${progress.value}% complete`);
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 var(--wa-color-brand-fill-loud);
+    box-shadow: 0 0 0 0 var(--c-progress-color-indicator);
   }
   70% {
     box-shadow: 0 0 0 0.5rem transparent;

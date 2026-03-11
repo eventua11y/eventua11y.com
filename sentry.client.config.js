@@ -7,6 +7,9 @@ Sentry.init({
   // never pollutes the production Sentry project (EVENTUA11Y-S).
   allowUrls: [/https?:\/\/eventua11y\.com/],
 
+  // Sample 10% of transactions for performance monitoring (Core Web Vitals).
+  tracesSampleRate: 0.1,
+
   // Suppress errors thrown internally by the Web Awesome library's wa-popup
   // component, which calls hidePopover() without first checking whether the
   // popover is showing (EVENTUA11Y-T, EVENTUA11Y-V).

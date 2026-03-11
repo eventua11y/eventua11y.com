@@ -1,26 +1,11 @@
 <template>
   <div class="event__dates">
-    <!-- Machine-readable start date for Schema.org -->
-    <time
-      :datetime="formatDate(dateStart, 'YYYY-MM-DDTHH:mm:ssZ')"
-      itemprop="startDate"
-      hidden
-    ></time>
-
-    <!-- Machine-readable end date for Schema.org -->
-    <time
-      v-if="dateEnd"
-      :datetime="formatDate(dateEnd, 'YYYY-MM-DDTHH:mm:ssZ')"
-      itemprop="endDate"
-      hidden
-    ></time>
-
-    <!-- Human-readable date range with locale-aware deduplication -->
+    <!-- Human-readable date range with machine-readable <time> elements -->
     <span class="event__dateRange">
-      {{ formattedRange[0]
-      }}<template v-if="formattedRange[1]"
+      <time :datetime="machineStart">{{ formattedRange[0] }}</time
+      ><template v-if="formattedRange[1]"
         ><span aria-hidden="true"> &ndash; </span><span class="sr-only">to</span
-        >{{ formattedRange[1] }}</template
+        ><time :datetime="machineEnd">{{ formattedRange[1] }}</time></template
       ><template v-if="!isInternational"
         >{{ ' '
         }}<abbr :title="getFullTimezoneName(currentTimezone) || undefined">{{
@@ -172,4 +157,24 @@ const currentTimezone = computed(() => {
  * @returns {boolean} True if the event is international
  */
 const isInternational = computed(() => !props.timezone);
+
+/** Whether the event uses date-only display (no times shown) */
+const isDateOnly = computed(
+  () => props.day || props.type === 'theme' || props.isDeadline
+);
+
+/** Machine-readable datetime format for the <time> element */
+const machineFormat = computed(() =>
+  isDateOnly.value ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZ'
+);
+
+/** Machine-readable start date for the start <time> element */
+const machineStart = computed(() =>
+  formatDate(props.dateStart, machineFormat.value)
+);
+
+/** Machine-readable end date for the end <time> element */
+const machineEnd = computed(() =>
+  props.dateEnd ? formatDate(props.dateEnd, machineFormat.value) : undefined
+);
 </script>

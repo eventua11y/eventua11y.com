@@ -4,3 +4,22 @@
 # Edge functions are auto-discovered from netlify/edge-functions/
 # Each function exports its own config with the path, so no explicit
 # [[edge_functions]] entries are needed here.
+
+# Immutable caching for hashed Astro assets (JS, CSS)
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Long cache for favicon assets
+[[headers]]
+  for = "/favicon/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# Redirect /events to the homepage at the CDN edge,
+# avoiding a serverless function invocation.
+[[redirects]]
+  from = "/events"
+  to = "/"
+  status = 301

@@ -20,6 +20,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 
+import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book } from '../types/event';
 
 // ── Sanity client ──────────────────────────────────────────────────────
@@ -42,6 +43,7 @@ interface RawEvent {
   title: string;
   slug?: { current: string };
   description?: string;
+  richDescription?: PortableTextBlock[];
   dateStart: string;
   dateEnd?: string;
   timezone?: string;
@@ -79,13 +81,41 @@ export async function getEvents(): Promise<{
     await Promise.all([
       client.fetch(`
         *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
-          ...,
+          _id,
+          _type,
+          type,
+          title,
+          slug,
+          description,
+          dateStart,
+          dateEnd,
+          timezone,
+          website,
+          attendanceMode,
+          callForSpeakers,
+          callForSpeakersClosingDate,
+          parent,
+          day,
+          isFree,
+          isParent,
+          location,
           "speakers": speakers[]->{ _id, name }
         }
       `),
       client.fetch(`
         *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
-          ...,
+          _id,
+          title,
+          slug,
+          type,
+          dateStart,
+          dateEnd,
+          timezone,
+          day,
+          website,
+          format,
+          scheduled,
+          parent,
           "speakers": speakers[]->{ _id, name }
         } | order(dateStart asc)
       `),
@@ -178,13 +208,30 @@ export async function getEvents(): Promise<{
 // ── Single event query ─────────────────────────────────────────────────
 
 /**
+ * In-memory cache for single event lookups, keyed by slug.
+ * Mirrors the 5-minute TTL caching strategy used by the
+ * get-events and get-books edge functions to reduce Sanity API calls.
+ */
+const eventCache: Record<string, { data: Event | null; timestamp: number }> =
+  {};
+const EVENT_CACHE_TTL = 300000; // 5 minutes in milliseconds
+
+/**
  * Fetches a single event by its slug, including resolved speakers
  * and child events. Returns null if no matching event is found.
+ *
+ * Results are cached in memory for 5 minutes per slug to reduce
+ * Sanity API calls across requests within the same function instance.
  *
  * Child events (those with a parent reference) inherit attendanceMode
  * and location from their parent when their own values are not set.
  */
 export async function getEventBySlug(slug: string): Promise<Event | null> {
+  const cached = eventCache[slug];
+  if (cached && Date.now() - cached.timestamp < EVENT_CACHE_TTL) {
+    return cached.data;
+  }
+
   const client = getSanityClient();
 
   const event: RawEvent | null = await client.fetch(
@@ -199,7 +246,17 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "organizer": coalesce(organizer, parent->organizer)->{ _id, name, website },
       "topics": topics[]->{ _id, name, slug, body },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
-        ...,
+        _id,
+        title,
+        slug,
+        type,
+        dateStart,
+        dateEnd,
+        timezone,
+        day,
+        website,
+        format,
+        scheduled,
         "speakers": speakers[]->{ _id, name }
       } | order(dateStart asc)
     }
@@ -207,13 +264,19 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
     { slug }
   );
 
-  if (!event) return null;
+  if (!event) {
+    eventCache[slug] = { data: null, timestamp: Date.now() };
+    return null;
+  }
 
-  return {
+  const result = {
     ...event,
     children:
       event.children && event.children.length > 0 ? event.children : undefined,
   } as Event;
+
+  eventCache[slug] = { data: result, timestamp: Date.now() };
+  return result;
 }
 
 // ── Book queries ───────────────────────────────────────────────────────

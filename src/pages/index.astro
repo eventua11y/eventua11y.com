@@ -10,6 +10,13 @@ import FilterBarPlaceholder from '../components/FilterBarPlaceholder.astro';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
+
+// Cache the response to reduce origin hits, matching the
+// strategy used by the get-events edge function.
+Astro.response.headers.set(
+  'Cache-Control',
+  'private, max-age=300, stale-while-revalidate=60'
+);
 ---
 
 <DefaultLayout>
@@ -35,7 +42,7 @@ export const prerender = false;
     <MonthNav
       id="month-nav"
       class="mb-l"
-      client:load
+      client:idle
       contentRegion="#events"
       showTodayLink={true}
     />
