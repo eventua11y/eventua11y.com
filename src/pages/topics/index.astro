@@ -26,33 +26,39 @@ const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
   title="Topics"
   description="Browse accessibility and inclusive design topics covered by events on Eventua11y."
 >
-  <div class="container readable py-l flow">
+  <div class="container py-l flow">
     <h1>Topics</h1>
-    <p>
+    <p class="readable">
       Browse accessibility and inclusive design topics covered by events on
       Eventua11y.
     </p>
 
     {
       topicsWithEvents.length > 0 ? (
-        <ul role="list" class="topic-list">
+        <ul
+          role="list"
+          class="wa-grid wa-gap-s"
+          style="--min-column-size: 18rem;"
+        >
           {topicsWithEvents.map((topic) => (
-            <li class="topic-list__item">
+            <li>
               <a
                 href={`/topics/${topic.slug.current}`}
-                class="topic-list__link"
+                class="topic-card__link"
               >
-                <span class="topic-list__name">{topic.name}</span>
-                <span class="topic-list__count text-small text-muted">
-                  {topic.eventCount}{' '}
-                  {topic.eventCount === 1 ? 'event' : 'events'}
-                </span>
+                <wa-card class="topic-card" appearance="outlined">
+                  <div class="wa-stack wa-gap-2xs">
+                    <h2 class="topic-card__name">{topic.name}</h2>
+                    {topic.description && (
+                      <p class="topic-card__description">{topic.description}</p>
+                    )}
+                    <p class="topic-card__count">
+                      {topic.eventCount}{' '}
+                      {topic.eventCount === 1 ? 'event' : 'events'}
+                    </p>
+                  </div>
+                </wa-card>
               </a>
-              {topic.description && (
-                <p class="topic-list__description text-small text-muted">
-                  {topic.description}
-                </p>
-              )}
             </li>
           ))}
         </ul>
@@ -64,21 +70,35 @@ const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
 </DefaultLayout>
 
 <style>
-  .topic-list {
+  ul[role='list'] {
     list-style: none;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--p-space-s);
   }
 
-  .topic-list__link {
-    display: flex;
-    align-items: baseline;
-    gap: var(--p-space-2xs);
+  .topic-card__link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
   }
 
-  .topic-list__description {
-    margin-top: var(--p-space-3xs);
+  .topic-card {
+    --spacing: var(--p-space-m);
+    height: 100%;
+  }
+
+  .topic-card__name {
+    font-size: var(--p-step-1);
+    margin: 0;
+  }
+
+  .topic-card__description {
+    font-size: var(--p-step--1);
+    color: var(--p-color-text-muted);
+  }
+
+  .topic-card__count {
+    font-size: var(--p-step--1);
+    color: var(--p-color-text-muted);
   }
 </style>
