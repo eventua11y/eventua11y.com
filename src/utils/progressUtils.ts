@@ -226,6 +226,13 @@ export function getTimeRemaining(now: Dayjs, options: ProgressOptions): string {
 /**
  * Countdown label for events that haven't started yet
  * (HTML with <abbr> elements).
+ *
+ * Escalates through increasingly coarse units:
+ * - Under 24 hr: "Starts in 3 hr 15 m" (via formatDuration)
+ * - 1 day:       "Starts tomorrow"
+ * - Under 30 d:  "Starts in 4 days"
+ * - Under 24 mo: "Starts in 3 months"
+ * - 24 mo+:      "Starts in 2 years"
  */
 export function getCountdownLabel(
   now: Dayjs,
@@ -233,8 +240,28 @@ export function getCountdownLabel(
 ): string {
   if (!isStartingSoon(now, options)) return '';
 
-  const minutesUntil = Math.max(0, getEventStart(options).diff(now, 'minute'));
-  return `Starts in ${formatDuration(minutesUntil)}`;
+  const start = getEventStart(options);
+  const minutesUntil = Math.max(0, start.diff(now, 'minute'));
+
+  if (minutesUntil < 60 * 24) {
+    return `Starts in ${formatDuration(minutesUntil)}`;
+  }
+
+  const daysUntil = Math.max(1, start.diff(now, 'day'));
+  if (daysUntil === 1) {
+    return 'Starts tomorrow';
+  }
+  if (daysUntil < 30) {
+    return `Starts in ${daysUntil} days`;
+  }
+
+  const monthsUntil = Math.max(1, start.diff(now, 'month'));
+  if (monthsUntil < 24) {
+    return `Starts in ${monthsUntil} ${monthsUntil === 1 ? 'month' : 'months'}`;
+  }
+
+  const yearsUntil = Math.max(2, start.diff(now, 'year'));
+  return `Starts in ${yearsUntil} years`;
 }
 
 /**
