@@ -38,10 +38,14 @@ const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
         <ul role="list" class="topic-list">
           {topicsWithEvents.map((topic) => (
             <li class="topic-list__item">
-              <a href={`/topics/${topic.slug.current}`} class="topic-list__link">
+              <a
+                href={`/topics/${topic.slug.current}`}
+                class="topic-list__link"
+              >
                 <span class="topic-list__name">{topic.name}</span>
                 <span class="topic-list__count text-small text-muted">
-                  {topic.eventCount} {topic.eventCount === 1 ? 'event' : 'events'}
+                  {topic.eventCount}{' '}
+                  {topic.eventCount === 1 ? 'event' : 'events'}
                 </span>
               </a>
               {topic.description && (
