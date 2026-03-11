@@ -16,21 +16,21 @@ const currentPath = Astro.url.pathname;
           <li class="primaryNav__item">
             <a
               class="primaryNav__link"
-              href="/past-events"
-              aria-current={currentPath === '/past-events' ? 'page' : undefined}
-            >
-              Past Events
-            </a>
-          </li>
-          <li class="primaryNav__item">
-            <a
-              class="primaryNav__link"
               href="/topics"
               aria-current={currentPath.startsWith('/topics')
                 ? 'page'
                 : undefined}
             >
               Topics
+            </a>
+          </li>
+          <li class="primaryNav__item">
+            <a
+              class="primaryNav__link"
+              href="/past-events"
+              aria-current={currentPath === '/past-events' ? 'page' : undefined}
+            >
+              Past Events
             </a>
           </li>
           <li class="primaryNav__item">
