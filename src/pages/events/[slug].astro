@@ -10,11 +10,11 @@
  */
 import DefaultLayout from '../../layouts/default.astro';
 import { getEventBySlug } from '../../lib/sanity';
+import { PortableText } from 'astro-portabletext';
 import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
-import { PortableText } from 'astro-portabletext';
 
 export const prerender = false;
 
@@ -45,6 +45,7 @@ const metaDescription = event.description
 
 // Check states
 const callForSpeakersOpen = isCallForSpeakersOpen(event);
+const hasTopics = Array.isArray(event.topics) && event.topics.length > 0;
 const hasChildren = Array.isArray(event.children) && event.children.length > 0;
 const isChildEvent = !!event.parent;
 const parentUrl = event.parentEvent?.slug?.current
@@ -330,6 +331,24 @@ const jsonLd = {
         }
 
         {
+          hasTopics && (
+            <div class="event-detail__topics">
+              <h2>{event.topics!.length === 1 ? 'Topic' : 'Topics'}</h2>
+              <ul role="list" class="event-detail__topic-list">
+                {event.topics!.map((topic) => (
+                  <li>
+                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                    {topic.description && (
+                      <p class="text-small text-muted">{topic.description}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
           !isDedicatedToAccessibility && hasChildren && (
             <section class="event-detail__children flow flow-s">
               <hgroup role="group" aria-roledescription="Heading group">
@@ -501,6 +520,14 @@ const jsonLd = {
 
   .event-detail__speaker-list li:not(:last-child) span::after {
     content: ',\00a0';
+  }
+
+  .event-detail__topic-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-2xs);
   }
 
   .event-detail__children h2 {
