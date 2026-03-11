@@ -1,0 +1,80 @@
+---
+/**
+ * Topics listing page.
+ *
+ * Displays all topics that are referenced by at least one event,
+ * with a short description and event count for each.
+ *
+ * This page runs in SSR mode to stay in sync with Sanity content.
+ */
+import DefaultLayout from '../../layouts/default.astro';
+import { getTopics } from '../../lib/sanity';
+
+export const prerender = false;
+
+const topics = await getTopics();
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'private, max-age=300, stale-while-revalidate=60'
+);
+
+const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
+---
+
+<DefaultLayout
+  title="Topics"
+  description="Browse accessibility and inclusive design topics covered by events on Eventua11y."
+>
+  <div class="container readable py-l flow">
+    <h1>Topics</h1>
+    <p>
+      Browse accessibility and inclusive design topics covered by events on
+      Eventua11y.
+    </p>
+
+    {
+      topicsWithEvents.length > 0 ? (
+        <ul role="list" class="topic-list">
+          {topicsWithEvents.map((topic) => (
+            <li class="topic-list__item">
+              <a href={`/topics/${topic.slug.current}`} class="topic-list__link">
+                <span class="topic-list__name">{topic.name}</span>
+                <span class="topic-list__count text-small text-muted">
+                  {topic.eventCount} {topic.eventCount === 1 ? 'event' : 'events'}
+                </span>
+              </a>
+              {topic.description && (
+                <p class="topic-list__description text-small text-muted">
+                  {topic.description}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No topics have been published yet.</p>
+      )
+    }
+  </div>
+</DefaultLayout>
+
+<style>
+  .topic-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-s);
+  }
+
+  .topic-list__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--p-space-2xs);
+  }
+
+  .topic-list__description {
+    margin-top: var(--p-space-3xs);
+  }
+</style>

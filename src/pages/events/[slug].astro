@@ -14,7 +14,6 @@ import { PortableText } from 'astro-portabletext';
 import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
-import TopicHeading from '../../components/TopicHeading.astro';
 import { isCallForSpeakersOpen } from '../../utils/eventUtils';
 
 export const prerender = false;
@@ -332,16 +331,21 @@ const jsonLd = {
         }
 
         {
-          hasTopics &&
-            event.topics!.map((topic) => (
-              <section class="event-detail__topic flow">
-                <h2>{topic.name}</h2>
-                <PortableText
-                  value={topic.body}
-                  components={{ block: { h2: TopicHeading } }}
-                />
-              </section>
-            ))
+          hasTopics && (
+            <div class="event-detail__topics">
+              <h2>{event.topics!.length === 1 ? 'Topic' : 'Topics'}</h2>
+              <ul role="list" class="event-detail__topic-list">
+                {event.topics!.map((topic) => (
+                  <li>
+                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                    {topic.description && (
+                      <p class="text-small text-muted">{topic.description}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
         }
 
         {
@@ -516,6 +520,14 @@ const jsonLd = {
 
   .event-detail__speaker-list li:not(:last-child) span::after {
     content: ',\00a0';
+  }
+
+  .event-detail__topic-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-2xs);
   }
 
   .event-detail__children h2 {

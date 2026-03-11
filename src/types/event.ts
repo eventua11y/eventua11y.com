@@ -19,7 +19,19 @@ export interface Topic {
   _id: string;
   name: string;
   slug: { current: string };
+  description?: string;
   body: any[];
+}
+
+/**
+ * Lightweight topic reference used on event detail pages and listing queries.
+ * Excludes the full Portable Text body to reduce payload size.
+ */
+export interface TopicSummary {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  description?: string;
 }
 
 export interface Event {
@@ -47,7 +59,7 @@ export interface Event {
   format?: string;
   speakers?: Speaker[];
   organizer?: Organizer;
-  topics?: Topic[];
+  topics?: TopicSummary[];
 }
 
 export interface ChildEvent {

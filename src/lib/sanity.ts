@@ -21,7 +21,7 @@ dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 
 import type { PortableTextBlock } from '@portabletext/types';
-import type { Event, Book } from '../types/event';
+import type { Event, Book, Topic } from '../types/event';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
@@ -63,7 +63,7 @@ interface RawEvent {
     _id: string;
     name: string;
     slug: { current: string };
-    body: any[];
+    description?: string;
   }>;
 }
 
@@ -244,7 +244,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "parentEvent": parent->{ title, slug },
       "speakers": speakers[]->{ _id, name },
       "organizer": coalesce(organizer, parent->organizer)->{ _id, name, website },
-      "topics": topics[]->{ _id, name, slug, body },
+      "topics": topics[]->{ _id, name, slug, description },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
         _id,
         title,
@@ -277,6 +277,101 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
 
   eventCache[slug] = { data: result, timestamp: Date.now() };
   return result;
+}
+
+// ── Topic queries ──────────────────────────────────────────────────────
+
+interface TopicListItem {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  description?: string;
+  eventCount: number;
+}
+
+/**
+ * Fetches all published topics that are referenced by at least one event,
+ * sorted alphabetically by name. Includes an event count for each topic.
+ */
+export async function getTopics(): Promise<TopicListItem[]> {
+  const client = getSanityClient();
+
+  return client.fetch(`
+    *[_type == "topic" && !(_id in path("drafts.**"))] {
+      _id,
+      name,
+      slug,
+      description,
+      "eventCount": count(*[_type == "event" && !(_id in path("drafts.**")) && references(^._id)])
+    } | order(name asc)
+  `);
+}
+
+interface RawTopic {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  description?: string;
+  body: any[];
+  events: Array<{
+    _id: string;
+    title: string;
+    slug: { current: string };
+    type: string;
+    dateStart: string;
+    dateEnd?: string;
+    timezone?: string;
+    day?: boolean;
+    attendanceMode?: string;
+    location?: string;
+    isFree?: boolean;
+  }>;
+}
+
+/**
+ * Fetches a single topic by slug with its full body content and a list
+ * of related events. Returns null if no matching topic is found.
+ */
+export async function getTopicBySlug(slug: string): Promise<
+  | (Topic & {
+      events: Event[];
+    })
+  | null
+> {
+  const client = getSanityClient();
+
+  const topic: RawTopic | null = await client.fetch(
+    `
+    *[_type == "topic" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+      _id,
+      name,
+      slug,
+      description,
+      body,
+      "events": *[_type == "event" && !(_id in path("drafts.**")) && references(^._id)] {
+        _id,
+        title,
+        slug,
+        type,
+        dateStart,
+        dateEnd,
+        timezone,
+        day,
+        attendanceMode,
+        location,
+        isFree
+      } | order(dateStart desc)
+    }
+  `,
+    { slug }
+  );
+
+  if (!topic) return null;
+
+  return {
+    ...topic,
+    events: topic.events as Event[],
+  };
 }
 
 // ── Book queries ───────────────────────────────────────────────────────
