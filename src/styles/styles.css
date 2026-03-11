@@ -13,6 +13,7 @@
 @import url('_filters.css');
 @import url('_forms.css');
 @import url('_footer.css');
+@import url('_auth.css');
 @import url('_utilities.css');
 /* Base SVG icon sizing (previously in Icon.vue, still used by footer/skip-link SVGs) */
 .icon {
@@ -47,11 +48,13 @@ main {
     wa-badge,
     wa-button,
     wa-callout,
+    wa-card,
     wa-divider,
     wa-drawer,
     wa-dropdown,
     wa-dropdown-item,
     wa-icon,
+    wa-input,
     wa-option,
     wa-radio,
     wa-radio-group,
