@@ -759,51 +759,51 @@ describe('getCountdownLabel', () => {
 
   it('returns "Starts tomorrow" when 1 day away', () => {
     // Event starts June 15 14:00; now is June 14 12:00 → ~26 hours away
-    expect(
-      getCountdownLabel(now('2026-06-14T12:00:00Z'), futureEvent)
-    ).toBe('Starts tomorrow');
+    expect(getCountdownLabel(now('2026-06-14T12:00:00Z'), futureEvent)).toBe(
+      'Starts tomorrow'
+    );
   });
 
   it('returns days when between 2 and 29 days away', () => {
     // Event starts June 15 14:00; now is June 10 12:00 → 5 days away
-    expect(
-      getCountdownLabel(now('2026-06-10T12:00:00Z'), futureEvent)
-    ).toBe('Starts in 5 days');
+    expect(getCountdownLabel(now('2026-06-10T12:00:00Z'), futureEvent)).toBe(
+      'Starts in 5 days'
+    );
   });
 
   it('returns "1 month" singular when roughly 1 month away', () => {
     // Event starts June 15 14:00; now is May 10 12:00 → ~1 month
-    expect(
-      getCountdownLabel(now('2026-05-10T12:00:00Z'), futureEvent)
-    ).toBe('Starts in 1 month');
+    expect(getCountdownLabel(now('2026-05-10T12:00:00Z'), futureEvent)).toBe(
+      'Starts in 1 month'
+    );
   });
 
   it('returns months when a few months away', () => {
     // Event starts June 15 14:00; now is March 10 12:00 → ~3 months
-    expect(
-      getCountdownLabel(now('2026-03-10T12:00:00Z'), futureEvent)
-    ).toBe('Starts in 3 months');
+    expect(getCountdownLabel(now('2026-03-10T12:00:00Z'), futureEvent)).toBe(
+      'Starts in 3 months'
+    );
   });
 
   it('stays in months beyond 12 months for precision', () => {
     // Event starts June 15 14:00; now is May 10 of prior year → ~13 months
-    expect(
-      getCountdownLabel(now('2025-05-10T12:00:00Z'), futureEvent)
-    ).toBe('Starts in 13 months');
+    expect(getCountdownLabel(now('2025-05-10T12:00:00Z'), futureEvent)).toBe(
+      'Starts in 13 months'
+    );
   });
 
   it('switches to years at 24 months', () => {
     // Event starts June 15 14:00; now is ~2 years prior
-    expect(
-      getCountdownLabel(now('2024-06-10T12:00:00Z'), futureEvent)
-    ).toBe('Starts in 2 years');
+    expect(getCountdownLabel(now('2024-06-10T12:00:00Z'), futureEvent)).toBe(
+      'Starts in 2 years'
+    );
   });
 
   it('returns higher year counts for far-future events', () => {
     // Event starts June 15 14:00; now is ~3 years prior
-    expect(
-      getCountdownLabel(now('2023-05-10T12:00:00Z'), futureEvent)
-    ).toBe('Starts in 3 years');
+    expect(getCountdownLabel(now('2023-05-10T12:00:00Z'), futureEvent)).toBe(
+      'Starts in 3 years'
+    );
   });
 });
 
