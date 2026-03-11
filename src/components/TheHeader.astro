@@ -16,12 +16,10 @@ const currentPath = Astro.url.pathname;
           <li class="primaryNav__item">
             <a
               class="primaryNav__link"
-              href="/topics"
-              aria-current={currentPath.startsWith('/topics')
-                ? 'page'
-                : undefined}
+              href="/"
+              aria-current={currentPath === '/' ? 'page' : undefined}
             >
-              Topics
+              Upcoming
             </a>
           </li>
           <li class="primaryNav__item">
@@ -36,10 +34,12 @@ const currentPath = Astro.url.pathname;
           <li class="primaryNav__item">
             <a
               class="primaryNav__link"
-              href="/"
-              aria-current={currentPath === '/' ? 'page' : undefined}
+              href="/topics"
+              aria-current={currentPath.startsWith('/topics')
+                ? 'page'
+                : undefined}
             >
-              Upcoming
+              Topics
             </a>
           </li>
         </ul>
