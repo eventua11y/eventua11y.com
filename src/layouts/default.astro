@@ -46,8 +46,13 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
     <meta property="og:url" content={Astro.url} />
     <script is:inline>
       (function () {
-        const storedTheme = localStorage.getItem('theme');
-        const prefersDarkScheme = window.matchMedia(
+        var storedTheme = null;
+        try {
+          if (typeof localStorage !== 'undefined' && localStorage !== null) {
+            storedTheme = localStorage.getItem('theme');
+          }
+        } catch (e) {}
+        var prefersDarkScheme = window.matchMedia(
           '(prefers-color-scheme: dark)'
         ).matches;
         if (storedTheme) {
