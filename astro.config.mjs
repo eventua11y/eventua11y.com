@@ -11,9 +11,7 @@ const { SENTRY_AUTH_TOKEN } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 // https://astro.build/config
 export default defineConfig({
   site: 'https://eventua11y.com',
-  output: 'server',
   adapter: netlify(),
-  compressHTML: true,
   prefetch: {
     defaultStrategy: 'hover',
     prefetchAll: true,
