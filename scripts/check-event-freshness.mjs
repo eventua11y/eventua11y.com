@@ -528,6 +528,8 @@ async function createGitHubIssue(title, body) {
         title,
         '--label',
         'content',
+        '--assignee',
+        'mattobee',
         '--body-file',
         tmpFile,
       ],
