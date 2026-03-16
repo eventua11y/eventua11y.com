@@ -119,16 +119,38 @@ async function fetchPage(url, timeoutMs = 15000) {
 /**
  * Strip HTML tags and collapse whitespace for plain-text analysis.
  * Truncates to a reasonable size for the LLM context window.
+ *
+ * Uses a loop to handle malformed/nested markup that a single pass
+ * would miss (e.g. `<scr<script>ipt>`), satisfying CodeQL's
+ * js/incomplete-multi-character-sanitization rule.
  */
 function stripHtml(html, maxLength = 12000) {
-  const text = html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  let text = html;
+
+  // Remove script, style, nav, and footer blocks (loop until stable
+  // to handle nested or malformed tags)
+  const blockPatterns = [
+    /<script[\s>][\s\S]*?<\/script[^>]*>/gi,
+    /<style[\s>][\s\S]*?<\/style[^>]*>/gi,
+    /<nav[\s>][\s\S]*?<\/nav[^>]*>/gi,
+    /<footer[\s>][\s\S]*?<\/footer[^>]*>/gi,
+  ];
+  for (const pattern of blockPatterns) {
+    let prev;
+    do {
+      prev = text;
+      text = text.replace(pattern, '');
+    } while (text !== prev);
+  }
+
+  // Strip remaining tags (loop until stable)
+  let prev;
+  do {
+    prev = text;
+    text = text.replace(/<[^>]+>/g, ' ');
+  } while (text !== prev);
+
+  text = text.replace(/\s+/g, ' ').trim();
 
   if (text.length > maxLength) {
     return text.substring(0, maxLength) + '\n[...truncated]';
@@ -484,7 +506,7 @@ function buildReport(results) {
 // ---------------------------------------------------------------------------
 
 async function createGitHubIssue(title, body) {
-  const { execSync } = await import('child_process');
+  const { execFileSync } = await import('child_process');
   const { writeFileSync, unlinkSync } = await import('fs');
   const { tmpdir } = await import('os');
   const { join } = await import('path');
@@ -494,11 +516,22 @@ async function createGitHubIssue(title, body) {
   try {
     writeFileSync(tmpFile, body, 'utf-8');
 
-    const result = execSync(
-      `gh issue create --repo eventua11y/eventua11y.com --title "${title.replace(/"/g, '\\"')}" --label "content" --body-file "${tmpFile}"`,
-      {
-        encoding: 'utf-8',
-      }
+    // Use execFileSync with an args array to avoid shell injection
+    const result = execFileSync(
+      'gh',
+      [
+        'issue',
+        'create',
+        '--repo',
+        'eventua11y/eventua11y.com',
+        '--title',
+        title,
+        '--label',
+        'content',
+        '--body-file',
+        tmpFile,
+      ],
+      { encoding: 'utf-8' }
     );
 
     return result.trim();
