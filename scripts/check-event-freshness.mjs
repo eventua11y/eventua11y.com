@@ -130,10 +130,10 @@ function stripHtml(html, maxLength = 12000) {
   // Remove script, style, nav, and footer blocks (loop until stable
   // to handle nested or malformed tags)
   const blockPatterns = [
-    /<script[\s>][\s\S]*?<\/script>/gi,
-    /<style[\s>][\s\S]*?<\/style>/gi,
-    /<nav[\s>][\s\S]*?<\/nav>/gi,
-    /<footer[\s>][\s\S]*?<\/footer>/gi,
+    /<script[\s>][\s\S]*?<\/script\s*>/gi,
+    /<style[\s>][\s\S]*?<\/style\s*>/gi,
+    /<nav[\s>][\s\S]*?<\/nav\s*>/gi,
+    /<footer[\s>][\s\S]*?<\/footer\s*>/gi,
   ];
   for (const pattern of blockPatterns) {
     let prev;
