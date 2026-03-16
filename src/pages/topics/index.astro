@@ -1,0 +1,104 @@
+---
+/**
+ * Topics listing page.
+ *
+ * Displays all topics that are referenced by at least one event,
+ * with a short description and event count for each.
+ *
+ * This page runs in SSR mode to stay in sync with Sanity content.
+ */
+import DefaultLayout from '../../layouts/default.astro';
+import { getTopics } from '../../lib/sanity';
+
+export const prerender = false;
+
+const topics = await getTopics();
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'private, max-age=300, stale-while-revalidate=60'
+);
+
+const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
+---
+
+<DefaultLayout
+  title="Topics"
+  description="Browse accessibility and inclusive design topics covered by events on Eventua11y."
+>
+  <div class="container py-l flow">
+    <h1>Topics</h1>
+    <p class="readable">
+      Browse accessibility and inclusive design topics covered by events on
+      Eventua11y.
+    </p>
+
+    {
+      topicsWithEvents.length > 0 ? (
+        <ul
+          role="list"
+          class="wa-grid wa-gap-s"
+          style="--min-column-size: 18rem;"
+        >
+          {topicsWithEvents.map((topic) => (
+            <li>
+              <a
+                href={`/topics/${topic.slug.current}`}
+                class="topic-card__link"
+              >
+                <wa-card class="topic-card" appearance="outlined">
+                  <div class="wa-stack wa-gap-2xs">
+                    <h2 class="topic-card__name">{topic.name}</h2>
+                    {topic.description && (
+                      <p class="topic-card__description">{topic.description}</p>
+                    )}
+                    <p class="topic-card__count">
+                      {topic.eventCount}{' '}
+                      {topic.eventCount === 1 ? 'event' : 'events'}
+                    </p>
+                  </div>
+                </wa-card>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No topics have been published yet.</p>
+      )
+    }
+  </div>
+</DefaultLayout>
+
+<style>
+  ul[role='list'] {
+    list-style: none;
+    padding: 0;
+  }
+
+  .topic-card__link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+  .topic-card {
+    --spacing: var(--p-space-m);
+    height: 100%;
+  }
+
+  .topic-card__name {
+    font-size: var(--p-step-1);
+    margin: 0;
+  }
+
+  .topic-card__description {
+    font-size: var(--p-step--1);
+    color: var(--p-color-text-muted);
+  }
+
+  .topic-card__count {
+    font-size: var(--p-step--1);
+    color: var(--p-color-text-muted);
+  }
+</style>
