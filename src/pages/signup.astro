@@ -32,21 +32,27 @@ if (Astro.locals.user) {
               type="password"
               required
               autocomplete="new-password"
-              password-toggle></wa-input>
+              password-toggle
+              aria-describedby="password-hint"></wa-input>
+            <p id="password-hint" class="wa-text-s wa-text-muted">
+              Must be at least 6 characters.
+            </p>
             <wa-button id="signup-button" type="submit"
               >Create account</wa-button
             >
 
-            <wa-callout id="signup-error" variant="danger" hidden>
-              <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-              <span id="signup-error-message"
-                >There was a problem creating your account.</span
-              >
-            </wa-callout>
+            <div id="signup-error-region" role="alert">
+              <wa-callout id="signup-error" variant="danger" hidden>
+                <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+                <span id="signup-error-message"
+                  >There was a problem creating your account.</span
+                >
+              </wa-callout>
+            </div>
 
             <wa-divider></wa-divider>
 
-            <p>Or sign up with:</p>
+            <p>Or create an account with:</p>
             <div class="wa-grid" style="--min-column-size: 12ch;">
               <wa-button id="github-signup" appearance="outlined" type="button">
                 <wa-icon slot="start" name="github" family="brands"></wa-icon>
@@ -68,20 +74,23 @@ if (Astro.locals.user) {
           </div>
         </div>
 
-        <div id="signup-success" class="wa-stack" hidden>
-          <wa-callout variant="success">
-            <wa-icon slot="icon" name="circle-check"></wa-icon>
-            <div class="wa-stack">
-              <strong>Check your email</strong>
-              <p>
-                We&rsquo;ve sent a confirmation link to your email address.
-                Please click the link to verify your account before logging in.
-              </p>
-            </div>
-          </wa-callout>
-          <p>
-            <a href="/login">Go to log in</a>
-          </p>
+        <div id="signup-success-region" role="status" aria-live="polite">
+          <div id="signup-success" class="wa-stack" hidden>
+            <wa-callout variant="success">
+              <wa-icon slot="icon" name="circle-check"></wa-icon>
+              <div class="wa-stack">
+                <strong>Check your email</strong>
+                <p>
+                  We&rsquo;ve sent a confirmation link to your email address.
+                  Please click the link to verify your account before logging
+                  in.
+                </p>
+              </div>
+            </wa-callout>
+            <p>
+              <a href="/login">Go to log in</a>
+            </p>
+          </div>
         </div>
       </form>
     </wa-card>
@@ -164,6 +173,7 @@ if (Astro.locals.user) {
       signupErrorMessage.textContent = 'Please enter your email and password.';
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
+      signupError.focus();
       return;
     }
 
@@ -172,6 +182,7 @@ if (Astro.locals.user) {
         'Password must be at least 6 characters.';
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
+      signupError.focus();
       return;
     }
 
@@ -185,9 +196,10 @@ if (Astro.locals.user) {
 
     if (error) {
       signupErrorMessage.textContent =
-        error.message || 'There was a problem creating your account.';
+        'There was a problem creating your account. Please try again.';
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
+      signupError.focus();
     } else {
       // Migrate localStorage preferences to the new profile
       if (data.user) {
@@ -203,6 +215,7 @@ if (Astro.locals.user) {
       // Show success message
       formFields.hidden = true;
       signupSuccess.hidden = false;
+      signupSuccess.focus();
     }
   });
 

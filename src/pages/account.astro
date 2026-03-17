@@ -39,17 +39,21 @@ const isEmailUser = provider === 'email';
       <div class="wa-stack">
         <h1 class="wa-heading-l">Your account</h1>
 
-        <wa-callout id="update-success" variant="success" hidden>
-          <wa-icon slot="icon" name="circle-check"></wa-icon>
-          Your profile has been updated.
-        </wa-callout>
+        <div id="update-success-region" role="status" aria-live="polite">
+          <wa-callout id="update-success" variant="success" hidden>
+            <wa-icon slot="icon" name="circle-check"></wa-icon>
+            Your profile has been updated.
+          </wa-callout>
+        </div>
 
-        <wa-callout id="update-error" variant="danger" hidden>
-          <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-          <span id="update-error-message"
-            >There was a problem updating your profile.</span
-          >
-        </wa-callout>
+        <div id="update-error-region" role="alert">
+          <wa-callout id="update-error" variant="danger" hidden>
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+            <span id="update-error-message"
+              >There was a problem updating your profile.</span
+            >
+          </wa-callout>
+        </div>
 
         {
           avatarUrl && (
@@ -67,7 +71,7 @@ const isEmailUser = provider === 'email';
         <dl class="account-details">
           <dt>Email</dt>
           <dd>{email}</dd>
-          <dt>Sign-in method</dt>
+          <dt>Login method</dt>
           <dd class="provider-name">
             {provider === 'github' && 'GitHub'}
             {provider === 'linkedin_oidc' && 'LinkedIn'}
@@ -106,24 +110,32 @@ const isEmailUser = provider === 'email';
               <wa-button id="save-password" type="button">
                 Update password
               </wa-button>
-              <wa-callout id="password-success" variant="success" hidden>
-                <wa-icon slot="icon" name="circle-check" />
-                Your password has been updated.
-              </wa-callout>
-              <wa-callout id="password-error" variant="danger" hidden>
-                <wa-icon slot="icon" name="circle-exclamation" />
-                <span id="password-error-message">
-                  There was a problem updating your password.
-                </span>
-              </wa-callout>
+              <div
+                id="password-success-region"
+                role="status"
+                aria-live="polite"
+              >
+                <wa-callout id="password-success" variant="success" hidden>
+                  <wa-icon slot="icon" name="circle-check" />
+                  Your password has been updated.
+                </wa-callout>
+              </div>
+              <div id="password-error-region" role="alert">
+                <wa-callout id="password-error" variant="danger" hidden>
+                  <wa-icon slot="icon" name="circle-exclamation" />
+                  <span id="password-error-message">
+                    There was a problem updating your password.
+                  </span>
+                </wa-callout>
+              </div>
             </>
           )
         }
 
         <wa-divider></wa-divider>
 
-        <wa-button id="sign-out-button" appearance="outlined" variant="danger">
-          Sign out
+        <wa-button id="log-out-button" appearance="outlined" variant="danger">
+          Log out
         </wa-button>
       </div>
     </wa-card>
@@ -173,10 +185,12 @@ const isEmailUser = provider === 'email';
 
     if (error) {
       updateErrorMessage.textContent =
-        error.message || 'There was a problem updating your profile.';
+        'There was a problem updating your profile.';
       updateError.hidden = false;
+      updateError.focus();
     } else {
       updateSuccess.hidden = false;
+      updateSuccess.focus();
     }
   });
 
@@ -208,7 +222,10 @@ const isEmailUser = provider === 'email';
       if (passwordErrorMessage)
         passwordErrorMessage.textContent =
           'Password must be at least 6 characters.';
-      if (passwordError) passwordError.hidden = false;
+      if (passwordError) {
+        passwordError.hidden = false;
+        passwordError.focus();
+      }
       savePasswordButton?.removeAttribute('loading');
       return;
     }
@@ -220,19 +237,25 @@ const isEmailUser = provider === 'email';
     if (error) {
       if (passwordErrorMessage)
         passwordErrorMessage.textContent =
-          error.message || 'There was a problem updating your password.';
-      if (passwordError) passwordError.hidden = false;
+          'There was a problem updating your password.';
+      if (passwordError) {
+        passwordError.hidden = false;
+        passwordError.focus();
+      }
     } else {
-      if (passwordSuccess) passwordSuccess.hidden = false;
+      if (passwordSuccess) {
+        passwordSuccess.hidden = false;
+        passwordSuccess.focus();
+      }
       if (newPasswordInput) newPasswordInput.value = '';
     }
   });
 
-  // Sign out
+  // Log out
   document
-    .getElementById('sign-out-button')
+    .getElementById('log-out-button')
     ?.addEventListener('click', async () => {
       await supabase.auth.signOut();
-      window.location.href = '/login?signed-out=true';
+      window.location.href = '/login?logged-out=true';
     });
 </script>

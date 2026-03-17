@@ -12,7 +12,7 @@ if (Astro.locals.user) {
 }
 
 const errorParam = Astro.url.searchParams.get('error');
-const signedOut = Astro.url.searchParams.get('signed-out');
+const loggedOut = Astro.url.searchParams.get('logged-out');
 ---
 
 <Layout title={title} description={description}>
@@ -31,10 +31,10 @@ const signedOut = Astro.url.searchParams.get('signed-out');
         }
 
         {
-          signedOut && (
+          loggedOut && (
             <wa-callout variant="neutral">
               <wa-icon slot="icon" name="circle-check" />
-              You have been signed out.
+              You have been logged out.
             </wa-callout>
           )
         }
@@ -53,10 +53,16 @@ const signedOut = Astro.url.searchParams.get('signed-out');
           autocomplete="current-password"></wa-input>
         <wa-button id="login-button" type="submit">Log in</wa-button>
 
-        <wa-callout id="login-error" variant="danger" hidden>
-          <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-          <span id="login-error-message">Invalid email or password.</span>
-        </wa-callout>
+        <p>
+          <a href="/forgot-password">Forgot your password?</a>
+        </p>
+
+        <div id="login-error-region" role="alert">
+          <wa-callout id="login-error" variant="danger" hidden>
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+            <span id="login-error-message">Invalid email or password.</span>
+          </wa-callout>
+        </div>
 
         <wa-divider></wa-divider>
 
@@ -110,6 +116,7 @@ const signedOut = Astro.url.searchParams.get('signed-out');
       loginErrorMessage.textContent = 'Please enter your email and password.';
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
+      loginError.focus();
       return;
     }
 
@@ -119,10 +126,10 @@ const signedOut = Astro.url.searchParams.get('signed-out');
     });
 
     if (error) {
-      loginErrorMessage.textContent =
-        error.message || 'Invalid email or password.';
+      loginErrorMessage.textContent = 'Invalid email or password.';
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
+      loginError.focus();
     } else {
       window.location.href = '/account';
     }

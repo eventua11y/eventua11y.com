@@ -395,6 +395,15 @@ test.describe('Login page accessibility', () => {
     await expect(signupLink).toHaveAttribute('href', '/signup');
   });
 
+  test('link to forgot password page exists', async ({ page }) => {
+    const main = page.getByRole('main');
+    const forgotLink = main.getByRole('link', {
+      name: /Forgot your password/i,
+    });
+    await expect(forgotLink).toBeVisible();
+    await expect(forgotLink).toHaveAttribute('href', '/forgot-password');
+  });
+
   test('banner and contentinfo landmarks are present', async ({ page }) => {
     await expect(page.getByRole('banner')).toBeVisible();
     await expect(page.getByRole('contentinfo')).toBeVisible();
@@ -460,11 +469,11 @@ test.describe('Signup page accessibility', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Confirm email page (/auth/confirm)
+// Forgot password page (/forgot-password)
 // ---------------------------------------------------------------------------
-test.describe('Confirm email page accessibility', () => {
+test.describe('Forgot password page accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/auth/confirm');
+    await page.goto('/forgot-password');
   });
 
   test('has no WCAG 2.2 AA violations', async ({ page }) => {
@@ -473,7 +482,7 @@ test.describe('Confirm email page accessibility', () => {
   });
 
   test('page has correct title', async ({ page }) => {
-    await expect(page).toHaveTitle(/Check your email.*Eventua11y/);
+    await expect(page).toHaveTitle(/Reset your password.*Eventua11y/);
   });
 
   test('main landmark is present', async ({ page }) => {
@@ -483,7 +492,70 @@ test.describe('Confirm email page accessibility', () => {
   test('h1 heading is visible', async ({ page }) => {
     const h1 = page.getByRole('heading', { level: 1 });
     await expect(h1).toBeVisible();
-    await expect(h1).toHaveAccessibleName('Check your email');
+    await expect(h1).toHaveAccessibleName('Reset your password');
+  });
+
+  test('email input has accessible label', async ({ page }) => {
+    const emailInput = page.locator('wa-input#email');
+    await expect(emailInput).toHaveAttribute('label', 'Email');
+  });
+
+  test('link back to login page exists', async ({ page }) => {
+    const main = page.getByRole('main');
+    const loginLink = main.getByRole('link', { name: /Back to log in/i });
+    await expect(loginLink).toBeVisible();
+    await expect(loginLink).toHaveAttribute('href', '/login');
+  });
+
+  test('banner and contentinfo landmarks are present', async ({ page }) => {
+    await expect(page.getByRole('banner')).toBeVisible();
+    await expect(page.getByRole('contentinfo')).toBeVisible();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reset password page (/reset-password)
+// ---------------------------------------------------------------------------
+test.describe('Reset password page accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/reset-password');
+  });
+
+  test('has no WCAG 2.2 AA violations', async ({ page }) => {
+    const results = await runAxeScan(page);
+    expect(results.violations).toEqual([]);
+  });
+
+  test('page has correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Set a new password.*Eventua11y/);
+  });
+
+  test('main landmark is present', async ({ page }) => {
+    await expect(page.getByRole('main')).toBeVisible();
+  });
+
+  test('h1 heading is visible', async ({ page }) => {
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toBeVisible();
+    await expect(h1).toHaveAccessibleName('Set a new password');
+  });
+
+  test('password input has accessible label', async ({ page }) => {
+    const passwordInput = page.locator('wa-input#new-password');
+    await expect(passwordInput).toHaveAttribute('label', 'New password');
+  });
+
+  test('password requirements are visible', async ({ page }) => {
+    const hint = page.locator('#password-hint');
+    await expect(hint).toBeVisible();
+    await expect(hint).toContainText('at least 6 characters');
+  });
+
+  test('link back to login page exists', async ({ page }) => {
+    const main = page.getByRole('main');
+    const loginLink = main.getByRole('link', { name: /Back to log in/i });
+    await expect(loginLink).toBeVisible();
+    await expect(loginLink).toHaveAttribute('href', '/login');
   });
 
   test('banner and contentinfo landmarks are present', async ({ page }) => {
@@ -566,7 +638,8 @@ const pages = [
   { name: '404', path: '/404' },
   { name: 'Login', path: '/login' },
   { name: 'Signup', path: '/signup' },
-  { name: 'Confirm Email', path: '/auth/confirm' },
+  { name: 'Forgot Password', path: '/forgot-password' },
+  { name: 'Reset Password', path: '/reset-password' },
 ];
 
 for (const colorScheme of ['light', 'dark'] as const) {

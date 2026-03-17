@@ -2,11 +2,10 @@ import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServerClient } from './lib/supabase/server';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // Default to no user/session
+  // Default to no user
   context.locals.user = null;
-  context.locals.session = null;
 
-  // Skip Supabase auth for prerendered routes or when env vars are missing
+  // Skip Supabase auth when env vars are missing (e.g. local dev without Supabase)
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const supabaseKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -25,9 +24,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     } = await supabase.auth.getUser();
 
     context.locals.user = user;
-    context.locals.session = user
-      ? (await supabase.auth.getSession()).data.session
-      : null;
   } catch {
     // If auth fails (e.g. during prerendering), continue without user
   }
