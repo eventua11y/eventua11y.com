@@ -26,8 +26,11 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
   }
 
   // 2. Create an admin client with the service role key
+  //    Use process.env for the service role key because non-PUBLIC_ vars are
+  //    only statically replaced from .env files at build time — they won't be
+  //    available via import.meta.env when set as Netlify runtime env vars.
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!serviceRoleKey) {
     console.error('SUPABASE_SERVICE_ROLE_KEY is not configured');
