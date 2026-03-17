@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from '../../lib/supabase/server';
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 /**
  * OAuth callback handler.
  * Exchanges the authorization code for a session, then redirects.
