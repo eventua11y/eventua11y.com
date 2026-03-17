@@ -137,6 +137,69 @@ const isEmailUser = provider === 'email';
         <wa-button id="log-out-button" appearance="outlined" variant="danger">
           Log out
         </wa-button>
+
+        <wa-divider></wa-divider>
+
+        <h2 class="wa-heading-m">Delete account</h2>
+
+        <p>
+          Permanently delete your account and all associated data. This action
+          cannot be undone.
+        </p>
+
+        <div id="delete-error-region" role="alert">
+          <wa-callout id="delete-error" variant="danger" hidden>
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+            <span id="delete-error-message"
+              >There was a problem deleting your account.</span
+            >
+          </wa-callout>
+        </div>
+
+        <wa-button
+          id="delete-account-button"
+          variant="danger"
+          appearance="outlined"
+        >
+          Delete account
+        </wa-button>
+
+        <wa-dialog id="delete-confirm-dialog" label="Delete your account">
+          <p>
+            This will <strong>permanently delete</strong> your account and all associated
+            data. This action cannot be undone.
+          </p>
+
+          <p id="delete-confirm-hint">
+            Type <strong>DELETE</strong> below to confirm.
+          </p>
+
+          <wa-input
+            id="delete-confirm-input"
+            label="Confirmation"
+            placeholder="Type DELETE to confirm"
+            aria-describedby="delete-confirm-hint"></wa-input>
+
+          <div id="dialog-delete-error-region" role="alert">
+            <wa-callout id="dialog-delete-error" variant="danger" hidden>
+              <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+              <span id="dialog-delete-error-message"
+                >Please type DELETE to confirm.</span
+              >
+            </wa-callout>
+          </div>
+
+          <wa-button
+            slot="footer"
+            id="delete-cancel-button"
+            appearance="outlined"
+          >
+            Cancel
+          </wa-button>
+          <wa-button slot="footer" id="delete-confirm-button" variant="danger">
+            Permanently delete account
+          </wa-button>
+        </wa-dialog>
       </div>
     </wa-card>
   </div>
@@ -258,4 +321,101 @@ const isEmailUser = provider === 'email';
       await supabase.auth.signOut();
       window.location.href = '/login?logged-out=true';
     });
+
+  // Delete account
+  const deleteAccountButton = document.getElementById(
+    'delete-account-button'
+  ) as HTMLElement;
+  const deleteConfirmDialog = document.getElementById(
+    'delete-confirm-dialog'
+  ) as HTMLElement & { show(): void; hide(): void };
+  const deleteConfirmInput = document.getElementById(
+    'delete-confirm-input'
+  ) as HTMLInputElement & { value: string };
+  const deleteCancelButton = document.getElementById(
+    'delete-cancel-button'
+  ) as HTMLElement;
+  const deleteConfirmButton = document.getElementById(
+    'delete-confirm-button'
+  ) as HTMLElement;
+  const deleteError = document.getElementById('delete-error') as HTMLElement;
+  const deleteErrorMessage = document.getElementById(
+    'delete-error-message'
+  ) as HTMLElement;
+  const dialogDeleteError = document.getElementById(
+    'dialog-delete-error'
+  ) as HTMLElement;
+  const dialogDeleteErrorMessage = document.getElementById(
+    'dialog-delete-error-message'
+  ) as HTMLElement;
+
+  // Open the confirmation dialog
+  deleteAccountButton?.addEventListener('click', () => {
+    deleteError.hidden = true;
+    deleteConfirmInput.value = '';
+    dialogDeleteError.hidden = true;
+    deleteConfirmDialog.show();
+  });
+
+  // Cancel closes the dialog
+  deleteCancelButton?.addEventListener('click', () => {
+    deleteConfirmDialog.hide();
+  });
+
+  // Reset dialog state when it closes
+  deleteConfirmDialog?.addEventListener('wa-after-hide', () => {
+    deleteConfirmInput.value = '';
+    dialogDeleteError.hidden = true;
+    deleteConfirmButton.removeAttribute('loading');
+    deleteConfirmButton.removeAttribute('disabled');
+  });
+
+  // Confirm deletion
+  deleteConfirmButton?.addEventListener('click', async () => {
+    dialogDeleteError.hidden = true;
+
+    // Validate the confirmation input
+    if (deleteConfirmInput.value.trim() !== 'DELETE') {
+      dialogDeleteErrorMessage.textContent =
+        'Please type DELETE to confirm account deletion.';
+      dialogDeleteError.hidden = false;
+      dialogDeleteError.focus();
+      return;
+    }
+
+    deleteConfirmButton.setAttribute('loading', '');
+    deleteConfirmButton.setAttribute('disabled', '');
+    deleteCancelButton.setAttribute('disabled', '');
+
+    try {
+      const response = await fetch('/api/delete-account', {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Account deleted — redirect to homepage
+        window.location.href = '/?account-deleted=true';
+        return;
+      }
+
+      const data = await response.json();
+      // Close dialog and show error on the page
+      deleteConfirmDialog.hide();
+      deleteErrorMessage.textContent =
+        data.error ||
+        'There was a problem deleting your account. Please try again.';
+      deleteError.hidden = false;
+      deleteError.focus();
+    } catch {
+      deleteConfirmDialog.hide();
+      deleteErrorMessage.textContent =
+        'There was a problem deleting your account. Please try again.';
+      deleteError.hidden = false;
+      deleteError.focus();
+    } finally {
+      deleteConfirmButton.removeAttribute('loading');
+      deleteConfirmButton.removeAttribute('disabled');
+      deleteCancelButton.removeAttribute('disabled');
+    }
+  });
 </script>
