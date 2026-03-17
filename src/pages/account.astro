@@ -351,11 +351,15 @@ const isEmailUser = provider === 'email';
     'dialog-delete-error-message'
   ) as HTMLElement;
 
+  // Track a pending page-level error to show after the dialog fully closes
+  let pendingPageError: string | null = null;
+
   // Open the confirmation dialog
   deleteAccountButton?.addEventListener('click', () => {
     deleteError.hidden = true;
-    deleteConfirmInput.value = '';
-    dialogDeleteError.hidden = true;
+    pendingPageError = null;
+    if (deleteConfirmInput) deleteConfirmInput.value = '';
+    if (dialogDeleteError) dialogDeleteError.hidden = true;
     deleteConfirmDialog.show();
   });
 
@@ -364,24 +368,42 @@ const isEmailUser = provider === 'email';
     deleteConfirmDialog.hide();
   });
 
-  // Reset dialog state when it closes
+  // Reset dialog state when it closes; show any pending page error
   deleteConfirmDialog?.addEventListener('wa-after-hide', () => {
-    deleteConfirmInput.value = '';
-    dialogDeleteError.hidden = true;
-    deleteConfirmButton.removeAttribute('loading');
-    deleteConfirmButton.removeAttribute('disabled');
+    if (deleteConfirmInput) deleteConfirmInput.value = '';
+    if (dialogDeleteError) dialogDeleteError.hidden = true;
+    if (deleteConfirmButton) {
+      deleteConfirmButton.removeAttribute('loading');
+      deleteConfirmButton.removeAttribute('disabled');
+    }
+    if (deleteCancelButton) {
+      deleteCancelButton.removeAttribute('disabled');
+    }
+
+    // Show page-level error after dialog has fully closed
+    if (pendingPageError) {
+      deleteErrorMessage.textContent = pendingPageError;
+      deleteError.hidden = false;
+      deleteError.focus();
+      pendingPageError = null;
+    }
   });
 
   // Confirm deletion
   deleteConfirmButton?.addEventListener('click', async () => {
-    dialogDeleteError.hidden = true;
+    if (dialogDeleteError) dialogDeleteError.hidden = true;
 
     // Validate the confirmation input
-    if (deleteConfirmInput.value.trim() !== 'DELETE') {
-      dialogDeleteErrorMessage.textContent =
-        'Please type DELETE to confirm account deletion.';
-      dialogDeleteError.hidden = false;
-      dialogDeleteError.focus();
+    const value = deleteConfirmInput?.value?.trim() ?? '';
+    if (value !== 'DELETE') {
+      if (dialogDeleteErrorMessage) {
+        dialogDeleteErrorMessage.textContent =
+          'Please type DELETE to confirm account deletion.';
+      }
+      if (dialogDeleteError) {
+        dialogDeleteError.hidden = false;
+        dialogDeleteError.focus();
+      }
       return;
     }
 
@@ -400,24 +422,22 @@ const isEmailUser = provider === 'email';
         return;
       }
 
-      const data = await response.json();
-      // Close dialog and show error on the page
-      deleteConfirmDialog.hide();
-      deleteErrorMessage.textContent =
-        data.error ||
+      let message =
         'There was a problem deleting your account. Please try again.';
-      deleteError.hidden = false;
-      deleteError.focus();
+      try {
+        const data = await response.json();
+        if (data.error) message = data.error;
+      } catch {
+        // Response wasn't JSON — use default message
+      }
+
+      // Queue the error to display after the dialog closes
+      pendingPageError = message;
+      deleteConfirmDialog.hide();
     } catch {
-      deleteConfirmDialog.hide();
-      deleteErrorMessage.textContent =
+      pendingPageError =
         'There was a problem deleting your account. Please try again.';
-      deleteError.hidden = false;
-      deleteError.focus();
-    } finally {
-      deleteConfirmButton.removeAttribute('loading');
-      deleteConfirmButton.removeAttribute('disabled');
-      deleteCancelButton.removeAttribute('disabled');
+      deleteConfirmDialog.hide();
     }
   });
 </script>
