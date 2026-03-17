@@ -165,28 +165,30 @@ const isEmailUser = provider === 'email';
         </wa-button>
 
         <wa-dialog id="delete-confirm-dialog" label="Delete your account">
-          <p>
-            This will <strong>permanently delete</strong> your account and all associated
-            data. This action cannot be undone.
-          </p>
+          <div class="wa-stack">
+            <p>
+              This will <strong>permanently delete</strong> your account and all associated
+              data. This action cannot be undone.
+            </p>
 
-          <p id="delete-confirm-hint">
-            Type <strong>DELETE</strong> below to confirm.
-          </p>
+            <p id="delete-confirm-hint">
+              Type <strong>DELETE</strong> below to confirm.
+            </p>
 
-          <wa-input
-            id="delete-confirm-input"
-            label="Confirmation"
-            placeholder="Type DELETE to confirm"
-            aria-describedby="delete-confirm-hint"></wa-input>
+            <wa-input
+              id="delete-confirm-input"
+              label="Confirmation"
+              placeholder="Type DELETE to confirm"
+              aria-describedby="delete-confirm-hint"></wa-input>
 
-          <div id="dialog-delete-error-region" role="alert">
-            <wa-callout id="dialog-delete-error" variant="danger" hidden>
-              <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-              <span id="dialog-delete-error-message"
-                >Please type DELETE to confirm.</span
-              >
-            </wa-callout>
+            <div id="dialog-delete-error-region" role="alert">
+              <wa-callout id="dialog-delete-error" variant="danger" hidden>
+                <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+                <span id="dialog-delete-error-message"
+                  >Please type DELETE to confirm.</span
+                >
+              </wa-callout>
+            </div>
           </div>
 
           <wa-button
