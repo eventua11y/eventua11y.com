@@ -41,6 +41,10 @@
       "type": "remote",
       "url": "https://mcp.supabase.com/mcp?project_ref=btzgjrkejhurcgmpaqzy",
       "oauth": {}
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@latest"]
     }
   }
 }
