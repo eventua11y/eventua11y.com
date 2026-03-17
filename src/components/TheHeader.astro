@@ -36,13 +36,25 @@ const user = Astro.locals.user;
       </nav>
       {
         user ? (
-          <a
-            href="/account"
-            class="masthead__account-link"
-            aria-label="Your account"
-          >
-            <wa-icon name="circle-user" label="Your account" />
-          </a>
+          <wa-dropdown id="account-menu" placement="bottom-end" distance="3">
+            <wa-button
+              slot="trigger"
+              variant="brand"
+              appearance="plain"
+              aria-label="Your account"
+            >
+              <wa-icon name="circle-user" label="Your account" />
+            </wa-button>
+            <wa-dropdown-item value="settings">
+              <wa-icon slot="start" name="gear" />
+              Settings
+            </wa-dropdown-item>
+            <wa-divider />
+            <wa-dropdown-item value="logout">
+              <wa-icon slot="start" name="arrow-right-from-bracket" />
+              Log out
+            </wa-dropdown-item>
+          </wa-dropdown>
         ) : (
           <a href="/login" class="masthead__account-link" aria-label="Log in">
             <wa-icon name="arrow-right-to-bracket" label="Log in" />

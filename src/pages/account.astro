@@ -175,12 +175,6 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
 
         <wa-divider></wa-divider>
 
-        <wa-button id="log-out-button" appearance="outlined" variant="danger">
-          Log out
-        </wa-button>
-
-        <wa-divider></wa-divider>
-
         <h2 class="wa-heading-m">Delete account</h2>
 
         <p>
@@ -418,14 +412,6 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
       if (newPasswordInput) newPasswordInput.value = '';
     }
   });
-
-  // Log out
-  document
-    .getElementById('log-out-button')
-    ?.addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      window.location.href = '/login?logged-out=true';
-    });
 
   // Delete account
   const deleteAccountButton = document.getElementById(
