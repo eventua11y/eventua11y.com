@@ -37,6 +37,15 @@ When creating or updating GitHub issues or pull requests, you **must** apply app
 | `Epic`           | The issue is a parent tracking issue for a larger initiative         |
 | `Social`         | The change relates to social media or Open Graph metadata            |
 
+## Fixed Development Ports
+
+This project uses **fixed, non-negotiable ports** for local development:
+
+- **Port 4117**: Netlify CLI dev proxy (the port you visit in the browser)
+- **Port 4321**: Astro upstream dev server (proxied by Netlify CLI)
+
+Both ports are configured with strict enforcement — the server will **error and exit** rather than silently switching to an alternative port. **Never** pass `--port` flags, change port numbers in configuration files, or suggest alternative ports. If a port conflict occurs, identify and stop whatever process is occupying the port instead.
+
 ## Accessibility Testing
 
 This project uses a two-layer accessibility testing strategy in `tests/accessibility.spec.ts`:
