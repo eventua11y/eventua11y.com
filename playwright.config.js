@@ -24,7 +24,7 @@ export default defineConfig({
 
   use: {
     // Base URL to use in actions like `await page.goto('/')`.
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4117',
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:8888',
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
@@ -49,7 +49,7 @@ export default defineConfig({
   webServer: !process.env.PLAYWRIGHT_TEST_BASE_URL
     ? {
         command: 'netlify dev',
-        port: 4117,
+        port: 8888,
         reuseExistingServer: !process.env.CI,
       }
     : undefined,

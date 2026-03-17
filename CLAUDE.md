@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run dev` - Start development server with watch mode for formatting and linting
 - `npm start` - Start Astro development server only
 - `astro dev` - Direct Astro development server (upstream, runs on port 4321)
-- `netlify dev` - Run with Netlify edge functions (proxies to Astro, accessible on port 4117)
+- `netlify dev` - Run with Netlify edge functions (proxies to Astro, accessible on port 8888)
 
 ### Building and Deployment
 
@@ -28,7 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `npm test` or `npx playwright test` - Run all Playwright tests
 - `npm run test:ui` or `npx playwright test --ui` - Run tests in interactive UI mode
-- Tests run against `http://localhost:4117` by default (Netlify dev server)
+- Tests run against `http://localhost:8888` by default (Netlify dev server)
 - Set `PLAYWRIGHT_TEST_BASE_URL` environment variable to test against different URL
 
 ## Architecture Overview
@@ -129,10 +129,10 @@ When adding new pages or interactive components, add both layers:
 
 This project uses **fixed, non-negotiable ports** for local development:
 
-- **Port 4117**: Netlify CLI dev proxy (the port you visit in the browser)
+- **Port 8888**: Netlify CLI dev proxy (the port you visit in the browser at `http://localhost:8888`)
 - **Port 4321**: Astro upstream dev server (proxied by Netlify CLI)
 
-Both are configured with strict port enforcement — the server will **error and exit** rather than silently switching to an alternative port. This ensures a predictable development environment. Do not pass `--port` flags, change port values in config files, or suggest alternative ports if a port conflict occurs. Instead, identify and stop whatever is occupying the port.
+Both Netlify and Astro are configured with strict port enforcement — the server will **error and exit** rather than silently switching to an alternative port. This ensures a predictable development environment. Do not pass `--port` flags, change port values in config files, or suggest alternative ports if a port conflict occurs. Instead, identify and stop whatever is occupying the port.
 
 ### Browser Support
 

@@ -12,6 +12,9 @@ const { SENTRY_AUTH_TOKEN } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 export default defineConfig({
   site: 'https://eventua11y.com',
   adapter: netlify(),
+  server: {
+    allowedHosts: ['.ts.net'],
+  },
   vite: {
     server: {
       strictPort: true,
