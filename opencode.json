@@ -39,7 +39,7 @@
     },
     "supabase": {
       "type": "remote",
-      "url": "https://mcp.supabase.com/mcp?read_only=true",
+      "url": "https://mcp.supabase.com/mcp?project_ref=btzgjrkejhurcgmpaqzy",
       "oauth": {}
     }
   }
