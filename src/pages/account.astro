@@ -236,6 +236,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
             slot="footer"
             id="delete-cancel-button"
             appearance="outlined"
+            data-dialog="close"
           >
             Cancel
           </wa-button>
@@ -463,11 +464,6 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
     if (deleteConfirmInput) deleteConfirmInput.value = '';
     if (dialogDeleteError) dialogDeleteError.hidden = true;
     deleteConfirmDialog.show();
-  });
-
-  // Cancel closes the dialog
-  deleteCancelButton?.addEventListener('click', () => {
-    deleteConfirmDialog.hide();
   });
 
   // Reset dialog state when it closes; show any pending page error
