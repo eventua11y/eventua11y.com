@@ -19,11 +19,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
       context.cookies
     );
 
+    // Use getSession() instead of getUser() to avoid a network request to
+    // Supabase on every SSR page load. getSession() reads the JWT from
+    // cookies locally, which is sufficient for UI display (e.g. showing a
+    // login vs account link in the header). Pages that need *verified* auth
+    // (like /account and /api/delete-account) call getUser() themselves.
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    context.locals.user = user;
+    context.locals.user = session?.user ?? null;
   } catch {
     // If auth fails (e.g. during prerendering), continue without user
   }
