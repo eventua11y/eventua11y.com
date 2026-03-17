@@ -447,7 +447,8 @@ test.describe('Signup page accessibility', () => {
   });
 
   test('link to login page exists', async ({ page }) => {
-    const loginLink = page.getByRole('link', { name: /Log in/i });
+    const main = page.getByRole('main');
+    const loginLink = main.getByRole('link', { name: /Log in/i });
     await expect(loginLink).toBeVisible();
     await expect(loginLink).toHaveAttribute('href', '/login');
   });
