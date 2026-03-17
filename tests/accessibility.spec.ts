@@ -565,6 +565,51 @@ test.describe('Reset password page accessibility', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Resend confirmation page (/resend-confirmation)
+// ---------------------------------------------------------------------------
+test.describe('Resend confirmation page accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/resend-confirmation');
+  });
+
+  test('has no WCAG 2.2 AA violations', async ({ page }) => {
+    const results = await runAxeScan(page);
+    expect(results.violations).toEqual([]);
+  });
+
+  test('page has correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Resend confirmation email.*Eventua11y/);
+  });
+
+  test('main landmark is present', async ({ page }) => {
+    await expect(page.getByRole('main')).toBeVisible();
+  });
+
+  test('h1 heading is visible', async ({ page }) => {
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toBeVisible();
+    await expect(h1).toHaveAccessibleName('Resend confirmation email');
+  });
+
+  test('email input has accessible label', async ({ page }) => {
+    const emailInput = page.locator('wa-input#email');
+    await expect(emailInput).toHaveAttribute('label', 'Email');
+  });
+
+  test('link back to login page exists', async ({ page }) => {
+    const main = page.getByRole('main');
+    const loginLink = main.getByRole('link', { name: /Back to log in/i });
+    await expect(loginLink).toBeVisible();
+    await expect(loginLink).toHaveAttribute('href', '/login');
+  });
+
+  test('banner and contentinfo landmarks are present', async ({ page }) => {
+    await expect(page.getByRole('banner')).toBeVisible();
+    await expect(page.getByRole('contentinfo')).toBeVisible();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Shared component assertions (tested on homepage where all components load)
 // ---------------------------------------------------------------------------
 test.describe('Shared component accessibility', () => {
@@ -640,6 +685,7 @@ const pages = [
   { name: 'Signup', path: '/signup' },
   { name: 'Forgot Password', path: '/forgot-password' },
   { name: 'Reset Password', path: '/reset-password' },
+  { name: 'Resend Confirmation', path: '/resend-confirmation' },
 ];
 
 for (const colorScheme of ['light', 'dark'] as const) {

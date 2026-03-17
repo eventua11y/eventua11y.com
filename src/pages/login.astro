@@ -126,7 +126,12 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
     });
 
     if (error) {
-      loginErrorMessage.textContent = 'Invalid email or password.';
+      if (error.message === 'Email not confirmed') {
+        loginErrorMessage.innerHTML =
+          'Your email address has not been confirmed. Please check your inbox or <a href="/resend-confirmation">resend the confirmation email</a>.';
+      } else {
+        loginErrorMessage.textContent = 'Invalid email or password.';
+      }
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
       loginError.focus();
