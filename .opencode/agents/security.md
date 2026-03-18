@@ -57,6 +57,7 @@ You are the Security specialist for Eventua11y, an Astro 6 SSR site hosted on Ne
 - Mutable API endpoints (POST, PUT, DELETE) must have CSRF protection. The preferred pattern for this project is Origin header validation: compare the request's `Origin` header against the expected origin derived from `request.url`.
 - For destructive operations (e.g. account deletion), require explicit confirmation in the request body as defense-in-depth (e.g. `{ "confirm": "DELETE" }`).
 - Verify that client-side `fetch()` calls to mutable endpoints set `Content-Type: application/json` — this ensures the browser sends the `Origin` header (non-simple request).
+
 ### Content injection
 
 - Sanity Portable Text is rendered via `astro-portabletext`. Verify the serialisers don't insert raw HTML from CMS content without sanitisation.
