@@ -154,7 +154,7 @@ test.describe('Signup page', () => {
     const errorCallout = page.locator('#signup-error');
     await expect(errorCallout).toBeVisible();
     await expect(page.locator('#signup-error-message')).toHaveText(
-      'Password must be at least 6 characters.'
+      'Password must be at least 8 characters.'
     );
   });
 
@@ -286,7 +286,7 @@ test.describe('Reset password page', () => {
     const errorCallout = page.locator('#reset-error');
     await expect(errorCallout).toBeVisible();
     await expect(page.locator('#reset-error-message')).toHaveText(
-      'Password must be at least 6 characters.'
+      'Password must be at least 8 characters.'
     );
   });
 

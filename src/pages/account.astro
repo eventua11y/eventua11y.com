@@ -150,11 +150,11 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
                 type="password"
                 autocomplete="new-password"
                 password-toggle
-                minlength="6"
+                minlength="8"
                 aria-describedby="password-hint"
               />
               <p id="password-hint" class="wa-text-s wa-text-muted">
-                Must be at least 6 characters.
+                Must be at least 8 characters.
               </p>
               <wa-button id="save-password" type="button">
                 Update password
@@ -403,10 +403,10 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
 
     const password = newPasswordInput?.value;
 
-    if (!password || password.length < 6) {
+    if (!password || password.length < 8) {
       if (passwordErrorMessage)
         passwordErrorMessage.textContent =
-          'Password must be at least 6 characters.';
+          'Password must be at least 8 characters.';
       if (passwordError) {
         passwordError.hidden = false;
         passwordError.focus();

@@ -35,7 +35,7 @@ if (Astro.locals.user) {
               password-toggle
               aria-describedby="password-hint"></wa-input>
             <p id="password-hint" class="wa-text-s wa-text-muted">
-              Must be at least 6 characters.
+              Must be at least 8 characters.
             </p>
             <wa-button id="signup-button" type="submit"
               >Create account</wa-button
@@ -181,9 +181,9 @@ if (Astro.locals.user) {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       signupErrorMessage.textContent =
-        'Password must be at least 6 characters.';
+        'Password must be at least 8 characters.';
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
       signupError.focus();
