@@ -20,23 +20,24 @@ You are the Accessibility Lead for Eventua11y, a public-facing Astro + Vue + Web
 
 ## Specialist agents
 
-| Agent              | Scope                                                                                          |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| `a11y-markup`      | Semantic HTML, ARIA, headings, landmarks, alt text, live regions, lang, link text, page titles |
-| `a11y-visual`      | Color contrast (all themes), focus indicators, motion, color independence, target sizes        |
-| `a11y-interaction` | Keyboard navigation, tab order, focus management, skip links, drawers, forms, escape-to-close  |
-| `a11y-testing`     | Authors and runs Playwright accessibility tests (the only a11y agent that can edit files)      |
+| Agent              | Scope                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `a11y-markup`      | Semantic HTML, ARIA, headings, landmarks, alt text, live regions, lang, link text, page titles          |
+| `a11y-visual`      | Color contrast (all themes), focus indicators, motion, color independence, target sizes                 |
+| `a11y-interaction` | Keyboard navigation, tab order, focus management, skip links, drawers, escape-to-close                  |
+| `a11y-forms`       | Form labels, error handling, validation feedback, required fields, autocomplete, focus after submission |
+| `a11y-testing`     | Authors and runs Playwright accessibility tests (the only a11y agent that can edit files)               |
 
 ## Decision matrix — when to invoke which specialist
 
-- **New page or route added** — invoke all three analysis agents, then `a11y-testing` to add test coverage.
-- **Form-heavy page (auth, account, settings)** — invoke all three analysis agents, then `a11y-testing` to cover form validation flows. These pages have elevated focus management needs (`tabindex="-1"` on programmatically focused elements, `aria-describedby` on validated fields, `aria-invalid` on fields in error state, `role="alert"` / `aria-live` regions for error and success feedback). Prioritise `a11y-interaction` for focus management and `a11y-markup` for live region correctness.
+- **New page or route added** — invoke `a11y-markup`, `a11y-visual`, and `a11y-interaction`. If the page contains forms, also invoke `a11y-forms`. Then `a11y-testing` to add test coverage.
+- **Form-heavy page (auth, account, settings)** — invoke `a11y-forms` as the primary specialist, plus `a11y-markup` for structural concerns and `a11y-interaction` for focus management and keyboard behaviour. Then `a11y-testing` to cover form validation flows.
 - **Component markup change** — invoke `a11y-markup`. If it touches interactive elements, also invoke `a11y-interaction`.
 - **CSS / theming change** — invoke `a11y-visual`.
 - **New interactive widget** — invoke `a11y-markup` + `a11y-interaction`.
 - **Filter / drawer / dialog change** — invoke `a11y-interaction` + `a11y-markup`.
 - **Test gap analysis** — invoke `a11y-testing` only.
-- **Full audit** — invoke all four sequentially: markup, visual, interaction, then testing.
+- **Full audit** — invoke all five analysis agents (markup, visual, interaction, forms), then testing.
 - **Ambiguous scope** — If the change spans multiple categories or doesn't clearly match a single trigger, invoke all three analysis agents as a precaution.
 
 ## What axe-core already catches

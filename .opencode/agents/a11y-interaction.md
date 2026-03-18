@@ -43,12 +43,6 @@ Review these concerns against WCAG 2.2 Level AA:
   - Background content is inert.
   - Focus returns to trigger on close.
 
-### Form accessibility (1.3.1, 3.3.2, 4.1.2)
-
-- All form controls (`wa-select`, `wa-radio-group`, `wa-switch`, `wa-input`) must have visible, associated labels.
-- Error messages must be programmatically associated and announced.
-- Required fields must be indicated both visually and programmatically.
-
 ### Touch / pointer (2.5.1, 2.5.2)
 
 - No functionality requires multi-point or path-based gestures.
