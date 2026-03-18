@@ -91,12 +91,14 @@ if (Astro.locals.user) {
     isSubmitting = true;
     resendError.hidden = true;
     resendSuccess.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
     resendButton.setAttribute('loading', '');
 
     const email = emailInput.value;
 
     if (!email) {
       resendErrorMessage.textContent = 'Please enter your email address.';
+      emailInput.setAttribute('aria-invalid', 'true');
       resendError.hidden = false;
       resendButton.removeAttribute('loading');
       emailInput.focus();

@@ -111,6 +111,8 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
     if (isSubmitting) return;
     isSubmitting = true;
     loginError.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
+    passwordInput.removeAttribute('aria-invalid');
     loginButton.setAttribute('loading', '');
 
     const email = emailInput.value;
@@ -118,6 +120,8 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
 
     if (!email || !password) {
       loginErrorMessage.textContent = 'Please enter your email and password.';
+      emailInput.setAttribute('aria-invalid', 'true');
+      passwordInput.setAttribute('aria-invalid', 'true');
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
       loginError.focus();
@@ -144,6 +148,8 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
       } else {
         loginErrorMessage.textContent = 'Invalid email or password.';
       }
+      emailInput.setAttribute('aria-invalid', 'true');
+      passwordInput.setAttribute('aria-invalid', 'true');
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
       loginError.focus();

@@ -171,6 +171,8 @@ if (Astro.locals.user) {
     if (isSubmitting) return;
     isSubmitting = true;
     signupError.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
+    passwordInput.removeAttribute('aria-invalid');
     signupButton.setAttribute('loading', '');
 
     const email = emailInput.value;
@@ -178,6 +180,8 @@ if (Astro.locals.user) {
 
     if (!email || !password) {
       signupErrorMessage.textContent = 'Please enter your email and password.';
+      emailInput.setAttribute('aria-invalid', 'true');
+      passwordInput.setAttribute('aria-invalid', 'true');
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
       signupError.focus();
@@ -188,6 +192,7 @@ if (Astro.locals.user) {
     if (password.length < 8) {
       signupErrorMessage.textContent =
         'Password must be at least 8 characters.';
+      passwordInput.setAttribute('aria-invalid', 'true');
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
       signupError.focus();
@@ -216,6 +221,8 @@ if (Astro.locals.user) {
     if (error) {
       signupErrorMessage.textContent =
         'There was a problem creating your account. Please try again.';
+      emailInput.setAttribute('aria-invalid', 'true');
+      passwordInput.setAttribute('aria-invalid', 'true');
       signupError.hidden = false;
       signupButton.removeAttribute('loading');
       signupError.focus();

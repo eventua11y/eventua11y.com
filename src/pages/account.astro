@@ -290,6 +290,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
   saveEmailButton?.addEventListener('click', async () => {
     if (emailSuccess) emailSuccess.hidden = true;
     if (emailError) emailError.hidden = true;
+    newEmailInput?.removeAttribute('aria-invalid');
     saveEmailButton?.setAttribute('loading', '');
 
     const email = newEmailInput?.value?.trim();
@@ -297,6 +298,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
     if (!email) {
       if (emailErrorMessage)
         emailErrorMessage.textContent = 'Please enter a new email address.';
+      newEmailInput?.setAttribute('aria-invalid', 'true');
       if (emailError) {
         emailError.hidden = false;
         emailError.focus();
@@ -351,6 +353,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
   savePasswordButton?.addEventListener('click', async () => {
     if (passwordSuccess) passwordSuccess.hidden = true;
     if (passwordError) passwordError.hidden = true;
+    newPasswordInput?.removeAttribute('aria-invalid');
     savePasswordButton?.setAttribute('loading', '');
 
     const password = newPasswordInput?.value;
@@ -359,6 +362,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
       if (passwordErrorMessage)
         passwordErrorMessage.textContent =
           'Password must be at least 8 characters.';
+      newPasswordInput?.setAttribute('aria-invalid', 'true');
       if (passwordError) {
         passwordError.hidden = false;
         passwordError.focus();
@@ -451,6 +455,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
   // Confirm deletion
   deleteConfirmButton?.addEventListener('click', async () => {
     if (dialogDeleteError) dialogDeleteError.hidden = true;
+    deleteConfirmInput?.removeAttribute('aria-invalid');
 
     // Validate the confirmation input
     const value = deleteConfirmInput?.value?.trim() ?? '';
@@ -459,6 +464,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
         dialogDeleteErrorMessage.textContent =
           'Please type DELETE to confirm account deletion.';
       }
+      deleteConfirmInput?.setAttribute('aria-invalid', 'true');
       if (dialogDeleteError) {
         dialogDeleteError.hidden = false;
         dialogDeleteError.focus();
