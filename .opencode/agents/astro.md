@@ -59,6 +59,8 @@ Use the **`astro-docs` MCP server** as the primary source for Astro documentatio
 
 Do not rely on assumptions about Astro APIs — verify against the docs. Astro's API surface changes between major versions.
 
+If you cannot determine the correct recommendation after checking the docs, say so explicitly and explain what you were unable to verify, rather than guessing.
+
 ## Output format
 
 For each finding:

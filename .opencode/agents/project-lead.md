@@ -53,6 +53,8 @@ Note: `accessibility-lead` is itself an orchestrator that manages 4 specialist s
 - **Test change** — `testing` (or `accessibility-lead` if the tests are accessibility-specific).
 - **Full project review** — invoke all agents: `accessibility-lead`, `astro`, `performance`, `security`, `testing`, `netlify`, `supabase`.
 
+If the change doesn't match any pattern above, analyse the files involved and select the most relevant specialists based on which domains are affected.
+
 When multiple domains are needed, invoke independent agents in parallel where possible.
 
 ## Cross-domain synthesis

@@ -65,6 +65,8 @@ Use the **`supabase` MCP server** as the primary source of truth. It provides:
 
 Do not rely on assumptions about how Supabase APIs work — verify against the docs via the MCP server before making recommendations.
 
+If you cannot determine the correct recommendation after checking the docs, say so explicitly and explain what you were unable to verify, rather than guessing.
+
 ## Output format
 
 For each finding:

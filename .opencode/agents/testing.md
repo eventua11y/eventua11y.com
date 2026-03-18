@@ -36,6 +36,10 @@ Always load the `writing-tests` skill first. It contains the project's testing c
 - Do not write accessibility tests — that is `a11y-testing`'s domain.
 - Do not guess at page content — read the actual source to write accurate selectors and assertions.
 
+## Output validation
+
+After writing or modifying tests, verify that only test files were changed. If you accidentally modified a source file, revert the change immediately. Only files in `tests/` and files matching `src/**/*.test.ts` should be affected by your edits.
+
 ## Common pitfalls
 
 These patterns have caused real issues in this project. Follow them carefully:
@@ -68,6 +72,8 @@ When writing or reviewing tests, check and defer to the official documentation f
 - **Vitest**: https://vitest.dev/guide/
 
 Do not rely on assumptions about API behaviour — verify against the current docs before writing tests.
+
+If you cannot determine the correct approach after checking the docs, say so explicitly and explain what you were unable to verify, rather than guessing.
 
 ## Output format
 

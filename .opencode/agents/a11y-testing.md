@@ -34,6 +34,10 @@ Always load the `writing-a11y-tests` skill first. It contains the project's exac
 - Do not create tests that duplicate what axe-core already catches. axe runs on every page via `runAxeScan()` and catches: missing alt, duplicate IDs, color contrast, form labels, ARIA validity, lang, headings, landmarks.
 - Do not guess at page content — read the actual page/component source to write accurate selectors.
 
+## Output validation
+
+After writing or modifying tests, verify that only test files were changed. If you accidentally modified a source file, revert the change immediately. Only files in `tests/` should be affected by your edits.
+
 ## Test structure conventions
 
 - Tests are grouped in `test.describe()` blocks per page/feature.
@@ -60,6 +64,8 @@ When writing accessibility tests, check and defer to the official documentation:
 - **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
 
 Do not rely on assumptions about what axe-core catches or how Playwright assertions work — verify against the current docs.
+
+If you cannot determine the correct approach after checking the docs, say so explicitly and explain what you were unable to verify, rather than guessing.
 
 ## Output format
 

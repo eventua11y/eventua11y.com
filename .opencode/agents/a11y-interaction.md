@@ -80,6 +80,8 @@ When reviewing interaction accessibility, check and defer to the official specif
 
 Do not rely on assumptions about keyboard interaction patterns — defer to the APG and the WCAG specification.
 
+If you cannot determine the correct recommendation after checking the specs, say so explicitly and explain what you were unable to verify, rather than guessing.
+
 ## Output format
 
 For each finding:

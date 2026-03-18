@@ -75,6 +75,8 @@ For web security standards:
 
 Do not rely on assumptions about how a library or API works — verify against the current docs before making recommendations.
 
+If you cannot determine the correct recommendation after checking the docs, say so explicitly and explain what you were unable to verify, rather than guessing.
+
 ## Output format
 
 For each finding:

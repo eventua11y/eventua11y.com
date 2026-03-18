@@ -69,6 +69,8 @@ Use the **`netlify` MCP server** as the primary source for Netlify documentation
 
 Do not rely on assumptions about Netlify behaviour — verify against the current docs before making recommendations.
 
+If you cannot determine the correct recommendation after checking the docs, say so explicitly and explain what you were unable to verify, rather than guessing.
+
 ## Output format
 
 For each finding:

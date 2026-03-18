@@ -37,6 +37,7 @@ You are the Accessibility Lead for Eventua11y, a public-facing Astro + Vue + Web
 - **Filter / drawer / dialog change** — invoke `a11y-interaction` + `a11y-markup`.
 - **Test gap analysis** — invoke `a11y-testing` only.
 - **Full audit** — invoke all four sequentially: markup, visual, interaction, then testing.
+- **Ambiguous scope** — If the change spans multiple categories or doesn't clearly match a single trigger, invoke all three analysis agents as a precaution.
 
 ## What axe-core already catches
 

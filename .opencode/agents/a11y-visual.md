@@ -57,6 +57,8 @@ When reviewing visual accessibility, check and defer to the official specificati
 
 Do not rely on assumptions about contrast ratios or WCAG thresholds — defer to the specification.
 
+If you cannot determine the correct recommendation after checking the specs, say so explicitly and explain what you were unable to verify, rather than guessing.
+
 ## Output format
 
 For each finding:
