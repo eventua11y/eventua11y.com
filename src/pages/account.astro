@@ -60,34 +60,16 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
       <div class="wa-stack">
         <h1 class="wa-heading-l">Your account</h1>
 
-        <div id="update-success-region" role="status" aria-live="polite">
-          {
-            emailChanged && (
+        {
+          emailChanged && (
+            <div role="status" aria-live="polite">
               <wa-callout id="email-changed-success" variant="success">
                 <wa-icon slot="icon" name="circle-check" />
                 Your email address has been updated.
               </wa-callout>
-            )
-          }
-          <wa-callout
-            id="update-success"
-            variant="success"
-            hidden
-            tabindex="-1"
-          >
-            <wa-icon slot="icon" name="circle-check"></wa-icon>
-            Your profile has been updated.
-          </wa-callout>
-        </div>
-
-        <div id="update-error-region" role="alert">
-          <wa-callout id="update-error" variant="danger" hidden tabindex="-1">
-            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
-            <span id="update-error-message"
-              >There was a problem updating your profile.</span
-            >
-          </wa-callout>
-        </div>
+            </div>
+          )
+        }
 
         {
           avatarUrl && (
@@ -287,53 +269,6 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
   import { createSupabaseBrowserClient } from '../lib/supabase/client';
 
   const supabase = createSupabaseBrowserClient();
-
-  // Profile update callouts
-  const updateSuccess = document.getElementById(
-    'update-success'
-  ) as HTMLElement;
-  const updateError = document.getElementById('update-error') as HTMLElement;
-  const updateErrorMessage = document.getElementById(
-    'update-error-message'
-  ) as HTMLElement;
-
-  // Save display name
-  const nameInput = document.getElementById(
-    'display-name'
-  ) as HTMLInputElement & { value: string };
-  const saveNameButton = document.getElementById('save-name') as HTMLElement;
-
-  saveNameButton?.addEventListener('click', async () => {
-    updateSuccess.hidden = true;
-    updateError.hidden = true;
-    saveNameButton.setAttribute('loading', '');
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      window.location.href = '/login';
-      return;
-    }
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ display_name: nameInput.value })
-      .eq('id', user.id);
-
-    saveNameButton.removeAttribute('loading');
-
-    if (error) {
-      updateErrorMessage.textContent =
-        'There was a problem updating your profile.';
-      updateError.hidden = false;
-      updateError.focus();
-    } else {
-      updateSuccess.hidden = false;
-      updateSuccess.focus();
-    }
-  });
 
   // Email change
   const newEmailInput = document.getElementById('new-email') as
