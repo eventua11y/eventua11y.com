@@ -167,11 +167,9 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
                 autocomplete="new-password"
                 password-toggle
                 minlength="8"
-                aria-describedby="password-hint"
-              />
-              <p id="password-hint" class="wa-text-s wa-text-muted">
-                Must be at least 8 characters.
-              </p>
+              >
+                <span slot="hint">Must be at least 8 characters.</span>
+              </wa-input>
               <wa-button id="save-password" type="button">
                 Update password
               </wa-button>
@@ -240,7 +238,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
               data. This action cannot be undone.
             </p>
 
-            <p id="delete-confirm-hint">
+            <p>
               Type <strong>DELETE</strong> below to confirm.
             </p>
 
@@ -248,7 +246,10 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
               id="delete-confirm-input"
               label="Confirmation"
               placeholder="Type DELETE to confirm"
-              aria-describedby="delete-confirm-hint"></wa-input>
+              ><span slot="hint"
+                >Type DELETE to confirm account deletion.</span
+              ></wa-input
+            >
 
             <div id="dialog-delete-error-region" role="alert">
               <wa-callout

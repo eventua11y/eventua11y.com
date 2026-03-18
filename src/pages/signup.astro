@@ -33,10 +33,9 @@ if (Astro.locals.user) {
               required
               autocomplete="new-password"
               password-toggle
-              aria-describedby="password-hint"></wa-input>
-            <p id="password-hint" class="wa-text-s wa-text-muted">
-              Must be at least 8 characters.
-            </p>
+              ><span slot="hint">Must be at least 8 characters.</span
+              ></wa-input
+            >
             <wa-button id="signup-button" type="submit"
               >Create account</wa-button
             >

@@ -546,9 +546,10 @@ test.describe('Reset password page accessibility', () => {
   });
 
   test('password requirements are visible', async ({ page }) => {
-    const hint = page.locator('#password-hint');
-    await expect(hint).toBeVisible();
-    await expect(hint).toContainText('at least 8 characters');
+    const passwordInput = page.locator('wa-input#new-password');
+    await expect(passwordInput.locator('[slot="hint"]')).toContainText(
+      'at least 8 characters'
+    );
   });
 
   test('link back to login page exists', async ({ page }) => {
