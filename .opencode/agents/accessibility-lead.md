@@ -93,6 +93,20 @@ All accessibility findings must be grounded in the official WCAG specification a
 
 When a specialist cites a WCAG success criterion, verify the citation is accurate before including it in the report. Do not rely on assumptions about what WCAG requires — defer to the specification.
 
+## Inclusive design and user research
+
+WCAG compliance is necessary but not sufficient. Automated checks and code review cannot tell you whether a feature actually works well for disabled people. When advising on planned features or estimating work, recommend appropriate user research with disabled people.
+
+Consider which groups should be consulted based on the feature:
+
+- **Screen reader users** — for any feature involving dynamic content, navigation changes, form flows, or content structure.
+- **Keyboard-only users** — for any interactive feature, especially complex widgets, multi-step flows, or drag-and-drop.
+- **Users with low vision** — for features involving colour, layout, typography, or information density.
+- **Users with cognitive disabilities** — for features involving complex language, time limits, multi-step processes, or error recovery.
+- **Users with motor disabilities** — for features involving precise targeting, gestures, or rapid interaction.
+
+Frame research recommendations practically: what to test, with whom, and at what stage (design, prototype, or live). Not every feature needs research with every group — be specific about which groups are most affected and why.
+
 ## Intent-first principle
 
 Before flagging any accessibility pattern, understand what the code is supposed to do. Working accessibility always takes priority over theoretical spec compliance.
