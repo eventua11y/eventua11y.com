@@ -13,10 +13,16 @@ declare namespace App {
 interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_URL: string;
   readonly PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
-  /** Server-only: Supabase service role key for admin operations (e.g. account deletion). */
-  readonly SUPABASE_SERVICE_ROLE_KEY: string;
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
+}
+
+// Server-only env vars accessed via process.env at runtime (not import.meta.env).
+// Declared here for documentation; these are NOT available client-side.
+declare namespace NodeJS {
+  interface ProcessEnv {
+    SUPABASE_SERVICE_ROLE_KEY?: string;
+  }
 }
