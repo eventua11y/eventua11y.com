@@ -6,11 +6,21 @@ Instructions for AI agents and subagents working in this repository.
 
 This project has a team of specialist agents configured in `.opencode/agents/` and reusable skills in `.opencode/skills/`. The team is structured as:
 
-- **`project-lead`** (primary agent) — Routes review requests to domain specialists. Use Tab to switch to it in OpenCode, or invoke with `@project-lead`.
-- **`accessibility-lead`** — Orchestrates the accessibility sub-team (`a11y-markup`, `a11y-visual`, `a11y-interaction`, `a11y-testing`).
+- **`project-lead`** — Coordinates the specialist team. Use Tab to switch to it in OpenCode, or invoke with `@project-lead`.
+- **`accessibility-lead`** — Orchestrates the accessibility sub-team (`a11y-markup`, `a11y-visual`, `a11y-interaction`, `a11y-forms`, `a11y-testing`).
 - **Domain specialists** — `astro`, `performance`, `security`, `testing`, `netlify`, `supabase`.
 
 All analysis agents are read-only. Only `a11y-testing` and `testing` can edit files (test files only).
+
+### When to invoke agents
+
+Agents support five modes — **audit**, **advise**, **estimate**, **diagnose**, and **answer** — and should be invoked at appropriate workflow moments:
+
+- **Planning a feature or change** — invoke agents to **advise** on risks and recommend approaches, and to **estimate** effort, complexity, and priority before work begins.
+- **Reviewing code, PRs, or branches** — invoke agents to **audit** for issues in their domain.
+- **Investigating a bug or regression** — invoke agents to **diagnose** the problem in their area of expertise.
+- **Asking a question** — invoke agents to **answer** domain-specific questions (e.g. "does this need ARIA?", "will this break caching?", "is this RLS policy correct?").
+- **Before merging** — invoke the `project-lead` for a cross-domain review to catch issues that span multiple specialist areas.
 
 ## GitHub Labels
 
