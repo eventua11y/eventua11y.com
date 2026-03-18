@@ -30,7 +30,7 @@ You are the Accessibility Lead for Eventua11y, a public-facing Astro + Vue + Web
 ## Decision matrix — when to invoke which specialist
 
 - **New page or route added** — invoke all three analysis agents, then `a11y-testing` to add test coverage.
-- **Form-heavy page (auth, account, settings)** — invoke all three analysis agents. These pages have elevated focus management needs (`tabindex="-1"` on programmatically focused elements, `aria-describedby` on validated fields, `role="alert"` / `aria-live` regions for error and success feedback). Prioritise `a11y-interaction` for focus management and `a11y-markup` for live region correctness.
+- **Form-heavy page (auth, account, settings)** — invoke all three analysis agents, then `a11y-testing` to cover form validation flows. These pages have elevated focus management needs (`tabindex="-1"` on programmatically focused elements, `aria-describedby` on validated fields, `aria-invalid` on fields in error state, `role="alert"` / `aria-live` regions for error and success feedback). Prioritise `a11y-interaction` for focus management and `a11y-markup` for live region correctness.
 - **Component markup change** — invoke `a11y-markup`. If it touches interactive elements, also invoke `a11y-interaction`.
 - **CSS / theming change** — invoke `a11y-visual`.
 - **New interactive widget** — invoke `a11y-markup` + `a11y-interaction`.

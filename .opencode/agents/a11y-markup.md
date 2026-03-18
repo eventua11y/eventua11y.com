@@ -41,6 +41,7 @@ This project uses `wa-*` web components (Web Awesome 3) with shadow DOM. Load th
 When reviewing markup and semantics, check and defer to the official specifications:
 
 - **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
+- **WAI-ARIA 1.2**: https://www.w3.org/TR/wai-aria-1.2/
 - **ARIA in HTML**: https://www.w3.org/TR/html-aria/
 - **ARIA Authoring Practices Guide**: https://www.w3.org/WAI/ARIA/apg/
 - **HTML spec (elements)**: https://html.spec.whatwg.org/multipage/

@@ -59,11 +59,9 @@ You are the Performance specialist for Eventua11y, an Astro 6 SSR site with Vue 
 
 ## Authoritative references
 
-When reviewing performance concerns, check and defer to the official documentation:
+Use the **`astro-docs` MCP server** for Astro-specific performance guidance (islands, client directives, hydration). Use the **`netlify` MCP server** for caching and CDN behaviour.
 
 - **Web Vitals**: https://web.dev/articles/vitals
-- **Astro performance**: https://docs.astro.build/en/concepts/islands/
-- **Netlify caching**: https://docs.netlify.com/platform/caching/
 
 Do not rely on assumptions about framework behaviour — verify against the current docs before making recommendations.
 

@@ -74,8 +74,9 @@ When reviewing interaction accessibility, check and defer to the official specif
 - **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
 - **ARIA Authoring Practices Guide (patterns)**: https://www.w3.org/WAI/ARIA/apg/patterns/
 - **Understanding 2.1.1 Keyboard**: https://www.w3.org/WAI/WCAG22/Understanding/keyboard
+- **Understanding 2.1.2 No Keyboard Trap**: https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap
 - **Understanding 2.4.3 Focus Order**: https://www.w3.org/WAI/WCAG22/Understanding/focus-order
-- **Understanding 2.4.11 Focus Not Obscured**: https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum
+- **Understanding 2.4.7 Focus Visible**: https://www.w3.org/WAI/WCAG22/Understanding/focus-visible
 
 Do not rely on assumptions about keyboard interaction patterns — defer to the APG and the WCAG specification.
 

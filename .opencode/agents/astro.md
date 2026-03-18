@@ -23,14 +23,14 @@ Review these concerns:
 
 ### SSR and rendering
 
-- Pages that don't need per-request data should consider `prerender = true` for static generation.
+- Pages that don't need per-request data should opt into static generation where possible. Check the Astro docs for the current prerendering API.
 - Server-side data fetching should happen in the frontmatter fence, not in client-side components.
 - Avoid importing server-only modules (Sanity client, env vars) in client-side component code.
 
 ### Component boundaries
 
 - Astro components for static content and server logic; Vue components only when client-side interactivity is needed.
-- Vue components should use `client:load` only if they need to be interactive immediately. Consider `client:visible` or `client:idle` for below-the-fold content.
+- Vue components should only hydrate eagerly if they need to be interactive immediately. Check the Astro docs for current client directive options and when to use each.
 - Avoid passing large data objects as component props — serialise only what the component needs.
 
 ### Routing and pages
@@ -46,14 +46,18 @@ Review these concerns:
 
 ### Environment variables
 
-- Use `import.meta.env` for environment variables in Astro.
-- Public variables must be prefixed with `PUBLIC_` to be available client-side.
+- Check the Astro docs for the current environment variable API and public/private prefix conventions.
 - Server-only variables (Sanity tokens, Sentry DSN) must never be exposed to client bundles.
 
-### Astro 6 conventions
+### Astro conventions
 
-- Use the Astro docs MCP server for up-to-date guidance on Astro 6 features and APIs.
-- Content collections, if adopted, should follow the Astro 6 content layer API.
+- Always verify Astro API usage against the `astro-docs` MCP server. Do not assume API specifics from previous versions still apply.
+
+## Authoritative references
+
+Use the **`astro-docs` MCP server** as the primary source for Astro documentation. It provides up-to-date docs for the current Astro version. Query it before making recommendations about Astro APIs, configuration, or conventions.
+
+Do not rely on assumptions about Astro APIs — verify against the docs. Astro's API surface changes between major versions.
 
 ## Output format
 

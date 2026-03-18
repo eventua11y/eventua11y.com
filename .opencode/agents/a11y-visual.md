@@ -52,6 +52,7 @@ When reviewing visual accessibility, check and defer to the official specificati
 - **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
 - **Understanding 1.4.3 Contrast (Minimum)**: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum
 - **Understanding 1.4.11 Non-text Contrast**: https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast
+- **Understanding 2.4.7 Focus Visible**: https://www.w3.org/WAI/WCAG22/Understanding/focus-visible
 - **Understanding 2.5.8 Target Size (Minimum)**: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum
 
 Do not rely on assumptions about contrast ratios or WCAG thresholds — defer to the specification.

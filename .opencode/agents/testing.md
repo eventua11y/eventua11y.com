@@ -43,7 +43,7 @@ These patterns have caused real issues in this project. Follow them carefully:
 - **Register `page.route()` mocks before `page.goto()`** — The Supabase client initialises during page load and may fire auth requests (token refresh, session check) immediately. If mocks are registered after navigation, these requests go un-intercepted and can cause flaky failures. Always register route mocks before navigating.
 - **Always `waitForSelector` in `beforeEach`** — After `page.goto()`, wait for the primary content element (e.g. `#login-form`, `#signup-form`) to be present. This guards against Web Awesome custom element hydration timing and follows the project convention.
 - **Mock adjacent endpoints** — When testing auth flows, the Supabase client may also call non-auth endpoints (e.g. `**/rest/v1/profiles**` after signup to migrate preferences). Mock these too to prevent stray network requests.
-- **Use `page.unroute()` before overriding mocks** — If `beforeEach` registers a default mock and a test needs a different response, call `page.unroute('**/auth/v1/**')` before registering the new mock. Playwright stacks route handlers, so without unrouting the old handler may still fire.
+- **Use `page.unroute()` before overriding mocks** — If `beforeEach` registers a default mock and a test needs a different response, call `page.unroute('**/auth/v1/**')` before registering the new mock. Playwright stacks route handlers (newest first). Without unrouting, the old handler remains registered and could fire if the new handler uses `route.fallback()`, or if URL pattern matching differs. Unrouting keeps the handler list clean and avoids ambiguity.
 
 ## Running tests
 
