@@ -25,7 +25,43 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  // 2. Create an admin client with the service role key
+  // 2. CSRF mitigation — verify the Origin header matches this site.
+  //    Browsers always send the Origin header on DELETE requests (they are
+  //    not "simple" requests), and it cannot be spoofed by cross-origin JS.
+  const origin = request.headers.get('Origin');
+  const expectedOrigin = new URL(request.url).origin;
+
+  if (!origin || origin !== expectedOrigin) {
+    return new Response(
+      JSON.stringify({ error: 'Invalid or missing Origin header' }),
+      {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
+  // 3. Defense-in-depth — require explicit confirmation in the request body
+  let body: { confirm?: string } | null = null;
+  try {
+    body = await request.json();
+  } catch {
+    // invalid or missing JSON body
+  }
+
+  if (!body || body.confirm !== 'DELETE') {
+    return new Response(
+      JSON.stringify({
+        error: 'Missing or invalid confirmation. Send { "confirm": "DELETE" } in the request body.',
+      }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
+  // 4. Create an admin client with the service role key
   //    Use process.env for the service role key because non-PUBLIC_ vars are
   //    only statically replaced from .env files at build time — they won't be
   //    available via import.meta.env when set as Netlify runtime env vars.
@@ -49,7 +85,7 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // 3. Delete the user via the Admin API
+  // 5. Delete the user via the Admin API
   const { error } = await adminClient.auth.admin.deleteUser(user.id);
 
   if (error) {
@@ -65,7 +101,7 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     );
   }
 
-  // 4. Sign out to clear cookies
+  // 6. Sign out to clear cookies
   await supabase.auth.signOut();
 
   return new Response(JSON.stringify({ success: true }), {

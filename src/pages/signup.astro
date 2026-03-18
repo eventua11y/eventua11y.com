@@ -42,7 +42,7 @@ if (Astro.locals.user) {
             >
 
             <div id="signup-error-region" role="alert">
-              <wa-callout id="signup-error" variant="danger" hidden>
+              <wa-callout id="signup-error" variant="danger" hidden tabindex="-1">
                 <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
                 <span id="signup-error-message"
                   >There was a problem creating your account.</span
@@ -75,7 +75,7 @@ if (Astro.locals.user) {
         </div>
 
         <div id="signup-success-region" role="status" aria-live="polite">
-          <div id="signup-success" class="wa-stack" hidden>
+          <div id="signup-success" class="wa-stack" hidden tabindex="-1">
             <wa-callout variant="success">
               <wa-icon slot="icon" name="circle-check"></wa-icon>
               <strong>Check your email</strong><br />

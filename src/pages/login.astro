@@ -58,7 +58,7 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
         </p>
 
         <div id="login-error-region" role="alert">
-          <wa-callout id="login-error" variant="danger" hidden>
+          <wa-callout id="login-error" variant="danger" hidden tabindex="-1">
             <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
             <span id="login-error-message">Invalid email or password.</span>
           </wa-callout>

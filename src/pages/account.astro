@@ -53,14 +53,14 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
               </wa-callout>
             )
           }
-          <wa-callout id="update-success" variant="success" hidden>
+          <wa-callout id="update-success" variant="success" hidden tabindex="-1">
             <wa-icon slot="icon" name="circle-check"></wa-icon>
             Your profile has been updated.
           </wa-callout>
         </div>
 
         <div id="update-error-region" role="alert">
-          <wa-callout id="update-error" variant="danger" hidden>
+          <wa-callout id="update-error" variant="danger" hidden tabindex="-1">
             <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
             <span id="update-error-message"
               >There was a problem updating your profile.</span
@@ -123,7 +123,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
                 Update email
               </wa-button>
               <div id="email-success-region" role="status" aria-live="polite">
-                <wa-callout id="email-success" variant="success" hidden>
+                <wa-callout id="email-success" variant="success" hidden tabindex="-1">
                   <wa-icon slot="icon" name="circle-check" />
                   <span id="email-success-message">
                     Check your new email address for a confirmation link.
@@ -131,7 +131,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
                 </wa-callout>
               </div>
               <div id="email-error-region" role="alert">
-                <wa-callout id="email-error" variant="danger" hidden>
+                <wa-callout id="email-error" variant="danger" hidden tabindex="-1">
                   <wa-icon slot="icon" name="circle-exclamation" />
                   <span id="email-error-message">
                     There was a problem updating your email.
@@ -156,13 +156,13 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
                 role="status"
                 aria-live="polite"
               >
-                <wa-callout id="password-success" variant="success" hidden>
+                <wa-callout id="password-success" variant="success" hidden tabindex="-1">
                   <wa-icon slot="icon" name="circle-check" />
                   Your password has been updated.
                 </wa-callout>
               </div>
               <div id="password-error-region" role="alert">
-                <wa-callout id="password-error" variant="danger" hidden>
+                <wa-callout id="password-error" variant="danger" hidden tabindex="-1">
                   <wa-icon slot="icon" name="circle-exclamation" />
                   <span id="password-error-message">
                     There was a problem updating your password.
@@ -183,7 +183,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
         </p>
 
         <div id="delete-error-region" role="alert">
-          <wa-callout id="delete-error" variant="danger" hidden>
+          <wa-callout id="delete-error" variant="danger" hidden tabindex="-1">
             <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
             <span id="delete-error-message"
               >There was a problem deleting your account.</span
@@ -217,7 +217,7 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
               aria-describedby="delete-confirm-hint"></wa-input>
 
             <div id="dialog-delete-error-region" role="alert">
-              <wa-callout id="dialog-delete-error" variant="danger" hidden>
+              <wa-callout id="dialog-delete-error" variant="danger" hidden tabindex="-1">
                 <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
                 <span id="dialog-delete-error-message"
                   >Please type DELETE to confirm.</span
@@ -498,6 +498,8 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
     try {
       const response = await fetch('/api/delete-account', {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: 'DELETE' }),
       });
 
       if (response.ok) {

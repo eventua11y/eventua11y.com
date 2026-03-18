@@ -35,7 +35,7 @@ if (Astro.locals.user) {
         >
 
         <div id="resend-error-region" role="alert">
-          <wa-callout id="resend-error" variant="danger" hidden>
+          <wa-callout id="resend-error" variant="danger" hidden tabindex="-1">
             <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
             <span id="resend-error-message"
               >There was a problem sending the confirmation email.</span
@@ -44,7 +44,7 @@ if (Astro.locals.user) {
         </div>
 
         <div id="resend-success-region" role="status" aria-live="polite">
-          <wa-callout id="resend-success" variant="success" hidden>
+          <wa-callout id="resend-success" variant="success" hidden tabindex="-1">
             <wa-icon slot="icon" name="circle-check"></wa-icon>
             <strong>Check your email</strong><br />
             If an account exists with that email address and has not yet been confirmed,

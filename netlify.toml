@@ -6,6 +6,17 @@
 # Each function exports its own config with the path, so no explicit
 # [[edge_functions]] entries are needed here.
 
+# Global security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://cdn.sanity.io data:; connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+
 # Immutable caching for hashed Astro assets (JS, CSS)
 [[headers]]
   for = "/_astro/*"
