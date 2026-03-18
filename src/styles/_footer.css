@@ -1,5 +1,5 @@
 #global-footer {
-  --c-color-focus-ring: currentColor;
+  --c-focus-ring-color: currentColor;
 
   background: var(--c-footer-color-bg);
   color: var(--p-color-grey-200);
