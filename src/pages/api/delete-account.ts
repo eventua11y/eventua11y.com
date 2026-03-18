@@ -52,7 +52,8 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
   if (!body || body.confirm !== 'DELETE') {
     return new Response(
       JSON.stringify({
-        error: 'Missing or invalid confirmation. Send { "confirm": "DELETE" } in the request body.',
+        error:
+          'Missing or invalid confirmation. Send { "confirm": "DELETE" } in the request body.',
       }),
       {
         status: 400,

@@ -39,7 +39,11 @@ async function mockSupabaseAuth(
  * navigate to the given path. This ensures any auth requests fired
  * during page initialisation are safely intercepted.
  */
-async function gotoWithAuthMock(page: Page, path: string, formSelector: string) {
+async function gotoWithAuthMock(
+  page: Page,
+  path: string,
+  formSelector: string
+) {
   await mockSupabaseAuth(page, { data: { session: null } });
   await page.goto(path);
   await page.waitForSelector(formSelector);
@@ -183,7 +187,9 @@ test.describe('Signup page', () => {
     await expect(successCallout).toContainText('Check your email');
   });
 
-  test('hides form fields and shows success region after signup', async ({ page }) => {
+  test('hides form fields and shows success region after signup', async ({
+    page,
+  }) => {
     await page.unroute('**/auth/v1/**');
     await mockSupabaseAuth(page, {
       user: {
@@ -212,7 +218,9 @@ test.describe('Signup page', () => {
     await expect(page.locator('#signup-success')).toBeVisible();
   });
 
-  test('has error region with role="alert" and success region with role="status"', async ({ page }) => {
+  test('has error region with role="alert" and success region with role="status"', async ({
+    page,
+  }) => {
     const errorRegion = page.locator('#signup-error-region');
     await expect(errorRegion).toHaveAttribute('role', 'alert');
 
@@ -251,7 +259,9 @@ test.describe('Forgot password page', () => {
     await expect(successCallout).toContainText('Check your email');
   });
 
-  test('has error region with role="alert" and success region with aria-live="polite"', async ({ page }) => {
+  test('has error region with role="alert" and success region with aria-live="polite"', async ({
+    page,
+  }) => {
     const errorRegion = page.locator('#forgot-error-region');
     await expect(errorRegion).toHaveAttribute('role', 'alert');
 
@@ -280,7 +290,9 @@ test.describe('Reset password page', () => {
     );
   });
 
-  test('has error region with role="alert" and success region with aria-live="polite"', async ({ page }) => {
+  test('has error region with role="alert" and success region with aria-live="polite"', async ({
+    page,
+  }) => {
     const errorRegion = page.locator('#reset-error-region');
     await expect(errorRegion).toHaveAttribute('role', 'alert');
 
@@ -319,7 +331,9 @@ test.describe('Resend confirmation page', () => {
     await expect(successCallout).toContainText('Check your email');
   });
 
-  test('has error region with role="alert" and success region with aria-live="polite"', async ({ page }) => {
+  test('has error region with role="alert" and success region with aria-live="polite"', async ({
+    page,
+  }) => {
     const errorRegion = page.locator('#resend-error-region');
     await expect(errorRegion).toHaveAttribute('role', 'alert');
 

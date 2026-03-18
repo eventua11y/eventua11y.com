@@ -44,7 +44,12 @@ if (Astro.locals.user) {
         </div>
 
         <div id="resend-success-region" role="status" aria-live="polite">
-          <wa-callout id="resend-success" variant="success" hidden tabindex="-1">
+          <wa-callout
+            id="resend-success"
+            variant="success"
+            hidden
+            tabindex="-1"
+          >
             <wa-icon slot="icon" name="circle-check"></wa-icon>
             <strong>Check your email</strong><br />
             If an account exists with that email address and has not yet been confirmed,
