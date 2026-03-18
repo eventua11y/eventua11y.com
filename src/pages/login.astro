@@ -104,8 +104,12 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
     'login-error-message'
   ) as HTMLElement;
 
+  let isSubmitting = false;
+
   form?.addEventListener('submit', async (e: Event) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
     loginError.hidden = true;
     loginButton.setAttribute('loading', '');
 
@@ -117,6 +121,7 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
       loginError.focus();
+      isSubmitting = false;
       return;
     }
 
@@ -142,6 +147,7 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
       loginError.hidden = false;
       loginButton.removeAttribute('loading');
       loginError.focus();
+      isSubmitting = false;
     } else {
       window.location.href = '/account';
     }

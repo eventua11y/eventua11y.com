@@ -83,8 +83,12 @@ if (Astro.locals.user) {
     'resend-success'
   ) as HTMLElement;
 
+  let isSubmitting = false;
+
   form?.addEventListener('submit', async (e: Event) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
     resendError.hidden = true;
     resendSuccess.hidden = true;
     resendButton.setAttribute('loading', '');
@@ -96,6 +100,7 @@ if (Astro.locals.user) {
       resendError.hidden = false;
       resendButton.removeAttribute('loading');
       emailInput.focus();
+      isSubmitting = false;
       return;
     }
 
@@ -119,5 +124,6 @@ if (Astro.locals.user) {
       resendSuccess.hidden = false;
       resendSuccess.focus();
     }
+    isSubmitting = false;
   });
 </script>
