@@ -2,6 +2,16 @@
 
 Instructions for AI agents and subagents working in this repository.
 
+## OpenCode Agent Team
+
+This project has a team of specialist agents configured in `.opencode/agents/` and reusable skills in `.opencode/skills/`. The team is structured as:
+
+- **`project-lead`** (primary agent) — Routes review requests to domain specialists. Use Tab to switch to it in OpenCode, or invoke with `@project-lead`.
+- **`accessibility-lead`** — Orchestrates the accessibility sub-team (`a11y-markup`, `a11y-visual`, `a11y-interaction`, `a11y-testing`).
+- **Domain specialists** — `astro`, `performance`, `security`, `testing`, `netlify`, `supabase`.
+
+All analysis agents are read-only. Only `a11y-testing` and `testing` can edit files (test files only).
+
 ## GitHub Labels
 
 When creating or updating GitHub issues or pull requests, you **must** apply appropriate labels. Never create an issue or PR without at least one label.
@@ -37,6 +47,13 @@ When creating or updating GitHub issues or pull requests, you **must** apply app
 | `Epic`           | The issue is a parent tracking issue for a larger initiative         |
 | `Social`         | The change relates to social media or Open Graph metadata            |
 
+### Labeling Rules
+
+1. Apply **at least one** label to every issue and PR.
+2. Use **multiple labels** when relevant (e.g. a bug fix for date filtering should get `bug`, `dates`, and `filtering`).
+3. For PRs, match labels to the nature of the code change, not just the linked issue.
+4. When in doubt about whether a label applies, include it — over-labeling is better than under-labeling.
+
 ## Fixed Development Ports
 
 This project uses **fixed, non-negotiable ports** for local development:
@@ -50,15 +67,10 @@ Both ports are configured with strict enforcement — the server will **error an
 
 This project uses a two-layer accessibility testing strategy in `tests/accessibility.spec.ts`:
 
-1. **axe-core scans** on every page as a foundation, scoped to WCAG 2.2 Level AA. These catch a broad range of automated violations.
+1. **axe-core scans** on every page as a foundation, scoped to WCAG 2.2 Level AA.
 2. **Playwright assertions** on top for things axe cannot catch: accessible names on interactive elements, landmark structure, heading hierarchy, `aria-current` navigation state, `aria-live` regions, and `lang` attribute.
 
-When adding new pages or interactive components, add both layers:
-
-- An axe scan for the new page using the shared `runAxeScan()` helper
-- Targeted assertions for any interactive elements, landmarks, or headings
-
-**Web component shadow DOM caveat:** Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For Web Awesome buttons (`wa-button`), assert on the host element attribute (`label`, `aria-label`) or text content instead. For icon-only buttons, check the child `wa-icon`'s `label` attribute. The axe scan validates the actual computed accessible name.
+When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-a11y-tests` OpenCode skill in `.opencode/skills/writing-a11y-tests/SKILL.md`.
 
 ## GROQ Query Projections
 
@@ -77,15 +89,8 @@ This project has two Sanity datasets: **`production`** and **`test`**.
 - All test or dummy documents **must** be created in the **`test`** dataset.
 - When using Sanity MCP tools, always verify the `dataset` parameter before any write operation. If the data is for testing, experimentation, or development, set the dataset to `test`.
 
-### Sub-Issues
+## Sub-Issues for Epics
 
 When creating an `Epic` issue with child tasks, add the child issues as **sub-issues** using the GitHub GraphQL API rather than listing them manually in the epic body. GitHub renders sub-issues natively with progress tracking.
 
 Do **not** duplicate the sub-issue list in the epic's body text — the native sub-issues view is the source of truth.
-
-### Labeling Rules
-
-1. Apply **at least one** label to every issue and PR.
-2. Use **multiple labels** when relevant (e.g. a bug fix for date filtering should get `bug`, `dates`, and `filtering`).
-3. For PRs, match labels to the nature of the code change, not just the linked issue.
-4. When in doubt about whether a label applies, include it -- over-labeling is better than under-labeling.
