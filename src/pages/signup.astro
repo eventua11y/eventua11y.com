@@ -190,11 +190,21 @@ if (Astro.locals.user) {
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    // Collect preferences to pass as user_metadata during signup.
+    // These are stored in the auth user record and synced to the
+    // profiles table on first authenticated page load (account page).
+    const preferences = collectPreferences();
+    const metadata: Record<string, unknown> = {};
+    if (Object.keys(preferences).length > 0) {
+      metadata.preferences = preferences;
+    }
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: metadata,
       },
     });
 
@@ -205,17 +215,6 @@ if (Astro.locals.user) {
       signupButton.removeAttribute('loading');
       signupError.focus();
     } else {
-      // Migrate localStorage preferences to the new profile
-      if (data.user) {
-        const preferences = collectPreferences();
-        if (Object.keys(preferences).length > 0) {
-          await supabase
-            .from('profiles')
-            .update({ preferences })
-            .eq('id', data.user.id);
-        }
-      }
-
       // Show success message
       formFields.hidden = true;
       signupSuccess.hidden = false;

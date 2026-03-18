@@ -26,6 +26,22 @@ const { data: profile } = await supabase
   .eq('id', user.id)
   .single();
 
+// Sync preferences from user_metadata to profile on first login.
+// Preferences are stored in user_metadata during signup (before email
+// confirmation) and migrated here where we have a verified session.
+const metaPrefs = user.user_metadata?.preferences;
+if (
+  metaPrefs &&
+  typeof metaPrefs === 'object' &&
+  Object.keys(metaPrefs).length > 0 &&
+  (!profile?.preferences || Object.keys(profile.preferences).length === 0)
+) {
+  await supabase
+    .from('profiles')
+    .update({ preferences: metaPrefs })
+    .eq('id', user.id);
+}
+
 const displayName =
   profile?.display_name ||
   user.user_metadata?.full_name ||
