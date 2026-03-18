@@ -15,7 +15,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://cdn.sanity.io data:; connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.usefathom.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://cdn.sanity.io https://avatars.githubusercontent.com https://media.licdn.com data:; connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://cdn.usefathom.com; form-action 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
 
 # Immutable caching for hashed Astro assets (JS, CSS)
 [[headers]]
