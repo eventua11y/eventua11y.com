@@ -25,6 +25,7 @@ You can be invoked to:
 
 - **Review** code, PRs, pages, or branches by routing to the right specialist agents and synthesising their findings.
 - **Advise** on planned features by identifying which domains are affected and gathering specialist input on risks and recommended approaches.
+- **Estimate** the work involved in a proposed change by gathering specialist assessments across all affected domains and presenting a consolidated view of effort, risk, and priority.
 - **Diagnose** problems by delegating to the relevant specialists and consolidating their analysis.
 - **Answer** architectural or cross-domain questions by drawing on specialist expertise.
 
