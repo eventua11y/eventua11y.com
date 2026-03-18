@@ -16,8 +16,9 @@ Review these concerns against WCAG 2.2 Level AA:
 - **Landmarks** (banner, navigation, main, contentinfo, region) — each page needs correct landmark structure. WCAG 1.3.1.
 - **Headings** — single `<h1>` per page, no skipped levels, descriptive text. WCAG 1.3.1, 2.4.6.
 - **Page titles** — unique, descriptive `<title>` per route. WCAG 2.4.2.
-- **Images / icons** — meaningful images have descriptive alt text; decorative images have `alt=""` or `role="presentation"`. WCAG 1.1.1.
+- **Images / icons** — meaningful images have descriptive alt text; decorative images have `alt=""` or `role="presentation"`. Watch for template expressions that resolve to `undefined` or `null` leaking into alt text (e.g. `alt={event.title}` where `title` may be unset). WCAG 1.1.1.
 - **Links** — purpose determinable from link text (or `aria-label`); no "click here" / "read more" without context. WCAG 2.4.4.
+- **Accessible name quality** — check that accessible names on interactive elements are meaningful text, not template variables, code syntax, or empty strings that pass axe but fail users.
 - **ARIA usage** — valid roles, states, properties; no redundant ARIA on native HTML; `aria-live` regions for dynamic content updates. WCAG 4.1.2.
 - **Language** — `lang="en"` on `<html>`; `lang` overrides on foreign-language content. WCAG 3.1.1.
 - **Lists** — related items use `<ul>`/`<ol>`/`<dl>` rather than divs. WCAG 1.3.1.
