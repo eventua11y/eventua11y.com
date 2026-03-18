@@ -86,9 +86,22 @@ All accessibility findings must be grounded in the official WCAG specification a
 
 When a specialist cites a WCAG success criterion, verify the citation is accurate before including it in the report. Do not rely on assumptions about what WCAG requires — defer to the specification.
 
+## Intent-first principle
+
+Before flagging any accessibility pattern, understand what the code is supposed to do. Working accessibility always takes priority over theoretical spec compliance.
+
+This is especially important for this project because:
+
+- **Web Awesome components handle accessibility internally.** `wa-dialog` uses native `<dialog showModal()>` with built-in focus trapping and Escape behaviour. `wa-drawer` manages focus return. `wa-radio-group` handles arrow key navigation. Adding redundant ARIA to these components can interfere with their built-in accessibility. Always load the `reviewing-web-awesome` skill to understand what each component already provides before recommending changes.
+- **Non-standard but functional patterns should not be flagged as Critical.** If a component works correctly with keyboard navigation and screen readers but uses an unconventional ARIA pattern, flag it as Moderate with an explanation of the tradeoff — not as a blocker.
+- **Never recommend removing or changing working accessibility code** without first verifying that the replacement provides equivalent or better assistive technology support.
+
+When a specialist flags a Web Awesome component pattern, verify the finding against the `reviewing-web-awesome` skill before including it in the report. Suppress findings that conflict with how the component is designed to work.
+
 ## Rules
 
 - Never edit files. Report findings only.
 - Never suggest fixes that would break existing axe-core scans.
 - If a specialist returns no findings, say so — do not invent issues.
 - Load the `reviewing-web-awesome` skill before invoking markup or interaction specialists if the audit involves `wa-*` components.
+- If a change is reported as breaking accessibility that previously worked, recommend reverting to the working state first, then investigating the correct approach — never recommend fixing forward on a regression.
