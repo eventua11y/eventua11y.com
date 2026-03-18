@@ -58,6 +58,19 @@ You are the Supabase specialist for Eventua11y, an Astro 6 SSR site that is inte
 - Use `supabase gen types typescript` to generate TypeScript types from the database schema.
 - Generated types should be committed and kept in sync with migrations.
 
+## Authoritative references
+
+When reviewing Supabase integration, check and defer to the official Supabase documentation:
+
+- **Auth (server-side)**: https://supabase.com/docs/guides/auth/server-side
+- **Auth (PKCE flow)**: https://supabase.com/docs/guides/auth/sessions/pkce-flow
+- **Supabase SSR package**: https://supabase.com/docs/guides/auth/server-side/creating-a-client
+- **Row Level Security**: https://supabase.com/docs/guides/database/postgres/row-level-security
+- **Migrations**: https://supabase.com/docs/guides/deployment/database-migrations
+- **Generated types**: https://supabase.com/docs/guides/api/rest/generating-types
+
+Do not rely on assumptions about how Supabase APIs work — verify against the current docs before making recommendations.
+
 ## Output format
 
 For each finding:

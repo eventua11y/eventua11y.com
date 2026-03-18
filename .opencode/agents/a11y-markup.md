@@ -36,6 +36,17 @@ This project uses `wa-*` web components (Web Awesome 3) with shadow DOM. Load th
 - `wa-drawer`, `wa-dialog`: require a `label` attribute for the accessible name.
 - `wa-switch`, `wa-radio-group`, `wa-select`: need associated labels.
 
+## Authoritative references
+
+When reviewing markup and semantics, check and defer to the official specifications:
+
+- **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
+- **ARIA in HTML**: https://www.w3.org/TR/html-aria/
+- **ARIA Authoring Practices Guide**: https://www.w3.org/WAI/ARIA/apg/
+- **HTML spec (elements)**: https://html.spec.whatwg.org/multipage/
+
+Do not rely on assumptions about what WCAG or ARIA require — defer to the specification.
+
 ## Output format
 
 For each finding:

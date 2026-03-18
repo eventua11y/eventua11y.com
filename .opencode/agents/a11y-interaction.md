@@ -67,6 +67,18 @@ Load the `reviewing-web-awesome` skill for component-specific interaction patter
 - `wa-switch`: toggled with Space. Check it has an associated label.
 - `wa-radio-group`: navigated with arrow keys. Check group has a label.
 
+## Authoritative references
+
+When reviewing interaction accessibility, check and defer to the official specifications:
+
+- **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
+- **ARIA Authoring Practices Guide (patterns)**: https://www.w3.org/WAI/ARIA/apg/patterns/
+- **Understanding 2.1.1 Keyboard**: https://www.w3.org/WAI/WCAG22/Understanding/keyboard
+- **Understanding 2.4.3 Focus Order**: https://www.w3.org/WAI/WCAG22/Understanding/focus-order
+- **Understanding 2.4.11 Focus Not Obscured**: https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum
+
+Do not rely on assumptions about keyboard interaction patterns — defer to the APG and the WCAG specification.
+
 ## Output format
 
 For each finding:

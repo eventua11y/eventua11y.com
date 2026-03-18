@@ -51,6 +51,16 @@ npx playwright test tests/accessibility.spec.ts
 
 If tests fail, fix the test code (not the source code). Report any genuine accessibility failures to the user.
 
+## Authoritative references
+
+When writing accessibility tests, check and defer to the official documentation:
+
+- **Playwright accessibility testing**: https://playwright.dev/docs/accessibility-testing
+- **axe-core rules**: https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md
+- **WCAG 2.2**: https://www.w3.org/TR/WCAG22/
+
+Do not rely on assumptions about what axe-core catches or how Playwright assertions work — verify against the current docs.
+
 ## Output format
 
 When reporting test coverage gaps:

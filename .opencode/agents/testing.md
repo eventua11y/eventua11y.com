@@ -36,6 +36,15 @@ Always load the `writing-tests` skill first. It contains the project's testing c
 - Do not write accessibility tests — that is `a11y-testing`'s domain.
 - Do not guess at page content — read the actual source to write accurate selectors and assertions.
 
+## Common pitfalls
+
+These patterns have caused real issues in this project. Follow them carefully:
+
+- **Register `page.route()` mocks before `page.goto()`** — The Supabase client initialises during page load and may fire auth requests (token refresh, session check) immediately. If mocks are registered after navigation, these requests go un-intercepted and can cause flaky failures. Always register route mocks before navigating.
+- **Always `waitForSelector` in `beforeEach`** — After `page.goto()`, wait for the primary content element (e.g. `#login-form`, `#signup-form`) to be present. This guards against Web Awesome custom element hydration timing and follows the project convention.
+- **Mock adjacent endpoints** — When testing auth flows, the Supabase client may also call non-auth endpoints (e.g. `**/rest/v1/profiles**` after signup to migrate preferences). Mock these too to prevent stray network requests.
+- **Use `page.unroute()` before overriding mocks** — If `beforeEach` registers a default mock and a test needs a different response, call `page.unroute('**/auth/v1/**')` before registering the new mock. Playwright stacks route handlers, so without unrouting the old handler may still fire.
+
 ## Running tests
 
 ```bash
@@ -48,6 +57,17 @@ npx vitest run
 # Unit tests with coverage
 npx vitest run --coverage
 ```
+
+## Authoritative references
+
+When writing or reviewing tests, check and defer to the official documentation for the test frameworks:
+
+- **Playwright**: https://playwright.dev/docs/intro
+- **Playwright assertions**: https://playwright.dev/docs/test-assertions
+- **Playwright route mocking**: https://playwright.dev/docs/mock
+- **Vitest**: https://vitest.dev/guide/
+
+Do not rely on assumptions about API behaviour — verify against the current docs before writing tests.
 
 ## Output format
 

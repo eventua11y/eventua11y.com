@@ -36,7 +36,15 @@ You are the Netlify & Deployment specialist for Eventua11y, an Astro 6 SSR site 
 
 - Review `netlify.toml` for correct build command, publish directory, and function configuration.
 - Check redirect rules for correctness (status codes, force flags).
-- Verify header rules for security headers (CSP, X-Frame-Options, etc.) and cache headers for static assets.
+- Verify header rules for security headers and cache headers for static assets.
+- CSP baseline expectations — a production CSP should include at minimum:
+  - `default-src 'self'`
+  - `object-src 'none'` (prevent plugin-based attacks)
+  - `base-uri 'self'` (prevent `<base>` tag injection)
+  - `frame-ancestors 'none'` (prevent clickjacking, alongside `X-Frame-Options: DENY`)
+  - Appropriate `connect-src` entries for all external APIs (Supabase, Sentry)
+  - Appropriate `img-src`, `font-src`, `style-src` entries for CDN resources (Sanity, Google Fonts)
+- Other expected security headers: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`.
 
 ### Environment variables
 
@@ -54,6 +62,18 @@ You are the Netlify & Deployment specialist for Eventua11y, an Astro 6 SSR site 
 - Check that the Astro build output is compatible with Netlify's expectations.
 - Verify the publish directory matches between `astro.config.mjs` and `netlify.toml`.
 - Review any deploy-specific headers or redirects.
+
+## Authoritative references
+
+When reviewing Netlify configuration, check and defer to the official Netlify documentation:
+
+- **Headers**: https://docs.netlify.com/routing/headers/
+- **Redirects**: https://docs.netlify.com/routing/redirects/
+- **Edge Functions**: https://docs.netlify.com/edge-functions/overview/
+- **Environment variables**: https://docs.netlify.com/environment-variables/overview/
+- **Build configuration**: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+Do not rely on assumptions about Netlify behaviour — verify against the current docs before making recommendations.
 
 ## Output format
 
