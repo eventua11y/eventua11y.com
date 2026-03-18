@@ -32,3 +32,12 @@
 .auth-page dd {
   margin: 0;
 }
+
+/* Programmatically focused callouts (tabindex="-1") need a visible
+   focus indicator. Use :focus rather than :focus-visible since these
+   receive focus via .focus(), which browsers may not classify as
+   :focus-visible. */
+wa-callout:focus {
+  outline: var(--c-focus-ring-width) solid var(--c-focus-ring-color);
+  outline-offset: var(--c-focus-ring-offset);
+}
