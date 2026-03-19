@@ -1,7 +1,7 @@
 ---
 description: Reviews security concerns including dependency vulnerabilities, environment variable exposure, content security policy, edge function safety, and authentication patterns. Read-only, can run audit commands.
 mode: subagent
-model: anthropic/claude-sonnet-4-20250514
+model: anthropic/claude-opus-4-6
 temperature: 0.1
 steps: 15
 permission:

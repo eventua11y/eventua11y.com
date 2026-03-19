@@ -1,7 +1,7 @@
 ---
 description: Top-level orchestrator that routes review and audit requests to domain specialists across accessibility, Astro, performance, security, testing, Netlify, and Supabase. Read-only — delegates all analysis and implementation to specialist agents.
 mode: primary
-model: anthropic/claude-sonnet-4-20250514
+model: anthropic/claude-sonnet-4-6
 temperature: 0.1
 steps: 25
 color: accent
