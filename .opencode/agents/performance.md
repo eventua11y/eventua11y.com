@@ -1,7 +1,9 @@
 ---
 description: Reviews performance including Core Web Vitals, bundle size, caching strategies, hydration cost, image optimisation, and edge function efficiency. Read-only, can run build and analysis commands.
 mode: subagent
+model: anthropic/claude-sonnet-4-6
 temperature: 0.1
+steps: 15
 permission:
   edit: deny
   bash:

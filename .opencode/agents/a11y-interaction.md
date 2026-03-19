@@ -1,7 +1,9 @@
 ---
 description: Reviews keyboard navigation, tab order, focus management, skip links, drawer/dialog behaviour, forms, and escape-to-close against WCAG 2.2. Read-only.
 mode: subagent
+model: anthropic/claude-opus-4-6
 temperature: 0.1
+steps: 15
 permission:
   edit: deny
   bash: deny
