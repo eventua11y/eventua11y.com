@@ -1,7 +1,9 @@
 ---
 description: Reviews color contrast across themes, focus indicators, motion preferences, color independence, and target sizes against WCAG 2.2. Read-only.
 mode: subagent
+model: anthropic/claude-sonnet-4-20250514
 temperature: 0.1
+steps: 15
 permission:
   edit: deny
   bash: deny

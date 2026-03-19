@@ -1,7 +1,9 @@
 ---
 description: Reviews Netlify deployment configuration, edge functions, redirects, headers, environment setup, and the local development proxy. Read-only, can run Netlify status commands.
 mode: subagent
+model: anthropic/claude-sonnet-4-20250514
 temperature: 0.1
+steps: 15
 permission:
   edit: deny
   bash:

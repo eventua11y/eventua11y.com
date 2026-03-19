@@ -1,7 +1,9 @@
 ---
 description: Authors and runs Playwright E2E tests and Vitest unit tests for non-accessibility concerns. Can edit test files and execute test commands. Load the writing-tests skill before writing tests.
 mode: subagent
+model: anthropic/claude-sonnet-4-20250514
 temperature: 0.1
+steps: 30
 permission:
   edit: allow
   bash:
