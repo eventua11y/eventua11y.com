@@ -208,29 +208,36 @@ if (Astro.locals.user) {
       metadata.preferences = preferences;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: metadata,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: metadata,
+        },
+      });
 
-    if (error) {
+      if (error) {
+        signupErrorMessage.textContent =
+          'There was a problem creating your account. Please try again.';
+        emailInput.setAttribute('aria-invalid', 'true');
+        passwordInput.setAttribute('aria-invalid', 'true');
+        signupError.hidden = false;
+        signupError.focus();
+      } else {
+        // Show success message
+        formFields.hidden = true;
+        signupSuccess.hidden = false;
+        signupSuccess.focus();
+      }
+    } catch {
       signupErrorMessage.textContent =
-        'There was a problem creating your account. Please try again.';
-      emailInput.setAttribute('aria-invalid', 'true');
-      passwordInput.setAttribute('aria-invalid', 'true');
+        'A network error occurred. Please try again.';
       signupError.hidden = false;
-      signupButton.removeAttribute('loading');
       signupError.focus();
-      isSubmitting = false;
-    } else {
-      // Show success message
-      formFields.hidden = true;
-      signupSuccess.hidden = false;
-      signupSuccess.focus();
+    } finally {
+      signupButton.removeAttribute('loading');
       isSubmitting = false;
     }
   });

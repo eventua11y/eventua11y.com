@@ -101,31 +101,38 @@ if (Astro.locals.user) {
       emailInput.setAttribute('aria-invalid', 'true');
       resendError.hidden = false;
       resendButton.removeAttribute('loading');
-      emailInput.focus();
+      resendError.focus();
       isSubmitting = false;
       return;
     }
 
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    resendButton.removeAttribute('loading');
-
-    if (error) {
+      if (error) {
+        resendErrorMessage.textContent =
+          'There was a problem sending the confirmation email. Please try again.';
+        resendError.hidden = false;
+        resendError.focus();
+      } else {
+        // Always show success to prevent email enumeration
+        resendSuccess.hidden = false;
+        resendSuccess.focus();
+      }
+    } catch {
       resendErrorMessage.textContent =
-        'There was a problem sending the confirmation email. Please try again.';
+        'A network error occurred. Please try again.';
       resendError.hidden = false;
       resendError.focus();
-    } else {
-      // Always show success to prevent email enumeration
-      resendSuccess.hidden = false;
-      resendSuccess.focus();
+    } finally {
+      resendButton.removeAttribute('loading');
+      isSubmitting = false;
     }
-    isSubmitting = false;
   });
 </script>

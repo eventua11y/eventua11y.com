@@ -36,10 +36,14 @@ if (
   Object.keys(metaPrefs).length > 0 &&
   (!profile?.preferences || Object.keys(profile.preferences).length === 0)
 ) {
-  await supabase
+  const { error: prefError } = await supabase
     .from('profiles')
     .update({ preferences: metaPrefs })
     .eq('id', user.id);
+
+  if (prefError) {
+    console.error('Failed to migrate preferences:', prefError.message);
+  }
 }
 
 const displayName =
@@ -323,30 +327,40 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
       return;
     }
 
-    const { error } = await supabase.auth.updateUser(
-      { email },
-      {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/account?email-changed=true')}`,
+    try {
+      const { error } = await supabase.auth.updateUser(
+        { email },
+        {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/account?email-changed=true')}`,
+        }
+      );
+
+      if (error) {
+        if (emailErrorMessage)
+          emailErrorMessage.textContent =
+            'There was a problem updating your email address.';
+        if (emailError) {
+          emailError.hidden = false;
+          emailError.focus();
+        }
+      } else {
+        if (emailSuccess) {
+          emailSuccess.hidden = false;
+          emailSuccess.focus();
+        }
+        if (newEmailInput) newEmailInput.value = '';
       }
-    );
-
-    saveEmailButton?.removeAttribute('loading');
-    isEmailSubmitting = false;
-
-    if (error) {
+    } catch {
       if (emailErrorMessage)
         emailErrorMessage.textContent =
-          'There was a problem updating your email address.';
+          'A network error occurred. Please try again.';
       if (emailError) {
         emailError.hidden = false;
         emailError.focus();
       }
-    } else {
-      if (emailSuccess) {
-        emailSuccess.hidden = false;
-        emailSuccess.focus();
-      }
-      if (newEmailInput) newEmailInput.value = '';
+    } finally {
+      saveEmailButton?.removeAttribute('loading');
+      isEmailSubmitting = false;
     }
   });
 
@@ -398,25 +412,35 @@ const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
       return;
     }
 
-    const { error } = await supabase.auth.updateUser({ password });
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
 
-    savePasswordButton?.removeAttribute('loading');
-    isPasswordSubmitting = false;
-
-    if (error) {
+      if (error) {
+        if (passwordErrorMessage)
+          passwordErrorMessage.textContent =
+            'There was a problem updating your password.';
+        if (passwordError) {
+          passwordError.hidden = false;
+          passwordError.focus();
+        }
+      } else {
+        if (passwordSuccess) {
+          passwordSuccess.hidden = false;
+          passwordSuccess.focus();
+        }
+        if (newPasswordInput) newPasswordInput.value = '';
+      }
+    } catch {
       if (passwordErrorMessage)
         passwordErrorMessage.textContent =
-          'There was a problem updating your password.';
+          'A network error occurred. Please try again.';
       if (passwordError) {
         passwordError.hidden = false;
         passwordError.focus();
       }
-    } else {
-      if (passwordSuccess) {
-        passwordSuccess.hidden = false;
-        passwordSuccess.focus();
-      }
-      if (newPasswordInput) newPasswordInput.value = '';
+    } finally {
+      savePasswordButton?.removeAttribute('loading');
+      isPasswordSubmitting = false;
     }
   });
 

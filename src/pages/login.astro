@@ -129,33 +129,41 @@ const loggedOut = Astro.url.searchParams.get('logged-out');
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      if (error.message === 'Email not confirmed') {
-        loginErrorMessage.textContent = '';
-        loginErrorMessage.append(
-          'Your email address has not been confirmed. Please check your inbox or '
-        );
-        const link = document.createElement('a');
-        link.href = '/resend-confirmation';
-        link.textContent = 'resend the confirmation email';
-        loginErrorMessage.appendChild(link);
-        loginErrorMessage.append('.');
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          loginErrorMessage.textContent = '';
+          loginErrorMessage.append(
+            'Your email address has not been confirmed. Please check your inbox or '
+          );
+          const link = document.createElement('a');
+          link.href = '/resend-confirmation';
+          link.textContent = 'resend the confirmation email';
+          loginErrorMessage.appendChild(link);
+          loginErrorMessage.append('.');
+        } else {
+          loginErrorMessage.textContent = 'Invalid email or password.';
+        }
+        emailInput.setAttribute('aria-invalid', 'true');
+        passwordInput.setAttribute('aria-invalid', 'true');
+        loginError.hidden = false;
+        loginError.focus();
       } else {
-        loginErrorMessage.textContent = 'Invalid email or password.';
+        window.location.href = '/account';
       }
-      emailInput.setAttribute('aria-invalid', 'true');
-      passwordInput.setAttribute('aria-invalid', 'true');
+    } catch {
+      loginErrorMessage.textContent =
+        'A network error occurred. Please try again.';
       loginError.hidden = false;
-      loginButton.removeAttribute('loading');
       loginError.focus();
+    } finally {
+      loginButton.removeAttribute('loading');
       isSubmitting = false;
-    } else {
-      window.location.href = '/account';
     }
   });
 
