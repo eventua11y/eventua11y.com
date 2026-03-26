@@ -2,25 +2,20 @@
 
 Instructions for AI agents and subagents working in this repository.
 
-## OpenCode Agent Team
+## Skills
 
-This project has a team of specialist agents configured in `.opencode/agents/` and reusable skills in `.opencode/skills/`. The team is structured as:
+This project uses reusable skills from [mattobee/skills](https://github.com/mattobee/skills), installed in `.opencode/skills/`. Available skills:
 
-- **`project-lead`** — Coordinates the specialist team. Use Tab to switch to it in OpenCode, or invoke with `@project-lead`.
-- **`accessibility-lead`** — Orchestrates the accessibility sub-team (`a11y-markup`, `a11y-visual`, `a11y-interaction`, `a11y-forms`, `a11y-testing`).
-- **Domain specialists** — `astro`, `performance`, `security`, `testing`, `netlify`, `supabase`.
+- **`designing-agent-teams`** — Design and generate multi-agent coding teams.
+- **`estimating-accessibility-effort`** — Estimate effort to remediate accessibility issues.
+- **`fixing-accessibility-issues`** — Fix accessibility issues in implemented UI code.
+- **`predicting-accessibility-risks`** — Identify accessibility risks before implementation.
+- **`prioritising-accessibility-fixes`** — Prioritise accessibility issues for remediation.
+- **`reviewing-accessibility`** — Review implemented UI code for WCAG AA compliance.
+- **`suggesting-next-steps`** — Suggest prioritised next steps based on project state.
+- **`writing-accessibility-tests`** — Write Playwright accessibility tests with axe-core scans and targeted assertions.
 
-All analysis agents are read-only. Only `a11y-testing` and `testing` can edit files (test files only).
-
-### When to invoke agents
-
-Agents support five modes — **audit**, **advise**, **estimate**, **diagnose**, and **answer** — and should be invoked at appropriate workflow moments:
-
-- **Planning a feature or change** — invoke agents to **advise** on risks and recommend approaches, and to **estimate** effort, complexity, and priority before work begins.
-- **Reviewing code, PRs, or branches** — invoke agents to **audit** for issues in their domain.
-- **Investigating a bug or regression** — invoke agents to **diagnose** the problem in their area of expertise.
-- **Asking a question** — invoke agents to **answer** domain-specific questions (e.g. "does this need ARIA?", "will this break caching?", "is this RLS policy correct?").
-- **Before merging** — invoke the `project-lead` for a cross-domain review to catch issues that span multiple specialist areas.
+To update skills: `npx skills update` from `.opencode/`.
 
 ## GitHub Labels
 
@@ -80,7 +75,7 @@ This project uses a two-layer accessibility testing strategy in `tests/accessibi
 1. **axe-core scans** on every page as a foundation, scoped to WCAG 2.2 Level AA.
 2. **Playwright assertions** on top for things axe cannot catch: accessible names on interactive elements, landmark structure, heading hierarchy, `aria-current` navigation state, `aria-live` regions, and `lang` attribute.
 
-When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-a11y-tests` OpenCode skill in `.opencode/skills/writing-a11y-tests/SKILL.md`.
+When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-accessibility-tests` skill in `.opencode/skills/writing-accessibility-tests/SKILL.md`.
 
 ## GROQ Query Projections
 
