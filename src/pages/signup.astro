@@ -1,0 +1,266 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/default.astro';
+
+const title = 'Create an account';
+const description = 'Create an Eventua11y account.';
+
+// If already logged in, redirect to account page
+if (Astro.locals.user) {
+  return Astro.redirect('/account');
+}
+---
+
+<Layout title={title} description={description}>
+  <div class="auth-page">
+    <wa-card>
+      <form id="signup-form" class="wa-stack" novalidate>
+        <h1 class="wa-heading-l">Create an account</h1>
+
+        <div id="signup-form-fields">
+          <div class="wa-stack">
+            <wa-input
+              id="email"
+              label="Email"
+              type="email"
+              required
+              autocomplete="email"></wa-input>
+            <wa-input
+              id="password"
+              label="Password"
+              type="password"
+              required
+              autocomplete="new-password"
+              password-toggle
+              ><span slot="hint">Must be at least 8 characters.</span></wa-input
+            >
+            <wa-button id="signup-button" type="submit"
+              >Create account</wa-button
+            >
+
+            <div id="signup-error-region" role="alert">
+              <wa-callout
+                id="signup-error"
+                variant="danger"
+                hidden
+                tabindex="-1"
+              >
+                <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+                <span id="signup-error-message"
+                  >There was a problem creating your account.</span
+                >
+              </wa-callout>
+            </div>
+
+            <wa-divider></wa-divider>
+
+            <p>Or create an account with:</p>
+            <div class="wa-grid" style="--min-column-size: 12ch;">
+              <wa-button id="github-signup" appearance="outlined" type="button">
+                <wa-icon slot="start" name="github" family="brands"></wa-icon>
+                GitHub
+              </wa-button>
+              <wa-button
+                id="linkedin-signup"
+                appearance="outlined"
+                type="button"
+              >
+                <wa-icon slot="start" name="linkedin" family="brands"></wa-icon>
+                LinkedIn
+              </wa-button>
+            </div>
+
+            <p>
+              Already have an account? <a href="/login">Sign in</a>
+            </p>
+          </div>
+        </div>
+
+        <div id="signup-success-region" role="status" aria-live="polite">
+          <div id="signup-success" class="wa-stack" hidden tabindex="-1">
+            <wa-callout variant="success">
+              <wa-icon slot="icon" name="circle-check"></wa-icon>
+              <strong>Check your email</strong><br />
+              We&rsquo;ve sent a confirmation link to your email address. Please click
+              the link to verify your account before signing in.
+            </wa-callout>
+            <p>
+              Didn&rsquo;t receive the email?
+              <a href="/resend-confirmation">Resend confirmation email</a>
+            </p>
+            <p>
+              <a href="/login">Go to sign in</a>
+            </p>
+          </div>
+        </div>
+      </form>
+    </wa-card>
+  </div>
+</Layout>
+
+<script>
+  import { createSupabaseBrowserClient } from '../lib/supabase/client';
+
+  const supabase = createSupabaseBrowserClient();
+
+  const form = document.getElementById('signup-form') as HTMLFormElement;
+  const formFields = document.getElementById(
+    'signup-form-fields'
+  ) as HTMLElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement & {
+    value: string;
+  };
+  const passwordInput = document.getElementById(
+    'password'
+  ) as HTMLInputElement & { value: string };
+  const signupButton = document.getElementById('signup-button') as HTMLElement;
+  const signupError = document.getElementById('signup-error') as HTMLElement;
+  const signupErrorMessage = document.getElementById(
+    'signup-error-message'
+  ) as HTMLElement;
+  const signupSuccess = document.getElementById(
+    'signup-success'
+  ) as HTMLElement;
+
+  /**
+   * Collects current localStorage preferences for migration to the user profile.
+   */
+  function collectPreferences(): Record<string, unknown> {
+    const preferences: Record<string, unknown> = {};
+
+    try {
+      const timezone = localStorage.getItem('userTimezone');
+      const locale = localStorage.getItem('userLocale');
+      const geo = localStorage.getItem('userGeo');
+      const useLocalTimezone = localStorage.getItem('useLocalTimezone');
+      const theme = localStorage.getItem('theme');
+      const filters = localStorage.getItem('filters');
+
+      if (timezone) preferences.timezone = timezone;
+      if (locale) preferences.locale = locale;
+      if (geo) {
+        try {
+          preferences.geo = JSON.parse(geo);
+        } catch {
+          /* ignore malformed JSON */
+        }
+      }
+      if (useLocalTimezone)
+        preferences.useLocalTimezone = useLocalTimezone === 'true';
+      if (theme) preferences.theme = theme;
+      if (filters) {
+        try {
+          preferences.filters = JSON.parse(filters);
+        } catch {
+          /* ignore malformed JSON */
+        }
+      }
+    } catch {
+      /* localStorage unavailable */
+    }
+
+    return preferences;
+  }
+
+  let isSubmitting = false;
+
+  form?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    signupError.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
+    passwordInput.removeAttribute('aria-invalid');
+    signupButton.setAttribute('loading', '');
+
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      signupErrorMessage.textContent = 'Please enter your email and password.';
+      emailInput.setAttribute('aria-invalid', 'true');
+      passwordInput.setAttribute('aria-invalid', 'true');
+      signupError.hidden = false;
+      signupButton.removeAttribute('loading');
+      signupError.focus();
+      isSubmitting = false;
+      return;
+    }
+
+    if (password.length < 8) {
+      signupErrorMessage.textContent =
+        'Password must be at least 8 characters.';
+      passwordInput.setAttribute('aria-invalid', 'true');
+      signupError.hidden = false;
+      signupButton.removeAttribute('loading');
+      signupError.focus();
+      isSubmitting = false;
+      return;
+    }
+
+    // Collect preferences to pass as user_metadata during signup.
+    // These are stored in the auth user record and synced to the
+    // profiles table on first authenticated page load (account page).
+    const preferences = collectPreferences();
+    const metadata: Record<string, unknown> = {};
+    if (Object.keys(preferences).length > 0) {
+      metadata.preferences = preferences;
+    }
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: metadata,
+        },
+      });
+
+      if (error) {
+        signupErrorMessage.textContent =
+          'There was a problem creating your account. Please try again.';
+        emailInput.setAttribute('aria-invalid', 'true');
+        passwordInput.setAttribute('aria-invalid', 'true');
+        signupError.hidden = false;
+        signupError.focus();
+      } else {
+        // Show success message
+        formFields.hidden = true;
+        signupSuccess.hidden = false;
+        signupSuccess.focus();
+      }
+    } catch {
+      signupErrorMessage.textContent =
+        'A network error occurred. Please try again.';
+      signupError.hidden = false;
+      signupError.focus();
+    } finally {
+      signupButton.removeAttribute('loading');
+      isSubmitting = false;
+    }
+  });
+
+  document
+    .getElementById('github-signup')
+    ?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+
+  document
+    .getElementById('linkedin-signup')
+    ?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+</script>

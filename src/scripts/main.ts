@@ -128,4 +128,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Account menu
+  const accountMenu = document.getElementById('account-menu');
+  if (accountMenu) {
+    accountMenu.addEventListener('wa-select', ((event: CustomEvent) => {
+      const value = event.detail.item.value;
+      if (value === 'settings') {
+        window.location.href = '/account';
+      } else if (value === 'logout') {
+        import('../lib/supabase/client').then(
+          ({ createSupabaseBrowserClient }) => {
+            const supabase = createSupabaseBrowserClient();
+            supabase.auth.signOut().then(() => {
+              window.location.href = '/login?logged-out=true';
+            });
+          }
+        );
+      }
+    }) as EventListener);
+  }
 });

@@ -1,0 +1,562 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/default.astro';
+import { createSupabaseServerClient } from '../lib/supabase/server';
+
+const title = 'Your account';
+const description = 'Manage your Eventua11y account.';
+
+// Use getUser() for verified auth — the middleware only uses getSession()
+// which reads the JWT locally without a network call. This page needs a
+// server-verified user since it displays and modifies account data.
+const supabase = createSupabaseServerClient(Astro.request, Astro.cookies);
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+// Fetch profile data
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('display_name, avatar_url, preferences')
+  .eq('id', user.id)
+  .single();
+
+// Sync preferences from user_metadata to profile on first login.
+// Preferences are stored in user_metadata during signup (before email
+// confirmation) and migrated here where we have a verified session.
+const metaPrefs = user.user_metadata?.preferences;
+if (
+  metaPrefs &&
+  typeof metaPrefs === 'object' &&
+  Object.keys(metaPrefs).length > 0 &&
+  (!profile?.preferences || Object.keys(profile.preferences).length === 0)
+) {
+  const { error: prefError } = await supabase
+    .from('profiles')
+    .update({ preferences: metaPrefs })
+    .eq('id', user.id);
+
+  if (prefError) {
+    console.error('Failed to migrate preferences:', prefError.message);
+  }
+}
+
+const displayName =
+  profile?.display_name ||
+  user.user_metadata?.full_name ||
+  user.user_metadata?.name ||
+  '';
+const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url || '';
+const email = user.email || '';
+const provider = user.app_metadata?.provider || 'email';
+const isEmailUser = provider === 'email';
+const emailChanged = Astro.url.searchParams.get('email-changed') === 'true';
+---
+
+<Layout title={title} description={description}>
+  <div class="auth-page">
+    <wa-card>
+      <div class="wa-stack">
+        <h1 class="wa-heading-l">Your account</h1>
+
+        {
+          emailChanged && (
+            <div role="status" aria-live="polite">
+              <wa-callout id="email-changed-success" variant="success">
+                <wa-icon slot="icon" name="circle-check" />
+                Your email address has been updated.
+              </wa-callout>
+            </div>
+          )
+        }
+
+        {
+          avatarUrl && (
+            <div class="account-avatar">
+              <img
+                src={avatarUrl}
+                alt={`${displayName || 'User'}'s avatar`}
+                width="80"
+                height="80"
+              />
+            </div>
+          )
+        }
+
+        <dl class="account-details">
+          <dt>Email</dt>
+          <dd>{email}</dd>
+          <dt>Sign-in method</dt>
+          <dd class="provider-name">
+            {provider === 'github' && 'GitHub'}
+            {provider === 'linkedin_oidc' && 'LinkedIn'}
+            {provider === 'email' && 'Email and password'}
+            {
+              !['github', 'linkedin_oidc', 'email'].includes(provider) &&
+                provider
+            }
+          </dd>
+        </dl>
+
+        {
+          isEmailUser && (
+            <>
+              <wa-divider />
+              <form id="email-form" class="wa-stack" novalidate>
+                <h2 class="wa-heading-m">Change email</h2>
+                <wa-input
+                  id="new-email"
+                  label="New email address"
+                  type="email"
+                  required
+                  autocomplete="email"
+                />
+                <wa-button id="save-email" type="submit">
+                  Update email
+                </wa-button>
+                <div id="email-success-region" role="status" aria-live="polite">
+                  <wa-callout
+                    id="email-success"
+                    variant="success"
+                    hidden
+                    tabindex="-1"
+                  >
+                    <wa-icon slot="icon" name="circle-check" />
+                    <span id="email-success-message">
+                      Check your new email address for a confirmation link.
+                    </span>
+                  </wa-callout>
+                </div>
+                <div id="email-error-region" role="alert">
+                  <wa-callout
+                    id="email-error"
+                    variant="danger"
+                    hidden
+                    tabindex="-1"
+                  >
+                    <wa-icon slot="icon" name="circle-exclamation" />
+                    <span id="email-error-message">
+                      There was a problem updating your email.
+                    </span>
+                  </wa-callout>
+                </div>
+              </form>
+
+              <wa-divider />
+              <form id="password-form" class="wa-stack" novalidate>
+                <h2 class="wa-heading-m">Change password</h2>
+                <wa-input
+                  id="new-password"
+                  label="New password"
+                  type="password"
+                  required
+                  autocomplete="new-password"
+                  password-toggle
+                  minlength="8"
+                >
+                  <span slot="hint">Must be at least 8 characters.</span>
+                </wa-input>
+                <wa-button id="save-password" type="submit">
+                  Update password
+                </wa-button>
+                <div
+                  id="password-success-region"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <wa-callout
+                    id="password-success"
+                    variant="success"
+                    hidden
+                    tabindex="-1"
+                  >
+                    <wa-icon slot="icon" name="circle-check" />
+                    Your password has been updated.
+                  </wa-callout>
+                </div>
+                <div id="password-error-region" role="alert">
+                  <wa-callout
+                    id="password-error"
+                    variant="danger"
+                    hidden
+                    tabindex="-1"
+                  >
+                    <wa-icon slot="icon" name="circle-exclamation" />
+                    <span id="password-error-message">
+                      There was a problem updating your password.
+                    </span>
+                  </wa-callout>
+                </div>
+              </form>
+            </>
+          )
+        }
+
+        <wa-divider></wa-divider>
+
+        <h2 class="wa-heading-m">Delete account</h2>
+
+        <p>
+          Permanently delete your account and all associated data. This action
+          cannot be undone.
+        </p>
+
+        <div id="delete-error-region" role="alert">
+          <wa-callout id="delete-error" variant="danger" hidden tabindex="-1">
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+            <span id="delete-error-message"
+              >There was a problem deleting your account.</span
+            >
+          </wa-callout>
+        </div>
+
+        <wa-button
+          id="delete-account-button"
+          variant="danger"
+          appearance="outlined"
+        >
+          Delete account
+        </wa-button>
+
+        <wa-dialog id="delete-confirm-dialog" label="Delete your account">
+          <div class="wa-stack">
+            <p>
+              This will <strong>permanently delete</strong> your account and all associated
+              data. This action cannot be undone.
+            </p>
+
+            <p>
+              Type <strong>DELETE</strong> below to confirm.
+            </p>
+
+            <wa-input
+              id="delete-confirm-input"
+              label="Confirmation"
+              placeholder="Type DELETE to confirm"
+              autocomplete="off"
+              ><span slot="hint">Type DELETE to confirm account deletion.</span
+              ></wa-input
+            >
+
+            <div id="dialog-delete-error-region" role="alert">
+              <wa-callout
+                id="dialog-delete-error"
+                variant="danger"
+                hidden
+                tabindex="-1"
+              >
+                <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+                <span id="dialog-delete-error-message"
+                  >Please type DELETE to confirm.</span
+                >
+              </wa-callout>
+            </div>
+          </div>
+
+          <wa-button
+            slot="footer"
+            id="delete-cancel-button"
+            appearance="outlined"
+            data-dialog="close"
+          >
+            Cancel
+          </wa-button>
+          <wa-button slot="footer" id="delete-confirm-button" variant="danger">
+            Permanently delete account
+          </wa-button>
+        </wa-dialog>
+      </div>
+    </wa-card>
+  </div>
+</Layout>
+
+<script>
+  import { createSupabaseBrowserClient } from '../lib/supabase/client';
+
+  const supabase = createSupabaseBrowserClient();
+
+  // Email change
+  const emailForm = document.getElementById(
+    'email-form'
+  ) as HTMLFormElement | null;
+  const newEmailInput = document.getElementById('new-email') as
+    | (HTMLInputElement & { value: string })
+    | null;
+  const saveEmailButton = document.getElementById(
+    'save-email'
+  ) as HTMLElement | null;
+  const emailSuccess = document.getElementById(
+    'email-success'
+  ) as HTMLElement | null;
+  const emailError = document.getElementById(
+    'email-error'
+  ) as HTMLElement | null;
+  const emailErrorMessage = document.getElementById(
+    'email-error-message'
+  ) as HTMLElement | null;
+
+  let isEmailSubmitting = false;
+
+  emailForm?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    if (isEmailSubmitting) return;
+    isEmailSubmitting = true;
+
+    if (emailSuccess) emailSuccess.hidden = true;
+    if (emailError) emailError.hidden = true;
+    newEmailInput?.removeAttribute('aria-invalid');
+    saveEmailButton?.setAttribute('loading', '');
+
+    const email = newEmailInput?.value?.trim();
+
+    if (!email) {
+      if (emailErrorMessage)
+        emailErrorMessage.textContent = 'Please enter a new email address.';
+      newEmailInput?.setAttribute('aria-invalid', 'true');
+      if (emailError) {
+        emailError.hidden = false;
+        emailError.focus();
+      }
+      saveEmailButton?.removeAttribute('loading');
+      isEmailSubmitting = false;
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser(
+        { email },
+        {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/account?email-changed=true')}`,
+        }
+      );
+
+      if (error) {
+        if (emailErrorMessage)
+          emailErrorMessage.textContent =
+            'There was a problem updating your email address.';
+        if (emailError) {
+          emailError.hidden = false;
+          emailError.focus();
+        }
+      } else {
+        if (emailSuccess) {
+          emailSuccess.hidden = false;
+          emailSuccess.focus();
+        }
+        if (newEmailInput) newEmailInput.value = '';
+      }
+    } catch {
+      if (emailErrorMessage)
+        emailErrorMessage.textContent =
+          'A network error occurred. Please try again.';
+      if (emailError) {
+        emailError.hidden = false;
+        emailError.focus();
+      }
+    } finally {
+      saveEmailButton?.removeAttribute('loading');
+      isEmailSubmitting = false;
+    }
+  });
+
+  // Password change
+  const passwordForm = document.getElementById(
+    'password-form'
+  ) as HTMLFormElement | null;
+  const newPasswordInput = document.getElementById('new-password') as
+    | (HTMLInputElement & { value: string })
+    | null;
+  const savePasswordButton = document.getElementById(
+    'save-password'
+  ) as HTMLElement | null;
+  const passwordSuccess = document.getElementById(
+    'password-success'
+  ) as HTMLElement | null;
+  const passwordError = document.getElementById(
+    'password-error'
+  ) as HTMLElement | null;
+  const passwordErrorMessage = document.getElementById(
+    'password-error-message'
+  ) as HTMLElement | null;
+
+  let isPasswordSubmitting = false;
+
+  passwordForm?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    if (isPasswordSubmitting) return;
+    isPasswordSubmitting = true;
+
+    if (passwordSuccess) passwordSuccess.hidden = true;
+    if (passwordError) passwordError.hidden = true;
+    newPasswordInput?.removeAttribute('aria-invalid');
+    savePasswordButton?.setAttribute('loading', '');
+
+    const password = newPasswordInput?.value;
+
+    if (!password || password.length < 8) {
+      if (passwordErrorMessage)
+        passwordErrorMessage.textContent =
+          'Password must be at least 8 characters.';
+      newPasswordInput?.setAttribute('aria-invalid', 'true');
+      if (passwordError) {
+        passwordError.hidden = false;
+        passwordError.focus();
+      }
+      savePasswordButton?.removeAttribute('loading');
+      isPasswordSubmitting = false;
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) {
+        if (passwordErrorMessage)
+          passwordErrorMessage.textContent =
+            'There was a problem updating your password.';
+        if (passwordError) {
+          passwordError.hidden = false;
+          passwordError.focus();
+        }
+      } else {
+        if (passwordSuccess) {
+          passwordSuccess.hidden = false;
+          passwordSuccess.focus();
+        }
+        if (newPasswordInput) newPasswordInput.value = '';
+      }
+    } catch {
+      if (passwordErrorMessage)
+        passwordErrorMessage.textContent =
+          'A network error occurred. Please try again.';
+      if (passwordError) {
+        passwordError.hidden = false;
+        passwordError.focus();
+      }
+    } finally {
+      savePasswordButton?.removeAttribute('loading');
+      isPasswordSubmitting = false;
+    }
+  });
+
+  // Delete account
+  const deleteAccountButton = document.getElementById(
+    'delete-account-button'
+  ) as HTMLElement;
+  const deleteConfirmDialog = document.getElementById(
+    'delete-confirm-dialog'
+  ) as HTMLElement & { show(): void; hide(): void };
+  const deleteConfirmInput = document.getElementById(
+    'delete-confirm-input'
+  ) as HTMLInputElement & { value: string };
+  const deleteCancelButton = document.getElementById(
+    'delete-cancel-button'
+  ) as HTMLElement;
+  const deleteConfirmButton = document.getElementById(
+    'delete-confirm-button'
+  ) as HTMLElement;
+  const deleteError = document.getElementById('delete-error') as HTMLElement;
+  const deleteErrorMessage = document.getElementById(
+    'delete-error-message'
+  ) as HTMLElement;
+  const dialogDeleteError = document.getElementById(
+    'dialog-delete-error'
+  ) as HTMLElement;
+  const dialogDeleteErrorMessage = document.getElementById(
+    'dialog-delete-error-message'
+  ) as HTMLElement;
+
+  // Track a pending page-level error to show after the dialog fully closes
+  let pendingPageError: string | null = null;
+
+  // Open the confirmation dialog
+  deleteAccountButton?.addEventListener('click', () => {
+    deleteError.hidden = true;
+    pendingPageError = null;
+    if (deleteConfirmInput) deleteConfirmInput.value = '';
+    if (dialogDeleteError) dialogDeleteError.hidden = true;
+    deleteConfirmDialog.show();
+  });
+
+  // Reset dialog state when it closes; show any pending page error
+  deleteConfirmDialog?.addEventListener('wa-after-hide', () => {
+    if (deleteConfirmInput) deleteConfirmInput.value = '';
+    if (dialogDeleteError) dialogDeleteError.hidden = true;
+    if (deleteConfirmButton) {
+      deleteConfirmButton.removeAttribute('loading');
+      deleteConfirmButton.removeAttribute('disabled');
+    }
+    if (deleteCancelButton) {
+      deleteCancelButton.removeAttribute('disabled');
+    }
+
+    // Show page-level error after dialog has fully closed
+    if (pendingPageError) {
+      deleteErrorMessage.textContent = pendingPageError;
+      deleteError.hidden = false;
+      deleteError.focus();
+      pendingPageError = null;
+    }
+  });
+
+  // Confirm deletion
+  deleteConfirmButton?.addEventListener('click', async () => {
+    if (dialogDeleteError) dialogDeleteError.hidden = true;
+    deleteConfirmInput?.removeAttribute('aria-invalid');
+
+    // Validate the confirmation input
+    const value = deleteConfirmInput?.value?.trim() ?? '';
+    if (value !== 'DELETE') {
+      if (dialogDeleteErrorMessage) {
+        dialogDeleteErrorMessage.textContent =
+          'Please type DELETE to confirm account deletion.';
+      }
+      deleteConfirmInput?.setAttribute('aria-invalid', 'true');
+      if (dialogDeleteError) {
+        dialogDeleteError.hidden = false;
+        dialogDeleteError.focus();
+      }
+      return;
+    }
+
+    deleteConfirmButton.setAttribute('loading', '');
+    deleteConfirmButton.setAttribute('disabled', '');
+    deleteCancelButton.setAttribute('disabled', '');
+
+    try {
+      const response = await fetch('/api/delete-account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: 'DELETE' }),
+      });
+
+      if (response.ok) {
+        // Account deleted — redirect to homepage
+        window.location.href = '/?account-deleted=true';
+        return;
+      }
+
+      let message =
+        'There was a problem deleting your account. Please try again.';
+      try {
+        const data = await response.json();
+        if (data.error) message = data.error;
+      } catch {
+        // Response wasn't JSON — use default message
+      }
+
+      // Queue the error to display after the dialog closes
+      pendingPageError = message;
+      deleteConfirmDialog.hide();
+    } catch {
+      pendingPageError =
+        'There was a problem deleting your account. Please try again.';
+      deleteConfirmDialog.hide();
+    }
+  });
+</script>

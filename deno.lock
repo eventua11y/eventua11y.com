@@ -254,6 +254,8 @@
         "npm:@sanity/client@^7.16.0",
         "npm:@sentry/astro@^10.43.0",
         "npm:@sentry/cli@^3.3.3",
+        "npm:@supabase/ssr@0.9",
+        "npm:@supabase/supabase-js@^2.99.0",
         "npm:@types/node@25",
         "npm:@vitest/coverage-v8@^4.0.18",
         "npm:astro-portabletext@0.13",

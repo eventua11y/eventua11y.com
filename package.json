@@ -11,7 +11,7 @@
     "test:ui": "npx playwright test --ui",
     "dev": "concurrently \"astro dev\" \"npm run check:watch\"",
     "start": "astro dev",
-    "build": "npm run check && astro build && npm run sentry:sourcemaps",
+    "build": "npm run check && astro build && (npm run sentry:sourcemaps || true)",
     "preview": "astro preview",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org matt-obee --project eventua11y ./dist && sentry-cli sourcemaps upload --org matt-obee --project eventua11y ./dist",
     "check": "prettier --check .",
@@ -70,6 +70,8 @@
     "@sanity/client": "^7.16.0",
     "@sentry/astro": "^10.43.0",
     "@sentry/cli": "^3.3.3",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.99.2",
     "astro-portabletext": "^0.13.0",
     "dayjs": "^1.11.13",
     "vue": "^3.5.25"

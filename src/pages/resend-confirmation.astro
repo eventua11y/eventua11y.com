@@ -1,0 +1,138 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/default.astro';
+
+const title = 'Resend confirmation email';
+const description =
+  'Request a new confirmation email for your Eventua11y account.';
+
+// If already logged in, redirect to account page
+if (Astro.locals.user) {
+  return Astro.redirect('/account');
+}
+---
+
+<Layout title={title} description={description}>
+  <div class="auth-page">
+    <wa-card>
+      <form id="resend-form" class="wa-stack" novalidate>
+        <h1 class="wa-heading-l">Resend confirmation email</h1>
+
+        <p>
+          Enter the email address you used to create your account and
+          we&rsquo;ll send you a new confirmation link.
+        </p>
+
+        <wa-input
+          id="email"
+          label="Email"
+          type="email"
+          required
+          autocomplete="email"></wa-input>
+        <wa-button id="resend-button" type="submit"
+          >Resend confirmation email</wa-button
+        >
+
+        <div id="resend-error-region" role="alert">
+          <wa-callout id="resend-error" variant="danger" hidden tabindex="-1">
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+            <span id="resend-error-message"
+              >There was a problem sending the confirmation email.</span
+            >
+          </wa-callout>
+        </div>
+
+        <div id="resend-success-region" role="status" aria-live="polite">
+          <wa-callout
+            id="resend-success"
+            variant="success"
+            hidden
+            tabindex="-1"
+          >
+            <wa-icon slot="icon" name="circle-check"></wa-icon>
+            <strong>Check your email</strong><br />
+            If an account exists with that email address and has not yet been confirmed,
+            we&rsquo;ve sent a new confirmation link. The link will expire in 1 hour.
+          </wa-callout>
+        </div>
+
+        <p>
+          <a href="/login">Back to log in</a>
+        </p>
+      </form>
+    </wa-card>
+  </div>
+</Layout>
+
+<script>
+  import { createSupabaseBrowserClient } from '../lib/supabase/client';
+
+  const supabase = createSupabaseBrowserClient();
+
+  const form = document.getElementById('resend-form') as HTMLFormElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement & {
+    value: string;
+  };
+  const resendButton = document.getElementById('resend-button') as HTMLElement;
+  const resendError = document.getElementById('resend-error') as HTMLElement;
+  const resendErrorMessage = document.getElementById(
+    'resend-error-message'
+  ) as HTMLElement;
+  const resendSuccess = document.getElementById(
+    'resend-success'
+  ) as HTMLElement;
+
+  let isSubmitting = false;
+
+  form?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    resendError.hidden = true;
+    resendSuccess.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
+    resendButton.setAttribute('loading', '');
+
+    const email = emailInput.value;
+
+    if (!email) {
+      resendErrorMessage.textContent = 'Please enter your email address.';
+      emailInput.setAttribute('aria-invalid', 'true');
+      resendError.hidden = false;
+      resendButton.removeAttribute('loading');
+      resendError.focus();
+      isSubmitting = false;
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        resendErrorMessage.textContent =
+          'There was a problem sending the confirmation email. Please try again.';
+        resendError.hidden = false;
+        resendError.focus();
+      } else {
+        // Always show success to prevent email enumeration
+        resendSuccess.hidden = false;
+        resendSuccess.focus();
+      }
+    } catch {
+      resendErrorMessage.textContent =
+        'A network error occurred. Please try again.';
+      resendError.hidden = false;
+      resendError.focus();
+    } finally {
+      resendButton.removeAttribute('loading');
+      isSubmitting = false;
+    }
+  });
+</script>

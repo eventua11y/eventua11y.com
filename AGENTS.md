@@ -2,25 +2,69 @@
 
 Instructions for AI agents and subagents working in this repository.
 
-## OpenCode Agent Team
+## Agent Team
 
-This project has a team of specialist agents configured in `.opencode/agents/` and reusable skills in `.opencode/skills/`. The team is structured as:
+Eventua11y uses a five-agent team configured in `opencode.json`. Agent instruction files live in `.agents/`.
 
-- **`project-lead`** — Coordinates the specialist team. Use Tab to switch to it in OpenCode, or invoke with `@project-lead`.
-- **`accessibility-lead`** — Orchestrates the accessibility sub-team (`a11y-markup`, `a11y-visual`, `a11y-interaction`, `a11y-forms`, `a11y-testing`).
-- **Domain specialists** — `astro`, `performance`, `security`, `testing`, `netlify`, `supabase`.
+### Roster
 
-All analysis agents are read-only. Only `a11y-testing` and `testing` can edit files (test files only).
+| Agent             | Mode     | Model tier        | Instruction file                                       | Rationale                                                                                                |
+| ----------------- | -------- | ----------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **Lead**          | Primary  | Frontier (Opus)   | [`.agents/lead.md`](.agents/lead.md)                   | Orchestration and planning require deep reasoning; mistakes cascade to all downstream agents             |
+| **Coder**         | Subagent | Mid-tier (Sonnet) | [`.agents/coder.md`](.agents/coder.md)                 | Best cost/quality/speed for full-stack implementation within scoped briefs                               |
+| **Tester**        | Subagent | Mid-tier (Sonnet) | [`.agents/tester.md`](.agents/tester.md)               | Independent test authorship at the same capability level as the Coder prevents confirmation bias         |
+| **Accessibility** | Subagent | Mid-tier (Sonnet) | [`.agents/accessibility.md`](.agents/accessibility.md) | Cross-cutting WCAG 2.2 AA specialist; called at planning and review stages                               |
+| **Security**      | Subagent | Mid-tier (Sonnet) | [`.agents/security.md`](.agents/security.md)           | Cross-cutting auth and data-safety specialist; called at planning and review stages on user-account work |
 
-### When to invoke agents
+### Orchestration pattern
 
-Agents support five modes — **audit**, **advise**, **estimate**, **diagnose**, and **answer** — and should be invoked at appropriate workflow moments:
+```
+User → Lead
+         ├─ early: Accessibility (risk assessment of plan)
+         ├─ early: Security (risk assessment of plan, on user-account work)
+         ├─ Coder (implementation, guided by accessibility + security findings)
+         ├─ Tester (independent tests from spec)
+         ├─ late: Accessibility (review of implemented code)
+         ├─ late: Security (review of implemented code, on user-account work)
+         └─ quality gates: npm run check, npx tsc --noEmit
+```
 
-- **Planning a feature or change** — invoke agents to **advise** on risks and recommend approaches, and to **estimate** effort, complexity, and priority before work begins.
-- **Reviewing code, PRs, or branches** — invoke agents to **audit** for issues in their domain.
-- **Investigating a bug or regression** — invoke agents to **diagnose** the problem in their area of expertise.
-- **Asking a question** — invoke agents to **answer** domain-specific questions (e.g. "does this need ARIA?", "will this break caching?", "is this RLS policy correct?").
-- **Before merging** — invoke the `project-lead` for a cross-domain review to catch issues that span multiple specialist areas.
+1. Lead gathers context, then calls **Accessibility** with the proposed plan.
+2. If the task touches authentication, user data, or access control, Lead also calls **Security** with the proposed plan.
+3. Lead delegates implementation to **Coder**, passing the accessibility and security risk findings as guidance.
+4. After implementation, Lead delegates test writing to **Tester** (independently from Coder).
+5. Lead calls **Accessibility** again to review the implemented changes.
+6. If Security was called early, Lead calls **Security** again to review the implemented changes.
+7. Lead runs deterministic quality gates; routes failures back to Coder.
+
+### Cost projection
+
+Approximate call distribution by volume: ~70% Sonnet (Coder + Tester + Accessibility), ~10% Opus (Lead), ~20% Haiku (explore subagent). Opus calls are low-volume but high-leverage — one Lead invocation drives many cheaper worker calls.
+
+Note: Security adds minimal cost overhead — it is only called on tasks that touch authentication, user data, or access control, not on every task.
+
+### Escalation map
+
+- **Coder** → Lead: ambiguous brief, out-of-scope files needed, persistent type errors
+- **Tester** → Lead: spec too ambiguous to derive criteria, genuine source bug discovered
+- **Accessibility** → Lead: critical WCAG failure requiring architectural change
+- **Security** → Lead: critical vulnerability requiring architectural change, secrets exposure
+- **Lead** → User: architectural decisions beyond current scope, unresolvable ambiguity
+
+## Skills
+
+This project uses reusable skills from [mattobee/skills](https://github.com/mattobee/skills), installed in `.opencode/skills/`. Available skills:
+
+- **`designing-agent-teams`** — Design and generate multi-agent coding teams.
+- **`estimating-accessibility-effort`** — Estimate effort to remediate accessibility issues.
+- **`fixing-accessibility-issues`** — Fix accessibility issues in implemented UI code.
+- **`predicting-accessibility-risks`** — Identify accessibility risks before implementation.
+- **`prioritising-accessibility-fixes`** — Prioritise accessibility issues for remediation.
+- **`reviewing-accessibility`** — Review implemented UI code for WCAG AA compliance.
+- **`suggesting-next-steps`** — Suggest prioritised next steps based on project state.
+- **`writing-accessibility-tests`** — Write Playwright accessibility tests with axe-core scans and targeted assertions.
+
+To update skills: `npx skills update` from `.opencode/`.
 
 ## GitHub Labels
 
@@ -80,7 +124,7 @@ This project uses a two-layer accessibility testing strategy in `tests/accessibi
 1. **axe-core scans** on every page as a foundation, scoped to WCAG 2.2 Level AA.
 2. **Playwright assertions** on top for things axe cannot catch: accessible names on interactive elements, landmark structure, heading hierarchy, `aria-current` navigation state, `aria-live` regions, and `lang` attribute.
 
-When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-a11y-tests` OpenCode skill in `.opencode/skills/writing-a11y-tests/SKILL.md`.
+When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-accessibility-tests` skill in `.opencode/skills/writing-accessibility-tests/SKILL.md`.
 
 ## GROQ Query Projections
 

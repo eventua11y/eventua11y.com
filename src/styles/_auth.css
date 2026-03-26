@@ -1,0 +1,43 @@
+/* Auth pages (login, signup, account) */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding: var(--p-space-xs-m);
+  padding-top: var(--p-space-l);
+  padding-bottom: var(--p-space-l);
+}
+
+.auth-page wa-card {
+  max-width: 45ch;
+  width: 100%;
+}
+
+/* Account avatar */
+.account-avatar img {
+  border-radius: 50%;
+  display: block;
+}
+
+/* Account provider row (read-only, styled to match wa-details rows) */
+.account-provider {
+  padding: var(--wa-spacing-m);
+}
+
+/* Reset <dl>/<dd> defaults inside account details */
+.auth-page dl {
+  margin: 0;
+}
+
+.auth-page dd {
+  margin: 0;
+}
+
+/* Programmatically focused callouts (tabindex="-1") need a visible
+   focus indicator. Use :focus rather than :focus-visible since these
+   receive focus via .focus(), which browsers may not classify as
+   :focus-visible. */
+wa-callout:focus {
+  outline: var(--c-focus-ring-width) solid var(--c-focus-ring-color);
+  outline-offset: var(--c-focus-ring-offset);
+}

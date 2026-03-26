@@ -1,0 +1,191 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/default.astro';
+
+const title = 'Sign in';
+const description = 'Sign in to your Eventua11y account.';
+
+// If already logged in, redirect to account page
+if (Astro.locals.user) {
+  return Astro.redirect('/account');
+}
+
+const errorParam = Astro.url.searchParams.get('error');
+const loggedOut = Astro.url.searchParams.get('logged-out');
+---
+
+<Layout title={title} description={description}>
+  <div class="auth-page">
+    <wa-card>
+      <form id="login-form" class="wa-stack" novalidate>
+        <h1 class="wa-heading-l">Sign in</h1>
+
+        {
+          errorParam === 'auth-code-error' && (
+            <wa-callout variant="danger">
+              <wa-icon slot="icon" name="circle-exclamation" />
+              There was a problem signing you in. Please try again.
+            </wa-callout>
+          )
+        }
+
+        {
+          loggedOut && (
+            <wa-callout variant="neutral">
+              <wa-icon slot="icon" name="circle-check" />
+              You have been logged out.
+            </wa-callout>
+          )
+        }
+
+        <wa-input
+          id="email"
+          label="Email"
+          type="email"
+          required
+          autocomplete="email"></wa-input>
+        <wa-input
+          id="password"
+          label="Password"
+          type="password"
+          required
+          autocomplete="current-password"></wa-input>
+        <wa-button id="login-button" type="submit">Sign in</wa-button>
+
+        <p>
+          <a href="/forgot-password">Forgot your password?</a>
+        </p>
+
+        <div id="login-error-region" role="alert">
+          <wa-callout id="login-error" variant="danger" hidden tabindex="-1">
+            <wa-icon slot="icon" name="circle-exclamation"></wa-icon>
+            <span id="login-error-message">Invalid email or password.</span>
+          </wa-callout>
+        </div>
+
+        <wa-divider></wa-divider>
+
+        <p>Or sign in with:</p>
+        <div class="wa-grid" style="--min-column-size: 12ch;">
+          <wa-button id="github-login" appearance="outlined" type="button">
+            <wa-icon slot="start" name="github" family="brands"></wa-icon>
+            GitHub
+          </wa-button>
+          <wa-button id="linkedin-login" appearance="outlined" type="button">
+            <wa-icon slot="start" name="linkedin" family="brands"></wa-icon>
+            LinkedIn
+          </wa-button>
+        </div>
+
+        <p>
+          Don&rsquo;t have an account? <a href="/signup">Create one</a>
+        </p>
+      </form>
+    </wa-card>
+  </div>
+</Layout>
+
+<script>
+  import { createSupabaseBrowserClient } from '../lib/supabase/client';
+
+  const supabase = createSupabaseBrowserClient();
+
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement & {
+    value: string;
+  };
+  const passwordInput = document.getElementById(
+    'password'
+  ) as HTMLInputElement & { value: string };
+  const loginButton = document.getElementById('login-button') as HTMLElement;
+  const loginError = document.getElementById('login-error') as HTMLElement;
+  const loginErrorMessage = document.getElementById(
+    'login-error-message'
+  ) as HTMLElement;
+
+  let isSubmitting = false;
+
+  form?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    loginError.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
+    passwordInput.removeAttribute('aria-invalid');
+    loginButton.setAttribute('loading', '');
+
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      loginErrorMessage.textContent = 'Please enter your email and password.';
+      emailInput.setAttribute('aria-invalid', 'true');
+      passwordInput.setAttribute('aria-invalid', 'true');
+      loginError.hidden = false;
+      loginButton.removeAttribute('loading');
+      loginError.focus();
+      isSubmitting = false;
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          loginErrorMessage.textContent = '';
+          loginErrorMessage.append(
+            'Your email address has not been confirmed. Please check your inbox or '
+          );
+          const link = document.createElement('a');
+          link.href = '/resend-confirmation';
+          link.textContent = 'resend the confirmation email';
+          loginErrorMessage.appendChild(link);
+          loginErrorMessage.append('.');
+        } else {
+          loginErrorMessage.textContent = 'Invalid email or password.';
+        }
+        emailInput.setAttribute('aria-invalid', 'true');
+        passwordInput.setAttribute('aria-invalid', 'true');
+        loginError.hidden = false;
+        loginError.focus();
+      } else {
+        window.location.href = '/account';
+      }
+    } catch {
+      loginErrorMessage.textContent =
+        'A network error occurred. Please try again.';
+      loginError.hidden = false;
+      loginError.focus();
+    } finally {
+      loginButton.removeAttribute('loading');
+      isSubmitting = false;
+    }
+  });
+
+  document
+    .getElementById('github-login')
+    ?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+
+  document
+    .getElementById('linkedin-login')
+    ?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    });
+</script>
