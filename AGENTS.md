@@ -8,12 +8,12 @@ Eventua11y uses a four-agent team configured in `opencode.json`. Agent instructi
 
 ### Roster
 
-| Agent | Mode | Model tier | Instruction file | Rationale |
-|---|---|---|---|---|
-| **Lead** | Primary | Frontier (Opus) | [`.agents/lead.md`](.agents/lead.md) | Orchestration and planning require deep reasoning; mistakes cascade to all downstream agents |
-| **Coder** | Subagent | Mid-tier (Sonnet) | [`.agents/coder.md`](.agents/coder.md) | Best cost/quality/speed for full-stack implementation within scoped briefs |
-| **Tester** | Subagent | Mid-tier (Sonnet) | [`.agents/tester.md`](.agents/tester.md) | Independent test authorship at the same capability level as the Coder prevents confirmation bias |
-| **Accessibility** | Subagent | Mid-tier (Sonnet) | [`.agents/accessibility.md`](.agents/accessibility.md) | Cross-cutting WCAG 2.2 AA specialist; called at planning and review stages |
+| Agent             | Mode     | Model tier        | Instruction file                                       | Rationale                                                                                        |
+| ----------------- | -------- | ----------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Lead**          | Primary  | Frontier (Opus)   | [`.agents/lead.md`](.agents/lead.md)                   | Orchestration and planning require deep reasoning; mistakes cascade to all downstream agents     |
+| **Coder**         | Subagent | Mid-tier (Sonnet) | [`.agents/coder.md`](.agents/coder.md)                 | Best cost/quality/speed for full-stack implementation within scoped briefs                       |
+| **Tester**        | Subagent | Mid-tier (Sonnet) | [`.agents/tester.md`](.agents/tester.md)               | Independent test authorship at the same capability level as the Coder prevents confirmation bias |
+| **Accessibility** | Subagent | Mid-tier (Sonnet) | [`.agents/accessibility.md`](.agents/accessibility.md) | Cross-cutting WCAG 2.2 AA specialist; called at planning and review stages                       |
 
 ### Orchestration pattern
 

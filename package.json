@@ -11,7 +11,7 @@
     "test:ui": "npx playwright test --ui",
     "dev": "concurrently \"astro dev\" \"npm run check:watch\"",
     "start": "astro dev",
-    "build": "npm run check && astro build && npm run sentry:sourcemaps",
+    "build": "npm run check && astro build && (npm run sentry:sourcemaps || true)",
     "preview": "astro preview",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org matt-obee --project eventua11y ./dist && sentry-cli sourcemaps upload --org matt-obee --project eventua11y ./dist",
     "check": "prettier --check .",
