@@ -2,6 +2,47 @@
 
 Instructions for AI agents and subagents working in this repository.
 
+## Agent Team
+
+Eventua11y uses a four-agent team configured in `opencode.json`. Agent instruction files live in `.agents/`.
+
+### Roster
+
+| Agent | Mode | Model tier | Instruction file | Rationale |
+|---|---|---|---|---|
+| **Lead** | Primary | Frontier (Opus) | [`.agents/lead.md`](.agents/lead.md) | Orchestration and planning require deep reasoning; mistakes cascade to all downstream agents |
+| **Coder** | Subagent | Mid-tier (Sonnet) | [`.agents/coder.md`](.agents/coder.md) | Best cost/quality/speed for full-stack implementation within scoped briefs |
+| **Tester** | Subagent | Mid-tier (Sonnet) | [`.agents/tester.md`](.agents/tester.md) | Independent test authorship at the same capability level as the Coder prevents confirmation bias |
+| **Accessibility** | Subagent | Mid-tier (Sonnet) | [`.agents/accessibility.md`](.agents/accessibility.md) | Cross-cutting WCAG 2.2 AA specialist; called at planning and review stages |
+
+### Orchestration pattern
+
+```
+User → Lead
+         ├─ early: Accessibility (risk assessment of plan)
+         ├─ Coder (implementation, guided by accessibility findings)
+         ├─ Tester (independent tests from spec)
+         ├─ late: Accessibility (review of implemented code)
+         └─ quality gates: npm run check, npx tsc --noEmit
+```
+
+1. Lead gathers context, then calls **Accessibility** with the proposed plan.
+2. Lead delegates implementation to **Coder**, passing the accessibility risk findings as guidance.
+3. After implementation, Lead delegates test writing to **Tester** (independently from Coder).
+4. Lead calls **Accessibility** again to review the implemented changes.
+5. Lead runs deterministic quality gates; routes failures back to Coder.
+
+### Cost projection
+
+Approximate call distribution by volume: ~70% Sonnet (Coder + Tester + Accessibility), ~10% Opus (Lead), ~20% Haiku (explore subagent). Opus calls are low-volume but high-leverage — one Lead invocation drives many cheaper worker calls.
+
+### Escalation map
+
+- **Coder** → Lead: ambiguous brief, out-of-scope files needed, persistent type errors
+- **Tester** → Lead: spec too ambiguous to derive criteria, genuine source bug discovered
+- **Accessibility** → Lead: critical WCAG failure requiring architectural change
+- **Lead** → User: architectural decisions beyond current scope, unresolvable ambiguity
+
 ## Skills
 
 This project uses reusable skills from [mattobee/skills](https://github.com/mattobee/skills), installed in `.opencode/skills/`. Available skills:

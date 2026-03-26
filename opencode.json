@@ -15,6 +15,60 @@
     },
     "explore": {
       "model": "anthropic/claude-haiku-4-5"
+    },
+    "lead": {
+      "description": "Tech lead: decomposes tasks, delegates to coder/tester/accessibility, runs quality gates",
+      "mode": "primary",
+      "model": "anthropic/claude-opus-4-6",
+      "prompt": "{file:.agents/lead.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "npm run check": "allow",
+          "npx tsc --noEmit": "allow"
+        }
+      }
+    },
+    "coder": {
+      "description": "Developer: implements features across Astro, Vue, TypeScript, Sanity, Netlify edge functions, Supabase",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.agents/coder.md}",
+      "permission": {
+        "bash": {
+          "*": "ask",
+          "npx tsc --noEmit": "allow",
+          "npm run check": "allow"
+        }
+      }
+    },
+    "tester": {
+      "description": "QA engineer: writes Playwright E2E and Vitest unit tests independently from the coder",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.agents/tester.md}",
+      "permission": {
+        "bash": {
+          "*": "ask",
+          "npm run check": "allow",
+          "npx playwright test *": "allow",
+          "npx vitest run *": "allow"
+        }
+      }
+    },
+    "accessibility": {
+      "description": "Accessibility specialist: assesses plans for WCAG risks and reviews implemented code; call early and late",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.agents/accessibility.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "npx playwright test tests/accessibility.spec.ts*": "allow"
+        }
+      }
     }
   },
   "mcp": {
