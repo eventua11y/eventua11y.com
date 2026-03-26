@@ -69,6 +69,18 @@
           "npx playwright test tests/accessibility.spec.ts*": "allow"
         }
       }
+    },
+    "security": {
+      "description": "Security specialist: assesses plans for auth/data risks and reviews implemented code; call early and late on user-account work",
+      "mode": "subagent",
+      "model": "github-copilot/claude-sonnet-4.5",
+      "prompt": "{file:.agents/security.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny"
+        }
+      }
     }
   },
   "mcp": {
