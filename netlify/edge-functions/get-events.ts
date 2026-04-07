@@ -6,7 +6,7 @@
  * - Implements caching to reduce API calls
  */
 
-import { SanityClient } from 'https://esm.sh/@sanity/client';
+import type { SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
 import utc from 'https://esm.sh/dayjs/plugin/utc';
 import timezone from 'https://esm.sh/dayjs/plugin/timezone';
