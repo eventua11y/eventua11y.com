@@ -27,11 +27,11 @@ import {
   PARENT_EVENTS_QUERY,
   CHILD_EVENTS_QUERY,
   BOOKS_QUERY,
-} from '../../netlify/edge-functions/queries';
+} from '../../netlify/edge-functions/lib/queries';
 import {
   assembleEvents,
   type AssemblableEvent,
-} from '../../netlify/edge-functions/assembleEvents';
+} from '../../netlify/edge-functions/lib/assembleEvents';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 

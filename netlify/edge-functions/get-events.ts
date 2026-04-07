@@ -13,9 +13,9 @@ import timezone from 'https://esm.sh/dayjs/plugin/timezone';
 import isBetween from 'https://esm.sh/dayjs/plugin/isBetween';
 import isSameOrBefore from 'https://esm.sh/dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'https://esm.sh/dayjs/plugin/isSameOrAfter';
-import { PARENT_EVENTS_QUERY, CHILD_EVENTS_QUERY } from './queries.ts';
-import { assembleEvents, type AssemblableEvent } from './assembleEvents.ts';
-import { createSanityClient } from './sanity-client.ts';
+import { PARENT_EVENTS_QUERY, CHILD_EVENTS_QUERY } from './lib/queries.ts';
+import { assembleEvents, type AssemblableEvent } from './lib/assembleEvents.ts';
+import { createSanityClient } from './lib/sanity-client.ts';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

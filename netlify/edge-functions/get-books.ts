@@ -6,8 +6,8 @@
  * - Returns minimal data structure for display
  */
 
-import { BOOKS_QUERY } from './queries.ts';
-import { createSanityClient } from './sanity-client.ts';
+import { BOOKS_QUERY } from './lib/queries.ts';
+import { createSanityClient } from './lib/sanity-client.ts';
 
 type SanityClient = ReturnType<typeof createSanityClient>;
 
