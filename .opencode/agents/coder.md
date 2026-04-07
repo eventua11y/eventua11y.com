@@ -7,10 +7,15 @@ steps: 30
 permission:
   edit: allow
   bash:
-    '*': deny
-    'npm run build*': allow
-    'npx astro check*': allow
+    '*': ask
+    'npm run *': allow
+    'npx astro *': allow
     'npx tsc*': allow
+    'npx prettier*': allow
+    'npx vitest*': allow
+    'git status*': allow
+    'git diff*': allow
+    'git log*': allow
 ---
 
 Follow the instructions in `.agents/coder.md`.
