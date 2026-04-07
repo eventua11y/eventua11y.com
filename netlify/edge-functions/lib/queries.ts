@@ -1,8 +1,9 @@
 /**
- * Shared GROQ query strings for event data.
+ * Shared GROQ query strings for event and book data.
  *
- * These are used by both the Astro SSR layer (src/lib/sanity.ts)
- * and the Netlify edge function (netlify/edge-functions/get-events.ts).
+ * These are used by the Astro SSR layer (src/lib/sanity.ts)
+ * and the Netlify edge functions
+ * (netlify/edge-functions/get-events.ts and netlify/edge-functions/get-books.ts).
  *
  * IMPORTANT: This file must have zero imports — it runs in both
  * Node (Astro) and Deno (edge functions) contexts.
