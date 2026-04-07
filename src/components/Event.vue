@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { isCallForSpeakersOpen, getEventUrl } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
@@ -81,40 +81,24 @@ const eventSpeakers = computed(() => {
 const MAX_DISPLAYED_SPEAKERS = 3;
 
 /**
- * Simple string hash function for deterministic seeding.
- * Produces a 32-bit integer from the input string.
+ * Shuffles an array using the Fisher-Yates algorithm.
+ * @returns A new shuffled copy of the array.
  */
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return Math.abs(hash);
-}
-
-/**
- * Deterministic Fisher-Yates shuffle using a seeded PRNG.
- * Given the same seed, always produces the same order.
- *
- * Uses a simple mulberry32 PRNG for reproducibility.
- */
-function seededShuffle<T>(array: T[], seed: number): T[] {
+function shuffleArray<T>(array: T[]): T[] {
   const result = [...array];
-  // mulberry32 PRNG
-  let s = seed | 0;
-  function random(): number {
-    s = (s + 0x6d2b79f5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  }
   for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
+    const j = Math.floor(Math.random() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
 }
+
+/**
+ * Speakers in randomised order, shuffled once at setup time.
+ * Ensures consistent display during the session while distributing
+ * visibility fairly across page loads.
+ */
+const shuffledSpeakers = ref(shuffleArray(eventSpeakers.value));
 
 /**
  * Determines if an event is dedicated to accessibility
@@ -140,9 +124,8 @@ const headingId = computed(() => `event-title-${props.event._id}`);
 
 /**
  * Formats speaker list for display.
- * If more than 3 speakers, selects 3 using a deterministic shuffle
- * seeded by the event ID, ensuring consistent display while
- * distributing visibility fairly across events.
+ * If more than 3 speakers, shows 3 from a pre-shuffled order
+ * (randomised once per page load) to distribute visibility fairly.
  * @returns {string} Formatted speaker list
  */
 const speakerDisplay = computed(() => {
@@ -168,13 +151,12 @@ const speakerDisplay = computed(() => {
     return `${first} and ${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}`;
   }
 
-  // Deterministically shuffle using event ID as seed to avoid favouring any individual
-  const shuffled = seededShuffle(speakers, hashString(props.event._id));
+  // Use pre-shuffled order (randomised once at setup) to avoid favouring any individual
+  const displayed = shuffledSpeakers.value
+    .filter((s) => s && typeof s === 'object' && s.name)
+    .slice(0, MAX_DISPLAYED_SPEAKERS);
 
-  const firstSpeakers = shuffled
-    .slice(0, MAX_DISPLAYED_SPEAKERS)
-    .map((speaker) => speaker.name)
-    .join(', ');
+  const firstSpeakers = displayed.map((speaker) => speaker.name).join(', ');
 
   return `${firstSpeakers}, and ${speakers.length - MAX_DISPLAYED_SPEAKERS} other speaker${speakers.length - MAX_DISPLAYED_SPEAKERS > 1 ? 's' : ''}`;
 });
