@@ -17,7 +17,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { createClient } from '@sanity/client';
+import { getSanityClient } from '../lib/sanity';
 
 export const prerender = false;
 
@@ -31,12 +31,7 @@ interface SitemapEvent {
  * Only includes events that have a slug (required to generate a URL).
  */
 async function getEventSlugs(): Promise<SitemapEvent[]> {
-  const client = createClient({
-    projectId: import.meta.env.SANITY_PROJECT,
-    dataset: import.meta.env.SANITY_DATASET,
-    apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
-    useCdn: true, // CDN is fine for sitemap reads
-  });
+  const client = getSanityClient();
 
   return client.fetch<SitemapEvent[]>(`
     *[_type == "event" && defined(slug.current) && !(_id in path("drafts.**"))] {
