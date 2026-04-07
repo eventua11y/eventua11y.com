@@ -1,7 +1,7 @@
 ---
 description: Reviews Supabase integration including authentication patterns, database schema, Row Level Security policies, migrations, and client setup for the Astro SSR context. Read-only.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: github-copilot/claude-sonnet-4-6
 temperature: 0.1
 steps: 15
 permission:

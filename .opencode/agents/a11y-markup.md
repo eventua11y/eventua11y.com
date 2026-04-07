@@ -1,7 +1,7 @@
 ---
 description: Reviews HTML semantics, ARIA usage, headings, landmarks, alt text, live regions, lang attributes, link text, and page titles against WCAG 2.2. Read-only.
 mode: subagent
-model: anthropic/claude-opus-4-6
+model: github-copilot/claude-opus-4-6
 temperature: 0.1
 steps: 15
 permission:

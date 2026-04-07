@@ -1,7 +1,7 @@
 ---
 description: Authors and runs Playwright accessibility tests. Can edit test files and execute test commands. Load the writing-a11y-tests skill before writing tests.
 mode: subagent
-model: anthropic/claude-opus-4-6
+model: github-copilot/claude-opus-4-6
 temperature: 0.1
 steps: 30
 permission:

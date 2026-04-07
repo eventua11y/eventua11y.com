@@ -1,7 +1,7 @@
 ---
 description: The team's authority on web accessibility. Audits code, advises on planned features, diagnoses problems, and answers accessibility questions. Delegates to a11y-* specialists for detailed analysis. Read-only — does not edit files directly.
 mode: subagent
-model: anthropic/claude-opus-4-6
+model: github-copilot/claude-opus-4-6
 temperature: 0.1
 steps: 25
 permission:
