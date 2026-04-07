@@ -35,7 +35,7 @@ import {
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
-function getSanityClient() {
+export function getSanityClient() {
   return createClient({
     projectId: import.meta.env.SANITY_PROJECT,
     dataset: import.meta.env.SANITY_DATASET,
