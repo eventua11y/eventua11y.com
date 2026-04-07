@@ -68,7 +68,7 @@
     "@awesome.me/webawesome": "^3.3.1",
     "@portabletext/toolkit": "^5.0.1",
     "@sanity/client": "^7.20.0",
-    "@sentry/astro": "^10.43.0",
+    "@sentry/astro": "^10.47.0",
     "@sentry/cli": "^3.3.3",
     "astro-portabletext": "^0.13.0",
     "dayjs": "^1.11.13",
