@@ -7,7 +7,7 @@ steps: 15
 permission:
   edit: deny
   bash:
-    '*': deny
+    '*': ask
     'npm audit*': allow
 ---
 

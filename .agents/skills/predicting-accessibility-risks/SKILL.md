@@ -22,16 +22,17 @@ Before assessing risks, understand what is being proposed:
 
 For each risk identified, produce:
 
-| Field | Description |
-|-------|-------------|
-| **Risk** | One-sentence description of what could go wrong |
-| **Affected users** | Which disability groups are affected and how (screen reader users, keyboard-only users, low vision, cognitive, motor) |
-| **WCAG criteria** | The success criteria at stake (e.g., 2.1.1 Keyboard, 1.3.1 Info and Relationships) |
-| **Likelihood** | How likely is this to occur without explicit attention? High (almost certain without mitigation), Medium (depends on implementation choices), Low (only if a specific mistake is made) |
-| **Cost to fix later** | How expensive is this to retrofit if caught after implementation? High (requires architectural changes), Medium (requires rework of multiple components), Low (localised fix) |
-| **Mitigation** | Specific, actionable recommendation to avoid the risk. Identify the pattern or approach ("use the APG dialog pattern", "ensure focus returns to the trigger on close"), not specific markup or API calls — implementation details belong in the coding phase where they can respond to the actual architecture |
+| Field                 | Description                                                                                                                                                                                                                                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Risk**              | One-sentence description of what could go wrong                                                                                                                                                                                                                                                                |
+| **Affected users**    | Which disability groups are affected and how (screen reader users, keyboard-only users, low vision, cognitive, motor)                                                                                                                                                                                          |
+| **WCAG criteria**     | The success criteria at stake (e.g., 2.1.1 Keyboard, 1.3.1 Info and Relationships)                                                                                                                                                                                                                             |
+| **Likelihood**        | How likely is this to occur without explicit attention? High (almost certain without mitigation), Medium (depends on implementation choices), Low (only if a specific mistake is made)                                                                                                                         |
+| **Cost to fix later** | How expensive is this to retrofit if caught after implementation? High (requires architectural changes), Medium (requires rework of multiple components), Low (localised fix)                                                                                                                                  |
+| **Mitigation**        | Specific, actionable recommendation to avoid the risk. Identify the pattern or approach ("use the APG dialog pattern", "ensure focus returns to the trigger on close"), not specific markup or API calls — implementation details belong in the coding phase where they can respond to the actual architecture |
 
 Focus on risks that meet at least one of these criteria:
+
 - High cost to fix later (structural or architectural)
 - High likelihood (the default implementation path would miss it)
 - Affects a fundamental interaction (navigation, form submission, content access)
@@ -150,20 +151,20 @@ These are common risk areas, not exhaustive checklists. Use them as prompts to i
 ### High Risk
 
 | Risk | Affected users | WCAG | Likelihood | Fix cost | Mitigation |
-|------|---------------|------|------------|----------|------------|
-| ... | ... | ... | ... | ... | ... |
+| ---- | -------------- | ---- | ---------- | -------- | ---------- |
+| ...  | ...            | ...  | ...        | ...      | ...        |
 
 ### Medium Risk
 
 | Risk | Affected users | WCAG | Likelihood | Fix cost | Mitigation |
-|------|---------------|------|------------|----------|------------|
-| ... | ... | ... | ... | ... | ... |
+| ---- | -------------- | ---- | ---------- | -------- | ---------- |
+| ...  | ...            | ...  | ...        | ...      | ...        |
 
 ### Low Risk
 
 | Risk | Affected users | WCAG | Likelihood | Fix cost | Mitigation |
-|------|---------------|------|------------|----------|------------|
-| ... | ... | ... | ... | ... | ... |
+| ---- | -------------- | ---- | ---------- | -------- | ---------- |
+| ...  | ...            | ...  | ...        | ...      | ...        |
 
 ### User research recommendations
 

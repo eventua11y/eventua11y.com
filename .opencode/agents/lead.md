@@ -7,7 +7,8 @@ steps: 25
 color: accent
 permission:
   edit: deny
-  bash: deny
+  bash:
+    '*': ask
   task:
     '*': deny
     'coder': allow

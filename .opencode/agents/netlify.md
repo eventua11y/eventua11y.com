@@ -7,7 +7,7 @@ steps: 15
 permission:
   edit: deny
   bash:
-    '*': deny
+    '*': ask
     'netlify status*': allow
     'netlify env:list*': allow
 ---
