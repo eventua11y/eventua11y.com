@@ -575,7 +575,7 @@ function nonBreakingTime(formatted: string): string {
  * If useLocalTimezone is true, uses the user's timezone.
  * Otherwise uses the event's timezone. Falls back to UTC.
  */
-function resolveTimezone(options: {
+export function resolveTimezone(options: {
   timezone?: string;
   useLocalTimezone?: boolean;
   userTimezone?: string;

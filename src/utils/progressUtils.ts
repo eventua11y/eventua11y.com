@@ -1,6 +1,7 @@
 import dayjs, { type Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { resolveTimezone } from './dateUtils';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -21,17 +22,8 @@ export interface ProgressOptions {
   userTimezone?: string;
 }
 
-/**
- * Resolves the effective timezone for date comparisons.
- * If useLocalTimezone is true, uses the user's timezone.
- * Otherwise uses the event's timezone. Falls back to UTC.
- */
-export function resolveTimezone(options: ProgressOptions): string {
-  if (options.useLocalTimezone) {
-    return options.userTimezone || 'UTC';
-  }
-  return options.timezone || 'UTC';
-}
+// Re-exported from dateUtils to maintain backward compatibility
+export { resolveTimezone };
 
 /**
  * Returns the event start as a dayjs instance in the resolved timezone.

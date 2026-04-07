@@ -19,6 +19,7 @@ import {
   formatDateRange,
   getYearMonth,
   isFullMonth,
+  resolveTimezone,
 } from './dateUtils';
 
 describe('getStartDateFormat', () => {
@@ -1242,5 +1243,40 @@ describe('isFullMonth', () => {
     const start = dayjs.utc('2026-10-01');
     const end = dayjs.utc('2026-10-01');
     expect(isFullMonth(start, end)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveTimezone
+// ---------------------------------------------------------------------------
+
+describe('resolveTimezone', () => {
+  it('returns the event timezone by default', () => {
+    expect(resolveTimezone({ timezone: 'Europe/London' })).toBe(
+      'Europe/London'
+    );
+  });
+
+  it('falls back to UTC when no timezone is set', () => {
+    expect(resolveTimezone({})).toBe('UTC');
+  });
+
+  it('uses userTimezone when useLocalTimezone is true', () => {
+    expect(
+      resolveTimezone({
+        timezone: 'Europe/London',
+        useLocalTimezone: true,
+        userTimezone: 'America/New_York',
+      })
+    ).toBe('America/New_York');
+  });
+
+  it('falls back to UTC when useLocalTimezone is true but userTimezone is missing', () => {
+    expect(
+      resolveTimezone({
+        timezone: 'Europe/London',
+        useLocalTimezone: true,
+      })
+    ).toBe('UTC');
   });
 });

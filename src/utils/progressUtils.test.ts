@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import {
-  resolveTimezone,
   getEventStart,
   getEventEnd,
   isMultiDayAllDay,
@@ -33,43 +32,6 @@ const now = (iso: string) => dayjs.utc(iso);
 /** <abbr> helpers matching the module constants. */
 const HR = ' <abbr title="hours">hr</abbr>';
 const M = ' <abbr title="minutes">m</abbr>';
-
-// ---------------------------------------------------------------------------
-// resolveTimezone
-// ---------------------------------------------------------------------------
-
-describe('resolveTimezone', () => {
-  it('returns the event timezone by default', () => {
-    expect(resolveTimezone({ dateStart: '', timezone: 'Europe/London' })).toBe(
-      'Europe/London'
-    );
-  });
-
-  it('falls back to UTC when no timezone is set', () => {
-    expect(resolveTimezone({ dateStart: '' })).toBe('UTC');
-  });
-
-  it('uses userTimezone when useLocalTimezone is true', () => {
-    expect(
-      resolveTimezone({
-        dateStart: '',
-        timezone: 'Europe/London',
-        useLocalTimezone: true,
-        userTimezone: 'America/New_York',
-      })
-    ).toBe('America/New_York');
-  });
-
-  it('falls back to UTC when useLocalTimezone is true but userTimezone is missing', () => {
-    expect(
-      resolveTimezone({
-        dateStart: '',
-        timezone: 'Europe/London',
-        useLocalTimezone: true,
-      })
-    ).toBe('UTC');
-  });
-});
 
 // ---------------------------------------------------------------------------
 // getEventStart
