@@ -159,3 +159,57 @@ export const getEventUrl = (
   if (!event.slug?.current) return undefined;
   return `/events/${event.slug.current}`;
 };
+
+// ── Format display helpers ─────────────────────────────────────────────
+
+/**
+ * Maps event format codes to human-readable display labels.
+ * Used by child event components and the event detail page.
+ */
+export const FORMAT_LABELS: Record<string, string> = {
+  talk: 'Talk',
+  tutorial: 'Tutorial',
+  workshop: 'Workshop',
+  webinar: 'Webinar',
+  panel: 'Panel',
+  meetup: 'Meetup',
+  interview: 'Interview',
+  qna: 'Q&A',
+  keynote: 'Keynote',
+  roundtable: 'Roundtable',
+};
+
+/**
+ * Maps event format codes to the preposition used before speaker names.
+ * "by" for presentation formats, "with" for collaborative formats.
+ */
+export const FORMAT_PREPOSITIONS: Record<string, string> = {
+  talk: 'by',
+  tutorial: 'by',
+  workshop: 'with',
+  webinar: 'with',
+  panel: 'with',
+  meetup: 'with',
+  interview: 'with',
+  qna: 'with',
+  keynote: 'by',
+  roundtable: 'with',
+};
+
+/**
+ * Returns the display label for an event format code.
+ * Falls back to the raw format string if no mapping exists.
+ */
+export function getFormatLabel(format: string | undefined): string | undefined {
+  if (!format) return undefined;
+  return FORMAT_LABELS[format] || format;
+}
+
+/**
+ * Returns the preposition for an event format code.
+ * Defaults to "by" if no mapping exists.
+ */
+export function getFormatPreposition(format: string | undefined): string {
+  if (!format) return 'by';
+  return FORMAT_PREPOSITIONS[format] || 'by';
+}

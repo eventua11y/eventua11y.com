@@ -7,6 +7,8 @@ import {
   formatMonthHeading,
   compareByDateAsc,
   compareByDateDesc,
+  getFormatLabel,
+  getFormatPreposition,
 } from './eventUtils';
 import type { Event, Book } from '../types/event';
 
@@ -418,5 +420,47 @@ describe('formatMonthHeading', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+// ── getFormatLabel ─────────────────────────────────────────────────────
+
+describe('getFormatLabel', () => {
+  it('returns the display label for known formats', () => {
+    expect(getFormatLabel('talk')).toBe('Talk');
+    expect(getFormatLabel('workshop')).toBe('Workshop');
+    expect(getFormatLabel('qna')).toBe('Q&A');
+    expect(getFormatLabel('keynote')).toBe('Keynote');
+  });
+
+  it('falls back to the raw format string for unknown formats', () => {
+    expect(getFormatLabel('hackathon')).toBe('hackathon');
+  });
+
+  it('returns undefined for undefined input', () => {
+    expect(getFormatLabel(undefined)).toBeUndefined();
+  });
+});
+
+// ── getFormatPreposition ───────────────────────────────────────────────
+
+describe('getFormatPreposition', () => {
+  it('returns "by" for presentation formats', () => {
+    expect(getFormatPreposition('talk')).toBe('by');
+    expect(getFormatPreposition('keynote')).toBe('by');
+    expect(getFormatPreposition('tutorial')).toBe('by');
+  });
+
+  it('returns "with" for collaborative formats', () => {
+    expect(getFormatPreposition('workshop')).toBe('with');
+    expect(getFormatPreposition('panel')).toBe('with');
+  });
+
+  it('defaults to "by" for unknown formats', () => {
+    expect(getFormatPreposition('hackathon')).toBe('by');
+  });
+
+  it('defaults to "by" for undefined input', () => {
+    expect(getFormatPreposition(undefined)).toBe('by');
   });
 });
