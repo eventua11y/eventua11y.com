@@ -12,13 +12,16 @@
  */
 import StaticEvent from './StaticEvent.astro';
 import StaticEventBook from './StaticEventBook.astro';
+import { getEvents, getBooks } from '../lib/sanity';
 import {
-  getEvents,
-  getBooks,
   groupByMonth,
+  filterPastMonths,
   formatMonthHeading,
-} from '../lib/sanity';
+} from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
 interface Props {
   type: 'upcoming' | 'past';
@@ -36,7 +39,22 @@ try {
   ]);
 
   const events = type === 'upcoming' ? future : past;
-  groupedItems = groupByMonth(events, books, type);
+  const items: (Event | Book)[] =
+    type === 'past' ? [...events] : [...events, ...books];
+
+  const utcKey = (item: Event | Book) => {
+    const d = dayjs.utc(item.dateStart);
+    return `${d.year()}-${d.month() + 1}`;
+  };
+
+  let grouped = groupByMonth(items, type, utcKey);
+
+  if (type !== 'past') {
+    const now = dayjs.utc();
+    grouped = filterPastMonths(grouped, now.year(), now.month() + 1);
+  }
+
+  groupedItems = grouped;
 } catch (e) {
   error = `Unable to load ${type} events.`;
   console.error('StaticEventList SSR error:', e);

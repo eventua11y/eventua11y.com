@@ -10,6 +10,11 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
+import {
+  groupByMonth,
+  filterPastMonths,
+  formatMonthHeading,
+} from '../utils/eventUtils';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -26,33 +31,6 @@ const groupedEvents = ref<GroupedEvents>({});
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-/**
- * Formats year-month string into readable heading
- * @param {string} yearMonth - Format: "YYYY-M"
- * @returns {string} Formatted heading (e.g., "This month", "January", or "January 2024")
- */
-const formatDate = (yearMonth: string) => {
-  const [yearStr, monthStr] = yearMonth.split('-');
-  const year = Number(yearStr);
-  const month = Number(monthStr) - 1; // 0-indexed for Date constructor
-  const date = new Date(year, month);
-
-  const userTz = userStore.geo?.timezone || 'UTC';
-  const now = dayjs().tz(userTz);
-
-  // Check if date is current month and year
-  if (month === now.month() && year === now.year()) {
-    return 'This month';
-  }
-
-  const formatter = new Intl.DateTimeFormat('default', {
-    month: 'long',
-    year: year !== now.year() ? 'numeric' : undefined,
-  });
-
-  return formatter.format(date);
-};
-
 /** Delegates to the shared getYearMonth utility */
 const getYearMonth = (item: ListItem): string => {
   const isBook = item._type === 'book';
@@ -67,6 +45,17 @@ const getYearMonth = (item: ListItem): string => {
 };
 
 /**
+ * Formats year-month string into readable heading
+ * @param {string} yearMonth - Format: "YYYY-M"
+ * @returns {string} Formatted heading (e.g., "This month", "January", or "January 2024")
+ */
+const formatDate = (yearMonth: string) => {
+  const userTz = userStore.geo?.timezone || 'UTC';
+  const now = dayjs().tz(userTz);
+  return formatMonthHeading(yearMonth, now);
+};
+
+/**
  * Groups and sorts events and books by month
  * - Groups items by calendar month
  * - Books appear at top of each month group
@@ -76,85 +65,23 @@ const getYearMonth = (item: ListItem): string => {
  */
 const groupEvents = (events: ListItem[]) => {
   // Filter out deadline events from past events
-  const filteredEvents =
+  const filtered =
     props.type === 'past'
       ? events.filter(
           (event) => !('type' in event) || event.type !== 'deadline'
         )
       : events;
 
-  // Initial sort of all events before grouping by month
-  // This ensures events appear in the correct order when first grouped
-  const sortedEvents = [...filteredEvents].sort((a, b) => {
-    // Compare event dates (chronological order)
-    const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-
-    // For past events: reverse chronological order (newest first)
-    // For upcoming events: chronological order (oldest first)
-    return props.type === 'past' ? -comparison : comparison;
-  });
-
-  // Group by year-month using timezone-aware logic
-  const groups = sortedEvents.reduce((groups: GroupedEvents, event) => {
-    const yearMonth = getYearMonth(event);
-    if (!groups[yearMonth]) groups[yearMonth] = [];
-    groups[yearMonth].push(event);
-    return groups;
-  }, {} as GroupedEvents);
-
-  // Sort each month's events: books first, then events by date
-  Object.keys(groups).forEach((yearMonth) => {
-    groups[yearMonth].sort((a, b) => {
-      // If both items are the same type (both books or both events)
-      if ((a._type === 'book') === (b._type === 'book')) {
-        // Calculate chronological comparison (earlier date comes first)
-        const comparison =
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-
-        // For past events: reverse chronological order (newest first)
-        // For upcoming events: chronological order (oldest first)
-        return props.type === 'past' ? -comparison : comparison;
-      }
-      // Different types: Books always go first within their month
-      return a._type === 'book' ? -1 : 1;
-    });
-  });
-
-  // Sort the month groups themselves
-  const sortedGroups = Object.fromEntries(
-    Object.entries(groups).sort((a, b) => {
-      // Extract year and month from month keys
-      const [yearA, monthA] = a[0].split('-').map(Number);
-      const [yearB, monthB] = b[0].split('-').map(Number);
-
-      // First compare years, then months if years are the same
-      const comparison = yearA - yearB || monthA - monthB;
-
-      // For past events: reverse chronological order (newest month first)
-      // For upcoming events: chronological order (oldest month first)
-      return props.type === 'past' ? -comparison : comparison;
-    })
-  );
+  let groups = groupByMonth(filtered, props.type, getYearMonth);
 
   // Filter out past months for upcoming events
   if (props.type !== 'past') {
     const userTz = userStore.geo?.timezone || 'UTC';
     const now = dayjs().tz(userTz);
-    const currentYear = now.year();
-    const currentMonth = now.month() + 1; // dayjs months are 0-indexed
-    Object.keys(sortedGroups).forEach((yearMonth) => {
-      const [year, month] = yearMonth.split('-').map(Number);
-      if (
-        year < currentYear ||
-        (year === currentYear && month < currentMonth)
-      ) {
-        delete sortedGroups[yearMonth];
-      }
-    });
+    groups = filterPastMonths(groups, now.year(), now.month() + 1);
   }
 
-  groupedEvents.value = sortedGroups;
+  groupedEvents.value = groups;
 };
 
 /**

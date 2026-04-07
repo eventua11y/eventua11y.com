@@ -22,6 +22,8 @@ dayjs.extend(isSameOrAfter);
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book } from '../types/event';
+import { groupByMonth, formatMonthHeading } from '../utils/eventUtils';
+export { groupByMonth, formatMonthHeading };
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
@@ -305,102 +307,4 @@ export async function getBooks(): Promise<Book[]> {
     date: book.date,
     dateStart: book.date || '',
   }));
-}
-
-// ── Grouping helpers ───────────────────────────────────────────────────
-
-type ListItem = Event | Book;
-type GroupedItems = Record<string, ListItem[]>;
-
-/**
- * Groups events and books by year-month using UTC.
- * Returns entries sorted chronologically (ascending for upcoming,
- * descending for past).
- */
-export function groupByMonth(
-  events: Event[],
-  books: Book[],
-  type: 'upcoming' | 'past'
-): GroupedItems {
-  const items: ListItem[] =
-    type === 'past' ? [...events] : [...events, ...books];
-
-  // Sort chronologically first
-  items.sort((a, b) => {
-    const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-    return type === 'past' ? -comparison : comparison;
-  });
-
-  // Group by YYYY-M
-  const groups: GroupedItems = {};
-  for (const item of items) {
-    const d = dayjs.utc(item.dateStart);
-    const key = `${d.year()}-${d.month() + 1}`;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(item);
-  }
-
-  // Sort within each group: books first, then by date
-  for (const key of Object.keys(groups)) {
-    groups[key].sort((a, b) => {
-      if ((a._type === 'book') === (b._type === 'book')) {
-        const comparison =
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-        return type === 'past' ? -comparison : comparison;
-      }
-      return a._type === 'book' ? -1 : 1;
-    });
-  }
-
-  // For upcoming: drop month groups that are in the past.
-  // This mirrors the client-side EventList.vue behaviour (lines 140-155)
-  // and prevents old books from appearing in the upcoming list.
-  if (type !== 'past') {
-    const now = dayjs.utc();
-    const currentYear = now.year();
-    const currentMonth = now.month() + 1; // dayjs months are 0-indexed
-    for (const key of Object.keys(groups)) {
-      const [year, month] = key.split('-').map(Number);
-      if (
-        year < currentYear ||
-        (year === currentYear && month < currentMonth)
-      ) {
-        delete groups[key];
-      }
-    }
-  }
-
-  // Sort month keys
-  const sortedEntries = Object.entries(groups).sort((a, b) => {
-    const [yearA, monthA] = a[0].split('-').map(Number);
-    const [yearB, monthB] = b[0].split('-').map(Number);
-    const comparison = yearA - yearB || monthA - monthB;
-    return type === 'past' ? -comparison : comparison;
-  });
-
-  return Object.fromEntries(sortedEntries);
-}
-
-/**
- * Formats a year-month key into a human-readable heading.
- * Uses UTC for consistency with the SSR context.
- */
-export function formatMonthHeading(yearMonth: string): string {
-  const [yearStr, monthStr] = yearMonth.split('-');
-  const year = Number(yearStr);
-  const month = Number(monthStr) - 1; // 0-indexed for Date constructor
-  const date = new Date(year, month);
-
-  const now = new Date();
-  if (month === now.getMonth() && year === now.getFullYear()) {
-    return 'This month';
-  }
-
-  const formatter = new Intl.DateTimeFormat('en', {
-    month: 'long',
-    year: year !== now.getFullYear() ? 'numeric' : undefined,
-  });
-
-  return formatter.format(date);
 }
