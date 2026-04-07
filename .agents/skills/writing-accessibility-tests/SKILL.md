@@ -98,7 +98,11 @@ export const test = base.extend<A11yFixtures>({
   makeAxeBuilder: async ({ page }, use) => {
     await use(() =>
       new AxeBuilder({ page }).withTags([
-        'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa',
+        'wcag2a',
+        'wcag2aa',
+        'wcag21a',
+        'wcag21aa',
+        'wcag22aa',
       ])
     );
   },
@@ -120,7 +124,9 @@ Tests then use:
 ```typescript
 import { test } from './fixtures/base';
 
-test('page has no accessibility violations', async ({ expectNoAxeViolations }) => {
+test('page has no accessibility violations', async ({
+  expectNoAxeViolations,
+}) => {
   await expectNoAxeViolations();
 });
 ```
@@ -180,9 +186,9 @@ await page.waitForSelector('#event-list');
 ### Accessible names
 
 ```typescript
-await expect(
-  page.getByRole('textbox', { name: 'Email' })
-).toHaveAccessibleName('Email');
+await expect(page.getByRole('textbox', { name: 'Email' })).toHaveAccessibleName(
+  'Email'
+);
 
 await expect(
   page.getByRole('button', { name: 'Save profile' })
@@ -233,8 +239,14 @@ expect(h1Count).toBe(1);
 ### Live regions
 
 ```typescript
-await expect(page.locator('.filter-count')).toHaveAttribute('aria-live', 'polite');
-await expect(page.locator('.filter-count')).toHaveAttribute('aria-atomic', 'true');
+await expect(page.locator('.filter-count')).toHaveAttribute(
+  'aria-live',
+  'polite'
+);
+await expect(page.locator('.filter-count')).toHaveAttribute(
+  'aria-atomic',
+  'true'
+);
 ```
 
 ### Dialog accessibility
@@ -306,9 +318,14 @@ axe cannot evaluate contrast for elements styled with CSS custom property chains
 
 ```typescript
 const fgColor = await element.evaluate((el) => getComputedStyle(el).color);
-const bgColor = await container.evaluate((el) => getComputedStyle(el).backgroundColor);
+const bgColor = await container.evaluate(
+  (el) => getComputedStyle(el).backgroundColor
+);
 const ratio = contrastRatio(fgColor, bgColor);
-expect(ratio, `Contrast ratio is ${ratio.toFixed(2)}:1, expected at least 4.5:1`).toBeGreaterThanOrEqual(4.5);
+expect(
+  ratio,
+  `Contrast ratio is ${ratio.toFixed(2)}:1, expected at least 4.5:1`
+).toBeGreaterThanOrEqual(4.5);
 ```
 
 ## Shadow DOM patterns
@@ -320,10 +337,16 @@ Playwright's `toHaveAccessibleName()` cannot pierce shadow DOM. For web componen
 await expect(page.locator('#my-button')).toContainText('Button Label');
 
 // Icon-only button — check the icon's label attribute
-await expect(page.locator('#my-button icon-element')).toHaveAttribute('label', /.+/);
+await expect(page.locator('#my-button icon-element')).toHaveAttribute(
+  'label',
+  /.+/
+);
 
 // Dialog/drawer — check the label attribute on the host
-await expect(page.locator('#my-dialog')).toHaveAttribute('label', 'Dialog Name');
+await expect(page.locator('#my-dialog')).toHaveAttribute(
+  'label',
+  'Dialog Name'
+);
 
 // Switch/select — check label attribute
 await expect(page.locator('#my-switch')).toHaveAttribute('label', /.+/);

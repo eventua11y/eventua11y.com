@@ -32,24 +32,24 @@ Effort estimates based only on the issue description are unreliable. Before esti
 
 For each issue, produce:
 
-| Field | Description |
-|-------|-------------|
-| **Issue** | One-sentence description of the problem |
-| **WCAG** | Success criterion reference (e.g., 2.1.1 Keyboard) |
-| **Severity** | Critical (A violation, blocker), Serious (AA violation), Moderate (best practice) |
-| **Scope** | How many files, components, or pages are affected |
-| **Effort** | T-shirt size: XS, S, M, L, XL (see definitions below) |
-| **Rationale** | Brief explanation of what the fix involves and why it takes this much effort |
-| **Dependencies** | Other issues or changes this fix depends on or enables |
+| Field            | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| **Issue**        | One-sentence description of the problem                                           |
+| **WCAG**         | Success criterion reference (e.g., 2.1.1 Keyboard)                                |
+| **Severity**     | Critical (A violation, blocker), Serious (AA violation), Moderate (best practice) |
+| **Scope**        | How many files, components, or pages are affected                                 |
+| **Effort**       | T-shirt size: XS, S, M, L, XL (see definitions below)                             |
+| **Rationale**    | Brief explanation of what the fix involves and why it takes this much effort      |
+| **Dependencies** | Other issues or changes this fix depends on or enables                            |
 
 ### Effort definitions
 
-| Size | Typical scope | Examples |
-|------|--------------|---------|
-| **XS** | Single attribute or property change. One file, no logic changes. | Add missing `alt` text, add `aria-label` to a button, add `autocomplete` attribute, add `lang` attribute |
-| **S** | Localised change within one component. May involve a few attributes and minor template restructuring. | Associate error messages with fields via `aria-describedby`, add visible labels to replace placeholder-only labels, add `aria-live` to a status region |
-| **M** | Changes to one component plus its consumers, or changes spanning 2-5 files. May require new state management. | Implement keyboard navigation for a custom widget, add focus management to a modal (trap + return), make a data table sortable by keyboard, add skip link |
-| **L** | Structural changes affecting multiple components or a shared layout. May require new components, hooks, or utility functions. | Redesign a drag-and-drop interface to have a keyboard alternative, retrofit focus management across all route changes, build an accessible combobox to replace a custom dropdown |
+| Size   | Typical scope                                                                                                                            | Examples                                                                                                                                                                                                |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **XS** | Single attribute or property change. One file, no logic changes.                                                                         | Add missing `alt` text, add `aria-label` to a button, add `autocomplete` attribute, add `lang` attribute                                                                                                |
+| **S**  | Localised change within one component. May involve a few attributes and minor template restructuring.                                    | Associate error messages with fields via `aria-describedby`, add visible labels to replace placeholder-only labels, add `aria-live` to a status region                                                  |
+| **M**  | Changes to one component plus its consumers, or changes spanning 2-5 files. May require new state management.                            | Implement keyboard navigation for a custom widget, add focus management to a modal (trap + return), make a data table sortable by keyboard, add skip link                                               |
+| **L**  | Structural changes affecting multiple components or a shared layout. May require new components, hooks, or utility functions.            | Redesign a drag-and-drop interface to have a keyboard alternative, retrofit focus management across all route changes, build an accessible combobox to replace a custom dropdown                        |
 | **XL** | Architectural changes. Affects the application's structure, routing, state management, or component library. Usually a multi-day effort. | Replace a custom component system with an accessible component library, restructure page layouts for correct landmark hierarchy across all routes, implement a comprehensive form error handling system |
 
 ### Factors that increase effort
@@ -74,12 +74,12 @@ When estimating a set of issues (e.g., a full audit report), also provide:
 ### Summary table
 
 | Effort | Count | Examples |
-|--------|-------|---------|
-| XS | n | ... |
-| S | n | ... |
-| M | n | ... |
-| L | n | ... |
-| XL | n | ... |
+| ------ | ----- | -------- |
+| XS     | n     | ...      |
+| S      | n     | ...      |
+| M      | n     | ...      |
+| L      | n     | ...      |
+| XL     | n     | ...      |
 
 ### Dependency graph
 
@@ -101,18 +101,18 @@ Highlight issues that are XS or S effort with Critical or Serious severity. Thes
 ### Individual Estimates
 
 | Issue | WCAG | Severity | Scope | Effort | Rationale |
-|-------|------|----------|-------|--------|-----------|
-| ... | ... | ... | ... | ... | ... |
+| ----- | ---- | -------- | ----- | ------ | --------- |
+| ...   | ...  | ...      | ...   | ...    | ...       |
 
 ### Summary
 
 | Effort | Count |
-|--------|-------|
-| XS | n |
-| S | n |
-| M | n |
-| L | n |
-| XL | n |
+| ------ | ----- |
+| XS     | n     |
+| S      | n     |
+| M      | n     |
+| L      | n     |
+| XL     | n     |
 
 ### Dependencies
 

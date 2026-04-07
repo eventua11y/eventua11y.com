@@ -29,12 +29,12 @@ If the project defines its own effort estimation convention (e.g. story points, 
 
 If issues arrive without effort estimates and `estimating-accessibility-effort` is not available, use this fallback scale:
 
-| Size | Typical scope |
-|------|--------------|
-| **XS** | Single attribute or property change, one file |
-| **S** | Localised change within one component, a few attributes |
-| **M** | Changes to one component plus its consumers, or 2-5 files |
-| **L** | Structural changes affecting multiple components or a shared layout |
+| Size   | Typical scope                                                                   |
+| ------ | ------------------------------------------------------------------------------- |
+| **XS** | Single attribute or property change, one file                                   |
+| **S**  | Localised change within one component, a few attributes                         |
+| **M**  | Changes to one component plus its consumers, or 2-5 files                       |
+| **L**  | Structural changes affecting multiple components or a shared layout             |
 | **XL** | Architectural changes affecting routing, state management, or component library |
 
 ## Pre-scoring overrides
@@ -57,45 +57,45 @@ Each issue is scored on three dimensions. The priority score determines the reme
 
 Severity measures how badly the user's experience is degraded. It is defined by functional impact, not WCAG conformance level — though the two often correlate.
 
-| Rating | Definition | Score |
-|--------|-----------|-------|
-| Blocker | Assistive technology users cannot access or operate the feature at all. Typically a WCAG Level A failure. | 5 |
-| Critical | The feature is technically operable but so degraded that most AT users will abandon the task. | 4 |
-| Serious | Significant friction or confusion. Users can complete the task but with considerable difficulty. Often a WCAG Level AA failure. | 3 |
-| Moderate | Noticeable inconvenience but the task is completable without major difficulty. | 2 |
-| Minor | Best practice or AAA improvement. Marginal polish rather than a barrier. | 1 |
+| Rating   | Definition                                                                                                                      | Score |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Blocker  | Assistive technology users cannot access or operate the feature at all. Typically a WCAG Level A failure.                       | 5     |
+| Critical | The feature is technically operable but so degraded that most AT users will abandon the task.                                   | 4     |
+| Serious  | Significant friction or confusion. Users can complete the task but with considerable difficulty. Often a WCAG Level AA failure. | 3     |
+| Moderate | Noticeable inconvenience but the task is completable without major difficulty.                                                  | 2     |
+| Minor    | Best practice or AAA improvement. Marginal polish rather than a barrier.                                                        | 1     |
 
 ### User impact
 
 User impact measures how many people are affected and how severely their experience is degraded. This is distinct from WCAG severity — a Serious (AA) issue that affects every keyboard user on every page has higher user impact than a Critical (A) issue on a rarely visited admin screen.
 
-| Rating | Definition | Score |
-|--------|-----------|-------|
-| Pervasive | Affects a core user flow AND appears across many pages/views. Multiple disability groups impacted. | 5 |
-| High | Affects a core user flow on specific pages, or a secondary flow across many pages. Multiple groups or a large single group impacted. | 4 |
-| Medium | Affects a secondary flow or a specific page. One disability group primarily impacted. | 3 |
-| Low | Affects a rarely used feature or a non-critical edge case. | 2 |
-| Minimal | Cosmetic or very minor inconvenience. Almost no users will notice. | 1 |
+| Rating    | Definition                                                                                                                           | Score |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| Pervasive | Affects a core user flow AND appears across many pages/views. Multiple disability groups impacted.                                   | 5     |
+| High      | Affects a core user flow on specific pages, or a secondary flow across many pages. Multiple groups or a large single group impacted. | 4     |
+| Medium    | Affects a secondary flow or a specific page. One disability group primarily impacted.                                                | 3     |
+| Low       | Affects a rarely used feature or a non-critical edge case.                                                                           | 2     |
+| Minimal   | Cosmetic or very minor inconvenience. Almost no users will notice.                                                                   | 1     |
 
 ### Effort (used as divisor — lower effort increases priority)
 
 Lower effort means faster delivery of accessibility improvement. All else being equal, fix the easy things first.
 
-| Rating | Effort sizes | Score |
-|--------|-------------|-------|
-| Low effort | XS, S | 3 |
-| Medium effort | M | 2 |
-| High effort | L, XL | 1 |
+| Rating        | Effort sizes | Score |
+| ------------- | ------------ | ----- |
+| Low effort    | XS, S        | 3     |
+| Medium effort | M            | 2     |
+| High effort   | L, XL        | 1     |
 
 ### Reach modifier (optional)
 
 For projects with shared components, templates, or design-system tokens that propagate across multiple pages, apply a reach modifier to the final score. Skip this modifier for small sites or single-page applications where reach differentiation adds no value.
 
-| Reach | Definition | Modifier |
-|-------|-----------|----------|
-| Systemic | Shared component / template / design token reused across many pages or in a design system | × 1.5 |
-| Multi-page | Appears on several distinct pages or views | × 1.25 |
-| Single page | Isolated to one page or view | × 1.0 (no change) |
+| Reach       | Definition                                                                                | Modifier          |
+| ----------- | ----------------------------------------------------------------------------------------- | ----------------- |
+| Systemic    | Shared component / template / design token reused across many pages or in a design system | × 1.5             |
+| Multi-page  | Appears on several distinct pages or views                                                | × 1.25            |
+| Single page | Isolated to one page or view                                                              | × 1.0 (no change) |
 
 If reach is not assessed, use the base priority score as the final score.
 
@@ -157,21 +157,21 @@ After scoring all issues and assigning tiers, run a quick validation pass:
 
 ### Tier 1 — Fix Immediately
 
-| # | Issue | WCAG | Severity | Impact | Effort | Reach | Score |
-|---|-------|------|----------|--------|--------|-------|-------|
-| 1 | ... | ... | ... | ... | ... | ... | ... |
+| #   | Issue | WCAG | Severity | Impact | Effort | Reach | Score |
+| --- | ----- | ---- | -------- | ------ | ------ | ----- | ----- |
+| 1   | ...   | ...  | ...      | ...    | ...    | ...   | ...   |
 
 ### Tier 2 — Plan for Next Cycle
 
-| # | Issue | WCAG | Severity | Impact | Effort | Reach | Score |
-|---|-------|------|----------|--------|--------|-------|-------|
-| 1 | ... | ... | ... | ... | ... | ... | ... |
+| #   | Issue | WCAG | Severity | Impact | Effort | Reach | Score |
+| --- | ----- | ---- | -------- | ------ | ------ | ----- | ----- |
+| 1   | ...   | ...  | ...      | ...    | ...    | ...   | ...   |
 
 ### Tier 3 — Schedule When Capacity Allows
 
-| # | Issue | WCAG | Severity | Impact | Effort | Reach | Score |
-|---|-------|------|----------|--------|--------|-------|-------|
-| 1 | ... | ... | ... | ... | ... | ... | ... |
+| #   | Issue | WCAG | Severity | Impact | Effort | Reach | Score |
+| --- | ----- | ---- | -------- | ------ | ------ | ----- | ----- |
+| 1   | ...   | ...  | ...      | ...    | ...    | ...   | ...   |
 
 ### Batches
 
