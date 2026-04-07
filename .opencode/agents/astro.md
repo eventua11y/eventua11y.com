@@ -6,7 +6,8 @@ temperature: 0.1
 steps: 15
 permission:
   edit: deny
-  bash: deny
+  bash:
+    '*': ask
 ---
 
 Follow the instructions in `.agents/astro.md`.

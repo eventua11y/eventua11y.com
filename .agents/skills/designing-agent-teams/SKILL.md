@@ -213,7 +213,7 @@ Not every specialist needs two touchpoints. Use dual-touchpoint for concerns tha
 
 When using dual-touchpoint specialists, name them "Specialist" rather than "Reviewer" — "Reviewer" implies they only look at finished work and doesn't reflect the advisory role.
 
-The early-pass output should include a structured **"Coder Requirements"** section: a numbered list of specific, implementable requirements arising from the risk assessment. Each item states *what* to do and *why* (citing the relevant standard or criterion). This section is passed directly to the Coder — write it for that audience. The Lead should pass this section verbatim rather than summarising it; detail is lost in translation when the Lead paraphrases specialist guidance.
+The early-pass output should include a structured **"Coder Requirements"** section: a numbered list of specific, implementable requirements arising from the risk assessment. Each item states _what_ to do and _why_ (citing the relevant standard or criterion). This section is passed directly to the Coder — write it for that audience. The Lead should pass this section verbatim rather than summarising it; detail is lost in translation when the Lead paraphrases specialist guidance.
 
 ### Ordering quality gates
 
