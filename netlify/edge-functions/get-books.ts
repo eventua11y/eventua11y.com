@@ -6,7 +6,10 @@
  * - Returns minimal data structure for display
  */
 
-import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
+import { BOOKS_QUERY } from './lib/queries.ts';
+import { createSanityClient } from './lib/sanity-client.ts';
+
+type SanityClient = ReturnType<typeof createSanityClient>;
 
 /**
  * Cache configuration to reduce Sanity API calls
@@ -20,39 +23,6 @@ const cache = {
 };
 
 /**
- * Gets Sanity configuration from environment variables
- * @returns {Object} Sanity client configuration
- */
-function getConfig() {
-  const projectId = Deno.env.get('SANITY_PROJECT');
-  const dataset = Deno.env.get('SANITY_DATASET');
-  const apiVersion = Deno.env.get('SANITY_API_VERSION');
-  const useCdn = Deno.env.get('SANITY_CDN') === 'true';
-
-  return {
-    projectId: projectId || '',
-    dataset: dataset || '',
-    apiVersion: apiVersion || '2021-03-25',
-    useCdn,
-  };
-}
-
-/**
- * Creates and configures Sanity client
- * @returns {SanityClient} Configured Sanity client
- * @throws {Error} If client initialization fails
- */
-function createSanityClient(): SanityClient {
-  try {
-    const config = getConfig();
-    return createClient(config);
-  } catch (error) {
-    console.error('Failed to create Sanity client:', error);
-    throw new Error('Sanity client initialization failed', { cause: error });
-  }
-}
-
-/**
  * Fetches books from Sanity and processes them
  * - Retrieves all non-draft book documents
  * - Orders books by date descending
@@ -64,14 +34,7 @@ function createSanityClient(): SanityClient {
  */
 async function fetchBooksFromSanity(client: SanityClient) {
   try {
-    return await client.fetch(`
-      *[_type == "book"] | order(date desc) {
-        _id,
-        title,
-        link,
-        date
-      }
-    `);
+    return await client.fetch(BOOKS_QUERY);
   } catch (error) {
     console.error('[fetchBooksFromSanity] Failed:', error);
     throw new Error('Failed to fetch books from Sanity', { cause: error });

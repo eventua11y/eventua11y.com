@@ -23,6 +23,15 @@ dayjs.extend(isSameOrAfter);
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book } from '../types/event';
 import { compareByDateAsc, compareByDateDesc } from '../utils/eventUtils';
+import {
+  PARENT_EVENTS_QUERY,
+  CHILD_EVENTS_QUERY,
+  BOOKS_QUERY,
+} from '../../netlify/edge-functions/lib/queries';
+import {
+  assembleEvents,
+  type AssemblableEvent,
+} from '../../netlify/edge-functions/lib/assembleEvents';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
@@ -72,83 +81,13 @@ export async function getEvents(): Promise<{
 }> {
   const client = getSanityClient();
 
-  const [parentEvents, childEvents]: [RawEvent[], RawEvent[]] =
+  const [parentEvents, childEvents]: [AssemblableEvent[], AssemblableEvent[]] =
     await Promise.all([
-      client.fetch(`
-        *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
-          _id,
-          _type,
-          type,
-          title,
-          slug,
-          description,
-          dateStart,
-          dateEnd,
-          timezone,
-          website,
-          attendanceMode,
-          callForSpeakers,
-          callForSpeakersClosingDate,
-          parent,
-          day,
-          isFree,
-          isParent,
-          location,
-          "speakers": speakers[]->{ _id, name }
-        }
-      `),
-      client.fetch(`
-        *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
-          _id,
-          title,
-          slug,
-          type,
-          dateStart,
-          dateEnd,
-          timezone,
-          day,
-          website,
-          format,
-          scheduled,
-          parent,
-          "speakers": speakers[]->{ _id, name }
-        } | order(dateStart asc)
-      `),
+      client.fetch(PARENT_EVENTS_QUERY),
+      client.fetch(CHILD_EVENTS_QUERY),
     ]);
 
-  // Group children by parent
-  const childrenByParent: Record<string, RawEvent[]> = {};
-  for (const child of childEvents) {
-    const parentId = child.parent?._ref;
-    if (parentId) {
-      if (!childrenByParent[parentId]) childrenByParent[parentId] = [];
-      childrenByParent[parentId].push(child);
-    }
-  }
-
-  // Attach children + create CFS deadline events
-  const allEvents: Event[] = [];
-  for (const event of parentEvents) {
-    const children = childrenByParent[event._id];
-    allEvents.push({
-      ...event,
-      children: children && children.length > 0 ? children : undefined,
-    } as Event);
-
-    if (event.callForSpeakersClosingDate) {
-      allEvents.push({
-        _id: `${event._id}-cfs-deadline`,
-        _type: 'event',
-        type: 'deadline',
-        title: event.title,
-        dateStart: event.callForSpeakersClosingDate,
-        timezone: event.timezone,
-        website: event.website,
-        attendanceMode: event.attendanceMode,
-        callForSpeakers: event.callForSpeakers,
-      } as Event);
-    }
-  }
+  const allEvents = assembleEvents(parentEvents, childEvents) as Event[];
 
   // Classify using UTC
   // The edge function splits events into today / future / past, then the
@@ -283,14 +222,7 @@ interface RawBook {
 export async function getBooks(): Promise<Book[]> {
   const client = getSanityClient();
 
-  const rawBooks: RawBook[] = await client.fetch(`
-    *[_type == "book"] | order(date desc) {
-      _id,
-      title,
-      link,
-      date
-    }
-  `);
+  const rawBooks: RawBook[] = await client.fetch(BOOKS_QUERY);
 
   return rawBooks.map((book) => ({
     _id: book._id,
