@@ -286,15 +286,13 @@ async function getRawEvents(client: SanityClient): Promise<Event[]> {
   console.log('[getRawEvents] Fetching fresh data from Sanity');
 
   // Fetch parent events and child events in two queries instead of N+1
-  const [parentEvents, childEvents]: [Event[], Event[]] = await Promise.all([
-    client.fetch(PARENT_EVENTS_QUERY),
-    client.fetch(CHILD_EVENTS_QUERY),
-  ]);
+  const [parentEvents, childEvents]: [AssemblableEvent[], AssemblableEvent[]] =
+    await Promise.all([
+      client.fetch(PARENT_EVENTS_QUERY),
+      client.fetch(CHILD_EVENTS_QUERY),
+    ]);
 
-  const flattenedEvents = assembleEvents(
-    parentEvents as unknown as AssemblableEvent[],
-    childEvents as unknown as AssemblableEvent[]
-  ) as Event[];
+  const flattenedEvents = assembleEvents(parentEvents, childEvents) as Event[];
 
   // Update cache with raw events
   cache.events = flattenedEvents;

@@ -22,7 +22,6 @@ export interface AssemblableEvent {
   callForSpeakersClosingDate?: string;
   parent?: { _ref: string };
   children?: AssemblableEvent[];
-  [key: string]: unknown;
 }
 
 /**
@@ -33,12 +32,12 @@ export interface AssemblableEvent {
  * @param childEvents - Events with a parent reference
  * @returns Flat array of assembled events (parents with children attached, plus CFS deadlines)
  */
-export function assembleEvents<T extends AssemblableEvent>(
-  parentEvents: T[],
-  childEvents: T[]
-): T[] {
+export function assembleEvents(
+  parentEvents: AssemblableEvent[],
+  childEvents: AssemblableEvent[]
+): AssemblableEvent[] {
   // Group children by parent
-  const childrenByParent: Record<string, T[]> = {};
+  const childrenByParent: Record<string, AssemblableEvent[]> = {};
   for (const child of childEvents) {
     const parentId = child.parent?._ref;
     if (parentId) {
@@ -48,7 +47,7 @@ export function assembleEvents<T extends AssemblableEvent>(
   }
 
   // Attach children + create CFS deadline events
-  const allEvents: T[] = [];
+  const allEvents: AssemblableEvent[] = [];
   for (const event of parentEvents) {
     const children = childrenByParent[event._id];
     allEvents.push({
@@ -67,7 +66,7 @@ export function assembleEvents<T extends AssemblableEvent>(
         website: event.website,
         attendanceMode: event.attendanceMode,
         callForSpeakers: event.callForSpeakers,
-      } as T);
+      });
     }
   }
 

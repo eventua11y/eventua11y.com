@@ -81,16 +81,13 @@ export async function getEvents(): Promise<{
 }> {
   const client = getSanityClient();
 
-  const [parentEvents, childEvents]: [RawEvent[], RawEvent[]] =
+  const [parentEvents, childEvents]: [AssemblableEvent[], AssemblableEvent[]] =
     await Promise.all([
       client.fetch(PARENT_EVENTS_QUERY),
       client.fetch(CHILD_EVENTS_QUERY),
     ]);
 
-  const allEvents = assembleEvents(
-    parentEvents as unknown as AssemblableEvent[],
-    childEvents as unknown as AssemblableEvent[]
-  ) as unknown as Event[];
+  const allEvents = assembleEvents(parentEvents, childEvents) as Event[];
 
   // Classify using UTC
   // The edge function splits events into today / future / past, then the
