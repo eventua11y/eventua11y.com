@@ -1,6 +1,30 @@
 import dayjs from 'dayjs';
 import type { Event, ChildEvent, Book } from '../types/event';
 
+// ── Date comparators ───────────────────────────────────────────────────
+
+/**
+ * Comparator: sorts items with a `dateStart` field in ascending
+ * chronological order (earliest first).
+ */
+export function compareByDateAsc(
+  a: { dateStart: string },
+  b: { dateStart: string }
+): number {
+  return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+}
+
+/**
+ * Comparator: sorts items with a `dateStart` field in descending
+ * chronological order (latest first).
+ */
+export function compareByDateDesc(
+  a: { dateStart: string },
+  b: { dateStart: string }
+): number {
+  return new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime();
+}
+
 // ── Grouping helpers ───────────────────────────────────────────────────
 
 type ListItem = Event | Book;
@@ -20,11 +44,8 @@ export function groupByMonth(
   getKey: (item: ListItem) => string
 ): GroupedItems {
   // Sort chronologically first
-  const sorted = [...items].sort((a, b) => {
-    const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-    return type === 'past' ? -comparison : comparison;
-  });
+  const comparator = type === 'past' ? compareByDateDesc : compareByDateAsc;
+  const sorted = [...items].sort(comparator);
 
   // Group by year-month key
   const groups: GroupedItems = {};
@@ -38,9 +59,7 @@ export function groupByMonth(
   for (const key of Object.keys(groups)) {
     groups[key].sort((a, b) => {
       if ((a._type === 'book') === (b._type === 'book')) {
-        const comparison =
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-        return type === 'past' ? -comparison : comparison;
+        return comparator(a, b);
       }
       return a._type === 'book' ? -1 : 1;
     });

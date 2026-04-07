@@ -5,6 +5,8 @@ import {
   groupByMonth,
   filterPastMonths,
   formatMonthHeading,
+  compareByDateAsc,
+  compareByDateDesc,
 } from './eventUtils';
 import type { Event, Book } from '../types/event';
 
@@ -123,6 +125,76 @@ const utcKey = (item: Event | Book) => {
   const d = new Date(item.dateStart);
   return `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}`;
 };
+
+// ── compareByDateAsc / compareByDateDesc ───────────────────────────────
+
+describe('compareByDateAsc', () => {
+  it('returns a negative number when a comes before b', () => {
+    const a = { dateStart: '2026-01-01T00:00:00Z' };
+    const b = { dateStart: '2026-06-01T00:00:00Z' };
+    expect(compareByDateAsc(a, b)).toBeLessThan(0);
+  });
+
+  it('returns a positive number when a comes after b', () => {
+    const a = { dateStart: '2026-06-01T00:00:00Z' };
+    const b = { dateStart: '2026-01-01T00:00:00Z' };
+    expect(compareByDateAsc(a, b)).toBeGreaterThan(0);
+  });
+
+  it('returns 0 for equal dates', () => {
+    const a = { dateStart: '2026-03-15T10:00:00Z' };
+    const b = { dateStart: '2026-03-15T10:00:00Z' };
+    expect(compareByDateAsc(a, b)).toBe(0);
+  });
+
+  it('sorts an array into ascending chronological order', () => {
+    const items = [
+      { dateStart: '2026-05-01T00:00:00Z' },
+      { dateStart: '2026-01-01T00:00:00Z' },
+      { dateStart: '2026-03-01T00:00:00Z' },
+    ];
+    const sorted = [...items].sort(compareByDateAsc);
+    expect(sorted.map((i) => i.dateStart)).toEqual([
+      '2026-01-01T00:00:00Z',
+      '2026-03-01T00:00:00Z',
+      '2026-05-01T00:00:00Z',
+    ]);
+  });
+});
+
+describe('compareByDateDesc', () => {
+  it('returns a positive number when a comes before b', () => {
+    const a = { dateStart: '2026-01-01T00:00:00Z' };
+    const b = { dateStart: '2026-06-01T00:00:00Z' };
+    expect(compareByDateDesc(a, b)).toBeGreaterThan(0);
+  });
+
+  it('returns a negative number when a comes after b', () => {
+    const a = { dateStart: '2026-06-01T00:00:00Z' };
+    const b = { dateStart: '2026-01-01T00:00:00Z' };
+    expect(compareByDateDesc(a, b)).toBeLessThan(0);
+  });
+
+  it('returns 0 for equal dates', () => {
+    const a = { dateStart: '2026-03-15T10:00:00Z' };
+    const b = { dateStart: '2026-03-15T10:00:00Z' };
+    expect(compareByDateDesc(a, b)).toBe(0);
+  });
+
+  it('sorts an array into descending chronological order', () => {
+    const items = [
+      { dateStart: '2026-01-01T00:00:00Z' },
+      { dateStart: '2026-05-01T00:00:00Z' },
+      { dateStart: '2026-03-01T00:00:00Z' },
+    ];
+    const sorted = [...items].sort(compareByDateDesc);
+    expect(sorted.map((i) => i.dateStart)).toEqual([
+      '2026-05-01T00:00:00Z',
+      '2026-03-01T00:00:00Z',
+      '2026-01-01T00:00:00Z',
+    ]);
+  });
+});
 
 // ── groupByMonth ───────────────────────────────────────────────────────
 
