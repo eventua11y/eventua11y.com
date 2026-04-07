@@ -6,13 +6,22 @@
  * - Implements caching to reduce API calls
  */
 
-import { createClient, SanityClient } from 'https://esm.sh/@sanity/client';
+import { SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
 import utc from 'https://esm.sh/dayjs/plugin/utc';
 import timezone from 'https://esm.sh/dayjs/plugin/timezone';
 import isBetween from 'https://esm.sh/dayjs/plugin/isBetween';
 import isSameOrBefore from 'https://esm.sh/dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'https://esm.sh/dayjs/plugin/isSameOrAfter';
+import {
+  PARENT_EVENTS_QUERY,
+  CHILD_EVENTS_QUERY,
+} from '../../src/queries/events.ts';
+import {
+  assembleEvents,
+  type AssemblableEvent,
+} from '../../src/queries/assembleEvents.ts';
+import { createSanityClient } from './sanity-client.ts';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -85,39 +94,6 @@ const cache: RawEventsCache = {
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };
-
-/**
- * Gets Sanity configuration from environment variables
- * @returns {Object} Sanity client configuration
- */
-function getConfig() {
-  const projectId = Deno.env.get('SANITY_PROJECT');
-  const dataset = Deno.env.get('SANITY_DATASET');
-  const apiVersion = Deno.env.get('SANITY_API_VERSION');
-  const useCdn = Deno.env.get('SANITY_CDN') === 'true';
-
-  return {
-    projectId: projectId || '',
-    dataset: dataset || '',
-    apiVersion: apiVersion || '2021-03-25',
-    useCdn,
-  };
-}
-
-/**
- * Creates and configures Sanity client
- * @returns {SanityClient} Configured Sanity client
- * @throws {Error} If client initialization fails
- */
-function createSanityClient(): SanityClient {
-  try {
-    const config = getConfig();
-    return createClient(config);
-  } catch (error) {
-    console.error('Failed to create Sanity client:', error);
-    throw new Error('Sanity client initialization failed', { cause: error });
-  }
-}
 
 /**
  * Sorts events array by start date
@@ -317,82 +293,14 @@ async function getRawEvents(client: SanityClient): Promise<Event[]> {
 
   // Fetch parent events and child events in two queries instead of N+1
   const [parentEvents, childEvents]: [Event[], Event[]] = await Promise.all([
-    client.fetch(`
-      *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
-        _id,
-        _type,
-        type,
-        title,
-        slug,
-        description,
-        dateStart,
-        dateEnd,
-        timezone,
-        website,
-        attendanceMode,
-        callForSpeakers,
-        callForSpeakersClosingDate,
-        parent,
-        day,
-        isFree,
-        isParent,
-        location,
-        "speakers": speakers[]->{ _id, name }
-      }
-    `),
-    client.fetch(`
-      *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
-        _id,
-        title,
-        slug,
-        type,
-        dateStart,
-        dateEnd,
-        timezone,
-        day,
-        website,
-        format,
-        scheduled,
-        parent,
-        "speakers": speakers[]->{ _id, name }
-      } | order(dateStart asc)
-    `),
+    client.fetch(PARENT_EVENTS_QUERY),
+    client.fetch(CHILD_EVENTS_QUERY),
   ]);
 
-  // Group child events by parent reference
-  const childrenByParent: Record<string, Event[]> = {};
-  for (const child of childEvents) {
-    const parentId = child.parent?._ref;
-    if (parentId) {
-      if (!childrenByParent[parentId]) childrenByParent[parentId] = [];
-      childrenByParent[parentId].push(child);
-    }
-  }
-
-  // Attach children to parents and create CFS deadline events
-  const flattenedEvents: Event[] = [];
-  for (const event of parentEvents) {
-    const children = childrenByParent[event._id];
-    flattenedEvents.push({
-      ...event,
-      children: children && children.length > 0 ? children : undefined,
-    });
-
-    // Add CFS (Call for Speakers) deadline event if applicable
-    if (event.callForSpeakersClosingDate) {
-      flattenedEvents.push({
-        _id: `${event._id}-cfs-deadline`,
-        _type: 'event',
-        type: 'deadline',
-        title: `${event.title}`,
-        dateStart: event.callForSpeakersClosingDate,
-        timezone: event.timezone,
-        website: event.website,
-        attendanceMode: event.attendanceMode,
-        callForSpeakers: event.callForSpeakers,
-      });
-    }
-  }
+  const flattenedEvents = assembleEvents(
+    parentEvents as unknown as AssemblableEvent[],
+    childEvents as unknown as AssemblableEvent[]
+  ) as Event[];
 
   // Update cache with raw events
   cache.events = flattenedEvents;
