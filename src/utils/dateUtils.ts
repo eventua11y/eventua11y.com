@@ -260,10 +260,7 @@ export function isToday(
 ): boolean {
   const tz = resolveTimezone(options);
   const today = (now || dayjs()).tz(tz);
-  const isInternational = !options.timezone;
-  const target = isInternational
-    ? dayjs.utc(date).tz(tz)
-    : dayjs.utc(date).tz(tz);
+  const target = dayjs.utc(date).tz(tz);
   return target.isSame(today, 'day');
 }
 
