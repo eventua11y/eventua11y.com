@@ -18,6 +18,7 @@
     "eslint-config-prettier",
     "eslint-plugin-astro",
     "eslint-plugin-playwright",
-    "netlify-cli"
+    "netlify-cli",
+    "vite"
   ]
 }

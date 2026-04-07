@@ -26,6 +26,9 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
 
+      - name: Check for unused code
+        run: npm run knip
+
   tests_e2e:
     name: Run end-to-end tests
     runs-on: ubuntu-latest
