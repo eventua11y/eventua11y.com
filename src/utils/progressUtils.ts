@@ -22,9 +22,6 @@ export interface ProgressOptions {
   userTimezone?: string;
 }
 
-// Re-exported from dateUtils to maintain backward compatibility
-export { resolveTimezone };
-
 /**
  * Returns the event start as a dayjs instance in the resolved timezone.
  */

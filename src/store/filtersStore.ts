@@ -7,7 +7,7 @@ type ListItem = Event | Book;
 /**
  * Filter options for event list display.
  */
-export interface Filters {
+interface Filters {
   cfs: 'any' | 'open' | 'closed';
   attendance: 'any' | 'online' | 'offline';
   cost: 'any' | 'free' | 'paid';
