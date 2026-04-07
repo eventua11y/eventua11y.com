@@ -22,13 +22,7 @@ dayjs.extend(isSameOrAfter);
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book } from '../types/event';
-import {
-  groupByMonth,
-  formatMonthHeading,
-  compareByDateAsc,
-  compareByDateDesc,
-} from '../utils/eventUtils';
-export { groupByMonth, formatMonthHeading };
+import { compareByDateAsc, compareByDateDesc } from '../utils/eventUtils';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 

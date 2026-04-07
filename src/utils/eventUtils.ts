@@ -183,7 +183,7 @@ export const FORMAT_LABELS: Record<string, string> = {
  * Maps event format codes to the preposition used before speaker names.
  * "by" for presentation formats, "with" for collaborative formats.
  */
-export const FORMAT_PREPOSITIONS: Record<string, string> = {
+const FORMAT_PREPOSITIONS: Record<string, string> = {
   talk: 'by',
   tutorial: 'by',
   workshop: 'with',

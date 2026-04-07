@@ -325,7 +325,7 @@ export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
  *   accessible separator between them (en-dash hidden from AT,
  *   "to" visible only to screen readers)
  */
-export type DateRangeParts = [string] | [string, string];
+type DateRangeParts = [string] | [string, string];
 
 /**
  * Formats a date range using dayjs with locale-aware deduplication
