@@ -1,7 +1,7 @@
 ---
 description: Authors and runs Playwright E2E tests and Vitest unit tests for non-accessibility concerns. Independent from the Coder. See .agents/tester.md for full instructions.
 mode: subagent
-model: github-copilot/claude-sonnet-4-6
+model: github-copilot/claude-sonnet-4.6
 temperature: 0.1
 steps: 30
 permission:

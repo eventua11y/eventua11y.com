@@ -1,7 +1,7 @@
 ---
 description: Implements features, fixes bugs, and refactors source code within scoped boundaries. See .agents/coder.md for full instructions.
 mode: subagent
-model: github-copilot/claude-sonnet-4-6
+model: github-copilot/claude-sonnet-4.6
 temperature: 0.1
 steps: 30
 permission:
