@@ -22,7 +22,12 @@ dayjs.extend(isSameOrAfter);
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book } from '../types/event';
-import { groupByMonth, formatMonthHeading } from '../utils/eventUtils';
+import {
+  groupByMonth,
+  formatMonthHeading,
+  compareByDateAsc,
+  compareByDateDesc,
+} from '../utils/eventUtils';
 export { groupByMonth, formatMonthHeading };
 
 // ── Sanity client ──────────────────────────────────────────────────────
@@ -179,10 +184,7 @@ export async function getEvents(): Promise<{
       const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
       return end.isSameOrAfter(todayStart);
     })
-    .sort(
-      (a, b) =>
-        new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-    );
+    .sort(compareByDateAsc);
 
   const past = allEvents
     .filter((event) => {
@@ -193,10 +195,7 @@ export async function getEvents(): Promise<{
       const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
       return end.isBefore(todayStart) && end.isAfter(twelveMonthsAgo);
     })
-    .sort(
-      (a, b) =>
-        new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime()
-    );
+    .sort(compareByDateDesc);
 
   return { future, past };
 }
