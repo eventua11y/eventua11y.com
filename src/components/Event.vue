@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { isCallForSpeakersOpen, getEventUrl } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
@@ -81,17 +81,24 @@ const eventSpeakers = computed(() => {
 const MAX_DISPLAYED_SPEAKERS = 3;
 
 /**
- * Shuffles an array in place using the Fisher-Yates algorithm.
- * @param {Array} array - The array to shuffle
- * @returns {Array} The shuffled array (same reference)
+ * Shuffles an array using the Fisher-Yates algorithm.
+ * @returns A new shuffled copy of the array.
  */
 function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [result[i], result[j]] = [result[j], result[i]];
   }
-  return array;
+  return result;
 }
+
+/**
+ * Speakers in randomised order, shuffled once at setup time.
+ * Ensures consistent display during the session while distributing
+ * visibility fairly across page loads.
+ */
+const shuffledSpeakers = ref(shuffleArray(eventSpeakers.value));
 
 /**
  * Determines if an event is dedicated to accessibility
@@ -116,10 +123,10 @@ const eventUrl = computed(() => getEventUrl(props.event));
 const headingId = computed(() => `event-title-${props.event._id}`);
 
 /**
- * Formats speaker list for display
- * If more than 3 speakers, randomly selects 3 to display and shows count of remaining.
- * This avoids giving preferential visibility to any particular speaker.
- * @returns {string} Formatted speaker list with HTML
+ * Formats speaker list for display.
+ * If more than 3 speakers, shows 3 from a pre-shuffled order
+ * (randomised once per page load) to distribute visibility fairly.
+ * @returns {string} Formatted speaker list
  */
 const speakerDisplay = computed(() => {
   if (!eventSpeakers.value) return '';
@@ -144,13 +151,12 @@ const speakerDisplay = computed(() => {
     return `${first} and ${speakers[MAX_DISPLAYED_SPEAKERS - 1].name}`;
   }
 
-  // Randomise which speakers are shown to avoid favouring any individual
-  const shuffled = shuffleArray([...speakers]);
+  // Use pre-shuffled order (randomised once at setup) to avoid favouring any individual
+  const displayed = shuffledSpeakers.value
+    .filter((s) => s && typeof s === 'object' && s.name)
+    .slice(0, MAX_DISPLAYED_SPEAKERS);
 
-  const firstSpeakers = shuffled
-    .slice(0, MAX_DISPLAYED_SPEAKERS)
-    .map((speaker) => speaker.name)
-    .join(', ');
+  const firstSpeakers = displayed.map((speaker) => speaker.name).join(', ');
 
   return `${firstSpeakers}, and ${speakers.length - MAX_DISPLAYED_SPEAKERS} other speaker${speakers.length - MAX_DISPLAYED_SPEAKERS > 1 ? 's' : ''}`;
 });
