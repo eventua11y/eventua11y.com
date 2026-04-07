@@ -2,25 +2,69 @@
 
 Instructions for AI agents and subagents working in this repository.
 
-## OpenCode Agent Team
+## Agent Team
 
-This project has a team of specialist agents configured in `.opencode/agents/` and reusable skills in `.opencode/skills/`. The team is structured as:
+Agent instruction files live in `.agents/` (platform-agnostic). Platform-specific configs live in `.opencode/agents/` and reference the `.agents/` files. Skills are in `.agents/skills/` (installed from [mattobee/skills](https://github.com/mattobee/skills)) and `.opencode/skills/` (project-specific).
 
-- **`project-lead`** — Coordinates the specialist team. Use Tab to switch to it in OpenCode, or invoke with `@project-lead`.
-- **`accessibility-lead`** — Orchestrates the accessibility sub-team (`a11y-markup`, `a11y-visual`, `a11y-interaction`, `a11y-forms`, `a11y-testing`).
-- **Domain specialists** — `astro`, `performance`, `security`, `testing`, `netlify`, `supabase`.
+### Team overview
 
-All analysis agents are read-only. Only `a11y-testing` and `testing` can edit files (test files only).
+The team follows a plan-implement-verify pattern with specialist consultants for cross-cutting concerns.
+
+| Agent               | Role                                                     | Model Tier        | Rationale                                                              |
+| ------------------- | -------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| **`lead`**          | Orchestrator — decomposes tasks, delegates, reviews      | Frontier (Opus)   | Cross-domain coordination needs highest reasoning depth                |
+| **`coder`**         | Developer — implements features and fixes                | Mid-tier (Sonnet) | The workhorse; mid-tier prevents overengineering                       |
+| **`tester`**        | QA — writes tests independently from coder               | Mid-tier (Sonnet) | Independent test authorship avoids confirmation bias                   |
+| **`accessibility`** | WCAG 2.2 specialist — markup, visual, interaction, forms | Frontier (Opus)   | Dual-touchpoint: advises during planning, reviews after implementation |
+| **`a11y-testing`**  | Accessibility test author                                | Mid-tier (Sonnet) | Scoped test writing from specialist requirements                       |
+| **`security`**      | Security specialist — deps, auth, CSP, CSRF              | Mid-tier (Sonnet) | Checklist-driven review                                                |
+| **`astro`**         | Astro framework specialist                               | Mid-tier (Sonnet) | Pattern-matching review                                                |
+| **`netlify`**       | Netlify deployment specialist                            | Mid-tier (Sonnet) | Configuration-oriented review                                          |
+| **`supabase`**      | Supabase integration specialist                          | Mid-tier (Sonnet) | Checklist-driven review                                                |
+| **`performance`**   | Performance specialist — CWV, bundle, caching            | Mid-tier (Sonnet) | Metric-driven review                                                   |
+
+### Orchestration
+
+The `lead` delegates to all other agents. No other agent delegates (flat hierarchy under the lead). The workflow for feature implementation:
+
+1. Lead gathers context and plans.
+2. Lead invokes `accessibility` and/or `security` to **advise** (early assessment). Their Coder Requirements are passed verbatim to the coder.
+3. Lead delegates to `coder` for implementation.
+4. Lead delegates to `tester` (functional) and/or `a11y-testing` (accessibility) for test authorship.
+5. After tests pass, Lead invokes specialists to **review** the implementation.
+6. Lead synthesises findings into a unified report.
+
+### Escalation map
+
+- `coder` escalates to `lead` on: ambiguous plans, build failures after 2 attempts, changes spanning 5+ unrelated modules.
+- `tester` escalates to `lead` on: test revealing a source code bug (tester cannot edit source).
+- `a11y-testing` escalates to `lead` on: genuine accessibility failures in source code.
+- All specialists escalate to `lead` when findings require code changes.
+
+### Cost projection
+
+- Frontier (Opus): 2 agents — `lead`, `accessibility`. ~20% of calls.
+- Mid-tier (Sonnet): 8 agents — `coder`, `tester`, `a11y-testing`, `security`, `astro`, `netlify`, `supabase`, `performance`. ~80% of calls.
+
+### Write access
+
+| Agent          | Can write to                                                  |
+| -------------- | ------------------------------------------------------------- |
+| `coder`        | `src/`, `netlify/`, `public/`, root config files              |
+| `tester`       | `tests/` (except `accessibility.spec.ts`), `src/**/*.test.ts` |
+| `a11y-testing` | `tests/`                                                      |
+| All others     | Read-only                                                     |
 
 ### When to invoke agents
 
 Agents support five modes — **audit**, **advise**, **estimate**, **diagnose**, and **answer** — and should be invoked at appropriate workflow moments:
 
-- **Planning a feature or change** — invoke agents to **advise** on risks and recommend approaches, and to **estimate** effort, complexity, and priority before work begins.
-- **Reviewing code, PRs, or branches** — invoke agents to **audit** for issues in their domain.
-- **Investigating a bug or regression** — invoke agents to **diagnose** the problem in their area of expertise.
-- **Asking a question** — invoke agents to **answer** domain-specific questions (e.g. "does this need ARIA?", "will this break caching?", "is this RLS policy correct?").
-- **Before merging** — invoke the `project-lead` for a cross-domain review to catch issues that span multiple specialist areas.
+- **Planning a feature or change** — invoke `accessibility` and/or `security` to **advise** on risks and produce Coder Requirements, and to **estimate** effort before work begins.
+- **Implementing a feature** — invoke `coder` to implement, then `tester` to verify.
+- **Reviewing code, PRs, or branches** — invoke relevant specialists to **audit** for issues.
+- **Investigating a bug or regression** — invoke specialists to **diagnose** the problem.
+- **Asking a question** — invoke specialists to **answer** domain-specific questions.
+- **Before merging** — invoke the `lead` for a cross-domain review.
 
 ## GitHub Labels
 
