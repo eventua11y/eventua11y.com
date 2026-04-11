@@ -35,13 +35,18 @@ import {
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
+const sanityClient = createClient({
+  projectId: import.meta.env.SANITY_PROJECT,
+  dataset: import.meta.env.SANITY_DATASET,
+  apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
+  useCdn: import.meta.env.SANITY_CDN === 'true',
+});
+
+/**
+ * Returns the shared Sanity client instance.
+ */
 export function getSanityClient() {
-  return createClient({
-    projectId: import.meta.env.SANITY_PROJECT,
-    dataset: import.meta.env.SANITY_DATASET,
-    apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
-    useCdn: import.meta.env.SANITY_CDN === 'true',
-  });
+  return sanityClient;
 }
 
 // ── Event queries (mirrors the edge function GROQ) ─────────────────────
@@ -79,7 +84,7 @@ export async function getEvents(): Promise<{
   future: Event[];
   past: Event[];
 }> {
-  const client = getSanityClient();
+  const client = sanityClient;
 
   const [parentEvents, childEvents]: [AssemblableEvent[], AssemblableEvent[]] =
     await Promise.all([
@@ -160,7 +165,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
     return cached.data;
   }
 
-  const client = getSanityClient();
+  const client = sanityClient;
 
   const event: RawEvent | null = await client.fetch(
     `
@@ -220,7 +225,7 @@ interface RawBook {
  * expected by the event list components.
  */
 export async function getBooks(): Promise<Book[]> {
-  const client = getSanityClient();
+  const client = sanityClient;
 
   const rawBooks: RawBook[] = await client.fetch(BOOKS_QUERY);
 
