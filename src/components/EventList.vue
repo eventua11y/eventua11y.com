@@ -6,18 +6,8 @@ import Skeleton from './Skeleton.vue';
 import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 import type { Event as EventType, Book } from '../types/event';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import dayjs from '../lib/dayjs';
 import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
-import {
-  groupByMonth,
-  filterPastMonths,
-  formatMonthHeading,
-} from '../utils/eventUtils';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 type ListItem = EventType | Book;
 type GroupedEvents = Record<string, ListItem[]>;

@@ -1,10 +1,6 @@
-import dayjs, { type Dayjs } from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import dayjs from '../lib/dayjs';
+import type { Dayjs } from 'dayjs';
 import { resolveTimezone } from './dateUtils';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 /** Wraps time abbreviations in <abbr> elements. */
 const HR = ' <abbr title="hours">hr</abbr>';

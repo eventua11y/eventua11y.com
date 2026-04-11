@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import dayjs from '../lib/dayjs';
 
 /** Non-breaking space used between time digits and AM/PM */
 const nbsp = '\u00A0';

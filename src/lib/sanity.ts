@@ -11,14 +11,7 @@
  */
 
 import { createClient } from '@sanity/client';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(isSameOrAfter);
+import dayjs from './dayjs';
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book } from '../types/event';
