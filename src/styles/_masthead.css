@@ -83,3 +83,9 @@
 .masthead wa-button::part(base):focus-visible {
   outline-color: var(--c-focus-ring-color);
 }
+
+/* Hide theme-selector dropdown content until the custom element upgrades,
+   preventing a FOUC where menu items appear as a horizontal text list. */
+#theme-selector:not(:defined) {
+  visibility: hidden;
+}
