@@ -31,22 +31,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import EventProgress from './EventProgress.vue';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezonePlugin from 'dayjs/plugin/timezone';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
-import advancedFormat from 'dayjs/plugin/advancedFormat';
+import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
 import { formatEventDate, formatDateRange } from '../utils/dateUtils';
 import 'dayjs/locale/en';
 import 'dayjs/locale/es';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/de';
-
-dayjs.extend(utc);
-dayjs.extend(timezonePlugin);
-dayjs.extend(localizedFormat);
-dayjs.extend(advancedFormat);
 
 const locale = userStore.locale || 'en';
 dayjs.locale(locale);

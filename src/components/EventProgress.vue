@@ -29,9 +29,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezonePlugin from 'dayjs/plugin/timezone';
+import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
 import {
   isHappeningNow as _isHappeningNow,
@@ -43,9 +41,6 @@ import {
   getTimeSinceEnded,
   type ProgressOptions,
 } from '../utils/progressUtils';
-
-dayjs.extend(utc);
-dayjs.extend(timezonePlugin);
 
 const props = withDefaults(
   defineProps<{

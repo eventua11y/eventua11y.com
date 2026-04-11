@@ -19,9 +19,7 @@ import {
   formatMonthHeading,
 } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-dayjs.extend(utc);
+import dayjs from '../lib/dayjs';
 
 interface Props {
   type: 'upcoming' | 'past';

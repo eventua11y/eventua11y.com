@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import dayjs from '../lib/dayjs';
 import {
   getEventStart,
   getEventEnd,
@@ -18,9 +16,6 @@ import {
   getTimeSinceEnded,
   type ProgressOptions,
 } from './progressUtils';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -19,12 +19,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import userStore from '../store/userStore';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import dayjs from '../lib/dayjs';
 
 withDefaults(
   defineProps<{

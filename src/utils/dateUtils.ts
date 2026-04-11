@@ -1,15 +1,8 @@
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
+import dayjs from '../lib/dayjs';
 import 'dayjs/locale/en';
 import 'dayjs/locale/de';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/es';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(localizedFormat);
 
 /**
  * Returns the day-of-week prefix for a given locale.
