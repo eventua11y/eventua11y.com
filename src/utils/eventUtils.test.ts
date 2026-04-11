@@ -431,10 +431,11 @@ describe('getFormatLabel', () => {
     expect(getFormatLabel('workshop')).toBe('Workshop');
     expect(getFormatLabel('qna')).toBe('Q&A');
     expect(getFormatLabel('keynote')).toBe('Keynote');
+    expect(getFormatLabel('hackathon')).toBe('Hackathon');
   });
 
   it('falls back to the raw format string for unknown formats', () => {
-    expect(getFormatLabel('hackathon')).toBe('hackathon');
+    expect(getFormatLabel('unconference')).toBe('unconference');
   });
 
   it('returns undefined for undefined input', () => {
@@ -454,10 +455,11 @@ describe('getFormatPreposition', () => {
   it('returns "with" for collaborative formats', () => {
     expect(getFormatPreposition('workshop')).toBe('with');
     expect(getFormatPreposition('panel')).toBe('with');
+    expect(getFormatPreposition('hackathon')).toBe('with');
   });
 
   it('defaults to "by" for unknown formats', () => {
-    expect(getFormatPreposition('hackathon')).toBe('by');
+    expect(getFormatPreposition('unconference')).toBe('by');
   });
 
   it('defaults to "by" for undefined input', () => {

@@ -177,6 +177,7 @@ export const FORMAT_LABELS: Record<string, string> = {
   qna: 'Q&A',
   keynote: 'Keynote',
   roundtable: 'Roundtable',
+  hackathon: 'Hackathon',
 };
 
 /**
@@ -194,6 +195,7 @@ const FORMAT_PREPOSITIONS: Record<string, string> = {
   qna: 'with',
   keynote: 'by',
   roundtable: 'with',
+  hackathon: 'with',
 };
 
 /**
