@@ -189,7 +189,7 @@ test.describe('Past Events page accessibility', () => {
   });
 
   test('events region is labelled', async ({ page }) => {
-    const region = page.locator('#events[role="region"]');
+    const region = page.locator('#past-events[role="region"]');
     await expect(region).toHaveAttribute(
       'aria-labelledby',
       'past-events-heading'

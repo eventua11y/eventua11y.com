@@ -26,7 +26,7 @@ Astro.response.headers.set(
   <Filters client:only="vue" />
   <div class="container grid">
     <div
-      id="events"
+      id="upcoming-events"
       role="region"
       aria-labelledby="upcoming-events-heading"
       class="py-l readable main-content"
@@ -43,7 +43,7 @@ Astro.response.headers.set(
       id="month-nav"
       class="mb-l"
       client:idle
-      contentRegion="#events"
+      contentRegion="#upcoming-events"
       showTodayLink={true}
     />
   </div>

@@ -180,7 +180,7 @@ watch(
     </wa-callout>
 
     <!-- Events list -->
-    <div :id="`${type}-events`" v-else class="flow flow-2xl">
+    <div v-else class="flow flow-2xl">
       <section
         v-for="(events, yearMonth) in groupedEvents"
         :key="yearMonth"
