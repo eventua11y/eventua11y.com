@@ -9,6 +9,7 @@ import {
   compareByDateDesc,
   getFormatLabel,
   getFormatPreposition,
+  capitalise,
 } from './eventUtils';
 import type { Event, Book } from '../types/event';
 
@@ -427,11 +428,11 @@ describe('formatMonthHeading', () => {
 
 describe('getFormatLabel', () => {
   it('returns the display label for known formats', () => {
-    expect(getFormatLabel('talk')).toBe('Talk');
-    expect(getFormatLabel('workshop')).toBe('Workshop');
+    expect(getFormatLabel('talk')).toBe('talk');
+    expect(getFormatLabel('workshop')).toBe('workshop');
     expect(getFormatLabel('qna')).toBe('Q&A');
-    expect(getFormatLabel('keynote')).toBe('Keynote');
-    expect(getFormatLabel('hackathon')).toBe('Hackathon');
+    expect(getFormatLabel('keynote')).toBe('keynote');
+    expect(getFormatLabel('hackathon')).toBe('hackathon');
   });
 
   it('falls back to the raw format string for unknown formats', () => {
@@ -440,6 +441,23 @@ describe('getFormatLabel', () => {
 
   it('returns undefined for undefined input', () => {
     expect(getFormatLabel(undefined)).toBeUndefined();
+  });
+});
+
+// ── capitalise ─────────────────────────────────────────────────────────
+
+describe('capitalise', () => {
+  it('capitalises the first letter', () => {
+    expect(capitalise('talk')).toBe('Talk');
+    expect(capitalise('workshop')).toBe('Workshop');
+  });
+
+  it('preserves acronyms', () => {
+    expect(capitalise('Q&A')).toBe('Q&A');
+  });
+
+  it('handles empty string', () => {
+    expect(capitalise('')).toBe('');
   });
 });
 

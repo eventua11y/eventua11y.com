@@ -17,6 +17,7 @@ import {
   isCallForSpeakersOpen,
   getFormatLabel,
   getFormatPreposition,
+  capitalise,
 } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
 
@@ -56,6 +57,7 @@ const parentUrl = event.parentEvent?.slug?.current
   : undefined;
 // Format and speaker subtitle for child events (e.g. "Talk by Speaker Name")
 const displayFormat = getFormatLabel(event.format);
+const capitalisedFormat = displayFormat ? capitalise(displayFormat) : undefined;
 const formatPreposition = getFormatPreposition(event.format);
 
 const isDedicatedToAccessibility =
@@ -198,7 +200,7 @@ const jsonLd = {
               <p aria-roledescription="subtitle" class="text-muted">
                 {displayFormat && (
                   <span>
-                    {displayFormat}
+                    {capitalisedFormat}
                     {allSpeakers.length > 0 && (
                       <Fragment>
                         {' '}

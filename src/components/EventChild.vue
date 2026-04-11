@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import {
   getEventUrl,
   FORMAT_LABELS,
+  capitalise,
   getFormatPreposition,
 } from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
@@ -57,8 +58,8 @@ const ended = computed(() => _hasEnded(now.value, progressOptions.value));
  * Falls back to raw format value if no mapping exists
  * @returns {string} Human-readable format string
  */
-const displayFormat = computed(
-  () => FORMAT_LABELS[props.event.format] || props.event.format
+const displayFormat = computed(() =>
+  capitalise(FORMAT_LABELS[props.event.format] || props.event.format)
 );
 
 const formatPreposition = computed(() =>
