@@ -8,6 +8,11 @@ import filtersStore from '../store/filtersStore';
 import type { Event as EventType, Book } from '../types/event';
 import dayjs from '../lib/dayjs';
 import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
+import {
+  groupByMonth,
+  filterPastMonths,
+  formatMonthHeading,
+} from '../utils/eventUtils';
 
 type ListItem = EventType | Book;
 type GroupedEvents = Record<string, ListItem[]>;
