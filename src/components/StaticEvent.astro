@@ -8,6 +8,8 @@
  */
 import dayjs from '../lib/dayjs';
 import type { Event } from '../types/event';
+import { getEventUrl } from '../utils/eventUtils';
+import { formatDateRange } from '../utils/dateUtils';
 
 interface Props {
   event: Event;

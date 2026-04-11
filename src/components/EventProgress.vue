@@ -31,6 +31,16 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
+import {
+  isHappeningNow as _isHappeningNow,
+  isStartingSoon as _isStartingSoon,
+  hasEnded as _hasEnded,
+  getProgress,
+  getTimeRemaining,
+  getCountdownLabel,
+  getTimeSinceEnded,
+  type ProgressOptions,
+} from '../utils/progressUtils';
 
 const props = withDefaults(
   defineProps<{
