@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { isCallForSpeakersOpen, getEventUrl } from '../utils/eventUtils';
+import {
+  isCallForSpeakersOpen,
+  getEventUrl,
+  getFormatLabel,
+} from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDelivery from './EventDelivery.vue';
 import EventChild from './EventChild.vue';
@@ -47,7 +51,10 @@ const enumeratedChildTypes = computed(() => {
     counts[child.format]++;
   });
   return Object.entries(counts)
-    .map(([format, count]) => `${count} ${format}${count > 1 ? 's' : ''}`)
+    .map(([format, count]) => {
+      const label = getFormatLabel(format) || format;
+      return `${count} ${label}${count > 1 ? 's' : ''}`;
+    })
     .join(', ');
 });
 
