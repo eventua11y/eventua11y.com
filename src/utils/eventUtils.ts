@@ -167,17 +167,17 @@ export const getEventUrl = (
  * Used by child event components and the event detail page.
  */
 export const FORMAT_LABELS: Record<string, string> = {
-  talk: 'Talk',
-  tutorial: 'Tutorial',
-  workshop: 'Workshop',
-  webinar: 'Webinar',
-  panel: 'Panel',
-  meetup: 'Meetup',
-  interview: 'Interview',
+  talk: 'talk',
+  tutorial: 'tutorial',
+  workshop: 'workshop',
+  webinar: 'webinar',
+  panel: 'panel',
+  meetup: 'meetup',
+  interview: 'interview',
   qna: 'Q&A',
-  keynote: 'Keynote',
-  roundtable: 'Roundtable',
-  hackathon: 'Hackathon',
+  keynote: 'keynote',
+  roundtable: 'roundtable',
+  hackathon: 'hackathon',
 };
 
 /**
@@ -205,6 +205,14 @@ const FORMAT_PREPOSITIONS: Record<string, string> = {
 export function getFormatLabel(format: string | undefined): string | undefined {
   if (!format) return undefined;
   return FORMAT_LABELS[format] || format;
+}
+
+/**
+ * Capitalises the first letter of a string.
+ */
+export function capitalise(str: string): string {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
