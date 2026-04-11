@@ -85,8 +85,10 @@
   outline-color: var(--c-focus-ring-color);
 }
 
-/* Hide theme-selector dropdown content until the custom element upgrades,
-   preventing a FOUC where menu items appear as a horizontal text list. */
+/* Hide theme-selector dropdown until the custom element upgrades,
+   preventing a FOUC where menu items appear as a horizontal text list.
+   display:none avoids reserving space for the unstyled text content;
+   margin-left:auto on .masthead__actions keeps the nav pinned right. */
 #theme-selector:not(:defined) {
-  visibility: hidden;
+  display: none;
 }
