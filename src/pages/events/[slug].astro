@@ -10,7 +10,7 @@
  */
 import DefaultLayout from '../../layouts/default.astro';
 import { getEventBySlug } from '../../lib/sanity';
-import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
+import EventDate from '../../components/EventDate.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
 import {
@@ -235,7 +235,7 @@ const jsonLd = {
 
         <wa-divider></wa-divider>
 
-        <EventDateWithTimezone
+        <EventDate
           client:only="vue"
           dateStart={event.dateStart}
           dateEnd={event.dateEnd}
