@@ -682,8 +682,12 @@ function formatFindings(findings) {
     lines.push(`- ${f}`);
   }
 
-  // Structured changes as a table
+  // Structured changes as a table. GitHub Markdown requires a blank
+  // line before a table when it directly follows a list, otherwise
+  // the table is treated as a continuation of the list and rendered
+  // as one mashed-up line.
   if (changes.length > 0) {
+    if (lines.length > 0) lines.push('');
     lines.push('| Field | Current | Suggested | Reason |');
     lines.push('| --- | --- | --- | --- |');
     for (const c of changes) {
@@ -694,9 +698,13 @@ function formatFindings(findings) {
     }
   }
 
-  // Notes
-  for (const n of notes) {
-    lines.push(`> ${n.note}`);
+  // Notes (also need a blank line above to render as a separate
+  // blockquote rather than getting absorbed into the previous block).
+  if (notes.length > 0) {
+    if (lines.length > 0) lines.push('');
+    for (const n of notes) {
+      lines.push(`> ${n.note}`);
+    }
   }
 
   return lines;
