@@ -464,8 +464,10 @@ const jsonLd = {
      inside .event-detail__children. The :not() guard is necessary because
      the Astro hydration wrappers around <EventDate client:only> and the
      EventChild components mean we can't use a direct-child combinator. */
-  .event-detail :global(.event__dates:not(.event-detail__children .event__dates)),
-  .event-detail :global(.event__delivery:not(.event-detail__children .event__delivery)) {
+  .event-detail
+    :global(.event__dates:not(.event-detail__children .event__dates)),
+  .event-detail
+    :global(.event__delivery:not(.event-detail__children .event__delivery)) {
     font-size: var(--p-step-0);
   }
 
