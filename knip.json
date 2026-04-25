@@ -3,6 +3,7 @@
   "entry": [
     "src/pages/**/*.{astro,ts}",
     "src/scripts/main.ts",
+    "src/middleware/index.ts",
     "netlify/edge-functions/*.ts",
     "scripts/*.mjs",
     "postcss.config.mjs"

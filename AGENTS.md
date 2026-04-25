@@ -126,6 +126,34 @@ This project uses a two-layer accessibility testing strategy in `tests/accessibi
 
 When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-a11y-tests` OpenCode skill in `.opencode/skills/writing-a11y-tests/SKILL.md`.
 
+## Feature Flags
+
+This project uses OpenFeature with the Flagsmith provider for server-side feature flag evaluation. See `src/lib/flags.ts`, `src/middleware/flags.ts`, and `src/types/flags.ts`.
+
+### Adding a new flag
+
+1. Add the flag name and JSDoc to the `Flags` interface in `src/types/flags.ts`.
+2. Add a default value (almost always `false`) to `FLAG_DEFAULTS`.
+3. Add a `client.getBooleanValue(...)` call in `resolveFlags()` in `src/lib/flags.ts`.
+4. Create the flag in all three Flagsmith environments (development, preview, production) with default value `false`.
+5. Read in SSR pages/components via `Astro.locals.flags.your_flag_name`.
+
+### Key type
+
+The `FLAGSMITH_ENVIRONMENT_KEY` env var holds a **Server-side SDK Token**, not an Environment API key. Local evaluation mode requires this key type. Generated per-environment in the Flagsmith UI under Environment settings → SDK keys. Each Netlify environment scope (production, deploy-preview) gets its own token.
+
+### Diagnostic
+
+The `<html>` element carries `data-flags-source="remote"` when the Flagsmith provider was reachable on a given request, or `data-flags-source="default"` when the middleware fell back to defaults. Use this to verify the provider is wired up in any environment.
+
+### Constraints
+
+- **Server-side only.** Do not import from `src/lib/flags.ts` in any client-side code or Vue island.
+- **Prerendered pages cannot read flags.** `Astro.locals.flags` is populated by middleware, which does not run for prerendered routes (404, accessibility, curation-policy). Flag-gated UI must not appear on prerendered pages.
+- **Vue islands receive flags as props.** Pass values from `Astro.locals.flags` as component props at render time.
+- **Propagation lag.** Flagsmith changes propagate to each warm Lambda instance within ~60s (local evaluation polling interval). Cold-started Lambdas fetch fresh data on init. Anonymous evaluation only — no user identity is passed to Flagsmith.
+- **Empty evaluation context.** All `getBooleanValue` calls pass `{}` explicitly. Do not pass user data — this is a regression-prevention guard.
+
 ## GROQ Query Projections
 
 Event listing queries in `src/lib/sanity.ts` and `netlify/edge-functions/get-events.ts` use **explicit field projections** — not the `...` spread operator. This is intentional to reduce payload sizes by excluding fields only needed on detail pages (e.g. `description`, `organizer`, `topics`, `geopoint`, `keywords`).

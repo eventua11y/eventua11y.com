@@ -42,6 +42,10 @@ See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this p
 - [Netlify](https://www.netlify.com/) -- hosting with automatic deploys from the `main` branch. Feature branches are deployed to preview URLs.
 - [Sentry](https://sentry.io/) -- error tracking and performance monitoring
 
+### Feature flags
+
+- [OpenFeature](https://openfeature.dev/) with the [Flagsmith](https://www.flagsmith.com/) provider -- server-side feature flag evaluation in local-evaluation mode (no per-request HTTP). See the Feature Flags section in [AGENTS.md](AGENTS.md) for the flag-authoring workflow and constraints.
+
 ### Testing
 
 - [Playwright](https://playwright.dev/) -- end-to-end and accessibility tests
@@ -64,13 +68,14 @@ See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this p
 
 The edge functions require the following environment variables, configured in Netlify:
 
-| Variable             | Description                                                  |
-| -------------------- | ------------------------------------------------------------ |
-| `SANITY_PROJECT`     | Sanity project ID                                            |
-| `SANITY_DATASET`     | Sanity dataset name                                          |
-| `SANITY_API_VERSION` | Sanity API version                                           |
-| `SANITY_CDN`         | Whether to use the Sanity CDN (`true`/`false`)               |
-| `SENTRY_AUTH_TOKEN`  | Sentry auth token (used during build for source map uploads) |
+| Variable                    | Description                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `SANITY_PROJECT`            | Sanity project ID                                                                                                                    |
+| `SANITY_DATASET`            | Sanity dataset name                                                                                                                  |
+| `SANITY_API_VERSION`        | Sanity API version                                                                                                                   |
+| `SANITY_CDN`                | Whether to use the Sanity CDN (`true`/`false`)                                                                                       |
+| `SENTRY_AUTH_TOKEN`         | Sentry auth token (used during build for source map uploads)                                                                         |
+| `FLAGSMITH_ENVIRONMENT_KEY` | Flagsmith **Server-side SDK Token** for OpenFeature (one per Netlify scope; optional locally — flags fall back to defaults if unset) |
 
 ### Getting started
 

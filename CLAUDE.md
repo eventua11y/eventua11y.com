@@ -41,6 +41,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Deployment**: Netlify with Deno-based edge functions
 - **Testing**: Playwright (E2E) + axe-core (accessibility) + Vitest (unit)
 - **Monitoring**: Sentry for error tracking and performance
+- **Feature flags**: OpenFeature with Flagsmith provider, server-side, local-evaluation mode (see Feature Flags section in `AGENTS.md`)
 - **Auth**: Supabase for user accounts (in progress)
 
 ### Key Files
@@ -51,6 +52,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `src/store/userStore.ts` — Vue reactive store for user preferences (theme, timezone)
 - `netlify/edge-functions/` — Three API endpoints (events, books, user-info)
 - `tests/accessibility.spec.ts` — Two-layer accessibility test suite
+- `src/lib/flags.ts`, `src/middleware/flags.ts`, `src/types/flags.ts` — OpenFeature/Flagsmith plumbing
 
 ### Content Types
 
@@ -73,6 +75,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `PLAYWRIGHT_TEST_BASE_URL`: Override test target URL (set by CI for deploy previews)
 - `PUBLIC_SUPABASE_URL`: Supabase project URL (client-safe)
 - `PUBLIC_SUPABASE_ANON_KEY`: Supabase publishable key (client-safe)
+- `FLAGSMITH_ENVIRONMENT_KEY`: Flagsmith Server-side SDK Token (server-only; optional locally)
 
 ## Development Workflow
 
