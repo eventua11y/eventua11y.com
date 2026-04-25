@@ -9,6 +9,9 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
+    ignore:
+      - dependency-name: '@openfeature/flagsmith-provider'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
