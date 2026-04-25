@@ -299,9 +299,14 @@ async function fetchPage(url, timeoutMs = 15000) {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
+        // Identify honestly, but wear a Mozilla coat: some WAFs (e.g.
+        // Cloudflare's bot-fight defaults) 403 anything that doesn't
+        // start with "Mozilla/", regardless of the rest of the UA.
         'User-Agent':
-          'Eventua11yFreshnessChecker/1.0 (+https://eventua11y.com)',
-        Accept: 'text/html,application/xhtml+xml',
+          'Mozilla/5.0 (compatible; Eventua11yFreshnessChecker/1.0; +https://eventua11y.com)',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
       },
       redirect: 'follow',
     });
