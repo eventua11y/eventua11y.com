@@ -41,7 +41,13 @@
             appearance="outlined"
             data-drawer="open filter-drawer"
           >
-            <wa-icon slot="start" name="filter" auto-width></wa-icon> Filter
+            <wa-icon
+              :slot="isNarrow ? undefined : 'start'"
+              name="filter"
+              :label="isNarrow ? 'Filter' : undefined"
+              auto-width
+            ></wa-icon>
+            <span v-if="!isNarrow">Filter</span>
           </wa-button>
           <TimezoneSelector />
         </div>
@@ -51,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
 
@@ -72,6 +78,17 @@ const filterToolbar = ref(null);
  * Used to ensure proper initialization of checked state
  */
 const awarenessDaysSwitch = ref(null);
+
+/**
+ * Tracks whether the viewport is narrow (≤699.98px)
+ * Used to switch the Filter button between icon-only and icon+label modes
+ */
+const isNarrow = ref(false);
+let mql: MediaQueryList | null = null;
+
+function updateIsNarrow(e: MediaQueryListEvent | MediaQueryList) {
+  isNarrow.value = e.matches;
+}
 
 /**
  * Resets all filters to default values
@@ -116,5 +133,22 @@ onMounted(async () => {
     );
     observer.observe(filterToolbar.value);
   }
+
+  mql = window.matchMedia('(max-width: 699.98px)');
+  isNarrow.value = mql.matches;
+  mql.addEventListener('change', updateIsNarrow);
+});
+
+onUnmounted(() => {
+  if (mql) mql.removeEventListener('change', updateIsNarrow);
 });
 </script>
+
+<style>
+@media (max-width: 699.98px) {
+  /* Defensive: ensure icon-only Filter button meets WCAG 2.2 SC 2.5.8 (24×24 minimum touch target) */
+  #open-filter-drawer {
+    min-width: 2.5rem;
+  }
+}
+</style>
