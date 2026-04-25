@@ -22,6 +22,10 @@ export const prerender = false;
 
 const { slug } = Astro.params;
 
+if (!Astro.locals.flags.topic_pages_enabled) {
+  return Astro.redirect('/404');
+}
+
 if (!slug) {
   return Astro.redirect('/404');
 }
