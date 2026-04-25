@@ -9,6 +9,23 @@ permission:
   edit: deny
   bash:
     '*': ask
+    'git status*': allow
+    'git diff*': allow
+    'git log*': allow
+    'git branch*': allow
+    'git show*': allow
+    'gh issue list*': allow
+    'gh issue view*': allow
+    'gh pr list*': allow
+    'gh pr view*': allow
+    'gh pr diff*': allow
+    'gh api*': allow
+    'gh repo view*': allow
+    'gh run list*': allow
+    'gh run view*': allow
+    'npm ls*': allow
+    'npm view*': allow
+    'npm audit*': allow
   task:
     '*': deny
     'coder': allow
