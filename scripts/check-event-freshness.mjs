@@ -88,6 +88,32 @@ const HIDDEN_FOR_THEME = new Set([
   'attendanceMode',
 ]);
 
+// Date formats accepted by the strict dayjs parser used in Rules 3 and 5.
+// dayjs's customParseFormat plugin can't parse the `dddd` (weekday name)
+// token even non-strictly, so any leading "Monday, " etc. is stripped by
+// `parseSuggestedDate` before the value reaches the formats list. The
+// list still has to cover everything the prompt tells the model to emit
+// (`D MMMM YYYY` / `D MMMM YYYY [at] HH:mm`), plus a few common variants.
+const SUGGESTED_DATE_FORMATS = [
+  'D MMMM YYYY',
+  'D MMMM YYYY [at] HH:mm',
+  'D MMMM YYYY HH:mm',
+  'DD MMMM YYYY',
+  'D MMM YYYY',
+  'DD MMM YYYY',
+  'YYYY-MM-DD',
+  'MMMM D, YYYY',
+  'MMMM D YYYY',
+];
+
+// Parse a suggested datetime string from the model. Strips a leading
+// weekday name ("Monday, ", "Tue, ") before delegating to dayjs because
+// `customParseFormat` can't handle the `dddd`/`ddd` tokens.
+function parseSuggestedDate(value) {
+  const cleaned = String(value).replace(/^[A-Za-z]+,\s*/, '');
+  return dayjs(cleaned, SUGGESTED_DATE_FORMATS, true);
+}
+
 // Phrases in a `reason` that indicate the model has talked itself out of
 // the suggestion. Treated as evidence to drop the row entirely.
 const SELF_CANCELLING_PHRASES = [
@@ -168,16 +194,7 @@ function validateChange(change, event) {
     // the event's timezone, not instants, because the model rarely
     // includes a time component for date-only sources.
     const tz = event.timezone || 'UTC';
-    const formats = [
-      'D MMMM YYYY',
-      'DD MMMM YYYY',
-      'D MMM YYYY',
-      'DD MMM YYYY',
-      'YYYY-MM-DD',
-      'MMMM D, YYYY',
-      'MMMM D YYYY',
-    ];
-    const suggestedDay = dayjs(String(suggested), formats, true);
+    const suggestedDay = parseSuggestedDate(suggested);
     const currentDay = event[field] ? dayjs.utc(event[field]).tz(tz) : null;
     if (
       suggestedDay.isValid() &&
@@ -235,16 +252,7 @@ function validateChange(change, event) {
   // DAW 2025 wrap-up text). Those need a human eye, not a structured
   // change. Surface as a note instead by dropping the change here.
   if (type === 'datetime') {
-    const formats = [
-      'D MMMM YYYY',
-      'DD MMMM YYYY',
-      'D MMM YYYY',
-      'DD MMM YYYY',
-      'YYYY-MM-DD',
-      'MMMM D, YYYY',
-      'MMMM D YYYY',
-    ];
-    const suggestedDay = dayjs(String(suggested), formats, true);
+    const suggestedDay = parseSuggestedDate(suggested);
     if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
       return {
         keep: false,
