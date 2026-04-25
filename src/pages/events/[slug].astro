@@ -459,8 +459,11 @@ const jsonLd = {
     margin-block: var(--p-space-s);
   }
 
-  .event-detail :global(.event__dates),
-  .event-detail :global(.event__delivery) {
+  /* Scope the larger date/delivery font-size to the parent event's own
+     direct children only, so it doesn't cascade into nested EventChild
+     listings inside .event-detail__children. */
+  .event-detail > :global(.event__dates),
+  .event-detail > :global(.event__delivery) {
     font-size: var(--p-step-0);
   }
 
