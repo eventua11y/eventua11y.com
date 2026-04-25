@@ -1,6 +1,7 @@
 ---
 import Logo from '../images/eventua11y_logo_wordmark_white.svg';
 const currentPath = Astro.url.pathname;
+const topicPagesEnabled = Astro.locals.flags.topic_pages_enabled;
 ---
 
 <header id="global-header" class="masthead">
@@ -31,17 +32,21 @@ const currentPath = Astro.url.pathname;
               Past Events
             </a>
           </li>
-          <li class="primaryNav__item">
-            <a
-              class="primaryNav__link"
-              href="/topics"
-              aria-current={currentPath.startsWith('/topics')
-                ? 'page'
-                : undefined}
-            >
-              Topics
-            </a>
-          </li>
+          {
+            topicPagesEnabled && (
+              <li class="primaryNav__item">
+                <a
+                  class="primaryNav__link"
+                  href="/topics"
+                  aria-current={
+                    currentPath.startsWith('/topics') ? 'page' : undefined
+                  }
+                >
+                  Topics
+                </a>
+              </li>
+            )
+          }
         </ul>
       </nav>
       <wa-dropdown id="theme-selector" placement="bottom-end" distance="3">

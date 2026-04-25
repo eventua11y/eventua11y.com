@@ -50,7 +50,10 @@ const metaDescription = event.description
 
 // Check states
 const callForSpeakersOpen = isCallForSpeakersOpen(event);
-const hasTopics = Array.isArray(event.topics) && event.topics.length > 0;
+const hasTopics =
+  Astro.locals.flags.topic_pages_enabled &&
+  Array.isArray(event.topics) &&
+  event.topics.length > 0;
 const hasChildren = Array.isArray(event.children) && event.children.length > 0;
 const isChildEvent = !!event.parent;
 const parentUrl = event.parentEvent?.slug?.current

@@ -75,15 +75,20 @@ function toW3CDate(isoDate?: string): string {
   return date.toISOString().split('T')[0];
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context) => {
   const site = 'https://eventua11y.com';
   const today = new Date().toISOString().split('T')[0];
+  const topicsEnabled = context.locals.flags.topic_pages_enabled;
 
-  // Fetch all event and topic slugs from Sanity
+  // Fetch event and topic slugs from Sanity (topics only when flag is on)
   let events: SitemapEvent[] = [];
   let topics: SitemapTopic[] = [];
   try {
-    [events, topics] = await Promise.all([getEventSlugs(), getTopicSlugs()]);
+    if (topicsEnabled) {
+      [events, topics] = await Promise.all([getEventSlugs(), getTopicSlugs()]);
+    } else {
+      events = await getEventSlugs();
+    }
   } catch {
     // If Sanity is unreachable, generate sitemap with static pages only.
     // This ensures crawlers still get a valid response.
@@ -112,12 +117,16 @@ export const GET: APIRoute = async () => {
       priority: '0.5',
       lastmod: today,
     },
-    {
-      loc: '/topics',
-      changefreq: 'weekly',
-      priority: '0.6',
-      lastmod: today,
-    },
+    ...(topicsEnabled
+      ? [
+          {
+            loc: '/topics',
+            changefreq: 'weekly',
+            priority: '0.6',
+            lastmod: today,
+          },
+        ]
+      : []),
   ];
 
   const urlEntries = staticPages

@@ -135,7 +135,7 @@ This project uses OpenFeature with the Flagsmith provider for server-side featur
 1. Add the flag name and JSDoc to the `Flags` interface in `src/types/flags.ts`.
 2. Add a default value (almost always `false`) to `FLAG_DEFAULTS`.
 3. Add a `client.getBooleanValue(...)` call in `resolveFlags()` in `src/lib/flags.ts`.
-4. Create the flag in all three Flagsmith environments (development, preview, production) with default value `false`.
+4. Create the flag in both Flagsmith environments (production and non-prod, where non-prod is shared by deploy-preview and local dev) with default value `false`. Set "server-side only" to true on the flag — this codebase exclusively uses server-side evaluation, and enforcing it at the platform level prevents accidental leakage to any future client-side code.
 5. Read in SSR pages/components via `Astro.locals.flags.your_flag_name`.
 
 ### Key type
@@ -149,7 +149,8 @@ The `<html>` element carries `data-flags-source="remote"` when the Flagsmith pro
 ### Constraints
 
 - **Server-side only.** Do not import from `src/lib/flags.ts` in any client-side code or Vue island.
-- **Prerendered pages cannot read flags.** `Astro.locals.flags` is populated by middleware, which does not run for prerendered routes (404, accessibility, curation-policy). Flag-gated UI must not appear on prerendered pages.
+- **Prerendered pages cannot read flags.** `Astro.locals.flags` is populated by middleware, which does not run for prerendered routes (currently only 404). Flag-gated UI must not appear on prerendered pages.
+- **Pages rendering the primary nav must be SSR.** Because `TheHeader.astro` reads `Astro.locals.flags` to gate nav links, any page using the default layout must have `prerender = false`. The 404 page is an exception: it uses a stripped-down `error.astro` layout (logo only, no nav) so it can stay prerendered.
 - **Vue islands receive flags as props.** Pass values from `Astro.locals.flags` as component props at render time.
 - **Propagation lag.** Flagsmith changes propagate to each warm Lambda instance within ~60s (local evaluation polling interval). Cold-started Lambdas fetch fresh data on init. Anonymous evaluation only — no user identity is passed to Flagsmith.
 - **Empty evaluation context.** All `getBooleanValue` calls pass `{}` explicitly. Do not pass user data — this is a regression-prevention guard.
