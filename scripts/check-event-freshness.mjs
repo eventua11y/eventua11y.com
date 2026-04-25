@@ -15,6 +15,9 @@
  *   SANITY_PROJECT     Sanity project ID (required)
  *   SANITY_DATASET     Sanity dataset name (defaults to "production")
  *   ANTHROPIC_API_KEY  Anthropic API key for Claude analysis (required)
+ *   FRESHNESS_MODEL    Override the Claude model ID (defaults to
+ *                      claude-sonnet-4-5-20250929; set to e.g.
+ *                      claude-haiku-4-5-20251001 for cheaper runs)
  *   GH_TOKEN           GitHub token for creating issues (required unless --dry-run)
  */
 
@@ -22,9 +25,11 @@ import { createClient } from '@sanity/client';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 const projectId = process.env.SANITY_PROJECT;
 const dataset = process.env.SANITY_DATASET || 'production';
@@ -47,6 +52,217 @@ const sanity = createClient({
   apiVersion: '2024-01-01',
   useCdn: true,
 });
+
+// ---------------------------------------------------------------------------
+// Schema constraints
+//
+// Mirrors the Sanity event schema (eventua11y-sanity/schemas/event.js).
+// Used to validate Claude's suggestions deterministically before they are
+// surfaced to humans, so we never recommend values the schema can't store
+// or changes to fields that are hidden for the event's type.
+//
+// Keep in sync with the Studio schema. If the schema changes, update here.
+// ---------------------------------------------------------------------------
+
+const FIELD_TYPES = {
+  dateStart: 'datetime',
+  dateEnd: 'datetime',
+  callForSpeakers: 'boolean',
+  callForSpeakersClosingDate: 'datetime',
+  attendanceMode: 'enum',
+  location: 'string',
+  eventStatus: 'enum',
+};
+
+const FIELD_ENUMS = {
+  attendanceMode: ['online', 'offline', 'mixed', 'none'],
+  eventStatus: ['scheduled', 'cancelled', 'postponed', 'rescheduled'],
+};
+
+// Fields that the schema hides for `type === 'theme'` events. Suggesting
+// values for these is meaningless because the field is never shown in the
+// Studio and frontend consumers ignore it.
+const HIDDEN_FOR_THEME = new Set([
+  'callForSpeakers',
+  'callForSpeakersClosingDate',
+  'attendanceMode',
+]);
+
+// Date formats accepted by the strict dayjs parser used in Rules 3 and 5.
+// dayjs's customParseFormat plugin can't parse the `dddd` (weekday name)
+// token even non-strictly, so any leading "Monday, " etc. is stripped by
+// `parseSuggestedDate` before the value reaches the formats list. The
+// list still has to cover everything the prompt tells the model to emit
+// (`D MMMM YYYY` / `D MMMM YYYY [at] HH:mm`), plus a few common variants.
+const SUGGESTED_DATE_FORMATS = [
+  'D MMMM YYYY',
+  'D MMMM YYYY [at] HH:mm',
+  'D MMMM YYYY HH:mm',
+  'DD MMMM YYYY',
+  'D MMM YYYY',
+  'DD MMM YYYY',
+  'YYYY-MM-DD',
+  'MMMM D, YYYY',
+  'MMMM D YYYY',
+];
+
+// Parse a suggested datetime string from the model. Strips a leading
+// weekday name ("Monday, ", "Tue, ") before delegating to dayjs because
+// `customParseFormat` can't handle the `dddd`/`ddd` tokens.
+function parseSuggestedDate(value) {
+  const cleaned = String(value).replace(/^[A-Za-z]+,\s*/, '');
+  return dayjs(cleaned, SUGGESTED_DATE_FORMATS, true);
+}
+
+// Phrases in a `reason` that indicate the model has talked itself out of
+// the suggestion. Treated as evidence to drop the row entirely.
+const SELF_CANCELLING_PHRASES = [
+  'no change',
+  'requires no change',
+  'is consistent',
+  'is actually consistent',
+  'matches the website',
+  'already matches',
+  'already correct',
+];
+
+/**
+ * Decide whether a single suggested change should be kept.
+ * Returns { keep: boolean, drop?: string } where `drop` explains why.
+ *
+ * Rules:
+ *  1. Drop if the field is hidden for this event's type.
+ *  2. Drop if the suggested value isn't representable in the schema.
+ *  3. Drop if current and suggested are equivalent (datetime instants
+ *     match, booleans/enums match literally).
+ *  4. Drop if the reason text contradicts the suggestion.
+ */
+function validateChange(change, event) {
+  const { field, current, suggested, reason } = change;
+
+  if (!field) return { keep: false, drop: 'missing field name' };
+
+  // Rule 1: hidden for theme events
+  if (event.type === 'theme' && HIDDEN_FOR_THEME.has(field)) {
+    return {
+      keep: false,
+      drop: `${field} is hidden for theme-type events`,
+    };
+  }
+
+  const type = FIELD_TYPES[field];
+
+  // Rule 2: representability
+  if (type === 'boolean') {
+    const s = String(suggested).toLowerCase().trim();
+    if (s !== 'true' && s !== 'false') {
+      return {
+        keep: false,
+        drop: `${field} is boolean; suggested "${suggested}" is not true/false`,
+      };
+    }
+  }
+
+  if (type === 'enum') {
+    const allowed = FIELD_ENUMS[field] || [];
+    const s = String(suggested).toLowerCase().trim();
+    if (!allowed.includes(s)) {
+      return {
+        keep: false,
+        drop: `${field} must be one of ${allowed.join('|')}; suggested "${suggested}"`,
+      };
+    }
+  }
+
+  if (type === 'datetime') {
+    // The suggested value is allowed to be a date string the model
+    // extracted from the website (e.g. "31 May 2026"). Reject only if
+    // it's literally "unknown" or "time unknown" — these can't be stored.
+    const s = String(suggested).toLowerCase().trim();
+    if (s === 'unknown' || s.includes('time unknown') || s === 'not set') {
+      return {
+        keep: false,
+        drop: `${field} is datetime; cannot store "${suggested}"`,
+      };
+    }
+  }
+
+  // Rule 3: equivalence
+  if (type === 'datetime' && current && suggested) {
+    // Parse the suggested string against a small set of human-readable
+    // date formats the prompt encourages. We compare calendar days in
+    // the event's timezone, not instants, because the model rarely
+    // includes a time component for date-only sources.
+    const tz = event.timezone || 'UTC';
+    const suggestedDay = parseSuggestedDate(suggested);
+    const currentDay = event[field] ? dayjs.utc(event[field]).tz(tz) : null;
+    if (
+      suggestedDay.isValid() &&
+      currentDay &&
+      suggestedDay.format('YYYY-MM-DD') === currentDay.format('YYYY-MM-DD')
+    ) {
+      // Same calendar day -- treat as equivalent unless the suggestion
+      // explicitly carries a different time component.
+      const reasonHasTimeChange = /\b\d{1,2}:\d{2}\b/.test(String(suggested));
+      if (!reasonHasTimeChange) {
+        return {
+          keep: false,
+          drop: `${field} suggested value resolves to same date as current`,
+        };
+      }
+    }
+  }
+
+  if (type === 'boolean' || type === 'enum') {
+    const c = String(current).toLowerCase().trim();
+    const s = String(suggested).toLowerCase().trim();
+    // Map the prompt's "yes"/"no"/"not set" prose for booleans so we
+    // can detect equivalence with the canonical true/false value.
+    const norm = (v) => {
+      if (v === 'yes') return 'true';
+      if (v === 'no') return 'false';
+      if (v === 'not set' || v === 'null' || v === '') return '';
+      return v;
+    };
+    if (norm(c) === norm(s)) {
+      return {
+        keep: false,
+        drop: `${field} current and suggested are equivalent (${suggested})`,
+      };
+    }
+  }
+
+  // Rule 4: self-cancelling reason text
+  const r = String(reason || '').toLowerCase();
+  for (const phrase of SELF_CANCELLING_PHRASES) {
+    if (r.includes(phrase)) {
+      return {
+        keep: false,
+        drop: `reason indicates no change needed ("${phrase}")`,
+      };
+    }
+  }
+
+  // Rule 5: past-dated datetime suggestions for upcoming events
+  //
+  // The freshness check only runs against events whose dateEnd is in
+  // the future, so a suggestion that resolves to a past date is almost
+  // always a confused reading of a website that hasn't been updated for
+  // the new edition yet (e.g. DAW 2026 record vs. site still showing
+  // DAW 2025 wrap-up text). Those need a human eye, not a structured
+  // change. Surface as a note instead by dropping the change here.
+  if (type === 'datetime') {
+    const suggestedDay = parseSuggestedDate(suggested);
+    if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
+      return {
+        keep: false,
+        drop: `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`,
+      };
+    }
+  }
+
+  return { keep: true };
+}
 
 // ---------------------------------------------------------------------------
 // Sanity: fetch upcoming events with websites
@@ -83,9 +299,14 @@ async function fetchPage(url, timeoutMs = 15000) {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
+        // Identify honestly, but wear a Mozilla coat: some WAFs (e.g.
+        // Cloudflare's bot-fight defaults) 403 anything that doesn't
+        // start with "Mozilla/", regardless of the rest of the UA.
         'User-Agent':
-          'Eventua11yFreshnessChecker/1.0 (+https://eventua11y.com)',
-        Accept: 'text/html,application/xhtml+xml',
+          'Mozilla/5.0 (compatible; Eventua11yFreshnessChecker/1.0; +https://eventua11y.com)',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
       },
       redirect: 'follow',
     });
@@ -119,16 +340,38 @@ async function fetchPage(url, timeoutMs = 15000) {
 /**
  * Strip HTML tags and collapse whitespace for plain-text analysis.
  * Truncates to a reasonable size for the LLM context window.
+ *
+ * Uses a loop to handle malformed/nested markup that a single pass
+ * would miss (e.g. `<scr<script>ipt>`), satisfying CodeQL's
+ * js/incomplete-multi-character-sanitization rule.
  */
 function stripHtml(html, maxLength = 12000) {
-  const text = html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  let text = html;
+
+  // Remove script, style, nav, and footer blocks (loop until stable
+  // to handle nested or malformed tags)
+  const blockPatterns = [
+    /<script[\s>][\s\S]*?<\/script[^>]*>/gi,
+    /<style[\s>][\s\S]*?<\/style[^>]*>/gi,
+    /<nav[\s>][\s\S]*?<\/nav[^>]*>/gi,
+    /<footer[\s>][\s\S]*?<\/footer[^>]*>/gi,
+  ];
+  for (const pattern of blockPatterns) {
+    let prev;
+    do {
+      prev = text;
+      text = text.replace(pattern, '');
+    } while (text !== prev);
+  }
+
+  // Strip remaining tags (loop until stable)
+  let prev;
+  do {
+    prev = text;
+    text = text.replace(/<[^>]+>/g, ' ');
+  } while (text !== prev);
+
+  text = text.replace(/\s+/g, ' ').trim();
 
   if (text.length > maxLength) {
     return text.substring(0, maxLength) + '\n[...truncated]';
@@ -167,22 +410,35 @@ async function analyseWithClaude(event, pageText) {
     ? ` (${event.timezone})`
     : ' (international event, no specific timezone)';
 
-  const eventSummary = [
+  // Render values in their stored form so the model sees -- and the report
+  // surfaces -- literal database values, not English prose. This avoids the
+  // "yes -> false" confusion where the model thinks they differ.
+  const isTheme = event.type === 'theme';
+  const summaryLines = [
     `Title: ${event.title}`,
-    `Start: ${startStr}${tzNote}`,
-    `End: ${endStr}${tzNote}`,
     `Type: ${event.type}`,
-    `Status in our database: ${event.eventStatus || 'scheduled (default)'}`,
-    `Attendance mode: ${event.attendanceMode || 'not set'}`,
-    `Location: ${event.location || 'not set'}`,
-    `Call for speakers: ${event.callForSpeakers === true ? 'yes' : event.callForSpeakers === false ? 'no' : 'not set'}`,
-    event.callForSpeakersClosingDate
-      ? `CFS closing date: ${dayjs.utc(event.callForSpeakersClosingDate).tz(tz).format('D MMMM YYYY [at] HH:mm')}${tzNote}`
-      : null,
-    `Is parent event (conference with sessions): ${event.isParent ? 'yes' : 'no'}`,
-  ]
-    .filter(Boolean)
-    .join('\n');
+    `dateStart (datetime): ${startStr}${tzNote}`,
+    `dateEnd (datetime): ${endStr}${tzNote}`,
+    `eventStatus (enum): ${event.eventStatus || 'scheduled (default)'}`,
+    `Is parent event (conference with sessions): ${event.isParent ? 'true' : 'false'}`,
+  ];
+  if (!isTheme) {
+    summaryLines.push(
+      `attendanceMode (enum): ${event.attendanceMode ?? 'null'}`,
+      `location (string): ${event.location ?? 'null'}`,
+      `callForSpeakers (boolean): ${event.callForSpeakers === true ? 'true' : event.callForSpeakers === false ? 'false' : 'null'}`
+    );
+    if (event.callForSpeakersClosingDate) {
+      summaryLines.push(
+        `callForSpeakersClosingDate (datetime): ${dayjs.utc(event.callForSpeakersClosingDate).tz(tz).format('D MMMM YYYY [at] HH:mm')}${tzNote} (UTC: ${event.callForSpeakersClosingDate})`
+      );
+    }
+  }
+  const eventSummary = summaryLines.join('\n');
+
+  const themeFieldNote = isTheme
+    ? `\n\nIMPORTANT: This is a theme/awareness-day event (type === "theme"). The fields callForSpeakers, callForSpeakersClosingDate, and attendanceMode are HIDDEN in the CMS for theme events and must not appear in your "changes". Do not suggest values for them under any circumstances.`
+    : '';
 
   const prompt = `You are helping maintain a curated calendar of accessibility and inclusive design events. Compare the following event record from our database against the text extracted from the event's official website.
 
@@ -196,42 +452,68 @@ ${pageText}
 
 ## Your task
 
-Analyse the website text and identify any fields in our database that need updating. Focus on:
+Identify fields in the database that need updating. Focus on:
 
-1. **Dates**: The dates above are already in the event's local timezone, so compare them directly against what the website shows. Be careful to distinguish actual event dates from other dates on the page (CFS deadlines, early-bird dates, blog post dates). Only flag if you are confident the website shows different event dates.
+1. **Dates (dateStart, dateEnd)**: The dates above are already in the event's local timezone, so compare them directly against what the website shows. Be careful to distinguish actual event dates from other dates on the page (CFS deadlines, early-bird dates, blog post dates). Only flag if you are confident the website shows different event dates.
 
-2. **Event status**: Any indication the event has been cancelled, postponed, rescheduled, or sold out (for this edition, not past ones).
+2. **eventStatus**: Any indication the event has been cancelled, postponed, or rescheduled (for this edition, not past ones). Sold-out is not a status change.
 
-3. **Call for speakers/proposals**: Is a CFS mentioned? Is it open, closed, or does it have a deadline? Compare with our record.
+3. **callForSpeakers / callForSpeakersClosingDate**: Is a CFS open or closed for THIS edition? Prefer dated announcements (news posts, blog entries) over static homepage hero copy, which may be stale. If the homepage says "soon" but a recent dated post announces the CFS is open, trust the dated post.
 
-4. **Location**: Has the venue or city changed?
+4. **location**: Has the venue or city changed?
 
-5. **Other**: Anything else that needs updating (renamed, placeholder page, content mismatch).
+5. **attendanceMode**: Has the format (online/offline/mixed) changed?
 
-Respond with ONLY a JSON object (no markdown fences) in this exact format:
+6. **Other**: Anything else worth noting (renamed, placeholder page, content mismatch). Put these in "notes", not "changes".${themeFieldNote}
+
+## Schema constraints (HARD rules — violations will be discarded)
+
+Each field has a fixed type and value space. Only suggest values that fit:
+
+- \`callForSpeakers\` (boolean): "true" or "false". There is NO "unknown" value — if you cannot tell, omit the change.
+- \`attendanceMode\` (enum): exactly one of "online", "offline", "mixed", "none". The word "multiple" is NOT valid; use "mixed".
+- \`eventStatus\` (enum): exactly one of "scheduled", "cancelled", "postponed", "rescheduled".
+- \`dateStart\`, \`dateEnd\`, \`callForSpeakersClosingDate\` (datetime): ISO datetime or a date string the website explicitly states (e.g. "31 May 2026", "9 June 2026"). NEVER suggest "unknown" or "time unknown" — these can't be stored. If the website doesn't state a time, suggest just the date and the value will be reconciled separately.
+
+## Equivalence and self-cancellation
+
+Before adding a change, ask yourself: does my "suggested" value actually differ from "current"? Examples that MUST NOT be reported as changes:
+
+- Current "15:30" and suggested "3:30 PM" — same instant in 24h vs 12h notation.
+- Current "10 June 2026 at 00:59 (Europe/London)" and website says "9 June 2026" in a US timezone — these may be the same UTC instant. If unsure, omit the change.
+- Current "false" and suggested "no" — same boolean.
+
+If your "reason" text concludes the values match, are consistent, or no change is needed, OMIT the change entirely. Do not emit a row only to explain why it isn't really a change.
+
+## Stale website content
+
+This check only runs against events whose end date is in the future. If the website still describes a past edition (e.g. "Thank you for joining us at FooConf 2025" while our record is FooConf 2026), DO NOT suggest changing the database dates back to the past edition. The site is likely stale, not the database. Put the observation in "notes" so a human can chase the organiser.
+
+## Response format
+
+Respond with ONLY a JSON object (no markdown fences) in this exact shape:
+
 {
   "changes": [
     {
-      "field": "dateStart|dateEnd|eventStatus|callForSpeakers|callForSpeakersClosingDate|location|attendanceMode|other",
+      "field": "dateStart|dateEnd|eventStatus|callForSpeakers|callForSpeakersClosingDate|location|attendanceMode",
       "severity": "warning|info",
-      "current": "What our database currently has for this field",
-      "suggested": "What the website suggests it should be, or 'unknown' if unclear",
-      "reason": "One sentence explaining the evidence from the website"
+      "current": "Literal current value as shown in the database record above",
+      "suggested": "Schema-valid replacement value (see constraints above)",
+      "reason": "One sentence citing the specific website text that justifies the change"
     }
   ],
   "noChanges": true|false,
-  "notes": "Optional one-sentence note about anything worth mentioning that does not require a database change, or null"
+  "notes": "Optional one-sentence note about something worth mentioning that does not fit a structured change, or null"
 }
 
 Rules:
-- Set "noChanges" to true and return an empty "changes" array if everything looks consistent.
-- Use "warning" severity for changes that likely need a database update.
-- Use "info" severity for things worth flagging but that may not need action.
-- For date fields, use the format the website shows (e.g. "23 June 2026") in the "suggested" value.
-- For boolean fields (callForSpeakers, isParent), use "true" or "false" as strings in "suggested".
-- Be conservative: only flag genuine discrepancies, not ambiguities.
-- Do not invent changes. If the page is unclear, say so in "notes" instead.
-- NEVER suggest changing isParent. This is an editorial decision about how we curate events, not something that can be inferred from a website. Events dedicated to accessibility (like CSUN, AccessU, Inclusive Design 24) are listed as standalone events, not parent events with children. Only broad multi-topic conferences that happen to include some accessibility content (like UX London, Figma Config) are marked as parent events so we can list their individual accessibility-relevant sessions.`;
+- Set "noChanges": true and an empty "changes" array if everything looks consistent.
+- "warning" severity = clear discrepancy needing a database update. "info" = ambiguous, worth a human glance.
+- Be conservative. When in doubt, use "notes" instead of "changes".
+- Never suggest changing isParent. This is an editorial decision about how we curate events, not something that can be inferred from a website. Events dedicated to accessibility (CSUN, AccessU, Inclusive Design 24) are standalone events. Only broad multi-topic conferences with embedded accessibility sessions (UX London, Figma Config) are marked as parent events.`;
+
+  const model = process.env.FRESHNESS_MODEL || 'claude-sonnet-4-5-20250929';
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -241,7 +523,7 @@ Rules:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     }),
@@ -343,6 +625,34 @@ async function checkEvent(event) {
 
   const analysis = await analyseWithClaude(event, plainText);
 
+  // Validate every suggested change against the schema. The model's
+  // instructions cover this, but we double-check deterministically so a
+  // single bad model response can't introduce noisy or invalid suggestions.
+  const dropped = [];
+  if (analysis.changes && analysis.changes.length > 0) {
+    const kept = [];
+    for (const change of analysis.changes) {
+      const verdict = validateChange(change, event);
+      if (verdict.keep) {
+        kept.push(change);
+      } else {
+        dropped.push({ change, reason: verdict.drop });
+      }
+    }
+    analysis.changes = kept;
+    if (kept.length === 0 && (!analysis.notes || analysis.notes === null)) {
+      analysis.noChanges = true;
+    }
+  }
+
+  if (dropped.length > 0) {
+    // Surface drops at debug verbosity so failures are diagnosable without
+    // polluting the human-facing report.
+    for (const { change, reason } of dropped) {
+      console.warn(`  Dropped suggestion (${change.field || '?'}): ${reason}`);
+    }
+  }
+
   if (analysis.changes && analysis.changes.length > 0) {
     for (const change of analysis.changes) {
       findings.push(change);
@@ -385,8 +695,12 @@ function formatFindings(findings) {
     lines.push(`- ${f}`);
   }
 
-  // Structured changes as a table
+  // Structured changes as a table. GitHub Markdown requires a blank
+  // line before a table when it directly follows a list, otherwise
+  // the table is treated as a continuation of the list and rendered
+  // as one mashed-up line.
   if (changes.length > 0) {
+    if (lines.length > 0) lines.push('');
     lines.push('| Field | Current | Suggested | Reason |');
     lines.push('| --- | --- | --- | --- |');
     for (const c of changes) {
@@ -397,9 +711,13 @@ function formatFindings(findings) {
     }
   }
 
-  // Notes
-  for (const n of notes) {
-    lines.push(`> ${n.note}`);
+  // Notes (also need a blank line above to render as a separate
+  // blockquote rather than getting absorbed into the previous block).
+  if (notes.length > 0) {
+    if (lines.length > 0) lines.push('');
+    for (const n of notes) {
+      lines.push(`> ${n.note}`);
+    }
   }
 
   return lines;
@@ -484,7 +802,7 @@ function buildReport(results) {
 // ---------------------------------------------------------------------------
 
 async function createGitHubIssue(title, body) {
-  const { execSync } = await import('child_process');
+  const { execFileSync } = await import('child_process');
   const { writeFileSync, unlinkSync } = await import('fs');
   const { tmpdir } = await import('os');
   const { join } = await import('path');
@@ -494,11 +812,24 @@ async function createGitHubIssue(title, body) {
   try {
     writeFileSync(tmpFile, body, 'utf-8');
 
-    const result = execSync(
-      `gh issue create --repo eventua11y/eventua11y.com --title "${title.replace(/"/g, '\\"')}" --label "content" --body-file "${tmpFile}"`,
-      {
-        encoding: 'utf-8',
-      }
+    // Use execFileSync with an args array to avoid shell injection
+    const result = execFileSync(
+      'gh',
+      [
+        'issue',
+        'create',
+        '--repo',
+        'eventua11y/eventua11y.com',
+        '--title',
+        title,
+        '--label',
+        'content',
+        '--assignee',
+        'mattobee',
+        '--body-file',
+        tmpFile,
+      ],
+      { encoding: 'utf-8' }
     );
 
     return result.trim();

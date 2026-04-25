@@ -10,11 +10,16 @@
  */
 import DefaultLayout from '../../layouts/default.astro';
 import { getEventBySlug } from '../../lib/sanity';
-import { PortableText } from 'astro-portabletext';
-import EventDateWithTimezone from '../../components/EventDateWithTimezone.vue';
+import EventDate from '../../components/EventDate.vue';
 import EventDelivery from '../../components/EventDelivery.vue';
 import EventChild from '../../components/EventChild.vue';
-import { isCallForSpeakersOpen } from '../../utils/eventUtils';
+import {
+  isCallForSpeakersOpen,
+  getFormatLabel,
+  getFormatPreposition,
+  capitalise,
+} from '../../utils/eventUtils';
+import { PortableText } from 'astro-portabletext';
 
 export const prerender = false;
 
@@ -52,36 +57,9 @@ const parentUrl = event.parentEvent?.slug?.current
   ? `/events/${event.parentEvent.slug.current}`
   : undefined;
 // Format and speaker subtitle for child events (e.g. "Talk by Speaker Name")
-const formatStrings: Record<string, string> = {
-  talk: 'Talk',
-  tutorial: 'Tutorial',
-  workshop: 'Workshop',
-  webinar: 'Webinar',
-  panel: 'Panel',
-  meetup: 'Meetup',
-  interview: 'Interview',
-  qna: 'Q&A',
-  keynote: 'Keynote',
-  roundtable: 'Roundtable',
-};
-const formatPrepositions: Record<string, string> = {
-  talk: 'by',
-  tutorial: 'by',
-  workshop: 'with',
-  webinar: 'with',
-  panel: 'with',
-  meetup: 'with',
-  interview: 'with',
-  qna: 'with',
-  keynote: 'by',
-  roundtable: 'with',
-};
-const displayFormat = event.format
-  ? formatStrings[event.format] || event.format
-  : undefined;
-const formatPreposition = event.format
-  ? formatPrepositions[event.format] || 'by'
-  : 'by';
+const displayFormat = getFormatLabel(event.format);
+const capitalisedFormat = displayFormat ? capitalise(displayFormat) : undefined;
+const formatPreposition = getFormatPreposition(event.format);
 
 const isDedicatedToAccessibility =
   !event.isParent && !event.parent && event.type !== 'theme';
@@ -223,7 +201,7 @@ const jsonLd = {
               <p aria-roledescription="subtitle" class="text-muted">
                 {displayFormat && (
                   <span>
-                    {displayFormat}
+                    {capitalisedFormat}
                     {allSpeakers.length > 0 && (
                       <Fragment>
                         {' '}
@@ -260,7 +238,7 @@ const jsonLd = {
 
         <wa-divider></wa-divider>
 
-        <EventDateWithTimezone
+        <EventDate
           client:only="vue"
           dateStart={event.dateStart}
           dateEnd={event.dateEnd}

@@ -11,27 +11,35 @@
  */
 
 import { createClient } from '@sanity/client';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(isSameOrAfter);
+import dayjs from './dayjs';
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book, Topic } from '../types/event';
+import { compareByDateAsc, compareByDateDesc } from '../utils/eventUtils';
+import {
+  PARENT_EVENTS_QUERY,
+  CHILD_EVENTS_QUERY,
+  BOOKS_QUERY,
+} from '../../netlify/edge-functions/lib/queries';
+import {
+  assembleEvents,
+  type AssemblableEvent,
+} from '../../netlify/edge-functions/lib/assembleEvents';
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
-function getSanityClient() {
-  return createClient({
-    projectId: import.meta.env.SANITY_PROJECT,
-    dataset: import.meta.env.SANITY_DATASET,
-    apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
-    useCdn: import.meta.env.SANITY_CDN === 'true',
-  });
+const sanityClient = createClient({
+  projectId: import.meta.env.SANITY_PROJECT,
+  dataset: import.meta.env.SANITY_DATASET,
+  apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
+  useCdn: import.meta.env.SANITY_CDN === 'true',
+});
+
+/**
+ * Returns the shared Sanity client instance.
+ */
+export function getSanityClient() {
+  return sanityClient;
 }
 
 // ── Event queries (mirrors the edge function GROQ) ─────────────────────
@@ -75,85 +83,15 @@ export async function getEvents(): Promise<{
   future: Event[];
   past: Event[];
 }> {
-  const client = getSanityClient();
+  const client = sanityClient;
 
-  const [parentEvents, childEvents]: [RawEvent[], RawEvent[]] =
+  const [parentEvents, childEvents]: [AssemblableEvent[], AssemblableEvent[]] =
     await Promise.all([
-      client.fetch(`
-        *[_type == "event" && !(_id in path("drafts.**")) && !defined(parent)] {
-          _id,
-          _type,
-          type,
-          title,
-          slug,
-          description,
-          dateStart,
-          dateEnd,
-          timezone,
-          website,
-          attendanceMode,
-          callForSpeakers,
-          callForSpeakersClosingDate,
-          parent,
-          day,
-          isFree,
-          isParent,
-          location,
-          "speakers": speakers[]->{ _id, name }
-        }
-      `),
-      client.fetch(`
-        *[_type == "event" && !(_id in path("drafts.**")) && defined(parent)] {
-          _id,
-          title,
-          slug,
-          type,
-          dateStart,
-          dateEnd,
-          timezone,
-          day,
-          website,
-          format,
-          scheduled,
-          parent,
-          "speakers": speakers[]->{ _id, name }
-        } | order(dateStart asc)
-      `),
+      client.fetch(PARENT_EVENTS_QUERY),
+      client.fetch(CHILD_EVENTS_QUERY),
     ]);
 
-  // Group children by parent
-  const childrenByParent: Record<string, RawEvent[]> = {};
-  for (const child of childEvents) {
-    const parentId = child.parent?._ref;
-    if (parentId) {
-      if (!childrenByParent[parentId]) childrenByParent[parentId] = [];
-      childrenByParent[parentId].push(child);
-    }
-  }
-
-  // Attach children + create CFS deadline events
-  const allEvents: Event[] = [];
-  for (const event of parentEvents) {
-    const children = childrenByParent[event._id];
-    allEvents.push({
-      ...event,
-      children: children && children.length > 0 ? children : undefined,
-    } as Event);
-
-    if (event.callForSpeakersClosingDate) {
-      allEvents.push({
-        _id: `${event._id}-cfs-deadline`,
-        _type: 'event',
-        type: 'deadline',
-        title: event.title,
-        dateStart: event.callForSpeakersClosingDate,
-        timezone: event.timezone,
-        website: event.website,
-        attendanceMode: event.attendanceMode,
-        callForSpeakers: event.callForSpeakers,
-      } as Event);
-    }
-  }
+  const allEvents = assembleEvents(parentEvents, childEvents) as Event[];
 
   // Classify using UTC
   // The edge function splits events into today / future / past, then the
@@ -183,10 +121,7 @@ export async function getEvents(): Promise<{
       const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
       return end.isSameOrAfter(todayStart);
     })
-    .sort(
-      (a, b) =>
-        new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-    );
+    .sort(compareByDateAsc);
 
   const past = allEvents
     .filter((event) => {
@@ -197,10 +132,7 @@ export async function getEvents(): Promise<{
       const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
       return end.isBefore(todayStart) && end.isAfter(twelveMonthsAgo);
     })
-    .sort(
-      (a, b) =>
-        new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime()
-    );
+    .sort(compareByDateDesc);
 
   return { future, past };
 }
@@ -232,7 +164,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
     return cached.data;
   }
 
-  const client = getSanityClient();
+  const client = sanityClient;
 
   const event: RawEvent | null = await client.fetch(
     `
@@ -388,16 +320,9 @@ interface RawBook {
  * expected by the event list components.
  */
 export async function getBooks(): Promise<Book[]> {
-  const client = getSanityClient();
+  const client = sanityClient;
 
-  const rawBooks: RawBook[] = await client.fetch(`
-    *[_type == "book"] | order(date desc) {
-      _id,
-      title,
-      link,
-      date
-    }
-  `);
+  const rawBooks: RawBook[] = await client.fetch(BOOKS_QUERY);
 
   return rawBooks.map((book) => ({
     _id: book._id,
@@ -407,102 +332,4 @@ export async function getBooks(): Promise<Book[]> {
     date: book.date,
     dateStart: book.date || '',
   }));
-}
-
-// ── Grouping helpers ───────────────────────────────────────────────────
-
-type ListItem = Event | Book;
-type GroupedItems = Record<string, ListItem[]>;
-
-/**
- * Groups events and books by year-month using UTC.
- * Returns entries sorted chronologically (ascending for upcoming,
- * descending for past).
- */
-export function groupByMonth(
-  events: Event[],
-  books: Book[],
-  type: 'upcoming' | 'past'
-): GroupedItems {
-  const items: ListItem[] =
-    type === 'past' ? [...events] : [...events, ...books];
-
-  // Sort chronologically first
-  items.sort((a, b) => {
-    const comparison =
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-    return type === 'past' ? -comparison : comparison;
-  });
-
-  // Group by YYYY-M
-  const groups: GroupedItems = {};
-  for (const item of items) {
-    const d = dayjs.utc(item.dateStart);
-    const key = `${d.year()}-${d.month() + 1}`;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(item);
-  }
-
-  // Sort within each group: books first, then by date
-  for (const key of Object.keys(groups)) {
-    groups[key].sort((a, b) => {
-      if ((a._type === 'book') === (b._type === 'book')) {
-        const comparison =
-          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-        return type === 'past' ? -comparison : comparison;
-      }
-      return a._type === 'book' ? -1 : 1;
-    });
-  }
-
-  // For upcoming: drop month groups that are in the past.
-  // This mirrors the client-side EventList.vue behaviour (lines 140-155)
-  // and prevents old books from appearing in the upcoming list.
-  if (type !== 'past') {
-    const now = dayjs.utc();
-    const currentYear = now.year();
-    const currentMonth = now.month() + 1; // dayjs months are 0-indexed
-    for (const key of Object.keys(groups)) {
-      const [year, month] = key.split('-').map(Number);
-      if (
-        year < currentYear ||
-        (year === currentYear && month < currentMonth)
-      ) {
-        delete groups[key];
-      }
-    }
-  }
-
-  // Sort month keys
-  const sortedEntries = Object.entries(groups).sort((a, b) => {
-    const [yearA, monthA] = a[0].split('-').map(Number);
-    const [yearB, monthB] = b[0].split('-').map(Number);
-    const comparison = yearA - yearB || monthA - monthB;
-    return type === 'past' ? -comparison : comparison;
-  });
-
-  return Object.fromEntries(sortedEntries);
-}
-
-/**
- * Formats a year-month key into a human-readable heading.
- * Uses UTC for consistency with the SSR context.
- */
-export function formatMonthHeading(yearMonth: string): string {
-  const [yearStr, monthStr] = yearMonth.split('-');
-  const year = Number(yearStr);
-  const month = Number(monthStr) - 1; // 0-indexed for Date constructor
-  const date = new Date(year, month);
-
-  const now = new Date();
-  if (month === now.getMonth() && year === now.getFullYear()) {
-    return 'This month';
-  }
-
-  const formatter = new Intl.DateTimeFormat('en', {
-    month: 'long',
-    year: year !== now.getFullYear() ? 'numeric' : undefined,
-  });
-
-  return formatter.format(date);
 }

@@ -39,14 +39,9 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue';
 import userStore from '../store/userStore';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import dayjs from '../lib/dayjs';
 import Event from './Event.vue';
 import filtersStore from '../store/filtersStore';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 // Get the start of the day using the timezone from the edge function
 const today = computed(() => {

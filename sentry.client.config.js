@@ -10,12 +10,17 @@ Sentry.init({
   // Sample 10% of transactions for performance monitoring (Core Web Vitals).
   tracesSampleRate: 0.1,
 
-  // Suppress errors thrown internally by the Web Awesome library's wa-popup
-  // component, which calls hidePopover() without first checking whether the
-  // popover is showing (EVENTUA11Y-T, EVENTUA11Y-V).
+  // Suppress known noise that does not represent real bugs:
+  // - hidePopover/showPopover: thrown internally by Web Awesome's wa-popup
+  //   when it calls these methods without checking popover state
+  //   (EVENTUA11Y-T, EVENTUA11Y-V).
+  // - "Load failed": Safari's generic message for fetch() rejections, most
+  //   often surfaced by Sentry's own hover-prefetch instrumentation when the
+  //   network request is cancelled or fails (EVENTUA11Y-10).
   ignoreErrors: [
     /Failed to execute 'hidePopover' on 'HTMLElement'/,
     /Failed to execute 'showPopover' on 'HTMLElement'/,
+    /^Load failed$/,
   ],
 
   beforeSendSpan(span) {

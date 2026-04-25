@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import { loadEnv } from 'vite';
 import netlify from '@astrojs/netlify';
 import vue from '@astrojs/vue';
@@ -11,9 +11,24 @@ const { SENTRY_AUTH_TOKEN } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 // https://astro.build/config
 export default defineConfig({
   site: 'https://eventua11y.com',
-  output: 'server',
   adapter: netlify(),
-  compressHTML: true,
+  env: {
+    schema: {
+      FLAGSMITH_ENVIRONMENT_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
+    },
+  },
+  server: {
+    allowedHosts: ['.ts.net'],
+  },
+  vite: {
+    server: {
+      strictPort: true,
+    },
+  },
   prefetch: {
     defaultStrategy: 'hover',
     prefetchAll: true,

@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Theme selection functionality
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
+  // Check whether localStorage is available (it can be null in restricted
+  // browsing contexts such as some bots, iframes, or privacy-focused browsers).
+  function storageAvailable(): boolean {
+    try {
+      return typeof localStorage !== 'undefined' && localStorage !== null;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Updates the theme selector button icon to reflect the current theme.
    * The button contains a child wa-icon element whose name and label we update.
@@ -41,17 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('wa-dark');
-      localStorage.setItem('theme', 'light');
+      if (storageAvailable()) localStorage.setItem('theme', 'light');
       updateThemeIcon(themeSelectorButton, 'sun-bright', 'Light mode');
     } else if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('wa-dark');
-      localStorage.setItem('theme', 'dark');
+      if (storageAvailable()) localStorage.setItem('theme', 'dark');
       updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
     } else {
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('wa-dark');
-      localStorage.removeItem('theme');
+      if (storageAvailable()) localStorage.removeItem('theme');
       if (prefersDarkScheme.matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.documentElement.classList.add('wa-dark');
@@ -89,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Apply the stored theme or the system default theme on initial load
-  const storedTheme = localStorage.getItem('theme');
+  const storedTheme = storageAvailable() ? localStorage.getItem('theme') : null;
   if (storedTheme) {
     applyTheme(storedTheme);
     updateSelection(storedTheme);
@@ -110,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for changes to the user's system preference and update the theme accordingly
   prefersDarkScheme.addEventListener('change', (event) => {
-    if (!localStorage.getItem('theme')) {
+    if (!storageAvailable() || !localStorage.getItem('theme')) {
       if (event.matches) {
         applyTheme('dark');
       } else {

@@ -1,15 +1,8 @@
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
+import dayjs from '../lib/dayjs';
 import 'dayjs/locale/en';
 import 'dayjs/locale/de';
 import 'dayjs/locale/fr';
 import 'dayjs/locale/es';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(localizedFormat);
 
 /**
  * Returns the day-of-week prefix for a given locale.
@@ -260,10 +253,7 @@ export function isToday(
 ): boolean {
   const tz = resolveTimezone(options);
   const today = (now || dayjs()).tz(tz);
-  const isInternational = !options.timezone;
-  const target = isInternational
-    ? dayjs.utc(date).tz(tz)
-    : dayjs.utc(date).tz(tz);
+  const target = dayjs.utc(date).tz(tz);
   return target.isSame(today, 'day');
 }
 
@@ -328,7 +318,7 @@ export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
  *   accessible separator between them (en-dash hidden from AT,
  *   "to" visible only to screen readers)
  */
-export type DateRangeParts = [string] | [string, string];
+type DateRangeParts = [string] | [string, string];
 
 /**
  * Formats a date range using dayjs with locale-aware deduplication
@@ -575,7 +565,7 @@ function nonBreakingTime(formatted: string): string {
  * If useLocalTimezone is true, uses the user's timezone.
  * Otherwise uses the event's timezone. Falls back to UTC.
  */
-function resolveTimezone(options: {
+export function resolveTimezone(options: {
   timezone?: string;
   useLocalTimezone?: boolean;
   userTimezone?: string;

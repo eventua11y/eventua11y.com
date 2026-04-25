@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "src/pages/**/*.{astro,ts}",
+    "src/scripts/main.ts",
+    "src/middleware/index.ts",
+    "netlify/edge-functions/*.ts",
+    "scripts/*.mjs",
+    "postcss.config.mjs"
+  ],
+  "project": [
+    "src/**/*.{ts,vue,astro,js,mjs}",
+    "netlify/**/*.ts",
+    "scripts/**/*.{js,mjs}",
+    "tests/**/*.ts"
+  ],
+  "ignore": ["src/components/EventDebug.vue"],
+  "ignoreDependencies": [
+    "eslint-config-prettier",
+    "eslint-plugin-astro",
+    "eslint-plugin-playwright",
+    "netlify-cli",
+    "vite"
+  ]
+}

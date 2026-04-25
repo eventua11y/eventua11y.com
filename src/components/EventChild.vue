@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import dayjs from 'dayjs';
-import { getEventUrl } from '../utils/eventUtils';
+import {
+  getEventUrl,
+  FORMAT_LABELS,
+  capitalise,
+  getFormatPreposition,
+} from '../utils/eventUtils';
 import EventDate from './EventDate.vue';
 import EventDuration from './EventDuration.vue';
 import type { ChildEvent } from '../types/event';
@@ -48,44 +53,18 @@ const inProgress = computed(() =>
 /** Whether the child event has ended (hides duration in Today section). */
 const ended = computed(() => _hasEnded(now.value, progressOptions.value));
 
-/** Mapping of event format codes to display strings. */
-const formatStrings: Record<string, string> = {
-  talk: 'Talk',
-  tutorial: 'Tutorial',
-  workshop: 'Workshop',
-  webinar: 'Webinar',
-  panel: 'Panel',
-  meetup: 'Meetup',
-  interview: 'Interview',
-  qna: 'Q&A',
-  keynote: 'Keynote',
-  roundtable: 'Roundtable',
-};
-
 /**
  * Computes display format string from event format
  * Falls back to raw format value if no mapping exists
  * @returns {string} Human-readable format string
  */
-const displayFormat = computed(
-  () => formatStrings[props.event.format] || props.event.format
+const displayFormat = computed(() =>
+  capitalise(FORMAT_LABELS[props.event.format] || props.event.format)
 );
 
-const formatPreposition = computed(() => {
-  const prepositions: Record<string, string> = {
-    talk: 'by',
-    tutorial: 'by',
-    workshop: 'with',
-    webinar: 'with',
-    panel: 'with',
-    meetup: 'with',
-    interview: 'with',
-    qna: 'with',
-    keynote: 'by',
-    roundtable: 'with',
-  };
-  return (props.event.format && prepositions[props.event.format]) || 'by';
-});
+const formatPreposition = computed(() =>
+  getFormatPreposition(props.event.format)
+);
 
 /**
  * Internal URL for the child event detail page, or undefined if no slug.

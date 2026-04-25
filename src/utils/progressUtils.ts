@@ -1,9 +1,6 @@
-import dayjs, { type Dayjs } from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import dayjs from '../lib/dayjs';
+import type { Dayjs } from 'dayjs';
+import { resolveTimezone } from './dateUtils';
 
 /** Wraps time abbreviations in <abbr> elements. */
 const HR = ' <abbr title="hours">hr</abbr>';
@@ -19,18 +16,6 @@ export interface ProgressOptions {
   showEnded?: boolean;
   useLocalTimezone?: boolean;
   userTimezone?: string;
-}
-
-/**
- * Resolves the effective timezone for date comparisons.
- * If useLocalTimezone is true, uses the user's timezone.
- * Otherwise uses the event's timezone. Falls back to UTC.
- */
-export function resolveTimezone(options: ProgressOptions): string {
-  if (options.useLocalTimezone) {
-    return options.userTimezone || 'UTC';
-  }
-  return options.timezone || 'UTC';
 }
 
 /**

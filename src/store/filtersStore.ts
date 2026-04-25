@@ -1,5 +1,5 @@
 import { reactive, computed, watch } from 'vue';
-import { isCallForSpeakersOpen } from '../utils/eventUtils';
+import { isCallForSpeakersOpen, compareByDateAsc } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
 
 type ListItem = Event | Book;
@@ -7,7 +7,7 @@ type ListItem = Event | Book;
 /**
  * Filter options for event list display.
  */
-export interface Filters {
+interface Filters {
   cfs: 'any' | 'open' | 'closed';
   attendance: 'any' | 'online' | 'offline';
   cost: 'any' | 'free' | 'paid';
@@ -195,8 +195,7 @@ const filtersStore = reactive({
     const filteredBaseEvents = this.filterEvents(this.futureEvents);
     const relevantBooks = this.filters.showBooks ? this.books : [];
     this.filteredEvents = [...filteredBaseEvents, ...relevantBooks].sort(
-      (a, b) =>
-        new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+      compareByDateAsc
     );
   },
 

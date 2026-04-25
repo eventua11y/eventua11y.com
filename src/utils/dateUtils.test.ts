@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import dayjs from '../lib/dayjs';
 
 /** Non-breaking space used between time digits and AM/PM */
 const nbsp = '\u00A0';
@@ -19,6 +14,7 @@ import {
   formatDateRange,
   getYearMonth,
   isFullMonth,
+  resolveTimezone,
 } from './dateUtils';
 
 describe('getStartDateFormat', () => {
@@ -1242,5 +1238,40 @@ describe('isFullMonth', () => {
     const start = dayjs.utc('2026-10-01');
     const end = dayjs.utc('2026-10-01');
     expect(isFullMonth(start, end)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveTimezone
+// ---------------------------------------------------------------------------
+
+describe('resolveTimezone', () => {
+  it('returns the event timezone by default', () => {
+    expect(resolveTimezone({ timezone: 'Europe/London' })).toBe(
+      'Europe/London'
+    );
+  });
+
+  it('falls back to UTC when no timezone is set', () => {
+    expect(resolveTimezone({})).toBe('UTC');
+  });
+
+  it('uses userTimezone when useLocalTimezone is true', () => {
+    expect(
+      resolveTimezone({
+        timezone: 'Europe/London',
+        useLocalTimezone: true,
+        userTimezone: 'America/New_York',
+      })
+    ).toBe('America/New_York');
+  });
+
+  it('falls back to UTC when useLocalTimezone is true but userTimezone is missing', () => {
+    expect(
+      resolveTimezone({
+        timezone: 'Europe/London',
+        useLocalTimezone: true,
+      })
+    ).toBe('UTC');
   });
 });
