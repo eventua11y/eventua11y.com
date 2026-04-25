@@ -126,5 +126,3 @@ export async function resolveFlags(): Promise<Flags> {
 
   return { user_accounts_enabled, topic_pages_enabled };
 }
-
-export { FLAG_DEFAULTS };
