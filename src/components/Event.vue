@@ -53,7 +53,7 @@ const enumeratedChildTypes = computed(() => {
   return Object.entries(counts)
     .map(([format, count]) => {
       const label = getFormatLabel(format) || format;
-      return `${count} ${label}${count > 1 ? 's' : ''}`;
+      return `${count} ${label}${count > 1 ? 's' : ''}`;
     })
     .join(', ');
 });
