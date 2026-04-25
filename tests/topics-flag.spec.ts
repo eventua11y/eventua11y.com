@@ -22,14 +22,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Topics feature flag — flag OFF (default)', () => {
   test('/topics redirects to 404 when flag is off', async ({ page }) => {
-    const response = await page.goto('/topics');
+    await page.goto('/topics');
     // The page redirects to /404; follow the redirect and check the final URL
     const url = page.url();
     expect(url).toContain('404');
   });
 
   test('/topics/[slug] redirects to 404 when flag is off', async ({ page }) => {
-    const response = await page.goto('/topics/some-slug');
+    await page.goto('/topics/some-slug');
     const url = page.url();
     expect(url).toContain('404');
   });
