@@ -226,6 +226,33 @@ function validateChange(change, event) {
     }
   }
 
+  // Rule 5: past-dated datetime suggestions for upcoming events
+  //
+  // The freshness check only runs against events whose dateEnd is in
+  // the future, so a suggestion that resolves to a past date is almost
+  // always a confused reading of a website that hasn't been updated for
+  // the new edition yet (e.g. DAW 2026 record vs. site still showing
+  // DAW 2025 wrap-up text). Those need a human eye, not a structured
+  // change. Surface as a note instead by dropping the change here.
+  if (type === 'datetime') {
+    const formats = [
+      'D MMMM YYYY',
+      'DD MMMM YYYY',
+      'D MMM YYYY',
+      'DD MMM YYYY',
+      'YYYY-MM-DD',
+      'MMMM D, YYYY',
+      'MMMM D YYYY',
+    ];
+    const suggestedDay = dayjs(String(suggested), formats, true);
+    if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
+      return {
+        keep: false,
+        drop: `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`,
+      };
+    }
+  }
+
   return { keep: true };
 }
 
@@ -445,6 +472,10 @@ Before adding a change, ask yourself: does my "suggested" value actually differ 
 
 If your "reason" text concludes the values match, are consistent, or no change is needed, OMIT the change entirely. Do not emit a row only to explain why it isn't really a change.
 
+## Stale website content
+
+This check only runs against events whose end date is in the future. If the website still describes a past edition (e.g. "Thank you for joining us at FooConf 2025" while our record is FooConf 2026), DO NOT suggest changing the database dates back to the past edition. The site is likely stale, not the database. Put the observation in "notes" so a human can chase the organiser.
+
 ## Response format
 
 Respond with ONLY a JSON object (no markdown fences) in this exact shape:
@@ -651,8 +682,12 @@ function formatFindings(findings) {
     lines.push(`- ${f}`);
   }
 
-  // Structured changes as a table
+  // Structured changes as a table. GitHub Markdown requires a blank
+  // line before a table when it directly follows a list, otherwise
+  // the table is treated as a continuation of the list and rendered
+  // as one mashed-up line.
   if (changes.length > 0) {
+    if (lines.length > 0) lines.push('');
     lines.push('| Field | Current | Suggested | Reason |');
     lines.push('| --- | --- | --- | --- |');
     for (const c of changes) {
@@ -663,9 +698,13 @@ function formatFindings(findings) {
     }
   }
 
-  // Notes
-  for (const n of notes) {
-    lines.push(`> ${n.note}`);
+  // Notes (also need a blank line above to render as a separate
+  // blockquote rather than getting absorbed into the previous block).
+  if (notes.length > 0) {
+    if (lines.length > 0) lines.push('');
+    for (const n of notes) {
+      lines.push(`> ${n.note}`);
+    }
   }
 
   return lines;
