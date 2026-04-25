@@ -226,6 +226,33 @@ function validateChange(change, event) {
     }
   }
 
+  // Rule 5: past-dated datetime suggestions for upcoming events
+  //
+  // The freshness check only runs against events whose dateEnd is in
+  // the future, so a suggestion that resolves to a past date is almost
+  // always a confused reading of a website that hasn't been updated for
+  // the new edition yet (e.g. DAW 2026 record vs. site still showing
+  // DAW 2025 wrap-up text). Those need a human eye, not a structured
+  // change. Surface as a note instead by dropping the change here.
+  if (type === 'datetime') {
+    const formats = [
+      'D MMMM YYYY',
+      'DD MMMM YYYY',
+      'D MMM YYYY',
+      'DD MMM YYYY',
+      'YYYY-MM-DD',
+      'MMMM D, YYYY',
+      'MMMM D YYYY',
+    ];
+    const suggestedDay = dayjs(String(suggested), formats, true);
+    if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
+      return {
+        keep: false,
+        drop: `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`,
+      };
+    }
+  }
+
   return { keep: true };
 }
 
@@ -444,6 +471,10 @@ Before adding a change, ask yourself: does my "suggested" value actually differ 
 - Current "false" and suggested "no" — same boolean.
 
 If your "reason" text concludes the values match, are consistent, or no change is needed, OMIT the change entirely. Do not emit a row only to explain why it isn't really a change.
+
+## Stale website content
+
+This check only runs against events whose end date is in the future. If the website still describes a past edition (e.g. "Thank you for joining us at FooConf 2025" while our record is FooConf 2026), DO NOT suggest changing the database dates back to the past edition. The site is likely stale, not the database. Put the observation in "notes" so a human can chase the organiser.
 
 ## Response format
 
