@@ -32,6 +32,14 @@
       wa-dropdown {
         width: 100%;
       }
+      @media (max-width: calc(700px - 0.01px)) {
+        > #open-filter-drawer {
+          flex: 0 0 auto;
+        }
+        wa-button#open-filter-drawer {
+          width: auto;
+        }
+      }
       @media (min-width: 700px) {
         > wa-button,
         > wa-dropdown {
