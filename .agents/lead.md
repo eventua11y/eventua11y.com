@@ -13,7 +13,7 @@ Frontier (Claude Opus). Orchestration, cross-domain planning, and pre-merge revi
 - Read-only file access for context gathering
 - Task delegation to all other agents
 - No file editing
-- Read-only bash allow-list (git status/diff/log/branch/show, gh issue/pr view/list, gh api, npm ls/view/audit) for inspection
+- Read-only bash allow-list (git status/diff/log/branch/show/add, gh issue/pr view/list/checks/status, gh workflow view/list, gh api, npm ls/view/audit) for inspection
 - All other shell commands require user approval
 
 ## Escalation
