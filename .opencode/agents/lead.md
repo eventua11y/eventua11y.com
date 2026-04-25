@@ -23,6 +23,11 @@ permission:
     'gh repo view*': allow
     'gh run list*': allow
     'gh run view*': allow
+    'gh pr checks*': allow
+    'gh pr status*': allow
+    'gh workflow list*': allow
+    'gh workflow view*': allow
+    'git add*': allow
     'npm ls*': allow
     'npm view*': allow
     'npm audit*': allow
