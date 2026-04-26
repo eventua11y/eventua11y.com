@@ -312,24 +312,6 @@ const jsonLd = {
         }
 
         {
-          hasTopics && (
-            <div class="event-detail__topics flow">
-              <h2>{event.topics!.length === 1 ? 'Topic' : 'Topics'}</h2>
-              <ul role="list" class="event-detail__topic-list flow flow-xs">
-                {event.topics!.map((topic) => (
-                  <li class="flow flow-3xs">
-                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
-                    {topic.description && (
-                      <p class="text-small text-muted">{topic.description}</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-
-        {
           !isDedicatedToAccessibility && hasChildren && (
             <section class="event-detail__children flow flow-s">
               <hgroup role="group" aria-roledescription="Heading group">
@@ -381,6 +363,24 @@ const jsonLd = {
                 date of the event.
               </p>
             </section>
+          )
+        }
+
+        {
+          hasTopics && (
+            <div class="event-detail__topics flow">
+              <h2>{event.topics!.length === 1 ? 'Topic' : 'Topics'}</h2>
+              <ul role="list" class="event-detail__topic-list flow flow-xs">
+                {event.topics!.map((topic) => (
+                  <li class="flow flow-3xs">
+                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                    {topic.description && (
+                      <p class="text-small text-muted">{topic.description}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )
         }
       </article>
