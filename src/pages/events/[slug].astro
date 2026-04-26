@@ -201,6 +201,15 @@ const jsonLd = {
       }),
     })),
   }),
+  ...(hasTopics && {
+    about: event.topics!.map((topic) => ({
+      '@type': 'DefinedTerm',
+      name: topic.name,
+      url: `https://eventua11y.com/topics/${topic.slug.current}`,
+      ...(topic.description && { description: topic.description }),
+    })),
+    keywords: event.topics!.map((topic) => topic.name).join(', '),
+  }),
 };
 ---
 
@@ -392,9 +401,7 @@ const jsonLd = {
                 {event.topics!.map((topic) => (
                   <li class="flow flow-3xs">
                     <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
-                    {topic.description && (
-                      <p class="text-small text-muted">{topic.description}</p>
-                    )}
+                    {topic.description && <p>{topic.description}</p>}
                   </li>
                 ))}
               </ul>
