@@ -220,7 +220,11 @@ const jsonLd = {
         <header class="event-detail__header">
           {
             displayFormat || (isChildEvent && event.parentEvent) ? (
-              <hgroup role="group" aria-roledescription="Heading group" class="mb-s">
+              <hgroup
+                role="group"
+                aria-roledescription="Heading group"
+                class="mb-s"
+              >
                 <h1 class="event-detail__title mb-s">{event.title}</h1>
                 <p aria-roledescription="subtitle" class="text-muted">
                   {displayFormat && (
