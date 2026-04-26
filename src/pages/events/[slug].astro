@@ -302,8 +302,6 @@ const jsonLd = {
           }
         </header>
 
-        <wa-divider></wa-divider>
-
         {
           (event.richDescription || event.description) && (
             <div class="event-detail__description flow">
@@ -518,6 +516,14 @@ const jsonLd = {
   .event-detail
     :global(.event__delivery:not(.event-detail__children .event__delivery)) {
     font-size: var(--p-step-0);
+  }
+
+  .event-detail__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-3xs);
+    border-bottom: 1px solid var(--s-color-border);
+    padding-bottom: var(--p-space-m);
   }
 
   .event-detail__badges {
