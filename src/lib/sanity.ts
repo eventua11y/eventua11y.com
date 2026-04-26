@@ -14,7 +14,7 @@ import { createClient } from '@sanity/client';
 import dayjs from './dayjs';
 
 import type { PortableTextBlock } from '@portabletext/types';
-import type { Event, Book } from '../types/event';
+import type { Event, Book, Topic } from '../types/event';
 import { compareByDateAsc, compareByDateDesc } from '../utils/eventUtils';
 import {
   PARENT_EVENTS_QUERY,
@@ -67,6 +67,12 @@ interface RawEvent {
   isParent?: boolean;
   speakers?: Array<{ _id: string; name: string }>;
   organizer?: { _id: string; name: string; website?: string };
+  topics?: Array<{
+    _id: string;
+    name: string;
+    slug: { current: string };
+    description?: string;
+  }>;
 }
 
 /**
@@ -170,6 +176,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "parentEvent": parent->{ title, slug },
       "speakers": speakers[]->{ _id, name },
       "organizer": coalesce(organizer, parent->organizer)->{ _id, name, website },
+      "topics": topics[]->{ _id, name, slug, description },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
         _id,
         title,
@@ -202,6 +209,174 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
 
   eventCache[slug] = { data: result, timestamp: Date.now() };
   return result;
+}
+
+// ── Topic queries ──────────────────────────────────────────────────────
+
+/**
+ * A topic as returned by `getTopics()`.
+ * `eventCount` reflects upcoming events only — events where `dateEnd >= now()`
+ * (when set) or `dateStart >= now()` (when `dateEnd` is absent). In-progress
+ * multi-day events are included.
+ */
+interface TopicListItem {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  description?: string;
+  /** Number of upcoming (not yet ended) events referencing this topic. */
+  eventCount: number;
+}
+
+/**
+ * Fetches all published topics sorted alphabetically by name.
+ * `eventCount` on each topic reflects upcoming events only — events where
+ * `dateEnd >= now()` (when set) or `dateStart >= now()` (when `dateEnd` is
+ * absent). In-progress multi-day events are included.
+ */
+export async function getTopics(): Promise<TopicListItem[]> {
+  const client = getSanityClient();
+
+  return client.fetch(`
+    *[_type == "topic" && !(_id in path("drafts.**"))] {
+      _id,
+      name,
+      slug,
+      description,
+      "eventCount": count(*[
+        _type == "event" &&
+        !(_id in path("drafts.**")) &&
+        references(^._id) &&
+        (
+          (defined(dateEnd) && dateEnd >= now()) ||
+          (!defined(dateEnd) && dateStart >= now())
+        )
+      ])
+    } | order(name asc)
+  `);
+}
+
+interface RawTopic {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  description?: string;
+  body: any[];
+  /** Upcoming events only (dateEnd >= now, or dateStart >= now if no dateEnd), sorted ascending by dateStart. */
+  events: Array<{
+    _id: string;
+    _type: string;
+    title: string;
+    slug: { current: string };
+    type: string;
+    dateStart: string;
+    dateEnd?: string;
+    timezone?: string;
+    day?: boolean;
+    attendanceMode?: string;
+    location?: string;
+    isFree?: boolean;
+    description?: string;
+    richDescription?: PortableTextBlock[];
+    website?: string;
+    callForSpeakers?: boolean;
+    callForSpeakersClosingDate?: string;
+    isParent?: boolean;
+    format?: string;
+    speakers?: Array<{ _id: string; name: string; slug?: { current: string } }>;
+    children?: Array<{
+      _id: string;
+      _type: string;
+      title: string;
+      format?: string;
+      dateStart?: string;
+      dateEnd?: string;
+      timezone?: string;
+      day?: boolean;
+      speakers?: Array<{
+        _id: string;
+        name: string;
+        slug?: { current: string };
+      }>;
+    }>;
+    parent?: { _id: string; title: string; slug?: { current: string } };
+  }>;
+}
+
+/**
+ * Fetches a single topic by slug with its full body content and a list
+ * of upcoming related events (sorted ascending by dateStart).
+ * Returns null if no matching topic is found.
+ */
+export async function getTopicBySlug(slug: string): Promise<
+  | (Topic & {
+      events: Event[];
+    })
+  | null
+> {
+  const client = getSanityClient();
+
+  const topic: RawTopic | null = await client.fetch(
+    `
+    *[_type == "topic" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+      _id,
+      name,
+      slug,
+      description,
+      body,
+      "events": *[
+        _type == "event" &&
+        !(_id in path("drafts.**")) &&
+        references(^._id) &&
+        (
+          (defined(dateEnd) && dateEnd >= now()) ||
+          (!defined(dateEnd) && dateStart >= now())
+        )
+      ] | order(dateStart asc) {
+        _id,
+        _type,
+        title,
+        slug,
+        type,
+        dateStart,
+        dateEnd,
+        timezone,
+        day,
+        attendanceMode,
+        location,
+        isFree,
+        description,
+        richDescription,
+        website,
+        callForSpeakers,
+        callForSpeakersClosingDate,
+        isParent,
+        format,
+        "speakers": speakers[]->{ _id, name, slug },
+        "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] | order(dateStart asc) {
+          _id,
+          _type,
+          title,
+          format,
+          dateStart,
+          dateEnd,
+          timezone,
+          day,
+          "speakers": speakers[]->{ _id, name, slug }
+        },
+        "parent": parent->{ _id, title, slug }
+      }
+    }
+  `,
+    { slug }
+  );
+
+  if (!topic) return null;
+
+  return {
+    ...topic,
+    events: topic.events as Event[],
+  };
 }
 
 // ── Book queries ───────────────────────────────────────────────────────

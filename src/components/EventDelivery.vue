@@ -99,7 +99,7 @@ const locationIcon = computed(() =>
       <span aria-hidden="true" class="event__delivery-separator">·</span>
       <a
         :href="website"
-        rel="noopener noreferrer"
+        rel="external noopener noreferrer"
         class="event__website-link"
         :aria-describedby="headingId"
         >Event website<span class="sr-only"> (opens external site)</span></a

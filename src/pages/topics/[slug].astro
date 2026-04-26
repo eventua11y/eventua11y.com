@@ -1,0 +1,75 @@
+---
+/**
+ * Dynamic topic detail page.
+ *
+ * Fetches a single topic by slug from Sanity and renders its full
+ * Portable Text body along with a list of upcoming related events.
+ *
+ * This page runs in SSR mode (no getStaticPaths needed).
+ */
+import DefaultLayout from '../../layouts/default.astro';
+import { getTopicBySlug } from '../../lib/sanity';
+import { PortableText } from 'astro-portabletext';
+import StaticEvent from '../../components/StaticEvent.astro';
+import Event from '../../components/Event.vue';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!Astro.locals.flags.topic_pages_enabled) {
+  return Astro.redirect('/404');
+}
+
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+const topic = await getTopicBySlug(slug);
+
+if (!topic) {
+  return Astro.redirect('/404');
+}
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'private, max-age=300, stale-while-revalidate=60'
+);
+
+const metaDescription = topic.description
+  ? topic.description.slice(0, 160) +
+    (topic.description.length > 160 ? '...' : '')
+  : `${topic.name} — a digital accessibility topic on Eventua11y.`;
+---
+
+<DefaultLayout title={topic.name} description={metaDescription}>
+  <div class="container readable py-l flow">
+    <h1>{topic.name}</h1>
+
+    {
+      topic.body && topic.body.length > 0 && (
+        <div class="flow">
+          <PortableText value={topic.body} />
+        </div>
+      )
+    }
+
+    {
+      topic.events.length > 0 && (
+        <section class="topic-events flow">
+          <h2>Upcoming events</h2>
+          <ol role="list" class="flow flow-l">
+            {topic.events.map((event) => (
+              <li>
+                <Event event={event} client:visible />
+                <noscript>
+                  <StaticEvent event={event} />
+                </noscript>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+  </div>
+</DefaultLayout>

@@ -50,6 +50,10 @@ const metaDescription = event.description
 
 // Check states
 const callForSpeakersOpen = isCallForSpeakersOpen(event);
+const hasTopics =
+  Astro.locals.flags.topic_pages_enabled &&
+  Array.isArray(event.topics) &&
+  event.topics.length > 0;
 const hasChildren = Array.isArray(event.children) && event.children.length > 0;
 const isChildEvent = !!event.parent;
 const parentUrl = event.parentEvent?.slug?.current
@@ -89,9 +93,20 @@ const enumeratedChildTypes = (() => {
     if (!child.format) return;
     counts[child.format] = (counts[child.format] || 0) + 1;
   });
-  return Object.entries(counts)
-    .map(([format, count]) => `${count} ${format}${count > 1 ? 's' : ''}`)
-    .join(', ');
+  const parts = Object.entries(counts).map(([format, count]) => {
+    const label = getFormatLabel(format) || format;
+    return `${count} ${label}${count > 1 ? 's' : ''}`;
+  });
+  if (parts.length === 0) return '';
+  let joined: string;
+  if (parts.length === 1) {
+    joined = parts[0];
+  } else if (parts.length === 2) {
+    joined = `${parts[0]} and ${parts[1]}`;
+  } else {
+    joined = `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+  }
+  return `${joined} at ${event.title}`;
 })();
 
 // JSON-LD structured data
@@ -185,6 +200,15 @@ const jsonLd = {
         url: `https://eventua11y.com/events/${child.slug.current}`,
       }),
     })),
+  }),
+  ...(hasTopics && {
+    about: event.topics!.map((topic) => ({
+      '@type': 'DefinedTerm',
+      name: topic.name,
+      url: `https://eventua11y.com/topics/${topic.slug.current}`,
+      ...(topic.description && { description: topic.description }),
+    })),
+    keywords: event.topics!.map((topic) => topic.name).join(', '),
   }),
 };
 ---
@@ -292,11 +316,11 @@ const jsonLd = {
 
         {
           allSpeakers.length > 0 && !displayFormat && !hasChildren && (
-            <div class="event-detail__speakers">
+            <div class="event-detail__speakers flow">
               <h2 class="text-large">
                 {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
               </h2>
-              <ul role="list" class="event-detail__speaker-list">
+              <ul role="list" class="event-detail__speaker-list flow flow-xs">
                 {allSpeakers.map((speaker) => (
                   <li>
                     <span>{speaker.name}</span>
@@ -312,7 +336,10 @@ const jsonLd = {
             <section class="event-detail__children flow flow-s">
               <hgroup role="group" aria-roledescription="Heading group">
                 <h2>Accessibility highlights</h2>
-                <p aria-roledescription="subtitle" class="text-muted">
+                <p
+                  aria-roledescription="subtitle"
+                  class="text-small text-muted"
+                >
                   {enumeratedChildTypes}
                 </p>
               </hgroup>
@@ -359,6 +386,26 @@ const jsonLd = {
                 date of the event.
               </p>
             </section>
+          )
+        }
+
+        {
+          hasTopics && (
+            <div class="event-detail__topics flow">
+              <h2>
+                {event.topics!.length === 1
+                  ? 'Related topic'
+                  : 'Related topics'}
+              </h2>
+              <ul role="list" class="event-detail__topic-list flow flow-xs">
+                {event.topics!.map((topic) => (
+                  <li class="flow flow-3xs">
+                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                    {topic.description && <p>{topic.description}</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )
         }
       </article>
@@ -486,6 +533,14 @@ const jsonLd = {
 
   .event-detail__speaker-list li:not(:last-child) span::after {
     content: ',\00a0';
+  }
+
+  .event-detail__topic-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-2xs);
   }
 
   .event-detail__children h2 {

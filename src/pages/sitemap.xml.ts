@@ -21,10 +21,13 @@ import { getSanityClient } from '../lib/sanity';
 
 export const prerender = false;
 
-interface SitemapEvent {
+interface SitemapEntry {
   slug: string;
   _updatedAt: string;
 }
+
+interface SitemapEvent extends SitemapEntry {}
+interface SitemapTopic extends SitemapEntry {}
 
 /**
  * Fetches all published event slugs and their last-modified dates from Sanity.
@@ -42,6 +45,26 @@ async function getEventSlugs(): Promise<SitemapEvent[]> {
 }
 
 /**
+ * Fetches all published topic slugs and their last-modified dates from Sanity.
+ * Only includes topics that have a slug (required to generate a URL).
+ */
+async function getTopicSlugs(): Promise<SitemapTopic[]> {
+  const client = createClient({
+    projectId: import.meta.env.SANITY_PROJECT,
+    dataset: import.meta.env.SANITY_DATASET,
+    apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
+    useCdn: true,
+  });
+
+  return client.fetch<SitemapTopic[]>(`
+    *[_type == "topic" && defined(slug.current) && !(_id in path("drafts.**"))] {
+      "slug": slug.current,
+      _updatedAt
+    } | order(_updatedAt desc)
+  `);
+}
+
+/**
  * Formats an ISO date string to the W3C Datetime format used in sitemaps.
  * Falls back to the current date if the input is invalid.
  */
@@ -52,14 +75,20 @@ function toW3CDate(isoDate?: string): string {
   return date.toISOString().split('T')[0];
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context) => {
   const site = 'https://eventua11y.com';
   const today = new Date().toISOString().split('T')[0];
+  const topicsEnabled = context.locals.flags.topic_pages_enabled;
 
-  // Fetch all event slugs from Sanity
+  // Fetch event and topic slugs from Sanity (topics only when flag is on)
   let events: SitemapEvent[] = [];
+  let topics: SitemapTopic[] = [];
   try {
-    events = await getEventSlugs();
+    if (topicsEnabled) {
+      [events, topics] = await Promise.all([getEventSlugs(), getTopicSlugs()]);
+    } else {
+      events = await getEventSlugs();
+    }
   } catch {
     // If Sanity is unreachable, generate sitemap with static pages only.
     // This ensures crawlers still get a valid response.
@@ -88,6 +117,16 @@ export const GET: APIRoute = async () => {
       priority: '0.5',
       lastmod: today,
     },
+    ...(topicsEnabled
+      ? [
+          {
+            loc: '/topics',
+            changefreq: 'weekly',
+            priority: '0.6',
+            lastmod: today,
+          },
+        ]
+      : []),
   ];
 
   const urlEntries = staticPages
@@ -106,6 +145,16 @@ export const GET: APIRoute = async () => {
     <lastmod>${toW3CDate(event._updatedAt)}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>`
+      )
+    )
+    .concat(
+      topics.map(
+        (topic) => `  <url>
+    <loc>${site}/topics/${topic.slug}</loc>
+    <lastmod>${toW3CDate(topic._updatedAt)}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>`
       )
     )

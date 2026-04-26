@@ -1,11 +1,18 @@
 ---
+/**
+ * Error page layout — used for 404 and future 500 pages.
+ *
+ * Users landing here are in a degraded wayfinding state; the primary nav
+ * would compete with recovery actions rather than help them. A minimal
+ * masthead with just the logo keeps the page oriented without adding noise.
+ */
 import '@awesome.me/webawesome/dist/styles/themes/default.css';
 import '@awesome.me/webawesome/dist/styles/utilities/gap.css';
 import '@awesome.me/webawesome/dist/styles/utilities/layout.css';
 import '@awesome.me/webawesome/dist/styles/utilities/visually-hidden.css';
 import '../styles/styles.css';
 import TheFooter from '../components/TheFooter.astro';
-import TheHeader from '../components/TheHeader.astro';
+import Logo from '../images/eventua11y_logo_wordmark_white.svg';
 const { title, description, ogType } = Astro.props.frontmatter || Astro.props;
 const defaultDescription =
   'The calendar of digital accessibility and inclusive design events, curated by Matt Obee.';
@@ -125,7 +132,15 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
       > Skip to main content
     </a>
 
-    <TheHeader />
+    <header id="global-header" class="masthead">
+      <div class="inner">
+        <div class="masthead__logo">
+          <a href="/" rel="home">
+            <Logo class="logo" aria-label="Eventua11y" />
+          </a>
+        </div>
+      </div>
+    </header>
 
     <main id="main">
       <slot />
