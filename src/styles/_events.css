@@ -67,9 +67,15 @@
     row-gap: 0;
     align-items: baseline;
   }
+}
 
-  .event__delivery > .event__website-link::before {
-    content: '·';
+.event__delivery-separator {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .event__delivery-separator {
+    display: inline;
     margin-right: 0.5em;
   }
 }
