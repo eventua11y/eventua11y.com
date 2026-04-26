@@ -3,20 +3,14 @@
  * Dynamic topic detail page.
  *
  * Fetches a single topic by slug from Sanity and renders its full
- * Portable Text body along with a list of related events.
+ * Portable Text body along with a list of upcoming related events.
  *
  * This page runs in SSR mode (no getStaticPaths needed).
  */
 import DefaultLayout from '../../layouts/default.astro';
 import { getTopicBySlug } from '../../lib/sanity';
 import { PortableText } from 'astro-portabletext';
-import type { Event } from '../../types/event';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-
-dayjs.extend(utc);
-dayjs.extend(isSameOrAfter);
+import StaticEvent from '../../components/StaticEvent.astro';
 
 export const prerender = false;
 
@@ -45,28 +39,6 @@ const metaDescription = topic.description
   ? topic.description.slice(0, 160) +
     (topic.description.length > 160 ? '...' : '')
   : `${topic.name} — a digital accessibility topic on Eventua11y.`;
-
-// Split events into upcoming and past
-const now = dayjs.utc().startOf('day');
-const upcomingEvents = topic.events
-  .filter((e: Event) => {
-    const end = dayjs.utc(e.dateEnd || e.dateStart);
-    return end.isSameOrAfter(now);
-  })
-  .sort(
-    (a: Event, b: Event) =>
-      new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-  );
-const pastEvents = topic.events
-  .filter((e: Event) => {
-    const end = dayjs.utc(e.dateEnd || e.dateStart);
-    return end.isBefore(now);
-  })
-  .sort(
-    (a: Event, b: Event) =>
-      new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime()
-  );
-const hasEvents = topic.events.length > 0;
 ---
 
 <DefaultLayout title={topic.name} description={metaDescription}>
@@ -82,47 +54,18 @@ const hasEvents = topic.events.length > 0;
     }
 
     {
-      hasEvents && (
+      topic.events.length > 0 && (
         <section class="topic-events flow">
-          <h2>Related events</h2>
-
-          {upcomingEvents.length > 0 && (
-            <div class="flow flow-s">
-              <h3>Upcoming</h3>
-              <ul role="list" class="topic-events__list">
-                {upcomingEvents.map((event) => (
-                  <li>
-                    <a href={`/events/${event.slug.current}`}>{event.title}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {pastEvents.length > 0 && (
-            <div class="flow flow-s">
-              <h3>Past</h3>
-              <ul role="list" class="topic-events__list">
-                {pastEvents.map((event) => (
-                  <li>
-                    <a href={`/events/${event.slug.current}`}>{event.title}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <h2>Upcoming events</h2>
+          <ol role="list" class="flow flow-l">
+            {topic.events.map((event) => (
+              <li>
+                <StaticEvent event={event} />
+              </li>
+            ))}
+          </ol>
         </section>
       )
     }
   </div>
 </DefaultLayout>
-
-<style>
-  .topic-events__list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--p-space-2xs);
-  }
-</style>

@@ -262,6 +262,7 @@ interface RawTopic {
   slug: { current: string };
   description?: string;
   body: any[];
+  /** Upcoming events only (dateEnd >= now, or dateStart >= now if no dateEnd), sorted ascending by dateStart. */
   events: Array<{
     _id: string;
     title: string;
@@ -274,12 +275,17 @@ interface RawTopic {
     attendanceMode?: string;
     location?: string;
     isFree?: boolean;
+    description?: string;
+    website?: string;
+    callForSpeakers?: boolean;
+    callForSpeakersClosingDate?: string;
   }>;
 }
 
 /**
  * Fetches a single topic by slug with its full body content and a list
- * of related events. Returns null if no matching topic is found.
+ * of upcoming related events (sorted ascending by dateStart).
+ * Returns null if no matching topic is found.
  */
 export async function getTopicBySlug(slug: string): Promise<
   | (Topic & {
@@ -297,7 +303,15 @@ export async function getTopicBySlug(slug: string): Promise<
       slug,
       description,
       body,
-      "events": *[_type == "event" && !(_id in path("drafts.**")) && references(^._id)] {
+      "events": *[
+        _type == "event" &&
+        !(_id in path("drafts.**")) &&
+        references(^._id) &&
+        (
+          (defined(dateEnd) && dateEnd >= now()) ||
+          (!defined(dateEnd) && dateStart >= now())
+        )
+      ] | order(dateStart asc) {
         _id,
         title,
         slug,
@@ -308,8 +322,12 @@ export async function getTopicBySlug(slug: string): Promise<
         day,
         attendanceMode,
         location,
-        isFree
-      } | order(dateStart desc)
+        isFree,
+        description,
+        website,
+        callForSpeakers,
+        callForSpeakersClosingDate
+      }
     }
   `,
     { slug }
