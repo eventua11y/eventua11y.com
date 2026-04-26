@@ -217,90 +217,92 @@ const jsonLd = {
   <div class="container py-l">
     <div class="event-detail-layout">
       <article class="event-detail flow flow-m">
-        {
-          displayFormat || (isChildEvent && event.parentEvent) ? (
-            <hgroup role="group" aria-roledescription="Heading group">
-              <h1 class="event-detail__title mb-s">{event.title}</h1>
-              <p aria-roledescription="subtitle" class="text-muted">
-                {displayFormat && (
-                  <span>
-                    {capitalisedFormat}
-                    {allSpeakers.length > 0 && (
-                      <Fragment>
-                        {' '}
-                        {formatPreposition}{' '}
-                        {allSpeakers.map((speaker, i) => (
-                          <Fragment>
-                            {i > 0 && ', '}
-                            <span>{speaker.name}</span>
-                          </Fragment>
-                        ))}
-                      </Fragment>
-                    )}
-                  </span>
+        <header class="event-detail__header">
+          {
+            displayFormat || (isChildEvent && event.parentEvent) ? (
+              <hgroup role="group" aria-roledescription="Heading group">
+                <h1 class="event-detail__title mb-s">{event.title}</h1>
+                <p aria-roledescription="subtitle" class="text-muted">
+                  {displayFormat && (
+                    <span>
+                      {capitalisedFormat}
+                      {allSpeakers.length > 0 && (
+                        <Fragment>
+                          {' '}
+                          {formatPreposition}{' '}
+                          {allSpeakers.map((speaker, i) => (
+                            <Fragment>
+                              {i > 0 && ', '}
+                              <span>{speaker.name}</span>
+                            </Fragment>
+                          ))}
+                        </Fragment>
+                      )}
+                    </span>
+                  )}
+                  {displayFormat && isChildEvent && event.parentEvent && (
+                    <span aria-hidden="true"> · </span>
+                  )}
+                  {isChildEvent && event.parentEvent && (
+                    <span>
+                      Part of{' '}
+                      {parentUrl ? (
+                        <a href={parentUrl}>{event.parentEvent.title}</a>
+                      ) : (
+                        <span>{event.parentEvent.title}</span>
+                      )}
+                    </span>
+                  )}
+                </p>
+              </hgroup>
+            ) : (
+              <h1 class="event-detail__title">{event.title}</h1>
+            )
+          }
+
+          <EventDate
+            client:only="vue"
+            dateStart={event.dateStart}
+            dateEnd={event.dateEnd}
+            timezone={event.timezone}
+            day={event.day}
+            type={event.type}
+            showCountdown={true}
+            showEnded={true}
+          />
+
+          <EventDelivery
+            client:idle
+            attendanceMode={event.attendanceMode as any}
+            location={event.location}
+            website={event.website}
+            showWebsiteLink={false}
+          />
+
+          {
+            hasBadges && (
+              <div class="event-detail__badges">
+                {isDedicatedToAccessibility && (
+                  <wa-badge pill variant="neutral">
+                    Dedicated to accessibility
+                  </wa-badge>
                 )}
-                {displayFormat && isChildEvent && event.parentEvent && (
-                  <span aria-hidden="true"> · </span>
+                {callForSpeakersOpen && (
+                  <wa-badge variant="success" pill attention="pulse">
+                    Call for speakers
+                  </wa-badge>
                 )}
-                {isChildEvent && event.parentEvent && (
-                  <span>
-                    Part of{' '}
-                    {parentUrl ? (
-                      <a href={parentUrl}>{event.parentEvent.title}</a>
-                    ) : (
-                      <span>{event.parentEvent.title}</span>
-                    )}
-                  </span>
+                {event.isFree && event.type !== 'theme' && (
+                  <wa-badge pill variant="neutral">
+                    Free
+                  </wa-badge>
                 )}
-              </p>
-            </hgroup>
-          ) : (
-            <h1 class="event-detail__title">{event.title}</h1>
-          )
-        }
+              </div>
+            )
+          }
+        </header>
 
         <wa-divider></wa-divider>
-
-        <EventDate
-          client:only="vue"
-          dateStart={event.dateStart}
-          dateEnd={event.dateEnd}
-          timezone={event.timezone}
-          day={event.day}
-          type={event.type}
-          showCountdown={true}
-          showEnded={true}
-        />
-
-        <EventDelivery
-          client:idle
-          attendanceMode={event.attendanceMode as any}
-          location={event.location}
-          website={event.website}
-          showWebsiteLink={false}
-        />
-
-        {
-          hasBadges && (
-            <div class="event-detail__badges">
-              {isDedicatedToAccessibility && (
-                <wa-badge pill variant="neutral">
-                  Dedicated to accessibility
-                </wa-badge>
-              )}
-              {callForSpeakersOpen && (
-                <wa-badge variant="success" pill attention="pulse">
-                  Call for speakers
-                </wa-badge>
-              )}
-              {event.isFree && event.type !== 'theme' && (
-                <wa-badge pill variant="neutral">
-                  Free
-                </wa-badge>
-              )}
-            </div>
-          )
-        }
 
         {
           (event.richDescription || event.description) && (
