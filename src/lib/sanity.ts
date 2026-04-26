@@ -265,6 +265,7 @@ interface RawTopic {
   /** Upcoming events only (dateEnd >= now, or dateStart >= now if no dateEnd), sorted ascending by dateStart. */
   events: Array<{
     _id: string;
+    _type: string;
     title: string;
     slug: { current: string };
     type: string;
@@ -276,9 +277,29 @@ interface RawTopic {
     location?: string;
     isFree?: boolean;
     description?: string;
+    richDescription?: PortableTextBlock[];
     website?: string;
     callForSpeakers?: boolean;
     callForSpeakersClosingDate?: string;
+    isParent?: boolean;
+    format?: string;
+    speakers?: Array<{ _id: string; name: string; slug?: { current: string } }>;
+    children?: Array<{
+      _id: string;
+      _type: string;
+      title: string;
+      format?: string;
+      dateStart?: string;
+      dateEnd?: string;
+      timezone?: string;
+      day?: boolean;
+      speakers?: Array<{
+        _id: string;
+        name: string;
+        slug?: { current: string };
+      }>;
+    }>;
+    parent?: { _id: string; title: string; slug?: { current: string } };
   }>;
 }
 
@@ -313,6 +334,7 @@ export async function getTopicBySlug(slug: string): Promise<
         )
       ] | order(dateStart asc) {
         _id,
+        _type,
         title,
         slug,
         type,
@@ -324,9 +346,25 @@ export async function getTopicBySlug(slug: string): Promise<
         location,
         isFree,
         description,
+        richDescription,
         website,
         callForSpeakers,
-        callForSpeakersClosingDate
+        callForSpeakersClosingDate,
+        isParent,
+        format,
+        "speakers": speakers[]->{ _id, name, slug },
+        "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] | order(dateStart asc) {
+          _id,
+          _type,
+          title,
+          format,
+          dateStart,
+          dateEnd,
+          timezone,
+          day,
+          "speakers": speakers[]->{ _id, name, slug }
+        },
+        "parent": parent->{ _id, title, slug }
       }
     }
   `,

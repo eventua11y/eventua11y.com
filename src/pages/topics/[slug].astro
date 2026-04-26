@@ -11,6 +11,7 @@ import DefaultLayout from '../../layouts/default.astro';
 import { getTopicBySlug } from '../../lib/sanity';
 import { PortableText } from 'astro-portabletext';
 import StaticEvent from '../../components/StaticEvent.astro';
+import Event from '../../components/Event.vue';
 
 export const prerender = false;
 
@@ -60,7 +61,10 @@ const metaDescription = topic.description
           <ol role="list" class="flow flow-l">
             {topic.events.map((event) => (
               <li>
-                <StaticEvent event={event} />
+                <Event event={event} client:visible />
+                <noscript>
+                  <StaticEvent event={event} />
+                </noscript>
               </li>
             ))}
           </ol>
