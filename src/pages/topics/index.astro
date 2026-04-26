@@ -2,8 +2,8 @@
 /**
  * Topics listing page.
  *
- * Displays all topics that are referenced by at least one event,
- * with a short description and event count for each.
+ * Displays all published topics in an alphabetical listing grouped by
+ * first letter. Event counts reflect upcoming events only.
  *
  * This page runs in SSR mode to stay in sync with Sanity content.
  */
@@ -23,7 +23,37 @@ Astro.response.headers.set(
   'private, max-age=300, stale-while-revalidate=60'
 );
 
-const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
+// ── Grouping logic ────────────────────────────────────────────────────
+
+// Sort case-insensitively (GROQ already orders by name, but JS sort
+// ensures locale-aware ordering within each letter group).
+const sorted = [...topics].sort((a, b) =>
+  a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+);
+
+// Group by first character; non-letters go to "#".
+const groupMap = new Map<string, typeof sorted>();
+
+for (const topic of sorted) {
+  const first = topic.name.charAt(0).toUpperCase();
+  const key = /^[A-Z]$/.test(first) ? first : '#';
+  if (!groupMap.has(key)) groupMap.set(key, []);
+  groupMap.get(key)!.push(topic);
+}
+
+// Build ordered array: "#" first (if present), then A–Z.
+const letterGroups: { letter: string; topics: typeof sorted }[] = [];
+
+if (groupMap.has('#')) {
+  letterGroups.push({ letter: '#', topics: groupMap.get('#')! });
+}
+
+for (let code = 65; code <= 90; code++) {
+  const letter = String.fromCharCode(code);
+  if (groupMap.has(letter)) {
+    letterGroups.push({ letter, topics: groupMap.get(letter)! });
+  }
+}
 ---
 
 <DefaultLayout
@@ -32,77 +62,76 @@ const topicsWithEvents = topics.filter((t) => t.eventCount > 0);
 >
   <div class="container py-l flow">
     <h1>Topics</h1>
-    <p class="readable">
-      Browse accessibility and inclusive design topics covered by events on
-      Eventua11y.
-    </p>
+    <div class="readable flow">
+      <p>
+        Browse accessibility and inclusive design topics covered by events on
+        Eventua11y.
+      </p>
 
-    {
-      topicsWithEvents.length > 0 ? (
-        <ul
-          role="list"
-          class="wa-grid wa-gap-s"
-          style="--min-column-size: 18rem;"
-        >
-          {topicsWithEvents.map((topic) => (
-            <li>
-              <a
-                href={`/topics/${topic.slug.current}`}
-                class="topic-card__link"
+      {
+        topics.length === 0 ? (
+          <p>No topics have been published yet.</p>
+        ) : (
+          letterGroups.map(({ letter, topics: group }) => (
+            <>
+              <h2
+                id={`letter-${letter === '#' ? 'other' : letter.toLowerCase()}`}
               >
-                <wa-card class="topic-card" appearance="outlined">
-                  <div class="wa-stack wa-gap-2xs">
-                    <h2 class="topic-card__name">{topic.name}</h2>
+                {letter === '#' ? '#' : letter}
+              </h2>
+              <ul role="list" class="topic-list">
+                {group.map((topic) => (
+                  <li class="topic-list__item flow flow-3xs">
+                    <h3 class="topic-list__name">
+                      <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                    </h3>
                     {topic.description && (
-                      <p class="topic-card__description">{topic.description}</p>
+                      <p class="topic-list__description">{topic.description}</p>
                     )}
-                    <p class="topic-card__count">
-                      {topic.eventCount}{' '}
-                      {topic.eventCount === 1 ? 'event' : 'events'}
-                    </p>
-                  </div>
-                </wa-card>
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No topics have been published yet.</p>
-      )
-    }
+                    {topic.eventCount > 0 && (
+                      <p class="topic-list__count">
+                        {topic.eventCount}{' '}
+                        {topic.eventCount === 1
+                          ? 'upcoming event'
+                          : 'upcoming events'}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ))
+        )
+      }
+    </div>
   </div>
 </DefaultLayout>
 
 <style>
-  ul[role='list'] {
+  .topic-list {
     list-style: none;
     padding: 0;
-  }
-
-  .topic-card__link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    height: 100%;
-  }
-
-  .topic-card {
-    --spacing: var(--p-space-m);
-    height: 100%;
-  }
-
-  .topic-card__name {
-    font-size: var(--p-step-1);
     margin: 0;
   }
 
-  .topic-card__description {
-    font-size: var(--p-step--1);
-    color: var(--p-color-text-muted);
+  .topic-list__item {
+    padding-block: var(--p-space-s);
+    border-block-end: 1px solid var(--p-color-border);
   }
 
-  .topic-card__count {
+  .topic-list__item:last-child {
+    border-block-end: none;
+  }
+
+  .topic-list__name {
+    font-size: var(--p-step-0);
+    margin: 0;
+  }
+
+  .topic-list__count {
     font-size: var(--p-step--1);
     color: var(--p-color-text-muted);
+    margin: 0;
+    margin-block-start: var(--p-space-3xs);
   }
 </style>

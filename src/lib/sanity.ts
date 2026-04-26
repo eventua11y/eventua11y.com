@@ -213,17 +213,26 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
 
 // ── Topic queries ──────────────────────────────────────────────────────
 
+/**
+ * A topic as returned by `getTopics()`.
+ * `eventCount` reflects upcoming events only — events where `dateEnd >= now()`
+ * (when set) or `dateStart >= now()` (when `dateEnd` is absent). In-progress
+ * multi-day events are included.
+ */
 interface TopicListItem {
   _id: string;
   name: string;
   slug: { current: string };
   description?: string;
+  /** Number of upcoming (not yet ended) events referencing this topic. */
   eventCount: number;
 }
 
 /**
- * Fetches all published topics that are referenced by at least one event,
- * sorted alphabetically by name. Includes an event count for each topic.
+ * Fetches all published topics sorted alphabetically by name.
+ * `eventCount` on each topic reflects upcoming events only — events where
+ * `dateEnd >= now()` (when set) or `dateStart >= now()` (when `dateEnd` is
+ * absent). In-progress multi-day events are included.
  */
 export async function getTopics(): Promise<TopicListItem[]> {
   const client = getSanityClient();
@@ -234,7 +243,15 @@ export async function getTopics(): Promise<TopicListItem[]> {
       name,
       slug,
       description,
-      "eventCount": count(*[_type == "event" && !(_id in path("drafts.**")) && references(^._id)])
+      "eventCount": count(*[
+        _type == "event" &&
+        !(_id in path("drafts.**")) &&
+        references(^._id) &&
+        (
+          (defined(dateEnd) && dateEnd >= now()) ||
+          (!defined(dateEnd) && dateStart >= now())
+        )
+      ])
     } | order(name asc)
   `);
 }
