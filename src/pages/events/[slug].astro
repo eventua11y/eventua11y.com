@@ -518,6 +518,12 @@ const jsonLd = {
     font-size: var(--p-step-0);
   }
 
+  .event-detail
+    :global(.event__delivery:not(.event-detail__children .event__delivery)) {
+    margin-bottom: 0;
+    margin-top: 0;
+  }
+
   .event-detail__header {
     display: flex;
     flex-direction: column;
