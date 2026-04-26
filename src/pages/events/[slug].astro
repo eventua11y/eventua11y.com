@@ -481,8 +481,15 @@ const jsonLd = {
     margin-block: var(--p-space-s);
   }
 
-  .event-detail :global(.event__dates),
-  .event-detail :global(.event__delivery) {
+  /* Scope the larger date/delivery font-size to the parent event's own
+     date/delivery elements, excluding any nested EventChild listings
+     inside .event-detail__children. The :not() guard is necessary because
+     the Astro hydration wrappers around <EventDate client:only> and the
+     EventChild components mean we can't use a direct-child combinator. */
+  .event-detail
+    :global(.event__dates:not(.event-detail__children .event__dates)),
+  .event-detail
+    :global(.event__delivery:not(.event-detail__children .event__delivery)) {
     font-size: var(--p-step-0);
   }
 

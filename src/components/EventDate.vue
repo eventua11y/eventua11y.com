@@ -5,8 +5,17 @@
       <time :datetime="machineStart">{{ formattedRange[0] }}</time
       ><template v-if="formattedRange[1]"
         ><span aria-hidden="true"> &ndash; </span><span class="sr-only">to</span
-        ><time :datetime="machineEnd">{{ formattedRange[1] }}</time></template
-      ><template v-if="!isInternational"
+        ><span class="event__time-tz"
+          ><time :datetime="machineEnd">{{ formattedRange[1] }}</time
+          ><template v-if="!isInternational"
+            >{{ ' '
+            }}<abbr
+              :title="getFullTimezoneName(currentTimezone) || undefined"
+              >{{ currentTimezone }}</abbr
+            ></template
+          ></span
+        ></template
+      ><template v-if="isInternational === false && !formattedRange[1]"
         >{{ ' '
         }}<abbr :title="getFullTimezoneName(currentTimezone) || undefined">{{
           currentTimezone

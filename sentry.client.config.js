@@ -16,11 +16,17 @@ Sentry.init({
   //   (EVENTUA11Y-T, EVENTUA11Y-V).
   // - "Load failed": Safari's generic message for fetch() rejections, most
   //   often surfaced by Sentry's own hover-prefetch instrumentation when the
-  //   network request is cancelled or fails (EVENTUA11Y-10).
+  //   network request is cancelled or fails (EVENTUA11Y-10, EVENTUA11Y-12).
+  //   Sentry sometimes appends a host suffix like " (eventua11y.com)", so the
+  //   pattern is a prefix match rather than an exact match.
+  // - "error loading dynamically imported module": Vite dev-server HMR noise
+  //   that slips past `allowUrls` because the localhost URL appears in the
+  //   error message rather than the stack frame (EVENTUA11Y-S).
   ignoreErrors: [
     /Failed to execute 'hidePopover' on 'HTMLElement'/,
     /Failed to execute 'showPopover' on 'HTMLElement'/,
-    /^Load failed$/,
+    /^Load failed\b/,
+    /error loading dynamically imported module/,
   ],
 
   beforeSendSpan(span) {

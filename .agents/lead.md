@@ -76,3 +76,4 @@ When collecting reports from multiple agents:
 - If an agent returns no findings, say so — do not invent issues.
 - When scope is ambiguous, ask the user to clarify.
 - Do not create git commits without explicit user instruction. When the user asks, commit and push only after verifying the build.
+- Before creating a new feature branch, always `git checkout main && git pull --ff-only` first. Branching from a stale or in-progress branch causes a merged PR to inherit unrelated history, making the GitHub "Files changed" view misleading even when the actual merge diff is clean.
