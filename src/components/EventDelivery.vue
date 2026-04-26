@@ -96,6 +96,7 @@ const locationIcon = computed(() =>
     </div>
 
     <template v-if="website && showWebsiteLink">
+      <span aria-hidden="true" class="event__delivery-separator">·</span>
       <a
         :href="website"
         rel="noopener noreferrer"
