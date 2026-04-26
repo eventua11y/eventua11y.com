@@ -357,11 +357,15 @@ export async function getTopicBySlug(slug: string): Promise<
           _id,
           _type,
           title,
-          format,
+          slug,
+          type,
           dateStart,
           dateEnd,
           timezone,
           day,
+          website,
+          format,
+          scheduled,
           "speakers": speakers[]->{ _id, name, slug }
         },
         "parent": parent->{ _id, title, slug }
