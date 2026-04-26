@@ -291,7 +291,7 @@ const speakerDisplay = computed(() => {
 .event__badges {
   display: flex;
   flex-wrap: wrap;
-  column-gap: var(--p-space-3xs);
+  column-gap: var(--p-space-2xs);
   row-gap: var(--p-space-3xs);
 }
 </style>
