@@ -20,7 +20,19 @@ import { test, expect } from '@playwright/test';
  * revisit and add flag-on assertions here.
  */
 
-test.describe('Topics feature flag — flag OFF (default)', () => {
+/**
+ * SKIPPED: The non-production Flagsmith environment has
+ * `topic_pages_enabled = true` so the feature can be visually validated on
+ * deploy previews. The two states (flag on for preview, flag off for these
+ * tests) cannot coexist on the same Flagsmith environment, and there is no
+ * Flagsmith mock/stub mechanism yet. Re-enable when either:
+ *   - the flag is permanently switched on in non-prod (these tests then
+ *     become obsolete and should be deleted), or
+ *   - a Flagsmith stub is added that lets Playwright force flag values
+ *     per-test (these tests then become useful again and should also gain
+ *     flag-on assertions per the existing TODO above).
+ */
+test.describe.skip('Topics feature flag — flag OFF (default)', () => {
   test('/topics redirects to 404 when flag is off', async ({ page }) => {
     await page.goto('/topics');
     // The page redirects to /404; follow the redirect and check the final URL
