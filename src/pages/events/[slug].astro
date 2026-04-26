@@ -383,7 +383,11 @@ const jsonLd = {
         {
           hasTopics && (
             <div class="event-detail__topics flow">
-              <h2>{event.topics!.length === 1 ? 'Topic' : 'Topics'}</h2>
+              <h2>
+                {event.topics!.length === 1
+                  ? 'Related topic'
+                  : 'Related topics'}
+              </h2>
               <ul role="list" class="event-detail__topic-list flow flow-xs">
                 {event.topics!.map((topic) => (
                   <li class="flow flow-3xs">
