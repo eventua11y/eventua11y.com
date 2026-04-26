@@ -296,11 +296,11 @@ const jsonLd = {
 
         {
           allSpeakers.length > 0 && !displayFormat && !hasChildren && (
-            <div class="event-detail__speakers">
+            <div class="event-detail__speakers flow">
               <h2 class="text-large">
                 {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
               </h2>
-              <ul role="list" class="event-detail__speaker-list">
+              <ul role="list" class="event-detail__speaker-list flow flow-xs">
                 {allSpeakers.map((speaker) => (
                   <li>
                     <span>{speaker.name}</span>
@@ -313,11 +313,11 @@ const jsonLd = {
 
         {
           hasTopics && (
-            <div class="event-detail__topics">
+            <div class="event-detail__topics flow">
               <h2>{event.topics!.length === 1 ? 'Topic' : 'Topics'}</h2>
-              <ul role="list" class="event-detail__topic-list">
+              <ul role="list" class="event-detail__topic-list flow flow-xs">
                 {event.topics!.map((topic) => (
-                  <li>
+                  <li class="flow flow-3xs">
                     <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
                     {topic.description && (
                       <p class="text-small text-muted">{topic.description}</p>
