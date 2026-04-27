@@ -233,12 +233,7 @@ const jsonLd = {
                       <Fragment>
                         {' '}
                         {formatPreposition}{' '}
-                        {allSpeakers.map((speaker, i) => (
-                          <Fragment>
-                            {i > 0 && ', '}
-                            <span>{speaker.name}</span>
-                          </Fragment>
-                        ))}
+                        {allSpeakers.map((s) => s.name).join(', ')}
                       </Fragment>
                     )}
                   </span>
