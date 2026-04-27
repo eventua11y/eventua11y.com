@@ -215,9 +215,8 @@ const jsonLd = {
 
 <DefaultLayout title={event.title} description={metaDescription} ogType="event">
   <div class="container py-l">
-    <div class="event-detail-layout">
-      <article class="event-detail flow flow-m">
-        <header class="event-detail__header">
+    <article class="event-detail flow flow-m">
+      <header class="event-detail__header">
           {
             displayFormat || (isChildEvent && event.parentEvent) ? (
               <hgroup
@@ -306,17 +305,98 @@ const jsonLd = {
           }
         </header>
 
-        {
-          (event.richDescription || event.description) && (
-            <div class="event-detail__description flow">
-              {event.richDescription ? (
-                <PortableText value={event.richDescription} />
-              ) : (
-                <p>{event.description}</p>
-              )}
-            </div>
-          )
-        }
+        <div class="event-detail-body">
+          {
+            (event.website || event.organizer) && (
+              <aside class="event-detail-sidebar">
+                <wa-card class="event-detail-sidebar__card" appearance="outlined">
+                  <p>
+                    {isChildEvent && event.parentEvent && event.organizer ? (
+                      <Fragment>
+                        This event is part of{' '}
+                        {parentUrl ? (
+                          <a href={parentUrl}>{event.parentEvent.title}</a>
+                        ) : (
+                          event.parentEvent.title
+                        )}
+                        {`, organised by `}
+                        {event.organizer.website ? (
+                          <a
+                            href={event.organizer.website}
+                            rel="noopener noreferrer"
+                            set:text={event.organizer.name}
+                          />
+                        ) : (
+                          event.organizer.name
+                        )}
+                        {`.`}
+                      </Fragment>
+                    ) : isChildEvent && event.parentEvent ? (
+                      <Fragment>
+                        This event is part of{' '}
+                        {parentUrl ? (
+                          <a href={parentUrl}>{event.parentEvent.title}</a>
+                        ) : (
+                          event.parentEvent.title
+                        )}
+                        .
+                      </Fragment>
+                    ) : event.organizer ? (
+                      <Fragment>
+                        {`This event is organised by `}
+                        {event.organizer.website ? (
+                          <a
+                            href={event.organizer.website}
+                            rel="noopener noreferrer"
+                            set:text={event.organizer.name}
+                          />
+                        ) : (
+                          event.organizer.name
+                        )}
+                        {`.`}
+                      </Fragment>
+                    ) : (
+                      ''
+                    )}
+                    {event.website && (
+                      <Fragment>
+                        {' '}
+                        Refer to the official event website for the most accurate
+                        and up-to-date information.
+                      </Fragment>
+                    )}
+                  </p>
+                  {event.website && (
+                    <wa-button
+                      href={event.website}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      variant="neutral"
+                      appearance="accent"
+                      style="width: 100%;"
+                    >
+                      Event website
+                      <wa-icon slot="end" name="arrow-up-right-from-square" />
+                    </wa-button>
+                  )}
+                </wa-card>
+              </aside>
+            )
+          }
+
+          <div class="event-detail-main flow flow-m">
+
+            {
+              (event.richDescription || event.description) && (
+                <div class="event-detail__description flow">
+                  {event.richDescription ? (
+                    <PortableText value={event.richDescription} />
+                  ) : (
+                    <p>{event.description}</p>
+                  )}
+                </div>
+              )
+            }
 
         {
           allSpeakers.length > 0 && !displayFormat && !hasChildren && (
@@ -412,96 +492,16 @@ const jsonLd = {
             </div>
           )
         }
-      </article>
+          </div>
 
-      {
-        (event.website || event.organizer) && (
-          <aside class="event-detail-sidebar">
-            <wa-card class="event-detail-sidebar__card" appearance="outlined">
-              <p>
-                {isChildEvent && event.parentEvent && event.organizer ? (
-                  <Fragment>
-                    This event is part of{' '}
-                    {parentUrl ? (
-                      <a href={parentUrl}>{event.parentEvent.title}</a>
-                    ) : (
-                      event.parentEvent.title
-                    )}
-                    {`, organised by `}
-                    {event.organizer.website ? (
-                      <a
-                        href={event.organizer.website}
-                        rel="noopener noreferrer"
-                        set:text={event.organizer.name}
-                      />
-                    ) : (
-                      event.organizer.name
-                    )}
-                    {`.`}
-                  </Fragment>
-                ) : isChildEvent && event.parentEvent ? (
-                  <Fragment>
-                    This event is part of{' '}
-                    {parentUrl ? (
-                      <a href={parentUrl}>{event.parentEvent.title}</a>
-                    ) : (
-                      event.parentEvent.title
-                    )}
-                    .
-                  </Fragment>
-                ) : event.organizer ? (
-                  <Fragment>
-                    {`This event is organised by `}
-                    {event.organizer.website ? (
-                      <a
-                        href={event.organizer.website}
-                        rel="noopener noreferrer"
-                        set:text={event.organizer.name}
-                      />
-                    ) : (
-                      event.organizer.name
-                    )}
-                    {`.`}
-                  </Fragment>
-                ) : (
-                  ''
-                )}
-                {event.website && (
-                  <Fragment>
-                    {' '}
-                    Refer to the official event website for the most accurate
-                    and up-to-date information.
-                  </Fragment>
-                )}
-              </p>
-              {event.website && (
-                <wa-button
-                  href={event.website}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  variant="neutral"
-                  appearance="accent"
-                  style="width: 100%;"
-                >
-                  Event website
-                  <wa-icon slot="end" name="arrow-up-right-from-square" />
-                </wa-button>
-              )}
-            </wa-card>
-          </aside>
-        )
-      }
-    </div>
+        </div>
+      </article>
   </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 </DefaultLayout>
 
 <style>
-  .event-detail-layout {
-    max-width: 55rem;
-  }
-
   .event-detail__title {
     text-wrap: balance;
   }
@@ -578,7 +578,7 @@ const jsonLd = {
   }
 
   .event-detail-sidebar {
-    margin-top: var(--p-space-m);
+    margin-bottom: var(--p-space-m);
   }
 
   .event-detail-sidebar__card {
@@ -591,22 +591,25 @@ const jsonLd = {
   }
 
   @media (min-width: 769px) {
-    .event-detail-layout {
-      display: grid;
-      grid-template-columns: 1fr 18rem;
-      gap: var(--p-space-l);
-      align-items: start;
+    .event-detail {
       max-width: none;
     }
 
-    .event-detail {
+    .event-detail-body {
+      display: grid;
+      grid-template-columns: 18rem 1fr;
+      gap: var(--p-space-l);
+      align-items: start;
+    }
+
+    .event-detail-main {
       max-width: 55rem;
     }
 
     .event-detail-sidebar {
       position: sticky;
       top: var(--p-space-m);
-      margin-top: 0;
+      margin-bottom: 0;
     }
   }
 </style>
