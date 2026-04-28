@@ -52,6 +52,11 @@ export interface Event {
   location?: string;
   isFree?: boolean;
   website?: string;
+  registration?: string;
+  codeOfConduct?: string;
+  accessibilityInfo?: { url?: string; summary?: string };
+  schedule?: string;
+  callForSpeakersLink?: string;
   parent?: { _ref: string };
   parentEvent?: { title: string; slug?: { current: string } };
   children?: ChildEvent[];
