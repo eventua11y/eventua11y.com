@@ -20,6 +20,8 @@ import {
   capitalise,
 } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
+import dayjs from '../../lib/dayjs';
+import { getEventEnd } from '../../utils/progressUtils';
 
 export const prerender = false;
 
@@ -122,23 +124,38 @@ const enumeratedChildTypes = (() => {
   return `${joined} at ${event.title}`;
 })();
 
-// Supplementary sidebar links
-const supplementaryLinks = [
-  event.registration && { href: event.registration, label: 'Registration' },
-  event.codeOfConduct && {
-    href: event.codeOfConduct,
-    label: 'Code of conduct',
-  },
-  event.accessibilityInfo?.url && {
-    href: event.accessibilityInfo.url,
-    label: 'Accessibility information',
-  },
-  event.schedule && { href: event.schedule, label: 'Schedule' },
-  event.callForSpeakersLink && {
-    href: event.callForSpeakersLink,
-    label: 'Call for speakers',
-  },
-].filter(Boolean) as Array<{ href: string; label: string }>;
+// Has the event ended? Used to hide supplementary links (registration,
+// schedule, etc.) once they're no longer relevant. Uses the same end-date
+// resolution as progressUtils.hasEnded() but without the showEnded gate,
+// which is a UI-context flag specific to the listing pages.
+const eventHasEnded = dayjs().isAfter(
+  getEventEnd({
+    dateStart: event.dateStart,
+    dateEnd: event.dateEnd,
+    timezone: event.timezone,
+    day: event.day,
+  })
+);
+
+// Supplementary sidebar links — hidden once the event has ended.
+const supplementaryLinks = eventHasEnded
+  ? []
+  : ([
+      event.registration && { href: event.registration, label: 'Registration' },
+      event.codeOfConduct && {
+        href: event.codeOfConduct,
+        label: 'Code of conduct',
+      },
+      event.accessibilityInfo?.url && {
+        href: event.accessibilityInfo.url,
+        label: 'Accessibility information',
+      },
+      event.schedule && { href: event.schedule, label: 'Schedule' },
+      event.callForSpeakersLink && {
+        href: event.callForSpeakersLink,
+        label: 'Call for speakers',
+      },
+    ].filter(Boolean) as Array<{ href: string; label: string }>);
 
 const hasSidebarLinks = supplementaryLinks.length > 0;
 
