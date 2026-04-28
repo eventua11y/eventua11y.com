@@ -116,23 +116,14 @@ const supplementaryLinks = [
     href: event.codeOfConduct,
     label: 'Code of conduct',
   },
-  event.accessibilityInfo?.url && {
-    href: event.accessibilityInfo.url,
-    label: 'Accessibility information',
-    summary: event.accessibilityInfo.summary,
-  },
   event.schedule && { href: event.schedule, label: 'Schedule' },
   event.callForSpeakersLink && {
     href: event.callForSpeakersLink,
     label: 'Call for speakers',
   },
-].filter(Boolean) as Array<{ href: string; label: string; summary?: string }>;
+].filter(Boolean) as Array<{ href: string; label: string }>;
 
-const hasAccessibilitySummaryOnly =
-  event.accessibilityInfo?.summary && !event.accessibilityInfo?.url;
-
-const hasSidebarLinks =
-  supplementaryLinks.length > 0 || hasAccessibilitySummaryOnly;
+const hasSidebarLinks = supplementaryLinks.length > 0;
 
 // JSON-LD structured data
 const jsonLd = {
@@ -404,53 +395,25 @@ const jsonLd = {
                   <>
                     <h2 class="sr-only">Event resources</h2>
                     <ul role="list" class="event-detail-sidebar__links">
-                      {supplementaryLinks.map((link) =>
-                        link.label === 'Accessibility information' &&
-                        link.summary ? (
-                          <li>
-                            <a
-                              href={link.href}
-                              rel="noopener noreferrer"
-                              target="_blank"
-                              aria-describedby="a11y-info-summary"
-                            >
-                              {link.label}
-                              <wa-icon
-                                name="arrow-up-right-from-square"
-                                label="(opens external site)"
-                              />
-                            </a>
-                            <p
-                              id="a11y-info-summary"
-                              class="text-small text-muted"
-                            >
-                              {link.summary}
-                            </p>
-                          </li>
-                        ) : (
-                          <li>
-                            <a
-                              href={link.href}
-                              rel="noopener noreferrer"
-                              target="_blank"
-                            >
-                              {link.label}
-                              <wa-icon
-                                name="arrow-up-right-from-square"
-                                label="(opens external site)"
-                              />
-                            </a>
-                          </li>
-                        )
-                      )}
-                      {hasAccessibilitySummaryOnly &&
-                        !event.accessibilityInfo?.url && (
-                          <li>
-                            <p class="text-small text-muted">
-                              Accessibility: {event.accessibilityInfo!.summary}
-                            </p>
-                          </li>
-                        )}
+                      {supplementaryLinks.map((link) => (
+                        <li>
+                          <wa-button
+                            href={link.href}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            appearance="plain"
+                            variant="neutral"
+                            size="small"
+                          >
+                            {link.label}
+                            <span class="sr-only"> (opens external site)</span>
+                            <wa-icon
+                              slot="end"
+                              name="arrow-up-right-from-square"
+                            />
+                          </wa-button>
+                        </li>
+                      ))}
                     </ul>
                   </>
                 )}
@@ -674,14 +637,17 @@ const jsonLd = {
     gap: var(--p-space-2xs);
   }
 
-  .event-detail-sidebar__links a {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--p-space-3xs);
+  .event-detail-sidebar__links li {
+    display: block;
   }
 
-  .event-detail-sidebar__links p {
-    margin: var(--p-space-3xs) 0 0;
+  .event-detail-sidebar__links wa-button {
+    display: block;
+    width: 100%;
+  }
+
+  .event-detail-sidebar__links wa-button::part(base) {
+    justify-content: flex-start;
   }
 
   @media (min-width: 769px) {
