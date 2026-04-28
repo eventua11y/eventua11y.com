@@ -54,6 +54,7 @@ export interface Event {
   website?: string;
   registration?: string;
   codeOfConduct?: string;
+  accessibilityInfo?: { url?: string; summary?: string };
   schedule?: string;
   callForSpeakersLink?: string;
   parent?: { _ref: string };

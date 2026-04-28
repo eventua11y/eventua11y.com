@@ -116,6 +116,10 @@ const supplementaryLinks = [
     href: event.codeOfConduct,
     label: 'Code of conduct',
   },
+  event.accessibilityInfo?.url && {
+    href: event.accessibilityInfo.url,
+    label: 'Accessibility information',
+  },
   event.schedule && { href: event.schedule, label: 'Schedule' },
   event.callForSpeakersLink && {
     href: event.callForSpeakersLink,
