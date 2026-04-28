@@ -35,6 +35,19 @@ if (!event) {
   return Astro.redirect('/404');
 }
 
+// Defensive: GROQ `field[]->{...}` returns null entries when a referenced
+// document is unpublished or deleted. Strip those before any consumer maps over them.
+if (Array.isArray(event.topics)) {
+  event.topics = event.topics.filter(
+    (t): t is NonNullable<typeof t> => t != null
+  );
+}
+if (Array.isArray(event.speakers)) {
+  event.speakers = event.speakers.filter(
+    (s): s is NonNullable<typeof s> => s != null
+  );
+}
+
 // Cache the response to reduce Sanity API calls, matching the
 // strategy used by the get-events edge function.
 Astro.response.headers.set(
