@@ -380,8 +380,7 @@ const jsonLd = {
                 {event.website && (
                   <wa-button
                     href={event.website}
-                    rel="noopener noreferrer"
-                    target="_blank"
+                    rel="external"
                     variant="neutral"
                     appearance="accent"
                     style="width: 100%;"
@@ -398,21 +397,11 @@ const jsonLd = {
                     <ul role="list" class="event-detail-sidebar__links">
                       {supplementaryLinks.map((link) => (
                         <li>
-                          <wa-button
-                            href={link.href}
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            appearance="plain"
-                            variant="neutral"
-                            size="small"
-                          >
+                          <a href={link.href} rel="external">
                             {link.label}
                             <span class="sr-only"> (opens external site)</span>
-                            <wa-icon
-                              slot="end"
-                              name="arrow-up-right-from-square"
-                            />
-                          </wa-button>
+                            <wa-icon name="arrow-up-right-from-square" />
+                          </a>
                         </li>
                       ))}
                     </ul>
@@ -636,17 +625,10 @@ const jsonLd = {
     gap: var(--p-space-2xs);
   }
 
-  .event-detail-sidebar__links li {
-    display: block;
-  }
-
-  .event-detail-sidebar__links wa-button {
-    display: block;
-    width: 100%;
-  }
-
-  .event-detail-sidebar__links wa-button::part(base) {
-    justify-content: flex-start;
+  .event-detail-sidebar__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--p-space-3xs);
   }
 
   @media (min-width: 769px) {
