@@ -109,6 +109,22 @@ const enumeratedChildTypes = (() => {
   return `${joined} at ${event.title}`;
 })();
 
+// Supplementary sidebar links
+const supplementaryLinks = [
+  event.registration && { href: event.registration, label: 'Registration' },
+  event.codeOfConduct && {
+    href: event.codeOfConduct,
+    label: 'Code of conduct',
+  },
+  event.schedule && { href: event.schedule, label: 'Schedule' },
+  event.callForSpeakersLink && {
+    href: event.callForSpeakersLink,
+    label: 'Call for speakers',
+  },
+].filter(Boolean) as Array<{ href: string; label: string }>;
+
+const hasSidebarLinks = supplementaryLinks.length > 0;
+
 // JSON-LD structured data
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -302,7 +318,7 @@ const jsonLd = {
 
       <div class="event-detail-body">
         {
-          (event.website || event.organizer) && (
+          (event.website || event.organizer || hasSidebarLinks) && (
             <aside class="event-detail-sidebar">
               <wa-card class="event-detail-sidebar__card" appearance="outlined">
                 <p>
@@ -364,15 +380,32 @@ const jsonLd = {
                 {event.website && (
                   <wa-button
                     href={event.website}
-                    rel="noopener noreferrer"
-                    target="_blank"
+                    rel="external"
                     variant="neutral"
                     appearance="accent"
                     style="width: 100%;"
+                    class="event-detail-sidebar__website-button"
                   >
                     Event website
+                    <span class="sr-only"> (opens external site)</span>
                     <wa-icon slot="end" name="arrow-up-right-from-square" />
                   </wa-button>
+                )}
+                {hasSidebarLinks && (
+                  <>
+                    <h2 class="sr-only">Event resources</h2>
+                    <ul role="list" class="event-detail-sidebar__links">
+                      {supplementaryLinks.map((link) => (
+                        <li>
+                          <a href={link.href} rel="external">
+                            {link.label}
+                            <span class="sr-only"> (opens external site)</span>
+                            <wa-icon name="arrow-up-right-from-square" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
               </wa-card>
             </aside>
@@ -579,8 +612,23 @@ const jsonLd = {
     font-size: var(--p-step--1);
   }
 
-  .event-detail-sidebar__card wa-button {
+  .event-detail-sidebar__website-button {
     margin-top: var(--p-space-xs);
+  }
+
+  .event-detail-sidebar__links {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--p-space-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-2xs);
+  }
+
+  .event-detail-sidebar__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--p-space-3xs);
   }
 
   @media (min-width: 769px) {
