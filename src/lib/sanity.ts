@@ -174,9 +174,9 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "attendanceMode": coalesce(attendanceMode, parent->attendanceMode),
       "location": coalesce(location, parent->location),
       "parentEvent": parent->{ title, slug },
-      "speakers": speakers[]->{ _id, name }[defined(_id)],
+      "speakers": speakers[]->{ _id, name },
       "organizer": coalesce(organizer, parent->organizer)->{ _id, name, website },
-      "topics": topics[]->{ _id, name, slug, description }[defined(_id)],
+      "topics": topics[]->{ _id, name, slug, description },
       "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] {
         _id,
         title,
@@ -189,7 +189,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
         website,
         format,
         scheduled,
-        "speakers": speakers[]->{ _id, name }[defined(_id)]
+        "speakers": speakers[]->{ _id, name }
       } | order(dateStart asc)
     }
   `,
@@ -352,7 +352,7 @@ export async function getTopicBySlug(slug: string): Promise<
         callForSpeakersClosingDate,
         isParent,
         format,
-        "speakers": speakers[]->{ _id, name, slug }[defined(_id)],
+        "speakers": speakers[]->{ _id, name, slug },
         "children": *[_type == "event" && parent._ref == ^._id && !(_id in path("drafts.**"))] | order(dateStart asc) {
           _id,
           _type,
@@ -366,7 +366,7 @@ export async function getTopicBySlug(slug: string): Promise<
           website,
           format,
           scheduled,
-          "speakers": speakers[]->{ _id, name, slug }[defined(_id)]
+          "speakers": speakers[]->{ _id, name, slug }
         },
         "parent": parent->{ _id, title, slug }
       }
