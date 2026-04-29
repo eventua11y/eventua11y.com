@@ -446,7 +446,7 @@ const jsonLd = {
           )
         }
 
-        <div class="event-detail-main flow flow-m">
+        <div class={`event-detail-main flow flow-m${!event.website && !event.organizer && !hasSidebarLinks ? ' event-detail-main--full-width' : ''}`}>
           {
             (event.richDescription || event.description) && (
               <div class="event-detail__description flow">
@@ -679,6 +679,10 @@ const jsonLd = {
 
     .event-detail-main {
       max-width: 55rem;
+    }
+
+    .event-detail-main--full-width {
+      grid-column: 1 / -1;
     }
 
     .event-detail-sidebar {
