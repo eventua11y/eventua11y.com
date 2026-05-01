@@ -2,7 +2,6 @@
   "name": "eventua11y",
   "version": "1.0.0",
   "description": "A curated list of digital accessibility events",
-  "main": "index.astro",
   "scripts": {
     "test": "npx playwright test",
     "test:unit": "vitest run",

@@ -4,12 +4,12 @@
 
 import type { PortableTextBlock } from '@portabletext/types';
 
-export interface Speaker {
+interface Speaker {
   _id: string;
   name: string;
 }
 
-export interface Organizer {
+interface Organizer {
   _id: string;
   name: string;
   website?: string;
@@ -27,7 +27,7 @@ export interface Topic {
  * Lightweight topic reference used on event detail pages and listing queries.
  * Excludes the full Portable Text body to reduce payload size.
  */
-export interface TopicSummary {
+interface TopicSummary {
   _id: string;
   name: string;
   slug: { current: string };
