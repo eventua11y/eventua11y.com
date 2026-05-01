@@ -59,7 +59,7 @@
     "eslint-plugin-playwright": "^2.10.2",
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^17.5.0",
-    "knip": "^6.3.0",
+    "knip": "^6.10.0",
     "netlify-cli": "^26.0.0",
     "playwright-chromium": "^1.59.1",
     "prettier": "^3.7.4",
