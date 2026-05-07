@@ -64,7 +64,7 @@
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "typescript-eslint": "^8.58.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@astrojs/netlify": "^7.0.8",
