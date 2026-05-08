@@ -466,7 +466,7 @@ describe('formatDateRange', () => {
     });
   });
 
-  describe('same-month date ranges (the key optimisation)', () => {
+  describe('same-month date ranges (the key optimization)', () => {
     it('deduplicates month and year for date-only ranges (en)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',

@@ -9,7 +9,7 @@ import {
   compareByDateDesc,
   getFormatLabel,
   getFormatPreposition,
-  capitalise,
+  capitalize,
 } from './eventUtils';
 import type { Event, Book } from '../types/event';
 
@@ -444,20 +444,20 @@ describe('getFormatLabel', () => {
   });
 });
 
-// ── capitalise ─────────────────────────────────────────────────────────
+// ── capitalize ─────────────────────────────────────────────────────────
 
-describe('capitalise', () => {
-  it('capitalises the first letter', () => {
-    expect(capitalise('talk')).toBe('Talk');
-    expect(capitalise('workshop')).toBe('Workshop');
+describe('capitalize', () => {
+  it('capitalizes the first letter', () => {
+    expect(capitalize('talk')).toBe('Talk');
+    expect(capitalize('workshop')).toBe('Workshop');
   });
 
   it('preserves acronyms', () => {
-    expect(capitalise('Q&A')).toBe('Q&A');
+    expect(capitalize('Q&A')).toBe('Q&A');
   });
 
   it('handles empty string', () => {
-    expect(capitalise('')).toBe('');
+    expect(capitalize('')).toBe('');
   });
 });
 

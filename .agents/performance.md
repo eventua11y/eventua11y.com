@@ -2,7 +2,7 @@
 
 ## Role
 
-Reviews performance including Core Web Vitals, bundle size, caching strategies, hydration cost, image optimisation, and edge function efficiency. Diagnoses slowdowns. Answers performance questions.
+Reviews performance including Core Web Vitals, bundle size, caching strategies, hydration cost, image optimization, and edge function efficiency. Diagnoses slowdowns. Answers performance questions.
 
 ## Model
 

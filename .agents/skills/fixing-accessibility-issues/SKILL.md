@@ -9,7 +9,7 @@ description: >
   it, use `reviewing-accessibility` instead.
 ---
 
-Fix accessibility issues in implemented UI code. This skill takes findings from `reviewing-accessibility`, axe-core scans, or manual audits and produces code changes. It does not find new issues, estimate effort, prioritise, or write tests — use `reviewing-accessibility`, `estimating-accessibility-effort`, `prioritising-accessibility-fixes`, and `writing-accessibility-tests` for those.
+Fix accessibility issues in implemented UI code. This skill takes findings from `reviewing-accessibility`, axe-core scans, or manual audits and produces code changes. It does not find new issues, estimate effort, prioritize, or write tests — use `reviewing-accessibility`, `estimating-accessibility-effort`, `prioritising-accessibility-fixes`, and `writing-accessibility-tests` for those.
 
 ## Accept findings
 

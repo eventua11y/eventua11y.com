@@ -32,7 +32,7 @@ The `lead` delegates to all other agents. No other agent delegates (flat hierarc
 3. Lead delegates to `coder` for implementation.
 4. Lead delegates to `tester` (functional) and/or `a11y-testing` (accessibility) for test authorship.
 5. After tests pass, Lead invokes specialists to **review** the implementation.
-6. Lead synthesises findings into a unified report.
+6. Lead synthesizes findings into a unified report.
 
 ### Escalation map
 
@@ -171,6 +171,17 @@ This project has two Sanity datasets: **`production`** and **`test`**.
 - **Never** create dummy, test, placeholder, or seed data in the `production` dataset. The production dataset contains only real, editorial content that powers the live site.
 - All test or dummy documents **must** be created in the **`test`** dataset.
 - When using Sanity MCP tools, always verify the `dataset` parameter before any write operation. If the data is for testing, experimentation, or development, set the dataset to `test`.
+
+## Spelling Convention
+
+This project uses **Oxford spelling** — the convention used by Oxford University Press, the OED, and many international organisations. Oxford spelling uses `-ize` and `-ization` endings (e.g. organize, organization, capitalize) while retaining other British conventions such as `-our` (colour), `-re` (centre), `-ence` (defence), and `-ogue` (catalogue).
+
+- **Do** write: analyze, organize, recognize, customize, capitalize, optimization, prioritize
+- **Don't** write: organise, recognise, customise, capitalise, optimisation, prioritise
+- **Keep British**: colour, favourite, centre, defence, catalogue
+- **Always `-ise`**: advise, comprise, surprise, exercise, supervise (these are not `-ize` words)
+
+Apply this convention to all user-facing content, code identifiers, comments, documentation, and agent instructions.
 
 ## Sub-Issues for Epics
 
