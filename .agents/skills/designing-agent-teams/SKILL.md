@@ -50,7 +50,7 @@ Gather what is available from the codebase and the user's request. If the user h
 - Read the existing agent configuration files (check `.agents/`, `AGENTS.md`, and any platform-specific configs)
 - Identify which models are assigned where, what tools each agent has, scope definitions
 - Apply the review checklist (below) to identify issues
-- If the user has described specific pain points, prioritise those
+- If the user has described specific pain points, prioritize those
 
 ## Design the agent team
 
@@ -192,7 +192,7 @@ The lead should explain each handoff to the user: which agent is being called, w
 
 Add this to the lead's instructions:
 
-> Before each delegation, explain which agent you are calling and why. After each agent returns, summarise what it found or did.
+> Before each delegation, explain which agent you are calling and why. After each agent returns, summarize what it found or did.
 
 Reinforce this in any platform-specific config preamble so the lead sees it at invocation time, not just in its instruction file.
 

@@ -1,14 +1,14 @@
 ---
 name: prioritising-accessibility-fixes
-description: Use this skill to prioritise a set of accessibility issues for remediation based on severity, user impact, and effort. Triggers when triaging an accessibility backlog, deciding what to fix first after an audit, planning an accessibility sprint, or asking which accessibility issues matter most.
+description: Use this skill to prioritize a set of accessibility issues for remediation based on severity, user impact, and effort. Triggers when triaging an accessibility backlog, deciding what to fix first after an audit, planning an accessibility sprint, or asking which accessibility issues matter most.
 compatibility: Works best when issues already have effort estimates (from estimating-accessibility-effort) but can assess effort independently.
 ---
 
-# Prioritising Accessibility Fixes
+# Prioritizing Accessibility Fixes
 
-Given a set of accessibility issues, produce a prioritised remediation order based on severity, user impact, and effort. The output is a ranked list that helps decide what to fix first, what to batch together, and what can wait.
+Given a set of accessibility issues, produce a prioritized remediation order based on severity, user impact, and effort. The output is a ranked list that helps decide what to fix first, what to batch together, and what can wait.
 
-This skill works on a set of known issues. It does not find new issues (use `reviewing-accessibility` for that), estimate effort from scratch (use `estimating-accessibility-effort` for that, or provide estimates as input), or implement fixes (use `fixing-accessibility-issues` for that). If issues arrive without effort estimates, assess effort by reading the affected code before prioritising.
+This skill works on a set of known issues. It does not find new issues (use `reviewing-accessibility` for that), estimate effort from scratch (use `estimating-accessibility-effort` for that, or provide estimates as input), or implement fixes (use `fixing-accessibility-issues` for that). If issues arrive without effort estimates, assess effort by reading the affected code before prioritizing.
 
 ## Inputs
 
@@ -21,7 +21,7 @@ A set of accessibility issues, ideally with:
 - Effort estimate (XS / S / M / L / XL)
 - Reach (Systemic / Multi-page / Single page) — optional, most useful for projects with shared components
 
-If effort estimates are missing, read the affected code and estimate before prioritising. Do not prioritise without understanding effort — a "Critical" issue that takes 5 minutes should be fixed immediately, while a "Critical" issue requiring an architectural redesign needs different planning.
+If effort estimates are missing, read the affected code and estimate before prioritizing. Do not prioritize without understanding effort — a "Critical" issue that takes 5 minutes should be fixed immediately, while a "Critical" issue requiring an architectural redesign needs different planning.
 
 ### Effort sizes
 
@@ -153,7 +153,7 @@ After scoring all issues and assigning tiers, run a quick validation pass:
 ## Report format
 
 ```markdown
-## Accessibility Prioritisation - [scope]
+## Accessibility Prioritization - [scope]
 
 ### Tier 1 — Fix Immediately
 
@@ -200,7 +200,7 @@ If the project defines its own priority labels (e.g. P0–P3, Critical/High/Medi
 - **User impact requires judgment, not just WCAG mapping.** Two issues can both violate 2.1.1 (Keyboard) — one on the main navigation (High impact, every user on every page) and one on a settings toggle (Low impact, rare interaction). Same criterion, very different priority.
 - **Quick wins are disproportionately valuable.** A batch of 10 XS/S fixes might take less time than one L fix but improve accessibility across more pages and for more users. Always surface quick wins prominently.
 - **Do not defer all large items.** If the scoring model puts all L/XL items in Tier 3, the project will never fix structural accessibility problems. Ensure at least one L or XL item is scheduled in Tier 2 per planning cycle if structural issues exist.
-- **Priorities change.** A Tier 3 issue becomes Tier 1 when a user reports it, when a legal requirement emerges, or when a dependent fix promotes it. Revisit prioritisation periodically rather than treating it as a one-time exercise.
+- **Priorities change.** A Tier 3 issue becomes Tier 1 when a user reports it, when a legal requirement emerges, or when a dependent fix promotes it. Revisit prioritization periodically rather than treating it as a one-time exercise.
 - **Do not invent impact assessments.** If the project has analytics, use them — a page with 10,000 daily visits has higher impact than one with 10. If there are no analytics, assess based on the feature's centrality to the product's purpose, not assumptions about traffic.
 - **Accessibility debt compounds.** Five Moderate issues in the same component often indicate a pattern problem. Consider whether fixing the pattern (one M/L task) is more effective than five individual fixes.
 - **Scores are a decision aid, not a decision.** The model produces a number but cannot account for context it was not given — internal politics, upcoming redesigns, capacity constraints, or user research findings. Treat tier placement as a strong default that can be overridden with a stated reason.

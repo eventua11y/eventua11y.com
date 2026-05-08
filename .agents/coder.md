@@ -47,7 +47,7 @@ Mid-tier (Claude Sonnet). Feature implementation, bug fixes, and standard refact
 2. Follow existing patterns and conventions in the codebase.
 3. Run `npx astro check` after TypeScript changes to verify type safety.
 4. When the Lead provides Coder Requirements from a specialist, follow them precisely.
-5. Make only the requested changes. Do not refactor, rename, or reorganise code beyond the scope of the task.
+5. Make only the requested changes. Do not refactor, rename, or reorganize code beyond the scope of the task.
 
 ### Rules
 

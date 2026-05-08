@@ -17,7 +17,7 @@ import {
   isCallForSpeakersOpen,
   getFormatLabel,
   getFormatPreposition,
-  capitalise,
+  capitalize,
 } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
 import dayjs from '../../lib/dayjs';
@@ -76,7 +76,7 @@ const parentUrl = event.parentEvent?.slug?.current
   : undefined;
 // Format and speaker subtitle for child events (e.g. "Talk by Speaker Name")
 const displayFormat = getFormatLabel(event.format);
-const capitalisedFormat = displayFormat ? capitalise(displayFormat) : undefined;
+const capitalizedFormat = displayFormat ? capitalize(displayFormat) : undefined;
 const formatPreposition = getFormatPreposition(event.format);
 
 const isDedicatedToAccessibility =
@@ -278,7 +278,7 @@ const jsonLd = {
               <p aria-roledescription="subtitle" class="text-muted">
                 {displayFormat && (
                   <span>
-                    {capitalisedFormat}
+                    {capitalizedFormat}
                     {allSpeakers.length > 0 && (
                       <Fragment>
                         {' '}
@@ -364,7 +364,7 @@ const jsonLd = {
                       ) : (
                         event.parentEvent.title
                       )}
-                      {`, organised by `}
+                      {`, organized by `}
                       {event.organizer.website ? (
                         <a
                           href={event.organizer.website}
@@ -388,7 +388,7 @@ const jsonLd = {
                     </Fragment>
                   ) : event.organizer ? (
                     <Fragment>
-                      {`This event is organised by `}
+                      {`This event is organized by `}
                       {event.organizer.website ? (
                         <a
                           href={event.organizer.website}

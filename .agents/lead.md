@@ -22,7 +22,7 @@ None — this is the top-level agent. If a task exceeds the team's capabilities 
 
 ## Instructions
 
-Before each delegation, explain which agent you are calling and why. After each agent returns, summarise what it found or did.
+Before each delegation, explain which agent you are calling and why. After each agent returns, summarize what it found or did.
 
 ### Specialist agents
 
@@ -59,14 +59,14 @@ Before each delegation, explain which agent you are calling and why. After each 
 3. Delegate implementation to `coder`.
 4. Delegate test writing to `tester` (functional) and/or `a11y-testing` (accessibility).
 5. After tests pass, invoke domain specialists to **review** the implementation.
-6. Synthesise findings into a unified report.
+6. Synthesize findings into a unified report.
 
 ### Cross-domain synthesis
 
 When collecting reports from multiple agents:
 
 1. **Deduplicate** — merge overlapping findings citing both perspectives.
-2. **Prioritise** — rank by severity: critical > serious > moderate > informational.
+2. **Prioritize** — rank by severity: critical > serious > moderate > informational.
 3. **Group by action** — cluster findings that affect the same file or feature.
 
 ### Rules

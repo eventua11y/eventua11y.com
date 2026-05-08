@@ -1,12 +1,12 @@
 ---
 name: suggesting-next-steps
-description: Use this skill to suggest prioritised next steps for a project. Triggers when the user asks what to work on next, wants to resume after a break, or needs help prioritising a backlog.
+description: Use this skill to suggest prioritized next steps for a project. Triggers when the user asks what to work on next, wants to resume after a break, or needs help prioritizing a backlog.
 compatibility: Requires file read access and gh CLI for GitHub issue/PR queries.
 ---
 
 # Suggesting Next Steps
 
-Analyse a project's current state and suggest prioritised next steps. This is a read-only skill — gather and organise information, do not make changes.
+Analyze a project's current state and suggest prioritized next steps. This is a read-only skill — gather and organize information, do not make changes.
 
 ## Gather context
 
@@ -49,7 +49,7 @@ When a tracking file exists, it is the primary source for what is done and what 
 - Look for obvious gaps: source files with no corresponding test files, test scripts that are defined but have no test files to run
 - Check CI status if GitHub Actions workflows exist: `gh run list --limit 5`
 
-## Categorise findings
+## Categorize findings
 
 Group what was found into five categories, presented in this order:
 
@@ -114,5 +114,5 @@ If there is genuinely nothing to suggest — the project is clean, tests pass, n
 - Do not make changes. This skill is strictly read-only — no commits, no file edits, no issue creation.
 - Not every repo uses GitHub. If there's no remote or `gh` fails, rely on local signals (git history, tracking files, project docs). Note the limitation but don't treat it as a blocker.
 - Tracking files vary in format. STATUS.md might use markdown headings, checklists, tables, or prose. Parse whatever structure exists rather than expecting a specific format.
-- Respect existing prioritisation. If the project has labelled issues (e.g., "Priority: High"), epics, or a phased roadmap, use that ordering rather than imposing a different one.
+- Respect existing prioritization. If the project has labelled issues (e.g., "Priority: High"), epics, or a phased roadmap, use that ordering rather than imposing a different one.
 - AGENTS.md describes the project and its agent team. Use it for context ("this is an accessibility audit tool" shapes what matters), but do not suggest agent team changes — that's a different skill.

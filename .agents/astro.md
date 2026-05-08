@@ -31,7 +31,7 @@ Mid-tier (Claude Sonnet). Astro review is well-scoped and pattern-matching orien
 
 **SSR**: Pages not needing per-request data should prerender. Server-side fetching in frontmatter, not client components. No server-only imports in client code.
 
-**Components**: Astro for static, Vue only for interactivity. Check hydration directives. Avoid large prop serialisation.
+**Components**: Astro for static, Vue only for interactivity. Check hydration directives. Avoid large prop serialization.
 
 **Routing**: Dynamic routes validate params and 404 on invalid. Sitemap stays in sync.
 

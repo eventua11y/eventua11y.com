@@ -16,7 +16,7 @@ Before assessing risks, understand what is being proposed:
 1. **Read the plan** — feature description, user story, design document, technical spec, or conversation describing the intended change.
 2. **Read affected code** — if the change modifies existing UI, read the current implementation to understand what is already in place. Risks are relative to the starting point.
 3. **Identify the user interactions** — what will people do with this feature? List the verbs: navigate, filter, select, submit, drag, expand, dismiss, etc. Each interaction is a potential risk surface.
-4. **Identify the content** — what information does the feature present? Text, images, status indicators, data visualisations, real-time updates. Each content type has accessibility constraints.
+4. **Identify the content** — what information does the feature present? Text, images, status indicators, data visualizations, real-time updates. Each content type has accessibility constraints.
 
 ## Assess risks
 
@@ -62,7 +62,7 @@ Scale the approach to the project. Not every project has a research budget, but 
 
 **Solo and small projects** — test with a screen reader yourself (VoiceOver, NVDA, or TalkBack are free), ask a disabled friend or colleague to try key flows, post in accessibility communities for informal feedback, or use free single-session options from panel services. Even one person using assistive technology will reveal things automated checks cannot.
 
-**Teams with some research capacity** — include disabled participants in existing user research. The NHS benchmark of 1 person with access needs in every 5 research participants is a reasonable starting point. Recruit from disability organisations, charities, or internal staff disability networks.
+**Teams with some research capacity** — include disabled participants in existing user research. The NHS benchmark of 1 person with access needs in every 5 research participants is a reasonable starting point. Recruit from disability organizations, charities, or internal staff disability networks.
 
 **Dedicated accessibility research** — panel services like [Fable](https://makeitfable.com/), [Access Works](https://knowbility.org/programs/accessworks) (Knowbility), and [AbilityNet](https://abilitynet.org.uk/) provide pre-qualified participants with documented assistive technology configurations. This is the most reliable option for structured usability testing across multiple AT setups.
 
@@ -117,7 +117,7 @@ These are common risk areas, not exhaustive checklists. Use them as prompts to i
 - No screen reader indication of draggable items, drop targets, or current position
 - Move operations that rely solely on pointer position with no confirmation step
 
-### Data visualisation (charts, graphs, maps)
+### Data visualization (charts, graphs, maps)
 
 - No text alternative or data table for the information conveyed visually
 - Colour-only encoding (red/green for good/bad) excludes colour-blind users
@@ -169,7 +169,7 @@ These are common risk areas, not exhaustive checklists. Use them as prompts to i
 ### User research recommendations
 
 - Which risks would benefit most from validation with disabled users
-- What disability groups and AT configurations to prioritise in testing based on the risks identified
+- What disability groups and AT configurations to prioritize in testing based on the risks identified
 - At what development phase testing would be most valuable for each risk
 
 ### Recommendations
@@ -184,7 +184,7 @@ Omit empty risk levels. If there are no high risks, do not include an empty High
 - **Risk prediction is not a compliance audit.** The goal is to identify problems before they are built, not to produce a WCAG scorecard. A risk assessment that just lists WCAG criteria without connecting them to specific design decisions is not useful.
 - **Not every feature needs a full risk assessment.** A text content change, a colour tweak with verified contrast, or a change to backend logic with no UI impact may have zero accessibility risks. Say so rather than inventing risks.
 - **Component libraries reduce but do not eliminate risk.** Headless UI libraries (Base UI, Headless UI, Ark UI) handle many ARIA patterns correctly, but the risk shifts to composition — how components are assembled, what labels are provided, and how focus is managed between them.
-- **The most dangerous risks are structural, not superficial.** A missing alt text is easy to add later. A widget built without a keyboard interaction model requires a redesign. Prioritise structural risks over cosmetic ones.
+- **The most dangerous risks are structural, not superficial.** A missing alt text is easy to add later. A widget built without a keyboard interaction model requires a redesign. Prioritize structural risks over cosmetic ones.
 - **"We'll add accessibility later" is itself the highest risk.** If the plan defers accessibility to a future sprint, flag this explicitly. Retrofitting accessibility onto a finished feature is consistently and often significantly more expensive than building it in from the start.
 - **Consider the full range of disabilities.** Accessibility reviews disproportionately focus on screen reader users. Keyboard-only users, users with low vision (who may not use screen readers), users with cognitive disabilities, and users with motor impairments all have distinct needs. Name the affected group explicitly.
 - **Custom components carry more risk than standard HTML.** A `<button>` has built-in keyboard handling, focus management, and role. A `<div onClick>` has none of these. The more custom the implementation, the higher the risk.
