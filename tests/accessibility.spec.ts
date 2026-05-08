@@ -400,7 +400,10 @@ test.describe('Shared component accessibility', () => {
   });
 
   test('html element has lang attribute', async ({ page }) => {
-    await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB-oxendict');
+    await expect(page.locator('html')).toHaveAttribute(
+      'lang',
+      'en-GB-oxendict'
+    );
   });
 });
 
