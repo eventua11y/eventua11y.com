@@ -316,7 +316,7 @@ export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
  * - Single element: no range (single date, or same-day date-only)
  * - Two elements: [startText, endText] — the template renders an
  *   accessible separator between them (en-dash hidden from AT,
- *   "to" visible only to screen readers)
+ *   "until" visible only to screen readers)
  */
 type DateRangeParts = [string] | [string, string];
 
@@ -328,7 +328,7 @@ type DateRangeParts = [string] | [string, string];
  * accessible separator between the start and end parts:
  *
  *   <span aria-hidden="true"> – </span>
- *   <span class="sr-only">to</span>
+ *   <span class="sr-only">until</span>
  *
  * Examples (en locale, showing the two parts):
  *   Same day, same period:  ["Sunday, March 8, 2026 2:00", "5:00 PM"]

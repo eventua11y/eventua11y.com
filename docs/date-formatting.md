@@ -79,11 +79,11 @@ All examples use same-month and different-month date-only ranges.
 Visually, all ranges use an en-dash (`–`, U+2013) with regular spaces on either side. Screen readers handle en-dashes inconsistently (some skip them, some read "dash", some create run-on text), so the separator is rendered as two elements:
 
 ```html
-<span aria-hidden="true"> – </span> <span class="sr-only">to</span>
+<span aria-hidden="true"> – </span> <span class="sr-only">until</span>
 ```
 
 - The en-dash is hidden from assistive technology via `aria-hidden="true"`
-- The word "to" is visible only to screen readers via the `.sr-only` class (defined in `src/styles/utils/_a11y.css`)
+- The word "until" is visible only to screen readers via the `.sr-only` class (defined in `src/styles/utils/_a11y.css`)
 - The `.sr-only` class uses `position: absolute` with clipping — not `display: none` or `visibility: hidden`, which would hide the element from screen readers too
 
 ### Return type
