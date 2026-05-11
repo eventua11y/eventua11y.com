@@ -71,7 +71,7 @@ const displayLocation = event.location || 'International';
           {formattedRange[1] && machineEnd && (
             <>
               <span aria-hidden="true"> &ndash; </span>
-              <span class="sr-only">to</span>
+              <span class="sr-only">until</span>
               <time datetime={machineEnd}>{formattedRange[1]}</time>
             </>
           )}
@@ -101,7 +101,7 @@ const displayLocation = event.location || 'International';
             {formattedRange[1] && machineEnd && (
               <>
                 <span aria-hidden="true"> &ndash; </span>
-                <span class="sr-only">to</span>
+                <span class="sr-only">until</span>
                 <time datetime={machineEnd}>{formattedRange[1]}</time>
               </>
             )}
