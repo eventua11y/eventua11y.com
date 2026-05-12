@@ -22,11 +22,15 @@ Sentry.init({
   // - "error loading dynamically imported module": Vite dev-server HMR noise
   //   that slips past `allowUrls` because the localhost URL appears in the
   //   error message rather than the stack frame (EVENTUA11Y-S).
+  // - "Object Not Found Matching Id:…": browser extension noise (typically
+  //   LastPass) calling internal methods on DOM elements they inject
+  //   (EVENTUA11Y-18).
   ignoreErrors: [
     /Failed to execute 'hidePopover' on 'HTMLElement'/,
     /Failed to execute 'showPopover' on 'HTMLElement'/,
     /^Load failed\b/,
     /error loading dynamically imported module/,
+    /Object Not Found Matching Id:\d+, MethodName:\w+, ParamCount:\d+/,
   ],
 
   beforeSendSpan(span) {
