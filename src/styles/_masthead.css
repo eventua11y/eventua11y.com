@@ -26,6 +26,10 @@
   #theme-selector {
     display: none;
   }
+
+  .masthead__actions {
+    margin-left: 0;
+  }
 }
 
 .masthead__logo a {
