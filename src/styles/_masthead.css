@@ -14,16 +14,6 @@
   }
 }
 
-@media screen and (max-width: 580px) {
-  .masthead .inner {
-    flex-direction: column;
-  }
-
-  .masthead .inner .logo {
-    margin-bottom: var(--p-space-s);
-  }
-}
-
 .masthead__logo a {
   display: block;
   text-decoration: none;
@@ -40,6 +30,26 @@
 .masthead .logo {
   color: var(--c-masthead-logo-color);
   max-width: 12rem;
+}
+
+@media screen and (max-width: 580px) {
+  .masthead .inner {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .masthead .inner .logo {
+    margin-bottom: var(--p-space-s);
+  }
+
+  #theme-selector {
+    display: none;
+  }
+
+  .masthead__actions {
+    justify-content: center;
+    margin-left: 0;
+  }
 }
 
 .skip {
