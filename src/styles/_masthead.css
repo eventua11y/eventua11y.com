@@ -22,6 +22,10 @@
   .masthead .inner .logo {
     margin-bottom: var(--p-space-s);
   }
+
+  #theme-selector {
+    display: none;
+  }
 }
 
 .masthead__logo a {
