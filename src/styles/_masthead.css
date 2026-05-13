@@ -29,6 +29,7 @@
   }
 
   .masthead__actions {
+    justify-content: center;
     margin-left: 0;
   }
 }
