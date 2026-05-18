@@ -335,7 +335,8 @@ export async function getTopicBySlug(slug: string): Promise<
         references(^._id) &&
         (
           (defined(dateEnd) && dateEnd >= now()) ||
-          (!defined(dateEnd) && dateStart >= now())
+          (!defined(dateEnd) && dateStart >= now()) ||
+          (scheduled == false && defined(parent) && parent->dateEnd >= now())
         )
       ] | order(dateStart asc) {
         _id,
