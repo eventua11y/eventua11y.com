@@ -308,20 +308,22 @@ const jsonLd = {
           )
         }
 
-        {event.scheduled ? (
-          <EventDate
-            client:only="vue"
-            dateStart={event.dateStart}
-            dateEnd={event.dateEnd}
-            timezone={event.timezone}
-            day={event.day}
-            type={event.type}
-            showCountdown={true}
-            showEnded={true}
-          />
-        ) : (
-          <p class="text-muted">Not yet scheduled</p>
-        )}
+        {
+          event.scheduled ? (
+            <EventDate
+              client:only="vue"
+              dateStart={event.dateStart}
+              dateEnd={event.dateEnd}
+              timezone={event.timezone}
+              day={event.day}
+              type={event.type}
+              showCountdown={true}
+              showEnded={true}
+            />
+          ) : (
+            <p class="text-muted">Not yet scheduled</p>
+          )
+        }
 
         <EventDelivery
           client:idle
