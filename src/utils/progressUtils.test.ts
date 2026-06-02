@@ -194,7 +194,7 @@ describe('isHappeningNow', () => {
     expect(
       isHappeningNow(now('2026-06-16T12:00:00Z'), {
         dateStart: '2026-06-15T00:00:00Z',
-        dateEnd: '2026-06-17T00:00:00Z',
+        dateEnd: '2026-06-16T23:59:00Z',
         day: true,
       })
     ).toBe(true);
@@ -279,16 +279,16 @@ describe('isStartingSoon', () => {
 // ---------------------------------------------------------------------------
 
 describe('isLastDayOfAllDay', () => {
-  // Mon–Fri event: dateStart June 15 (Mon), dateEnd June 20 (Sat, exclusive)
+  // Mon–Fri event: dateStart June 15 (Mon), dateEnd June 19 (Fri, inclusive)
   // Last real day is June 19 (Fri)
   const weekEvent: ProgressOptions = {
     dateStart: '2026-06-15T00:00:00Z',
-    dateEnd: '2026-06-20T00:00:00Z',
+    dateEnd: '2026-06-19T23:59:00Z',
     day: true,
   };
 
   it('returns true on the last real day of a multi-day all-day event', () => {
-    // June 19 is the last real day (dateEnd June 20 is exclusive)
+    // June 19 is the last real day (dateEnd is inclusive)
     expect(isLastDayOfAllDay(now('2026-06-19T12:00:00Z'), weekEvent)).toBe(
       true
     );
@@ -313,11 +313,11 @@ describe('isLastDayOfAllDay', () => {
   });
 
   it('returns true for a 2-day event on its last day', () => {
-    // June 15–16, dateEnd June 17 (exclusive), last real day is June 16
+    // June 15–16, dateEnd June 16 (inclusive), last real day is June 16
     expect(
       isLastDayOfAllDay(now('2026-06-16T12:00:00Z'), {
         dateStart: '2026-06-15T00:00:00Z',
-        dateEnd: '2026-06-17T00:00:00Z',
+        dateEnd: '2026-06-16T23:59:00Z',
         day: true,
       })
     ).toBe(true);
@@ -327,7 +327,7 @@ describe('isLastDayOfAllDay', () => {
     expect(
       isLastDayOfAllDay(now('2026-06-15T12:00:00Z'), {
         dateStart: '2026-06-15T00:00:00Z',
-        dateEnd: '2026-06-17T00:00:00Z',
+        dateEnd: '2026-06-16T23:59:00Z',
         day: true,
       })
     ).toBe(false);
@@ -348,12 +348,12 @@ describe('getEffectiveEnd', () => {
   });
 
   it('returns end-of-today for multi-day all-day events on the last day', () => {
-    // 2-day event: June 15–16, dateEnd June 17 (exclusive)
+    // 2-day event: June 15–16, dateEnd June 16 (inclusive)
     // June 16 IS the last real day → use end-of-today
     const n = now('2026-06-16T12:00:00Z');
     const end = getEffectiveEnd(n, {
       dateStart: '2026-06-15T00:00:00Z',
-      dateEnd: '2026-06-17T00:00:00Z',
+      dateEnd: '2026-06-16T23:59:00Z',
       day: true,
     });
     expect(end.format('YYYY-MM-DD')).toBe('2026-06-16');
@@ -362,15 +362,15 @@ describe('getEffectiveEnd', () => {
   });
 
   it('returns the actual dateEnd for multi-day all-day events on earlier days', () => {
-    // 5-day event: June 15–19, dateEnd June 20 (exclusive)
+    // 5-day event: June 15–19, dateEnd June 19 (inclusive)
     // June 16 is NOT the last day → use the actual dateEnd for span progress
     const n = now('2026-06-16T12:00:00Z');
     const end = getEffectiveEnd(n, {
       dateStart: '2026-06-15T00:00:00Z',
-      dateEnd: '2026-06-20T00:00:00Z',
+      dateEnd: '2026-06-19T23:59:00Z',
       day: true,
     });
-    expect(end.format('YYYY-MM-DD HH:mm')).toBe('2026-06-20 00:00');
+    expect(end.format('YYYY-MM-DD HH:mm')).toBe('2026-06-19 23:59');
   });
 });
 
@@ -422,24 +422,24 @@ describe('getProgress', () => {
   });
 
   it('measures overall span for multi-day all-day events on early days', () => {
-    // 5-day event: June 15–19, dateEnd June 20 (exclusive)
-    // Total span = June 15 00:00 → June 20 00:00 = 5 days
-    // On June 17 12:00 (midday of day 3), elapsed = 2.5 days = 50%
+    // 5-day event: June 15–19, dateEnd June 19 23:59 (inclusive)
+    // Total span = June 15 00:00 → June 19 23:59 ≈ 5 days
+    // On June 17 12:00 (midday of day 3), elapsed ≈ 2.5 days ≈ 50%
     const result = getProgress(now('2026-06-17T12:00:00Z'), {
       dateStart: '2026-06-15T00:00:00Z',
-      dateEnd: '2026-06-20T00:00:00Z',
+      dateEnd: '2026-06-19T23:59:00Z',
       day: true,
     });
     expect(result).toBe(50);
   });
 
   it('uses end-of-today for multi-day all-day events on the final day', () => {
-    // 2-day event: June 15–16, dateEnd June 17 (exclusive)
+    // 2-day event: June 15–16, dateEnd June 16 23:59 (inclusive)
     // On June 16 (last real day), effective end = June 16 23:59:59
     // So progress is measured from June 15 00:00 → June 16 23:59:59
     const result = getProgress(now('2026-06-16T12:00:00Z'), {
       dateStart: '2026-06-15T00:00:00Z',
-      dateEnd: '2026-06-17T00:00:00Z',
+      dateEnd: '2026-06-16T23:59:00Z',
       day: true,
     });
     // ~36 hours elapsed out of ~48 hours total ≈ 75%
@@ -509,36 +509,36 @@ describe('getTimeRemaining', () => {
   });
 
   it('returns "Ends today" for multi-day all-day events on their final day', () => {
-    // 2-day event: June 15–16, dateEnd June 17 (exclusive)
+    // 2-day event: June 15–16, dateEnd June 16 23:59 (inclusive)
     // June 16 IS the last real day
     expect(
       getTimeRemaining(now('2026-06-16T12:00:00Z'), {
         dateStart: '2026-06-15T00:00:00Z',
-        dateEnd: '2026-06-17T00:00:00Z',
+        dateEnd: '2026-06-16T23:59:00Z',
         day: true,
       })
     ).toBe('Ends today');
   });
 
   it('returns "Ends tomorrow" for multi-day all-day events one day before the last', () => {
-    // 3-day event: June 15–17, dateEnd June 18 (exclusive)
+    // 3-day event: June 15–17, dateEnd June 17 23:59 (inclusive)
     // June 16 → last real day is June 17 → "Ends tomorrow"
     expect(
       getTimeRemaining(now('2026-06-16T12:00:00Z'), {
         dateStart: '2026-06-15T00:00:00Z',
-        dateEnd: '2026-06-18T00:00:00Z',
+        dateEnd: '2026-06-17T23:59:00Z',
         day: true,
       })
     ).toBe('Ends tomorrow');
   });
 
   it('returns "Ends in N days" for multi-day all-day events on early days', () => {
-    // 5-day event: June 15–19, dateEnd June 20 (exclusive)
+    // 5-day event: June 15–19, dateEnd June 19 23:59 (inclusive)
     // June 15 → last real day is June 19 → 4 days away
     expect(
       getTimeRemaining(now('2026-06-15T12:00:00Z'), {
         dateStart: '2026-06-15T00:00:00Z',
-        dateEnd: '2026-06-20T00:00:00Z',
+        dateEnd: '2026-06-19T23:59:00Z',
         day: true,
       })
     ).toBe('Ends in 4 days');
@@ -828,7 +828,7 @@ describe('hasEnded', () => {
   it('works for multi-day all-day events after their end date', () => {
     const multiDay: ProgressOptions = {
       dateStart: '2026-06-15T00:00:00Z',
-      dateEnd: '2026-06-18T00:00:00Z',
+      dateEnd: '2026-06-17T23:59:00Z',
       day: true,
       showEnded: true,
     };
