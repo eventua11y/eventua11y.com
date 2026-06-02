@@ -90,9 +90,9 @@ export function isStartingSoon(now: Dayjs, options: ProgressOptions): boolean {
 /**
  * Whether today is the final calendar day of a multi-day all-day event.
  *
- * Because dateEnd for all-day events is an exclusive upper bound (midnight
- * of the day *after* the last day), the last real day is the calendar day
- * immediately before dateEnd.
+ * dateEnd for all-day events is stored as the inclusive last day of the
+ * event (at closing time), so we compare today directly against dateEnd's
+ * calendar day.
  */
 export function isLastDayOfAllDay(
   now: Dayjs,
@@ -101,8 +101,7 @@ export function isLastDayOfAllDay(
   if (!isMultiDayAllDay(options)) return false;
   const tz = resolveTimezone(options);
   const todayInTz = now.tz(tz);
-  const lastRealDay = getEventEnd(options).subtract(1, 'day');
-  return todayInTz.isSame(lastRealDay, 'day');
+  return todayInTz.isSame(getEventEnd(options), 'day');
 }
 
 /**
@@ -173,6 +172,9 @@ function formatDuration(minutes: number): string {
  * - Timed events ending today: "Ends in 2<abbr>hr</abbr> 15<abbr>m</abbr>"
  * - Timed events ending tomorrow: "Ends tomorrow"
  * - Timed events ending further out: "Ends in 3 days"
+ *
+ * dateEnd for all-day events is stored as the inclusive last day of the
+ * event, so day calculations use it directly without subtracting a day.
  */
 export function getTimeRemaining(now: Dayjs, options: ProgressOptions): string {
   if (!isHappeningNow(now, options)) return '';
@@ -184,10 +186,10 @@ export function getTimeRemaining(now: Dayjs, options: ProgressOptions): string {
       return 'Ends today';
     }
     // Fall through to days-away calculation.
-    // Use the last real day (dateEnd − 1) as the target.
+    // dateEnd is the inclusive last day, so use it directly.
     const tz = resolveTimezone(options);
     const todayStart = now.tz(tz).startOf('day');
-    const lastRealDay = getEventEnd(options).subtract(1, 'day').startOf('day');
+    const lastRealDay = getEventEnd(options).startOf('day');
     const daysAway = lastRealDay.diff(todayStart, 'day');
 
     if (daysAway === 1) return 'Ends tomorrow';
