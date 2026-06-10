@@ -55,7 +55,11 @@ export function assembleEvents(
       children: children && children.length > 0 ? children : undefined,
     });
 
-    if (event.callForSpeakersClosingDate) {
+    if (
+      event.callForSpeakers &&
+      event.callForSpeakersClosingDate &&
+      new Date() < new Date(event.callForSpeakersClosingDate)
+    ) {
       allEvents.push({
         _id: `${event._id}-cfs-deadline`,
         _type: 'event',

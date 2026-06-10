@@ -86,12 +86,12 @@ describe('assembleEvents', () => {
     expect(result[0].children).toBeUndefined();
   });
 
-  it('creates a CFS deadline event for a parent with callForSpeakersClosingDate', () => {
+  it('creates a CFS deadline event when callForSpeakers is true and closing date is in the future', () => {
     const parent = makeParent({
       _id: 'conf-1',
       title: 'Conf One',
       callForSpeakers: true,
-      callForSpeakersClosingDate: '2026-03-31T23:59:00Z',
+      callForSpeakersClosingDate: '2099-12-31T23:59:00Z',
       timezone: 'Europe/London',
       website: 'https://example.com',
       attendanceMode: 'online',
@@ -106,7 +106,7 @@ describe('assembleEvents', () => {
     expect(deadline._type).toBe('event');
     expect(deadline.type).toBe('deadline');
     expect(deadline.title).toBe('Conf One');
-    expect(deadline.dateStart).toBe('2026-03-31T23:59:00Z');
+    expect(deadline.dateStart).toBe('2099-12-31T23:59:00Z');
     expect(deadline.timezone).toBe('Europe/London');
     expect(deadline.website).toBe('https://example.com');
     expect(deadline.attendanceMode).toBe('online');
@@ -114,12 +114,38 @@ describe('assembleEvents', () => {
   });
 
   it('does not create a CFS deadline event when callForSpeakersClosingDate is not set', () => {
-    const parent = makeParent({ _id: 'no-cfs', callForSpeakers: false });
+    const parent = makeParent({ _id: 'no-cfs', callForSpeakers: true });
 
     const result = assembleEvents([parent], []);
 
     expect(result).toHaveLength(1);
     expect(result[0]._id).toBe('no-cfs');
+  });
+
+  it('does not create a CFS deadline event when callForSpeakers is false even if a closing date is set', () => {
+    const parent = makeParent({
+      _id: 'closed-cfs',
+      callForSpeakers: false,
+      callForSpeakersClosingDate: '2099-12-31T23:59:00Z',
+    });
+
+    const result = assembleEvents([parent], []);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]._id).toBe('closed-cfs');
+  });
+
+  it('does not create a CFS deadline event when the closing date is in the past', () => {
+    const parent = makeParent({
+      _id: 'past-cfs',
+      callForSpeakers: true,
+      callForSpeakersClosingDate: '2020-01-01T00:00:00Z',
+    });
+
+    const result = assembleEvents([parent], []);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]._id).toBe('past-cfs');
   });
 
   it('ignores children whose parent reference is undefined', () => {
@@ -143,13 +169,15 @@ describe('assembleEvents', () => {
       makeParent({
         _id: 'first',
         title: 'First',
-        callForSpeakersClosingDate: '2026-02-01T00:00:00Z',
+        callForSpeakers: true,
+        callForSpeakersClosingDate: '2099-02-01T00:00:00Z',
       }),
       makeParent({ _id: 'second', title: 'Second' }),
       makeParent({
         _id: 'third',
         title: 'Third',
-        callForSpeakersClosingDate: '2026-04-01T00:00:00Z',
+        callForSpeakers: true,
+        callForSpeakersClosingDate: '2099-04-01T00:00:00Z',
       }),
     ];
 
