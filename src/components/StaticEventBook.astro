@@ -13,7 +13,9 @@ const { book } = Astro.props;
 ---
 
 <div class="book">
-  <span class="text-small text-muted">Accessibility Book Club is reading</span>
+  <span class="text-small text-muted">Accessibility Book Club is reading</span>{
+    ' '
+  }
   {
     book.link ? (
       <a class="book__title" href={book.link}>
