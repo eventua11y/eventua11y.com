@@ -458,10 +458,22 @@ const jsonLd = {
                   </>
                 )}
                 {hasHashtags && (
-                  <p class="event-detail-sidebar__hashtags">
-                    Use these hashtags:{' '}
-                    {hashtags.map((tag) => `#${tag}`).join(', ')}
-                  </p>
+                  <>
+                    <h2 class="event-detail-sidebar__hashtags-heading">
+                      Hashtags
+                    </h2>
+                    <ul role="list" class="event-detail-sidebar__hashtags">
+                      {hashtags.map((tag) => (
+                        <li class="event-detail-sidebar__hashtag">
+                          <span>{`#${tag}`}</span>
+                          <wa-copy-button
+                            value={`#${tag}`}
+                            copy-label={`Copy #${tag}`}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
               </wa-card>
             </aside>
@@ -700,8 +712,28 @@ const jsonLd = {
     gap: var(--p-space-3xs);
   }
 
+  .event-detail-sidebar__hashtags-heading {
+    margin: var(--p-space-s) 0 var(--p-space-3xs);
+    font-size: var(--p-step--1);
+  }
+
   .event-detail-sidebar__hashtags {
-    margin-top: var(--p-space-xs);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--p-space-2xs);
+  }
+
+  .event-detail-sidebar__hashtag {
+    display: flex;
+    align-items: center;
+    gap: var(--p-space-3xs);
+  }
+
+  .event-detail-sidebar__hashtag span {
+    flex: 1 1 auto;
   }
 
   @media (min-width: 769px) {

@@ -304,10 +304,11 @@ test.describe('Curation Policy page accessibility', () => {
 // ---------------------------------------------------------------------------
 // Event detail page with hashtags (/events/all-things-open-2026)
 // ---------------------------------------------------------------------------
-// Covers the sidebar <wa-card> that renders plain-text hashtags. The axe scan
-// catches contrast issues; the targeted assertion confirms the hashtag tokens
-// (including the # prefix) are present in the DOM and announced to screen
-// readers as plain text.
+// Covers the sidebar <wa-card> that renders hashtags as a labelled group of
+// copy buttons. The axe scan catches contrast issues and validates each copy
+// button's accessible name (from copy-label, which axe reads through shadow
+// DOM); the targeted assertion confirms the # tokens are present and the copy
+// buttons are labelled.
 test.describe('Event detail page (with hashtags) accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/events/all-things-open-2026');
@@ -319,15 +320,19 @@ test.describe('Event detail page (with hashtags) accessibility', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('hashtags paragraph is present and contains # tokens as plain text', async ({
+  test('hashtags render with # tokens and labelled copy buttons', async ({
     page,
   }) => {
     // The # symbol is intentionally visible and announced — it identifies
-    // the tokens as hashtags. Confirm it is not hidden or stripped.
-    const hashtagsPara = page.locator('.event-detail-sidebar__hashtags');
-    await expect(hashtagsPara).toBeVisible();
-    await expect(hashtagsPara).toContainText('#AllThingsOpen');
-    await expect(hashtagsPara).toContainText('#ATO2026');
+    // the tokens as hashtags. Each tag has a copy button whose accessible
+    // name comes from copy-label.
+    const items = page.locator('.event-detail-sidebar__hashtag');
+    await expect(items.nth(0)).toContainText('#AllThingsOpen');
+    await expect(items.nth(1)).toContainText('#ATO2026');
+    const buttons = page.locator(
+      '.event-detail-sidebar__hashtag wa-copy-button'
+    );
+    await expect(buttons.nth(0)).toHaveAttribute('copy-label', /Copy #/);
   });
 });
 
