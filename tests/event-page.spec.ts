@@ -138,12 +138,18 @@ test.describe('Event detail page - sidebar hashtags', () => {
     );
   });
 
-  test('hashtags list is the last element inside the sidebar card', async ({
+  test('hashtags list is the last section inside the sidebar card', async ({
     page,
   }) => {
-    const card = page.locator('.event-detail-sidebar__card');
-    const lastChild = card.locator('> *:last-child');
-    await expect(lastChild).toHaveClass(/event-detail-sidebar__hashtags/);
+    // Inspect the card's light-DOM children directly. A CSS '> *:last-child'
+    // locator pierces the wa-card shadow DOM and also matches its internal
+    // <footer part="footer">, so use evaluate to stay in the light DOM.
+    const lastChildClass = await page.evaluate(() => {
+      const card = document.querySelector('.event-detail-sidebar__card');
+      const children = card ? Array.from(card.children) : [];
+      return children.at(-1)?.className ?? '';
+    });
+    expect(lastChildClass).toContain('event-detail-sidebar__hashtags');
   });
 });
 
