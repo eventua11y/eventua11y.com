@@ -179,6 +179,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
       "callForSpeakersLink": coalesce(callForSpeakersLink, parent->callForSpeakersLink),
       "attendanceMode": coalesce(attendanceMode, parent->attendanceMode),
       "location": coalesce(location, parent->location),
+      "hashtags": coalesce(hashtags, parent->hashtags),
       "parentEvent": parent->{ title, slug },
       "speakers": speakers[]->{ _id, name },
       "organizer": coalesce(organizer, parent->organizer)->{ _id, name, website },
