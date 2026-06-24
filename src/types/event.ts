@@ -65,6 +65,7 @@ export interface Event {
   speakers?: Speaker[];
   organizer?: Organizer;
   topics?: TopicSummary[];
+  hashtags?: string[];
 }
 
 export interface ChildEvent {

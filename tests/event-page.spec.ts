@@ -94,6 +94,65 @@ test.describe('Event detail page', () => {
   });
 });
 
+// Slug stable in both production and test datasets; hashtags: ["AllThingsOpen", "ATO2026"]
+const HASHTAG_SLUG = 'all-things-open-2026';
+
+test.describe('Event detail page - sidebar hashtags', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`/events/${HASHTAG_SLUG}`);
+  });
+
+  test('sidebar hashtags list is present', async ({ page }) => {
+    const hashtags = page.locator('.event-detail-sidebar__hashtags');
+    await expect(hashtags).toBeVisible();
+  });
+
+  test('hashtags group has a "Hashtags" heading', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Hashtags' })).toBeVisible();
+  });
+
+  test('each hashtag renders as a list item with the # prefix', async ({
+    page,
+  }) => {
+    // These values come from Sanity editorial content and could change if the
+    // event record is updated.
+    const items = page.locator('.event-detail-sidebar__hashtag');
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toContainText('#AllThingsOpen');
+    await expect(items.nth(1)).toContainText('#ATO2026');
+  });
+
+  test('each hashtag has a copy button that copies the tag with its #', async ({
+    page,
+  }) => {
+    const buttons = page.locator(
+      '.event-detail-sidebar__hashtag wa-copy-button'
+    );
+    await expect(buttons).toHaveCount(2);
+    // The copied value includes the leading # so it is paste-ready, and
+    // copy-label supplies the button's accessible name.
+    await expect(buttons.nth(0)).toHaveAttribute('value', '#AllThingsOpen');
+    await expect(buttons.nth(0)).toHaveAttribute(
+      'copy-label',
+      'Copy #AllThingsOpen'
+    );
+  });
+
+  test('hashtags list is the last section inside the sidebar card', async ({
+    page,
+  }) => {
+    // Inspect the card's light-DOM children directly. A CSS '> *:last-child'
+    // locator pierces the wa-card shadow DOM and also matches its internal
+    // <footer part="footer">, so use evaluate to stay in the light DOM.
+    const lastChildClass = await page.evaluate(() => {
+      const card = document.querySelector('.event-detail-sidebar__card');
+      const children = card ? Array.from(card.children) : [];
+      return children.at(-1)?.className ?? '';
+    });
+    expect(lastChildClass).toContain('event-detail-sidebar__hashtags');
+  });
+});
+
 test.describe('Event detail page - 404 handling', () => {
   test('non-existent slug redirects to 404', async ({ page }) => {
     const response = await page.goto('/events/this-event-does-not-exist-12345');

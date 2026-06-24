@@ -302,6 +302,41 @@ test.describe('Curation Policy page accessibility', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Event detail page with hashtags (/events/all-things-open-2026)
+// ---------------------------------------------------------------------------
+// Covers the sidebar <wa-card> that renders hashtags as a labelled group of
+// copy buttons. The axe scan catches contrast issues and validates each copy
+// button's accessible name (from copy-label, which axe reads through shadow
+// DOM); the targeted assertion confirms the # tokens are present and the copy
+// buttons are labelled.
+test.describe('Event detail page (with hashtags) accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/events/all-things-open-2026');
+    await page.waitForSelector('.event-detail-sidebar__hashtags');
+  });
+
+  test('has no WCAG 2.2 AA violations', async ({ page }) => {
+    const results = await runAxeScan(page);
+    expect(results.violations).toEqual([]);
+  });
+
+  test('hashtags render with # tokens and labelled copy buttons', async ({
+    page,
+  }) => {
+    // The # symbol is intentionally visible and announced — it identifies
+    // the tokens as hashtags. Each tag has a copy button whose accessible
+    // name comes from copy-label.
+    const items = page.locator('.event-detail-sidebar__hashtag');
+    await expect(items.nth(0)).toContainText('#AllThingsOpen');
+    await expect(items.nth(1)).toContainText('#ATO2026');
+    const buttons = page.locator(
+      '.event-detail-sidebar__hashtag wa-copy-button'
+    );
+    await expect(buttons.nth(0)).toHaveAttribute('copy-label', /Copy #/);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 404 Page (/404)
 // ---------------------------------------------------------------------------
 test.describe('404 page accessibility', () => {
@@ -419,6 +454,11 @@ const pages = [
   { name: 'Accessibility Statement', path: '/accessibility' },
   { name: 'Curation Policy', path: '/curation-policy' },
   { name: '404', path: '/404' },
+  {
+    name: 'Event detail (with hashtags)',
+    path: '/events/all-things-open-2026',
+    waitSelector: '.event-detail-sidebar__hashtags',
+  },
 ];
 
 for (const colorScheme of ['light', 'dark'] as const) {

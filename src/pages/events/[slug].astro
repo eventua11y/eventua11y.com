@@ -50,6 +50,13 @@ if (Array.isArray(event.speakers)) {
   );
 }
 
+const hashtags = Array.isArray(event.hashtags)
+  ? event.hashtags.filter(
+      (t): t is string => typeof t === 'string' && t.trim().length > 0
+    )
+  : [];
+const hasHashtags = hashtags.length > 0;
+
 // Cache the response to reduce Sanity API calls, matching the
 // strategy used by the get-events edge function.
 Astro.response.headers.set(
@@ -358,7 +365,10 @@ const jsonLd = {
 
       <div class="event-detail-body">
         {
-          (event.website || event.organizer || hasSidebarLinks) && (
+          (event.website ||
+            event.organizer ||
+            hasSidebarLinks ||
+            hasHashtags) && (
             <aside class="event-detail-sidebar">
               <wa-card class="event-detail-sidebar__card" appearance="outlined">
                 <p>
@@ -413,7 +423,7 @@ const jsonLd = {
                     <Fragment>
                       {' '}
                       Refer to the official event website for the most accurate
-                      and up-to-date information.
+                      information.
                     </Fragment>
                   )}
                 </p>
@@ -447,6 +457,24 @@ const jsonLd = {
                     </ul>
                   </>
                 )}
+                {hasHashtags && (
+                  <>
+                    <h2 class="event-detail-sidebar__hashtags-heading">
+                      Hashtags
+                    </h2>
+                    <ul role="list" class="event-detail-sidebar__hashtags">
+                      {hashtags.map((tag) => (
+                        <li class="event-detail-sidebar__hashtag">
+                          <span>{`#${tag}`}</span>
+                          <wa-copy-button
+                            value={`#${tag}`}
+                            copy-label={`Copy #${tag}`}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </wa-card>
             </aside>
           )
@@ -459,7 +487,10 @@ const jsonLd = {
             'flow-m',
             {
               'event-detail-main--full-width':
-                !event.website && !event.organizer && !hasSidebarLinks,
+                !event.website &&
+                !event.organizer &&
+                !hasSidebarLinks &&
+                !hasHashtags,
             },
           ]}
         >
@@ -679,6 +710,30 @@ const jsonLd = {
     display: inline-flex;
     align-items: center;
     gap: var(--p-space-3xs);
+  }
+
+  .event-detail-sidebar__hashtags-heading {
+    margin: var(--p-space-s) 0 var(--p-space-3xs);
+    font-size: var(--p-step--1);
+  }
+
+  .event-detail-sidebar__hashtags {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .event-detail-sidebar__hashtag {
+    display: flex;
+    align-items: center;
+    gap: var(--p-space-3xs);
+  }
+
+  .event-detail-sidebar__hashtag span {
+    flex: 1 1 auto;
   }
 
   @media (min-width: 769px) {
