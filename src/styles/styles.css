@@ -91,6 +91,12 @@ wa-switch:focus-within::part(control) {
   scroll-margin-top: 7rem;
 }
 
+/* Skip-link target: focusable via tabindex="-1" but not a visible focus ring
+   around the whole content region */
+#main:focus {
+  outline: none;
+}
+
 .content {
   display: flex;
   flex-direction: column;
