@@ -302,6 +302,36 @@ test.describe('Curation Policy page accessibility', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Event detail page with hashtags (/events/all-things-open-2026)
+// ---------------------------------------------------------------------------
+// Covers the sidebar <wa-card> that renders plain-text hashtags. The axe scan
+// catches contrast issues; the targeted assertion confirms the hashtag tokens
+// (including the # prefix) are present in the DOM and announced to screen
+// readers as plain text.
+test.describe('Event detail page (with hashtags) accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/events/all-things-open-2026');
+    await page.waitForSelector('.event-detail-sidebar__hashtags');
+  });
+
+  test('has no WCAG 2.2 AA violations', async ({ page }) => {
+    const results = await runAxeScan(page);
+    expect(results.violations).toEqual([]);
+  });
+
+  test('hashtags paragraph is present and contains # tokens as plain text', async ({
+    page,
+  }) => {
+    // The # symbol is intentionally visible and announced — it identifies
+    // the tokens as hashtags. Confirm it is not hidden or stripped.
+    const hashtagsPara = page.locator('.event-detail-sidebar__hashtags');
+    await expect(hashtagsPara).toBeVisible();
+    await expect(hashtagsPara).toContainText('#AllThingsOpen');
+    await expect(hashtagsPara).toContainText('#ATO2026');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 404 Page (/404)
 // ---------------------------------------------------------------------------
 test.describe('404 page accessibility', () => {
@@ -419,6 +449,11 @@ const pages = [
   { name: 'Accessibility Statement', path: '/accessibility' },
   { name: 'Curation Policy', path: '/curation-policy' },
   { name: '404', path: '/404' },
+  {
+    name: 'Event detail (with hashtags)',
+    path: '/events/all-things-open-2026',
+    waitSelector: '.event-detail-sidebar__hashtags',
+  },
 ];
 
 for (const colorScheme of ['light', 'dark'] as const) {

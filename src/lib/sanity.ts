@@ -73,6 +73,7 @@ interface RawEvent {
     slug: { current: string };
     description?: string;
   }>;
+  hashtags?: string[];
 }
 
 /**

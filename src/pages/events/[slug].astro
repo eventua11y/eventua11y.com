@@ -50,6 +50,13 @@ if (Array.isArray(event.speakers)) {
   );
 }
 
+const hashtags = Array.isArray(event.hashtags)
+  ? event.hashtags.filter(
+      (t): t is string => typeof t === 'string' && t.trim().length > 0
+    )
+  : [];
+const hasHashtags = hashtags.length > 0;
+
 // Cache the response to reduce Sanity API calls, matching the
 // strategy used by the get-events edge function.
 Astro.response.headers.set(
@@ -358,7 +365,10 @@ const jsonLd = {
 
       <div class="event-detail-body">
         {
-          (event.website || event.organizer || hasSidebarLinks) && (
+          (event.website ||
+            event.organizer ||
+            hasSidebarLinks ||
+            hasHashtags) && (
             <aside class="event-detail-sidebar">
               <wa-card class="event-detail-sidebar__card" appearance="outlined">
                 <p>
@@ -447,6 +457,12 @@ const jsonLd = {
                     </ul>
                   </>
                 )}
+                {hasHashtags && (
+                  <p class="event-detail-sidebar__hashtags">
+                    Use these hashtags:{' '}
+                    {hashtags.map((tag) => `#${tag}`).join(', ')}
+                  </p>
+                )}
               </wa-card>
             </aside>
           )
@@ -459,7 +475,10 @@ const jsonLd = {
             'flow-m',
             {
               'event-detail-main--full-width':
-                !event.website && !event.organizer && !hasSidebarLinks,
+                !event.website &&
+                !event.organizer &&
+                !hasSidebarLinks &&
+                !hasHashtags,
             },
           ]}
         >
@@ -679,6 +698,10 @@ const jsonLd = {
     display: inline-flex;
     align-items: center;
     gap: var(--p-space-3xs);
+  }
+
+  .event-detail-sidebar__hashtags {
+    margin-top: var(--p-space-xs);
   }
 
   @media (min-width: 769px) {

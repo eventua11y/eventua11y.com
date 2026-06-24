@@ -94,6 +94,63 @@ test.describe('Event detail page', () => {
   });
 });
 
+// Slug stable in both production and test datasets; hashtags: ["AllThingsOpen", "ATO2026"]
+const HASHTAG_SLUG = 'all-things-open-2026';
+
+test.describe('Event detail page - sidebar hashtags', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`/events/${HASHTAG_SLUG}`);
+  });
+
+  test('sidebar hashtags paragraph is present', async ({ page }) => {
+    const hashtags = page.locator('.event-detail-sidebar__hashtags');
+    await expect(hashtags).toBeVisible();
+  });
+
+  test('hashtags paragraph begins with the expected label', async ({ page }) => {
+    const hashtags = page.locator('.event-detail-sidebar__hashtags');
+    await expect(hashtags).toContainText('Use these hashtags:');
+  });
+
+  test('hashtags paragraph contains at least one #-prefixed token', async ({
+    page,
+  }) => {
+    const hashtags = page.locator('.event-detail-sidebar__hashtags');
+    const text = await hashtags.textContent();
+    // Resilient pattern: label followed by at least one word-character after '#'
+    expect(text).toMatch(/Use these hashtags:\s*#\w/);
+  });
+
+  test('hashtags paragraph contains the specific event hashtags', async ({
+    page,
+  }) => {
+    // These values come from Sanity editorial content and could change if the
+    // event record is updated.
+    const hashtags = page.locator('.event-detail-sidebar__hashtags');
+    await expect(hashtags).toContainText('#AllThingsOpen');
+    await expect(hashtags).toContainText('#ATO2026');
+  });
+
+  test('multiple hashtags are comma-separated with no trailing comma', async ({
+    page,
+  }) => {
+    const hashtags = page.locator('.event-detail-sidebar__hashtags');
+    const text = await hashtags.textContent();
+    // The two tags should be joined by ', ' with no trailing comma
+    expect(text).toContain('#AllThingsOpen, #ATO2026');
+    expect(text).not.toMatch(/,\s*$/);
+  });
+
+  test('hashtags paragraph is the last element inside the sidebar card', async ({
+    page,
+  }) => {
+    // The sidebar card is a wa-card; select its last direct paragraph child
+    const card = page.locator('.event-detail-sidebar__card');
+    const lastChild = card.locator('> p:last-child');
+    await expect(lastChild).toHaveClass(/event-detail-sidebar__hashtags/);
+  });
+});
+
 test.describe('Event detail page - 404 handling', () => {
   test('non-existent slug redirects to 404', async ({ page }) => {
     const response = await page.goto('/events/this-event-does-not-exist-12345');
