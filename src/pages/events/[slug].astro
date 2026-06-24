@@ -166,6 +166,15 @@ const supplementaryLinks = eventHasEnded
 
 const hasSidebarLinks = supplementaryLinks.length > 0;
 
+// The sidebar intro paragraph only has content when there is an organizer, a
+// parent event, or a website. Without this guard an empty <p> would render and
+// push the sidebar sections below it (e.g. Hashtags) down with stray spacing.
+const hasSidebarIntro = !!(
+  event.organizer ||
+  (isChildEvent && event.parentEvent) ||
+  event.website
+);
+
 // JSON-LD structured data
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -371,110 +380,117 @@ const jsonLd = {
             hasHashtags) && (
             <aside class="event-detail-sidebar">
               <wa-card class="event-detail-sidebar__card" appearance="outlined">
-                <p>
-                  {isChildEvent && event.parentEvent && event.organizer ? (
-                    <Fragment>
-                      This event is part of{' '}
-                      {parentUrl ? (
-                        <a href={parentUrl}>{event.parentEvent.title}</a>
+                <div class="event-detail-sidebar__content flow flow-s">
+                  {hasSidebarIntro && (
+                    <p>
+                      {isChildEvent && event.parentEvent && event.organizer ? (
+                        <Fragment>
+                          This event is part of{' '}
+                          {parentUrl ? (
+                            <a href={parentUrl}>{event.parentEvent.title}</a>
+                          ) : (
+                            event.parentEvent.title
+                          )}
+                          {`, organized by `}
+                          {event.organizer.website ? (
+                            <a
+                              href={event.organizer.website}
+                              rel="noopener noreferrer"
+                              set:text={event.organizer.name}
+                            />
+                          ) : (
+                            event.organizer.name
+                          )}
+                          {`.`}
+                        </Fragment>
+                      ) : isChildEvent && event.parentEvent ? (
+                        <Fragment>
+                          This event is part of{' '}
+                          {parentUrl ? (
+                            <a href={parentUrl}>{event.parentEvent.title}</a>
+                          ) : (
+                            event.parentEvent.title
+                          )}
+                          .
+                        </Fragment>
+                      ) : event.organizer ? (
+                        <Fragment>
+                          {`This event is organized by `}
+                          {event.organizer.website ? (
+                            <a
+                              href={event.organizer.website}
+                              rel="noopener noreferrer"
+                              set:text={event.organizer.name}
+                            />
+                          ) : (
+                            event.organizer.name
+                          )}
+                          {`.`}
+                        </Fragment>
                       ) : (
-                        event.parentEvent.title
+                        ''
                       )}
-                      {`, organized by `}
-                      {event.organizer.website ? (
-                        <a
-                          href={event.organizer.website}
-                          rel="noopener noreferrer"
-                          set:text={event.organizer.name}
-                        />
-                      ) : (
-                        event.organizer.name
+                      {event.website && (
+                        <Fragment>
+                          {' '}
+                          Refer to the official event website for the most
+                          accurate information.
+                        </Fragment>
                       )}
-                      {`.`}
-                    </Fragment>
-                  ) : isChildEvent && event.parentEvent ? (
-                    <Fragment>
-                      This event is part of{' '}
-                      {parentUrl ? (
-                        <a href={parentUrl}>{event.parentEvent.title}</a>
-                      ) : (
-                        event.parentEvent.title
-                      )}
-                      .
-                    </Fragment>
-                  ) : event.organizer ? (
-                    <Fragment>
-                      {`This event is organized by `}
-                      {event.organizer.website ? (
-                        <a
-                          href={event.organizer.website}
-                          rel="noopener noreferrer"
-                          set:text={event.organizer.name}
-                        />
-                      ) : (
-                        event.organizer.name
-                      )}
-                      {`.`}
-                    </Fragment>
-                  ) : (
-                    ''
+                    </p>
                   )}
                   {event.website && (
-                    <Fragment>
-                      {' '}
-                      Refer to the official event website for the most accurate
-                      information.
-                    </Fragment>
+                    <wa-button
+                      href={event.website}
+                      rel="external"
+                      variant="neutral"
+                      appearance="accent"
+                      style="width: 100%;"
+                      class="event-detail-sidebar__website-button"
+                    >
+                      Event website
+                      <span class="sr-only"> (opens external site)</span>
+                      <wa-icon slot="end" name="arrow-up-right-from-square" />
+                    </wa-button>
                   )}
-                </p>
-                {event.website && (
-                  <wa-button
-                    href={event.website}
-                    rel="external"
-                    variant="neutral"
-                    appearance="accent"
-                    style="width: 100%;"
-                    class="event-detail-sidebar__website-button"
-                  >
-                    Event website
-                    <span class="sr-only"> (opens external site)</span>
-                    <wa-icon slot="end" name="arrow-up-right-from-square" />
-                  </wa-button>
-                )}
-                {hasSidebarLinks && (
-                  <>
-                    <h2 class="sr-only">Event resources</h2>
-                    <ul role="list" class="event-detail-sidebar__links">
-                      {supplementaryLinks.map((link) => (
-                        <li>
-                          <a href={link.href} rel="external">
-                            {link.label}
-                            <span class="sr-only"> (opens external site)</span>
-                            <wa-icon name="arrow-up-right-from-square" />
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-                {hasHashtags && (
-                  <>
-                    <h2 class="event-detail-sidebar__hashtags-heading">
-                      Hashtags
-                    </h2>
-                    <ul role="list" class="event-detail-sidebar__hashtags">
-                      {hashtags.map((tag) => (
-                        <li class="event-detail-sidebar__hashtag">
-                          <span>{`#${tag}`}</span>
-                          <wa-copy-button
-                            value={`#${tag}`}
-                            copy-label={`Copy #${tag}`}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
+                  {hasSidebarLinks && (
+                    <div class="flow flow-3xs">
+                      <h2 class="sr-only">Event resources</h2>
+                      <ul role="list" class="event-detail-sidebar__links">
+                        {supplementaryLinks.map((link) => (
+                          <li>
+                            <a href={link.href} rel="external">
+                              {link.label}
+                              <span class="sr-only">
+                                {' '}
+                                (opens external site)
+                              </span>
+                              <wa-icon name="arrow-up-right-from-square" />
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {hasHashtags && (
+                    <div class="event-detail-sidebar__hashtags-group flow flow-3xs">
+                      <h2 class="event-detail-sidebar__hashtags-heading">
+                        Hashtags
+                      </h2>
+                      <ul role="list" class="event-detail-sidebar__hashtags">
+                        {hashtags.map((tag) => (
+                          <li class="event-detail-sidebar__hashtag">
+                            <span>{`#${tag}`}</span>
+                            <wa-copy-button
+                              value={`#${tag}`}
+                              copy-label={`Copy #${tag}`}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </wa-card>
             </aside>
           )
@@ -693,14 +709,9 @@ const jsonLd = {
     font-size: var(--p-step--1);
   }
 
-  .event-detail-sidebar__website-button {
-    margin-top: var(--p-space-xs);
-  }
-
   .event-detail-sidebar__links {
     list-style: none;
     padding: 0;
-    margin-top: var(--p-space-xs);
     display: flex;
     flex-direction: column;
     gap: var(--p-space-2xs);
@@ -713,14 +724,13 @@ const jsonLd = {
   }
 
   .event-detail-sidebar__hashtags-heading {
-    margin: var(--p-space-s) 0 var(--p-space-3xs);
+    margin: 0;
     font-size: var(--p-step--1);
   }
 
   .event-detail-sidebar__hashtags {
     list-style: none;
     padding: 0;
-    margin: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
