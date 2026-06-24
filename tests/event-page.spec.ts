@@ -107,7 +107,9 @@ test.describe('Event detail page - sidebar hashtags', () => {
     await expect(hashtags).toBeVisible();
   });
 
-  test('hashtags paragraph begins with the expected label', async ({ page }) => {
+  test('hashtags paragraph begins with the expected label', async ({
+    page,
+  }) => {
     const hashtags = page.locator('.event-detail-sidebar__hashtags');
     await expect(hashtags).toContainText('Use these hashtags:');
   });
