@@ -138,18 +138,18 @@ test.describe('Event detail page - sidebar hashtags', () => {
     );
   });
 
-  test('hashtags list is the last section inside the sidebar card', async ({
+  test('hashtags group is the last section inside the sidebar card', async ({
     page,
   }) => {
-    // Inspect the card's light-DOM children directly. A CSS '> *:last-child'
-    // locator pierces the wa-card shadow DOM and also matches its internal
-    // <footer part="footer">, so use evaluate to stay in the light DOM.
+    // Inspect the light-DOM children of the card's content wrapper. A CSS
+    // '> *:last-child' locator would pierce the wa-card shadow DOM and also
+    // match its internal <footer part="footer">, so use evaluate instead.
     const lastChildClass = await page.evaluate(() => {
-      const card = document.querySelector('.event-detail-sidebar__card');
-      const children = card ? Array.from(card.children) : [];
+      const content = document.querySelector('.event-detail-sidebar__content');
+      const children = content ? Array.from(content.children) : [];
       return children.at(-1)?.className ?? '';
     });
-    expect(lastChildClass).toContain('event-detail-sidebar__hashtags');
+    expect(lastChildClass).toContain('event-detail-sidebar__hashtags-group');
   });
 });
 
