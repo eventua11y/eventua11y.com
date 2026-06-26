@@ -4,9 +4,11 @@
       <hgroup role="group" aria-roledescription="Heading group">
         <h2>Today</h2>
         <p aria-roledescription="subtitle">
-          <time class="text-muted" :datetime="today.format('YYYY-MM-DD')">{{
-            today.format('MMMM D, YYYY')
-          }}</time>
+          <time
+            class="text-muted"
+            :datetime="localNow.format('YYYY-MM-DDTHH:mmZ')"
+            >{{ localNow.format('MMMM D, YYYY, h:mm A z') }}</time
+          >
         </p>
       </hgroup>
 
@@ -37,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from '../lib/dayjs';
 import Event from './Event.vue';
@@ -48,6 +50,19 @@ const today = computed(() => {
   const timezone = userStore.geo?.timezone || 'UTC';
   return dayjs().tz(timezone).startOf('day');
 });
+
+// Live-updating "now" so the displayed date and time stay current while the
+// page is open. Mirrors the pattern used in EventProgress.vue.
+const now = ref(dayjs());
+let timer: ReturnType<typeof setInterval> | null = null;
+
+// "now" in the user's timezone, used for the subtitle date and time,
+// e.g. "June 26, 2026, 9:41 AM GMT+1"
+const localNow = computed(() => {
+  const timezone = userStore.geo?.timezone || 'UTC';
+  return now.value.tz(timezone);
+});
+
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
@@ -69,6 +84,14 @@ const shouldShowDate = (event) => {
 
 onMounted(async () => {
   updateTodaysEvents();
+  // Update "now" every minute so the displayed time advances in real time
+  timer = setInterval(() => {
+    now.value = dayjs();
+  }, 60_000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
 });
 
 watch(
