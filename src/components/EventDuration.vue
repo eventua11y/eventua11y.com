@@ -2,7 +2,6 @@
   <span class="event__duration">
     <span class="sr-only">Duration</span>
     <time :datetime="`PT${duration}M`">
-      <wa-icon name="timer" auto-width></wa-icon>
       {{ formattedDuration }}
     </time>
   </span>
@@ -32,19 +31,21 @@ const duration = computed(() =>
 
 /**
  * Formats duration into human-readable string
- * - Under 1 hour: "X minutes"
- * - Whole hours: "X hours"
- * - Hours and minutes: "X hours Y minutes"
+ * - Under 1 hour: "X minutes long"
+ * - Whole hours: "X hours long"
+ * - Hours and minutes: "X hours Y minutes long"
  * @returns {string} Formatted duration string
  */
 const formattedDuration = computed(() => {
   const durationValue = duration.value;
   if (durationValue <= 60) {
-    return `${durationValue} minutes`;
+    return `${durationValue} minutes long`;
   } else {
     const hours = Math.floor(durationValue / 60);
     const minutes = durationValue % 60;
-    return minutes > 0 ? `${hours} hours ${minutes} minutes` : `${hours} hours`;
+    return minutes > 0
+      ? `${hours} hours ${minutes} minutes long`
+      : `${hours} hours long`;
   }
 });
 </script>
