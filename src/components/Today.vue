@@ -7,7 +7,6 @@
           <time class="text-muted" :datetime="today.format('YYYY-MM-DD')">{{
             today.format('MMMM D, YYYY')
           }}</time>
-          <span class="text-muted" aria-hidden="true">·</span>
           <time class="text-muted" :datetime="now.format('HH:mm')">{{
             currentTime
           }}</time>
@@ -108,7 +107,7 @@ watch(
 .today__subtitle {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5ch;
+  gap: 1ch;
 }
 
 .events {
