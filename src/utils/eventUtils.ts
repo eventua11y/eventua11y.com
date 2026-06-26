@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, ChildEvent, Book } from '../types/event';
 
 // ── Date comparators ───────────────────────────────────────────────────
@@ -170,19 +169,27 @@ export const getEventUrl = (
  * blocks with a space and collapsing runs of whitespace. Non-block
  * content (images, embeds, etc.) is ignored.
  *
+ * Accepts `unknown` so the parameter type reflects the real runtime
+ * input (which may contain non-block items); narrowing happens inside.
+ *
  * @param blocks - Portable Text blocks (e.g. an event's richDescription)
- * @returns A single normalised plain-text string (empty if no text)
+ * @returns A single normalized plain-text string (empty if no text)
  */
-export function portableTextToPlainText(blocks?: PortableTextBlock[]): string {
+export function portableTextToPlainText(blocks?: unknown): string {
   if (!Array.isArray(blocks)) return '';
+
+  type TextBlock = { children: Array<{ text?: unknown }> };
 
   return blocks
     .filter(
-      (block): block is PortableTextBlock =>
-        block?._type === 'block' && Array.isArray(block.children)
+      (block): block is TextBlock =>
+        typeof block === 'object' &&
+        block !== null &&
+        (block as { _type?: unknown })._type === 'block' &&
+        Array.isArray((block as { children?: unknown }).children)
     )
     .map((block) =>
-      (block.children as Array<{ text?: unknown }>)
+      block.children
         .map((child) => (typeof child.text === 'string' ? child.text : ''))
         .join('')
     )
@@ -197,13 +204,13 @@ export function portableTextToPlainText(blocks?: PortableTextBlock[]): string {
  *
  * @param text - The source text to truncate
  * @param max - Maximum length before truncation (default 160)
- * @returns The truncated, whitespace-normalised string
+ * @returns The truncated, whitespace-normalized string
  */
 export function truncateForMeta(text: string, max = 160): string {
-  const normalised = text.replace(/\s+/g, ' ').trim();
-  if (normalised.length <= max) return normalised;
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= max) return normalized;
 
-  const slice = normalised.slice(0, max);
+  const slice = normalized.slice(0, max);
   const lastSpace = slice.lastIndexOf(' ');
   // Prefer a word boundary, but only if it doesn't truncate too aggressively.
   const trimmed = lastSpace > max * 0.6 ? slice.slice(0, lastSpace) : slice;
