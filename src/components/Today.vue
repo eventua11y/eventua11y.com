@@ -7,7 +7,7 @@
           <time
             class="text-muted"
             :datetime="localNow.format('YYYY-MM-DDTHH:mmZ')"
-            >{{ localNow.format('MMMM D, YYYY, h:mm A z') }}</time
+            >{{ localNow.format('MMMM D, h:mm A z') }}</time
           >
         </p>
       </hgroup>
