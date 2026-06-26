@@ -16,11 +16,13 @@ const props = withDefaults(
     showDate?: boolean;
     showCountdown?: boolean;
     showEnded?: boolean;
+    isPast?: boolean;
   }>(),
   {
     showDate: true,
     showCountdown: false,
     showEnded: false,
+    isPast: false,
   }
 );
 
@@ -176,6 +178,7 @@ const speakerDisplay = computed(() => {
       :dateStart="event.dateStart"
       :timezone="event.timezone"
       :isDeadline="true"
+      :isPast="isPast"
     />
     <span class="event__title"
       >Submit proposals for
@@ -199,6 +202,7 @@ const speakerDisplay = computed(() => {
       :timezone="event.timezone"
       :day="event.day"
       :type="event.type"
+      :isPast="isPast"
       :showCountdown="showCountdown"
       :showEnded="showEnded"
     />
@@ -240,7 +244,11 @@ const speakerDisplay = computed(() => {
           :aria-label="`Accessibility highlights for ${event.title}`"
         >
           <li v-for="child in event.children" :key="child._id">
-            <EventChild :event="child" :showEnded="showEnded" />
+            <EventChild
+              :event="child"
+              :showEnded="showEnded"
+              :isPast="isPast"
+            />
           </li>
         </ol>
       </details>

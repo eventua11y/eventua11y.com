@@ -376,31 +376,63 @@ describe('getYearMonth', () => {
 
 describe('formatDateRange', () => {
   describe('single date (no end date)', () => {
-    it('returns a single-element tuple for timed events', () => {
+    it('returns a single-element tuple for timed events (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
         timezone: 'UTC',
         locale: 'en',
       });
+      expect(result).toEqual([`Sunday, March 8 2:00${nbsp}PM`]);
+    });
+
+    it('returns a single-element tuple for timed events (past — shows year)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T14:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        isPast: true,
+      });
       expect(result).toEqual([`Sunday, March 8, 2026 2:00${nbsp}PM`]);
     });
 
-    it('returns a single-element tuple for all-day events', () => {
+    it('returns a single-element tuple for all-day events (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         timezone: 'UTC',
         locale: 'en',
         day: true,
       });
+      expect(result).toEqual(['Sunday, March 8']);
+    });
+
+    it('returns a single-element tuple for all-day events (past — shows year)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        day: true,
+        isPast: true,
+      });
       expect(result).toEqual(['Sunday, March 8, 2026']);
     });
 
-    it('returns a single-element tuple for themes', () => {
+    it('returns a single-element tuple for themes (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         timezone: 'UTC',
         locale: 'en',
         type: 'theme',
+      });
+      expect(result).toEqual(['Sunday, March 8']);
+    });
+
+    it('returns a single-element tuple for themes (past — shows year)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+        isPast: true,
       });
       expect(result).toEqual(['Sunday, March 8, 2026']);
     });
@@ -414,8 +446,8 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // Both PM — AM/PM shown only on end time
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
+      // Both PM — AM/PM shown only on end time; no year for upcoming
+      expect(result).toEqual(['Sunday, March 8 2:00', `5:00${nbsp}PM`]);
     });
 
     it('shows AM/PM on both times when they differ', () => {
@@ -425,9 +457,9 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // AM → PM — both shown
+      // AM → PM — both shown; no year for upcoming
       expect(result).toEqual([
-        `Sunday, March 8, 2026 10:00${nbsp}AM`,
+        `Sunday, March 8 10:00${nbsp}AM`,
         `5:00${nbsp}PM`,
       ]);
     });
@@ -439,8 +471,8 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // Both AM — AM/PM shown only on end time
-      expect(result).toEqual(['Sunday, March 8, 2026 8:00', `11:00${nbsp}AM`]);
+      // Both AM — AM/PM shown only on end time; no year for upcoming
+      expect(result).toEqual(['Sunday, March 8 8:00', `11:00${nbsp}AM`]);
     });
 
     it('skips AM/PM dedup for 24-hour locales', () => {
@@ -450,8 +482,8 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'de',
       });
-      // 24-hour locale — no AM/PM to deduplicate
-      expect(result).toEqual(['Sonntag, 8. März 2026 14:00', '17:00']);
+      // 24-hour locale — no AM/PM to deduplicate; no year for upcoming
+      expect(result).toEqual(['Sonntag, 8. März 14:00', '17:00']);
     });
 
     it('returns single-element tuple for same-day date-only events', () => {
@@ -462,12 +494,24 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toEqual(['Sunday, March 8, 2026']);
+      // No year for upcoming
+      expect(result).toEqual(['Sunday, March 8']);
+    });
+
+    it('shows year on same-day events when isPast is true', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T14:00:00Z',
+        dateEnd: '2026-03-08T17:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        isPast: true,
+      });
+      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
     });
   });
 
   describe('same-month date ranges (the key optimization)', () => {
-    it('deduplicates month and year for date-only ranges (en)', () => {
+    it('deduplicates month for date-only ranges (upcoming — no year on either end)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -475,18 +519,42 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13']);
+    });
+
+    it('deduplicates month and year for date-only ranges (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        dateEnd: '2026-03-13T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        day: true,
+        isPast: true,
+      });
       expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
   });
 
   describe('different-month, same-year ranges', () => {
-    it('deduplicates the year for date-only ranges (en)', () => {
+    it('deduplicates the year for date-only ranges (upcoming — no year on either end)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-28T00:00:00Z',
         dateEnd: '2026-04-02T00:00:00Z',
         timezone: 'UTC',
         locale: 'en',
         day: true,
+      });
+      expect(result).toEqual(['Saturday, March 28', 'Thursday, April 2']);
+    });
+
+    it('deduplicates the year for date-only ranges (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        day: true,
+        isPast: true,
       });
       expect(result).toEqual(['Saturday, March 28', 'Thursday, April 2, 2026']);
     });
@@ -509,26 +577,55 @@ describe('formatDateRange', () => {
   });
 
   describe('multi-day timed events', () => {
-    it('deduplicates year for same-year timed ranges', () => {
+    it('deduplicates year for same-year timed ranges (upcoming — no year on end)', () => {
       const result = formatDateRange({
         dateStart: '2026-02-24T14:00:00Z',
         dateEnd: '2026-02-25T21:00:00Z',
         timezone: 'UTC',
         locale: 'en',
       });
-      // Start omits year, end keeps it (both have day names)
+      // Start omits year (already year-free format), end also omits year for upcoming
+      expect(result).toEqual([
+        `Tuesday, February 24 2:00${nbsp}PM`,
+        `Wednesday, February 25 9:00${nbsp}PM`,
+      ]);
+    });
+
+    it('deduplicates year for same-year timed ranges (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-02-24T14:00:00Z',
+        dateEnd: '2026-02-25T21:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        isPast: true,
+      });
+      // Start omits year (deduplication), end keeps it
       expect(result).toEqual([
         `Tuesday, February 24 2:00${nbsp}PM`,
         `Wednesday, February 25, 2026 9:00${nbsp}PM`,
       ]);
     });
 
-    it('deduplicates year across different months', () => {
+    it('deduplicates year across different months (upcoming — no year on end)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
         dateEnd: '2026-04-10T17:00:00Z',
         timezone: 'UTC',
         locale: 'en',
+      });
+      expect(result).toEqual([
+        `Sunday, March 8 2:00${nbsp}PM`,
+        `Friday, April 10 5:00${nbsp}PM`,
+      ]);
+    });
+
+    it('deduplicates year across different months (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T14:00:00Z',
+        dateEnd: '2026-04-10T17:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        isPast: true,
       });
       expect(result).toEqual([
         `Sunday, March 8 2:00${nbsp}PM`,
@@ -563,8 +660,8 @@ describe('formatDateRange', () => {
         day: true,
         now: notToday,
       });
-      // In EDT (UTC-4 in March), these are Mar 8 (Sun) and Mar 9 (Mon)
-      expect(result).toEqual(['Sunday, March 8', 'Monday, March 9, 2026']);
+      // In EDT (UTC-4 in March), these are Mar 8 (Sun) and Mar 9 (Mon); no year for upcoming
+      expect(result).toEqual(['Sunday, March 8', 'Monday, March 9']);
     });
 
     it('uses user timezone when useLocalTimezone is true', () => {
@@ -576,8 +673,8 @@ describe('formatDateRange', () => {
         userTimezone: 'Europe/London',
         locale: 'en',
       });
-      // In London (GMT), these are 14:00–17:00 on Mar 8 (both PM)
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
+      // In London (GMT), these are 14:00–17:00 on Mar 8 (both PM); no year for upcoming
+      expect(result).toEqual(['Sunday, March 8 2:00', `5:00${nbsp}PM`]);
     });
 
     it('uses UTC for international events (no timezone)', () => {
@@ -586,13 +683,13 @@ describe('formatDateRange', () => {
         dateEnd: '2026-03-08T17:00:00Z',
         locale: 'en',
       });
-      // No timezone = international, should use UTC values (both PM)
-      expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
+      // No timezone = international, should use UTC values (both PM); no year for upcoming
+      expect(result).toEqual(['Sunday, March 8 2:00', `5:00${nbsp}PM`]);
     });
   });
 
   describe('locale support', () => {
-    it('formats same-month range in German', () => {
+    it('formats same-month range in German (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -600,17 +697,43 @@ describe('formatDateRange', () => {
         locale: 'de',
         day: true,
       });
+      // "Sonntag, 8." / "Freitag, 13. März" — no year for upcoming
+      expect(result).toEqual(['Sonntag, 8.', 'Freitag, 13. März']);
+    });
+
+    it('formats same-month range in German (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        dateEnd: '2026-03-13T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'de',
+        day: true,
+        isPast: true,
+      });
       // "Sonntag, 8." / "Freitag, 13. März 2026"
       expect(result).toEqual(['Sonntag, 8.', 'Freitag, 13. März 2026']);
     });
 
-    it('formats different-month range in German', () => {
+    it('formats different-month range in German (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-28T00:00:00Z',
         dateEnd: '2026-04-02T00:00:00Z',
         timezone: 'UTC',
         locale: 'de',
         day: true,
+      });
+      // "Samstag, 28. März" / "Donnerstag, 2. April" — no year for upcoming
+      expect(result).toEqual(['Samstag, 28. März', 'Donnerstag, 2. April']);
+    });
+
+    it('formats different-month range in German (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'de',
+        day: true,
+        isPast: true,
       });
       // "Samstag, 28. März" / "Donnerstag, 2. April 2026"
       expect(result).toEqual([
@@ -619,19 +742,32 @@ describe('formatDateRange', () => {
       ]);
     });
 
-    it('formats same-month range in French', () => {
+    it('formats same-month range in French (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
         timezone: 'UTC',
         locale: 'fr',
         day: true,
+      });
+      // "dimanche 8" / "vendredi 13 mars" — no year for upcoming
+      expect(result).toEqual(['dimanche 8', 'vendredi 13 mars']);
+    });
+
+    it('formats same-month range in French (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        dateEnd: '2026-03-13T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'fr',
+        day: true,
+        isPast: true,
       });
       // "dimanche 8" / "vendredi 13 mars 2026"
       expect(result).toEqual(['dimanche 8', 'vendredi 13 mars 2026']);
     });
 
-    it('formats different-month range in French', () => {
+    it('formats different-month range in French (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-28T00:00:00Z',
         dateEnd: '2026-04-02T00:00:00Z',
@@ -639,11 +775,24 @@ describe('formatDateRange', () => {
         locale: 'fr',
         day: true,
       });
+      // "samedi 28 mars" / "jeudi 2 avril" — no year for upcoming
+      expect(result).toEqual(['samedi 28 mars', 'jeudi 2 avril']);
+    });
+
+    it('formats different-month range in French (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'fr',
+        day: true,
+        isPast: true,
+      });
       // "samedi 28 mars" / "jeudi 2 avril 2026"
       expect(result).toEqual(['samedi 28 mars', 'jeudi 2 avril 2026']);
     });
 
-    it('formats same-month range in Spanish', () => {
+    it('formats same-month range in Spanish (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T00:00:00Z',
         dateEnd: '2026-03-13T00:00:00Z',
@@ -651,17 +800,43 @@ describe('formatDateRange', () => {
         locale: 'es',
         day: true,
       });
+      // "domingo, 8" / "viernes, 13 de marzo" — no year for upcoming
+      expect(result).toEqual(['domingo, 8', 'viernes, 13 de marzo']);
+    });
+
+    it('formats same-month range in Spanish (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-08T00:00:00Z',
+        dateEnd: '2026-03-13T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'es',
+        day: true,
+        isPast: true,
+      });
       // "domingo, 8" / "viernes, 13 de marzo de 2026"
       expect(result).toEqual(['domingo, 8', 'viernes, 13 de marzo de 2026']);
     });
 
-    it('formats different-month range in Spanish', () => {
+    it('formats different-month range in Spanish (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-03-28T00:00:00Z',
         dateEnd: '2026-04-02T00:00:00Z',
         timezone: 'UTC',
         locale: 'es',
         day: true,
+      });
+      // "sábado, 28 de marzo" / "jueves, 2 de abril" — no year for upcoming
+      expect(result).toEqual(['sábado, 28 de marzo', 'jueves, 2 de abril']);
+    });
+
+    it('formats different-month range in Spanish (past — year on end)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-03-28T00:00:00Z',
+        dateEnd: '2026-04-02T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'es',
+        day: true,
+        isPast: true,
       });
       // "sábado, 28 de marzo" / "jueves, 2 de abril de 2026"
       expect(result).toEqual([
@@ -672,7 +847,7 @@ describe('formatDateRange', () => {
   });
 
   describe('full-month events', () => {
-    it('displays "October 2026" for a full October (en)', () => {
+    it('displays "October" for a full October upcoming event (en)', () => {
       const result = formatDateRange({
         dateStart: '2026-10-01T00:00:00Z',
         dateEnd: '2026-10-31T00:00:00Z',
@@ -680,10 +855,22 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
+      expect(result).toEqual(['October']);
+    });
+
+    it('displays "October 2026" for a full October past event (en)', () => {
+      const result = formatDateRange({
+        dateStart: '2026-10-01T00:00:00Z',
+        dateEnd: '2026-10-31T00:00:00Z',
+        timezone: 'UTC',
+        locale: 'en',
+        type: 'theme',
+        isPast: true,
+      });
       expect(result).toEqual(['October 2026']);
     });
 
-    it('displays "February 2026" for a full February (en)', () => {
+    it('displays "February" for a full February upcoming event (en)', () => {
       // February 2026 has 28 days
       const result = formatDateRange({
         dateStart: '2026-02-01T00:00:00Z',
@@ -692,10 +879,10 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
-      expect(result).toEqual(['February 2026']);
+      expect(result).toEqual(['February']);
     });
 
-    it('displays "February 2028" for a full leap-year February (en)', () => {
+    it('displays "February 2028" for a full leap-year February past event (en)', () => {
       // February 2028 has 29 days (leap year)
       const result = formatDateRange({
         dateStart: '2028-02-01T00:00:00Z',
@@ -703,6 +890,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         type: 'theme',
+        isPast: true,
       });
       expect(result).toEqual(['February 2028']);
     });
@@ -715,7 +903,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toEqual(['June 2026']);
+      // No year for upcoming
+      expect(result).toEqual(['June']);
     });
 
     it('does not apply to partial-month ranges', () => {
@@ -726,11 +915,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
-      // Oct 1–30 is not the full month (31 days), should show normal range
-      expect(result).toEqual([
-        'Thursday, October 1',
-        'Friday, October 30, 2026',
-      ]);
+      // Oct 1–30 is not the full month (31 days), should show normal range; no year for upcoming
+      expect(result).toEqual(['Thursday, October 1', 'Friday, October 30']);
     });
 
     it('does not apply to ranges starting after the 1st', () => {
@@ -741,10 +927,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
-      expect(result).toEqual([
-        'Friday, October 2',
-        'Saturday, October 31, 2026',
-      ]);
+      // No year for upcoming
+      expect(result).toEqual(['Friday, October 2', 'Saturday, October 31']);
     });
 
     it('does not apply to cross-month ranges', () => {
@@ -755,11 +939,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
-      // Oct 1 – Nov 30 spans two months
-      expect(result).toEqual([
-        'Thursday, October 1',
-        'Monday, November 30, 2026',
-      ]);
+      // Oct 1 – Nov 30 spans two months; no year for upcoming
+      expect(result).toEqual(['Thursday, October 1', 'Monday, November 30']);
     });
 
     it('does not apply to timed events (not date-only)', () => {
@@ -770,14 +951,14 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
       });
-      // Should show as a timed range, not "October 2026"
+      // Should show as a timed range, not "October"; no year for upcoming
       expect(result).toEqual([
         `Thursday, October 1 9:00${nbsp}AM`,
-        `Saturday, October 31, 2026 5:00${nbsp}PM`,
+        `Saturday, October 31 5:00${nbsp}PM`,
       ]);
     });
 
-    it('formats full month in German', () => {
+    it('formats full month in German (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-10-01T00:00:00Z',
         dateEnd: '2026-10-31T00:00:00Z',
@@ -785,10 +966,10 @@ describe('formatDateRange', () => {
         locale: 'de',
         type: 'theme',
       });
-      expect(result).toEqual(['Oktober 2026']);
+      expect(result).toEqual(['Oktober']);
     });
 
-    it('formats full month in French', () => {
+    it('formats full month in French (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-10-01T00:00:00Z',
         dateEnd: '2026-10-31T00:00:00Z',
@@ -796,10 +977,10 @@ describe('formatDateRange', () => {
         locale: 'fr',
         type: 'theme',
       });
-      expect(result).toEqual(['octobre 2026']);
+      expect(result).toEqual(['octobre']);
     });
 
-    it('formats full month in Spanish', () => {
+    it('formats full month in Spanish (upcoming — no year)', () => {
       const result = formatDateRange({
         dateStart: '2026-10-01T00:00:00Z',
         dateEnd: '2026-10-31T00:00:00Z',
@@ -807,7 +988,7 @@ describe('formatDateRange', () => {
         locale: 'es',
         type: 'theme',
       });
-      expect(result).toEqual(['octubre de 2026']);
+      expect(result).toEqual(['octubre']);
     });
 
     it('works for international events (no timezone)', () => {
@@ -817,7 +998,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
-      expect(result).toEqual(['October 2026']);
+      // No year for upcoming
+      expect(result).toEqual(['October']);
     });
   });
 
@@ -830,8 +1012,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         type: 'theme',
       });
-      // Should be date-only with day names
-      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
+      // Should be date-only with day names; no year for upcoming
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13']);
     });
 
     it('omits time for deadlines', () => {
@@ -842,7 +1024,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         isDeadline: true,
       });
-      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
+      // No year for upcoming
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13']);
     });
 
     it('omits time for all-day events', () => {
@@ -853,7 +1036,8 @@ describe('formatDateRange', () => {
         locale: 'en',
         day: true,
       });
-      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
+      // No year for upcoming
+      expect(result).toEqual(['Sunday, March 8', 'Friday, March 13']);
     });
   });
 

@@ -60,6 +60,7 @@ const props = withDefaults(
     day?: boolean;
     isDeadline?: boolean;
     type?: string;
+    isPast?: boolean;
     showCountdown?: boolean;
     showEnded?: boolean;
   }>(),
@@ -68,6 +69,7 @@ const props = withDefaults(
     day: false,
     isDeadline: false,
     type: 'event',
+    isPast: false,
     showCountdown: false,
     showEnded: false,
   }
@@ -138,6 +140,7 @@ const formattedRange = computed(() =>
     day: props.day,
     type: props.type,
     isDeadline: props.isDeadline,
+    isPast: props.isPast,
   })
 );
 

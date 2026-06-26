@@ -16,9 +16,11 @@ const props = withDefaults(
   defineProps<{
     event: ChildEvent;
     showEnded?: boolean;
+    isPast?: boolean;
   }>(),
   {
     showEnded: false,
+    isPast: false,
   }
 );
 
@@ -103,6 +105,7 @@ const speakersList = computed(() => {
           :timezone="event.timezone"
           :day="event.day"
           :type="event.type"
+          :isPast="isPast"
           :showEnded="showEnded"
         />
         <template v-if="event.dateEnd && !inProgress && !ended">

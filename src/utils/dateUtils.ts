@@ -297,6 +297,43 @@ const FULL_MONTH_FORMATS: Record<string, string> = {
 };
 
 /**
+ * Year-free date-only format strings per locale.
+ *
+ * Used for upcoming events where the year is implicit and can be omitted
+ * to reduce visual noise. Matches the day/month portion of the LL locale
+ * format without the year component.
+ *
+ * English:  "March 8"
+ * German:   "8. März"
+ * French:   "8 mars"
+ * Spanish:  "8 de marzo"
+ */
+const NO_YEAR_DATE_ONLY: Record<string, string> = {
+  en: 'MMMM D',
+  de: 'D. MMMM',
+  fr: 'D MMMM',
+  es: 'D [de] MMMM',
+};
+
+/**
+ * Year-free timed format strings per locale (LLLL equivalent without year).
+ *
+ * Used for upcoming timed events. Includes the day name and time but omits
+ * the year.
+ *
+ * English:  "Sunday, March 8 2:00 PM"
+ * German:   "Sonntag, 8. März 14:00"
+ * French:   "dimanche 8 mars 14:00"
+ * Spanish:  "domingo, 8 de marzo 2:00 PM"
+ */
+const NO_YEAR_TIMED: Record<string, string> = {
+  en: 'dddd, MMMM D LT',
+  de: 'dddd, D. MMMM LT',
+  fr: 'dddd D MMMM LT',
+  es: 'dddd, D [de] MMMM LT',
+};
+
+/**
  * Checks if a date range spans an entire calendar month.
  *
  * Returns true when the start date is the 1st and the end date is
@@ -353,6 +390,11 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
+  /**
+   * Whether the event is in the past. When false (upcoming), the year is
+   * omitted from display to reduce visual noise. Defaults to false.
+   */
+  isPast?: boolean;
   /** Injected "now" for testability; defaults to the real current time. */
   now?: dayjs.Dayjs;
 }): DateRangeParts {
@@ -417,9 +459,30 @@ export function formatDateRange(options: {
     return formatted;
   }
 
+  // Whether the year should be shown. For upcoming events (isPast = false/undefined),
+  // the year is omitted to reduce visual noise. Year is always shown for past events
+  // and for ranges that span a year boundary (which need the year for clarity).
+  const showYear = !!options.isPast;
+
+  // Year-free date-only format for the current locale
+  const noYearDateOnly = NO_YEAR_DATE_ONLY[locale] || NO_YEAR_DATE_ONLY.en;
+  // Year-free timed format for the current locale (LLLL equivalent without year)
+  const noYearTimed = NO_YEAR_TIMED[locale] || NO_YEAR_TIMED.en;
+
+  const dp = dayPrefix(locale);
+
   // No end date — return a single formatted date
   if (!options.dateEnd) {
-    const format = getStartDateFormat(options);
+    let format: string;
+    const isDateOnlySingle =
+      options.type === 'theme' || options.isDeadline || options.day;
+    if (showYear) {
+      format = getStartDateFormat(options);
+    } else if (isDateOnlySingle) {
+      format = `${dp}${noYearDateOnly}`;
+    } else {
+      format = noYearTimed;
+    }
     const startDj = isInternational
       ? dayjs.utc(options.dateStart).locale(locale)
       : dayjs.utc(options.dateStart).tz(tz).locale(locale);
@@ -443,21 +506,23 @@ export function formatDateRange(options: {
     ? dayjs.utc(options.dateEnd).locale(locale)
     : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
 
-  const dp = dayPrefix(locale);
+  // For year-spanning ranges, always show the year regardless of isPast
+  const sameYear = start.isSame(end, 'year');
+  const dateFmt = showYear || !sameYear ? `${dp}LL` : `${dp}${noYearDateOnly}`;
 
   // Same day — timed events show "date time" / "time", date-only returns single date
   if (start.isSame(end, 'day')) {
     if (isDateOnly) {
       return [
-        relativeDay(start, nonBreakingTime(start.format(`${dp}LL`)), `${dp}LL`),
+        relativeDay(start, nonBreakingTime(start.format(dateFmt)), dateFmt),
       ];
     }
     const startTime = deduplicateAmPm(start, end, locale);
     return [
       relativeDay(
         start,
-        nonBreakingTime(`${start.format(`${dp}LL`)} ${startTime}`),
-        `${dp}LL`
+        nonBreakingTime(`${start.format(dateFmt)} ${startTime}`),
+        dateFmt
       ),
       nonBreakingTime(end.format('LT')),
     ];
@@ -467,18 +532,16 @@ export function formatDateRange(options: {
 
   // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
-    if (start.isSame(end, 'year')) {
+    if (sameYear) {
+      // End format: LLLL (with year) for past, year-free timed for upcoming
+      const timedEndFmt = showYear ? formats.timedSameYear.end : noYearTimed;
       return [
         relativeDay(
           start,
           nonBreakingTime(start.format(formats.timedSameYear.start)),
           formats.timedSameYear.start
         ),
-        relativeDay(
-          end,
-          nonBreakingTime(end.format(formats.timedSameYear.end)),
-          formats.timedSameYear.end
-        ),
+        relativeDay(end, nonBreakingTime(end.format(timedEndFmt)), timedEndFmt),
       ];
     }
     return [
@@ -495,24 +558,30 @@ export function formatDateRange(options: {
     ];
   }
 
-  // Full-month events: display as "October 2026" instead of a verbose range
+  // Full-month events: display as "October 2026" for past, "October" for upcoming
   if (isFullMonth(start, end)) {
-    const fullMonthFmt = FULL_MONTH_FORMATS[locale] || FULL_MONTH_FORMATS.en;
+    const fullMonthFmt = showYear
+      ? FULL_MONTH_FORMATS[locale] || FULL_MONTH_FORMATS.en
+      : 'MMMM';
     return [start.format(fullMonthFmt)];
   }
 
   // Date-only multi-day ranges: deduplicate shared components
-  if (start.isSame(end, 'year')) {
+  if (sameYear) {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
+    // For upcoming events, strip the year but keep the month. diffMonth.start
+    // always includes the month without year, so it serves as the year-free
+    // end format for both sameMonth and diffMonth cases.
+    const endFmt = showYear ? fmt.end : formats.diffMonth.start;
     return [
       relativeDay(start, nonBreakingTime(start.format(fmt.start)), fmt.start),
-      relativeDay(end, nonBreakingTime(end.format(fmt.end)), fmt.end),
+      relativeDay(end, nonBreakingTime(end.format(endFmt)), endFmt),
     ];
   }
 
-  // Different years: no deduplication possible
+  // Different years: always show year for clarity
   return [
     relativeDay(
       start,

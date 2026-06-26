@@ -13,9 +13,10 @@ import { formatDateRange } from '../utils/dateUtils';
 
 interface Props {
   event: Event;
+  isPast?: boolean;
 }
 
-const { event } = Astro.props;
+const { event, isPast = false } = Astro.props;
 
 const isDeadline = event.type === 'deadline';
 const isTheme = event.type === 'theme';
@@ -43,6 +44,7 @@ const formattedRange = formatDateRange({
   day: isAllDay,
   type: event.type,
   isDeadline,
+  isPast,
   locale: 'en',
 });
 
