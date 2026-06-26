@@ -3,9 +3,13 @@
     <div class="container flow">
       <hgroup role="group" aria-roledescription="Heading group">
         <h2>Today</h2>
-        <p aria-roledescription="subtitle">
+        <p aria-roledescription="subtitle" class="today__subtitle">
           <time class="text-muted" :datetime="today.format('YYYY-MM-DD')">{{
             today.format('MMMM D, YYYY')
+          }}</time>
+          <span class="text-muted" aria-hidden="true">·</span>
+          <time class="text-muted" :datetime="now.format('HH:mm')">{{
+            currentTime
           }}</time>
         </p>
       </hgroup>
@@ -37,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from '../lib/dayjs';
 import Event from './Event.vue';
@@ -48,6 +52,18 @@ const today = computed(() => {
   const timezone = userStore.geo?.timezone || 'UTC';
   return dayjs().tz(timezone).startOf('day');
 });
+
+// Live-updating "now" so the displayed time stays current while the page is
+// open. Mirrors the pattern used in EventProgress.vue.
+const now = ref(dayjs());
+let timer: ReturnType<typeof setInterval> | null = null;
+
+// Current local time in the user's timezone, e.g. "9:41 AM GMT+1"
+const currentTime = computed(() => {
+  const timezone = userStore.geo?.timezone || 'UTC';
+  return now.value.tz(timezone).format('h:mm A z');
+});
+
 const todaysEvents = ref([]);
 
 const updateTodaysEvents = () => {
@@ -69,6 +85,14 @@ const shouldShowDate = (event) => {
 
 onMounted(async () => {
   updateTodaysEvents();
+  // Update "now" every minute so the displayed time advances in real time
+  timer = setInterval(() => {
+    now.value = dayjs();
+  }, 60_000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
 });
 
 watch(
@@ -81,6 +105,12 @@ watch(
 </script>
 
 <style>
+.today__subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5ch;
+}
+
 .events {
   border-top: 1px solid var(--s-color-border);
   padding-top: var(--p-space-s);
