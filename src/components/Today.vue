@@ -3,13 +3,12 @@
     <div class="container flow">
       <hgroup role="group" aria-roledescription="Heading group">
         <h2>Today</h2>
-        <p aria-roledescription="subtitle" class="today__subtitle">
-          <time class="text-muted" :datetime="today.format('YYYY-MM-DD')">{{
-            today.format('MMMM D, YYYY')
-          }}</time>
-          <time class="text-muted" :datetime="now.format('HH:mm')">{{
-            currentTime
-          }}</time>
+        <p aria-roledescription="subtitle">
+          <time
+            class="text-muted"
+            :datetime="localNow.format('YYYY-MM-DDTHH:mmZ')"
+            >{{ localNow.format('MMMM D, YYYY, h:mm A z') }}</time
+          >
         </p>
       </hgroup>
 
@@ -52,15 +51,16 @@ const today = computed(() => {
   return dayjs().tz(timezone).startOf('day');
 });
 
-// Live-updating "now" so the displayed time stays current while the page is
-// open. Mirrors the pattern used in EventProgress.vue.
+// Live-updating "now" so the displayed date and time stay current while the
+// page is open. Mirrors the pattern used in EventProgress.vue.
 const now = ref(dayjs());
 let timer: ReturnType<typeof setInterval> | null = null;
 
-// Current local time in the user's timezone, e.g. "9:41 AM GMT+1"
-const currentTime = computed(() => {
+// "now" in the user's timezone, used for the subtitle date and time,
+// e.g. "June 26, 2026, 9:41 AM GMT+1"
+const localNow = computed(() => {
   const timezone = userStore.geo?.timezone || 'UTC';
-  return now.value.tz(timezone).format('h:mm A z');
+  return now.value.tz(timezone);
 });
 
 const todaysEvents = ref([]);
@@ -104,12 +104,6 @@ watch(
 </script>
 
 <style>
-.today__subtitle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1ch;
-}
-
 .events {
   border-top: 1px solid var(--s-color-border);
   padding-top: var(--p-space-s);
