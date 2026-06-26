@@ -202,7 +202,12 @@ watch(
               :book="event"
               client:visible
             />
-            <Event v-else :event="event" :isPast="type === 'past'" client:visible />
+            <Event
+              v-else
+              :event="event"
+              :isPast="type === 'past'"
+              client:visible
+            />
           </li>
         </ol>
       </section>

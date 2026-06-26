@@ -244,7 +244,11 @@ const speakerDisplay = computed(() => {
           :aria-label="`Accessibility highlights for ${event.title}`"
         >
           <li v-for="child in event.children" :key="child._id">
-            <EventChild :event="child" :showEnded="showEnded" :isPast="isPast" />
+            <EventChild
+              :event="child"
+              :showEnded="showEnded"
+              :isPast="isPast"
+            />
           </li>
         </ol>
       </details>
