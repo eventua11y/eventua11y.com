@@ -136,12 +136,17 @@ const eventDuration = (() => {
   if (!isChildEvent || !event.dateStart || !event.dateEnd) return null;
   const minutes = dayjs(event.dateEnd).diff(dayjs(event.dateStart), 'minutes');
   if (minutes <= 0) return null;
-  if (minutes <= 60)
-    return { iso: `PT${minutes}M`, label: `${minutes} minutes long` };
+  if (minutes <= 60) {
+    const minuteLabel = minutes === 1 ? 'minute' : 'minutes';
+    return { iso: `PT${minutes}M`, label: `${minutes} ${minuteLabel} long` };
+  }
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
+  const hourLabel = hours === 1 ? 'hour' : 'hours';
   const label =
-    mins > 0 ? `${hours} hours ${mins} minutes long` : `${hours} hours long`;
+    mins > 0
+      ? `${hours} ${hourLabel} ${mins} ${mins === 1 ? 'minute' : 'minutes'} long`
+      : `${hours} ${hourLabel} long`;
   return { iso: `PT${minutes}M`, label };
 })();
 
