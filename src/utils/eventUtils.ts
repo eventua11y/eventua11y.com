@@ -160,6 +160,86 @@ export const getEventUrl = (
   return `/events/${event.slug.current}`;
 };
 
+// ── Meta description helpers ───────────────────────────────────────────
+
+/**
+ * Extracts plain text from an array of Portable Text blocks.
+ *
+ * Concatenates the text spans of every text block, joining separate
+ * blocks with a space and collapsing runs of whitespace. Non-block
+ * content (images, embeds, etc.) is ignored.
+ *
+ * Accepts `unknown` so the parameter type reflects the real runtime
+ * input (which may contain non-block items); narrowing happens inside.
+ *
+ * @param blocks - Portable Text blocks (e.g. an event's richDescription)
+ * @returns A single normalized plain-text string (empty if no text)
+ */
+export function portableTextToPlainText(blocks?: unknown): string {
+  if (!Array.isArray(blocks)) return '';
+
+  type TextBlock = { children: Array<{ text?: unknown }> };
+
+  return blocks
+    .filter(
+      (block): block is TextBlock =>
+        typeof block === 'object' &&
+        block !== null &&
+        (block as { _type?: unknown })._type === 'block' &&
+        Array.isArray((block as { children?: unknown }).children)
+    )
+    .map((block) =>
+      block.children
+        .map((child) => (typeof child.text === 'string' ? child.text : ''))
+        .join('')
+    )
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Truncates text to a maximum length suitable for a meta description,
+ * breaking on a word boundary where possible and appending an ellipsis.
+ *
+ * @param text - The source text to truncate
+ * @param max - Maximum length before truncation (default 160)
+ * @returns The truncated, whitespace-normalized string
+ */
+export function truncateForMeta(text: string, max = 160): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= max) return normalized;
+
+  const slice = normalized.slice(0, max);
+  const lastSpace = slice.lastIndexOf(' ');
+  // Prefer a word boundary, but only if it doesn't truncate too aggressively.
+  const trimmed = lastSpace > max * 0.6 ? slice.slice(0, lastSpace) : slice;
+  return trimmed.replace(/[\s.,;:!?–-]+$/, '') + '…';
+}
+
+/**
+ * Builds the meta description for an event detail page.
+ *
+ * Prefers the event's own short `description`, falling back to plain
+ * text extracted from its `richDescription`, and finally to a generic
+ * title-based sentence. The result is truncated for SERP display so
+ * each event gets a distinct, content-specific description rather than
+ * the site-wide default.
+ *
+ * @param event - The event to describe
+ * @returns A meta description string
+ */
+export function getEventMetaDescription(
+  event: Pick<Event, 'title' | 'description' | 'richDescription'>
+): string {
+  const source =
+    event.description?.trim() || portableTextToPlainText(event.richDescription);
+
+  if (source) return truncateForMeta(source);
+
+  return `${event.title} — a digital accessibility event on Eventua11y.`;
+}
+
 // ── Format display helpers ─────────────────────────────────────────────
 
 /**

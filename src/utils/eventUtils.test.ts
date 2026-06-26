@@ -10,8 +10,100 @@ import {
   getFormatLabel,
   getFormatPreposition,
   capitalize,
+  portableTextToPlainText,
+  truncateForMeta,
+  getEventMetaDescription,
 } from './eventUtils';
 import type { Event, Book } from '../types/event';
+import type { PortableTextBlock } from '@portabletext/types';
+
+// Helper to build a minimal Portable Text block from plain text spans.
+const block = (...texts: string[]): PortableTextBlock =>
+  ({
+    _type: 'block',
+    children: texts.map((text) => ({ _type: 'span', text })),
+  }) as unknown as PortableTextBlock;
+
+describe('portableTextToPlainText', () => {
+  it('returns an empty string for undefined or non-array input', () => {
+    expect(portableTextToPlainText(undefined)).toBe('');
+    expect(portableTextToPlainText([] as PortableTextBlock[])).toBe('');
+  });
+
+  it('concatenates spans within a block and joins blocks with a space', () => {
+    expect(
+      portableTextToPlainText([block('Hello ', 'world'), block('Again')])
+    ).toBe('Hello world Again');
+  });
+
+  it('collapses whitespace and trims', () => {
+    expect(portableTextToPlainText([block('  spaced\n\nout  text  ')])).toBe(
+      'spaced out text'
+    );
+  });
+
+  it('ignores non-block content such as images', () => {
+    const image = { _type: 'image' } as unknown as PortableTextBlock;
+    expect(portableTextToPlainText([image, block('Caption')])).toBe('Caption');
+  });
+});
+
+describe('truncateForMeta', () => {
+  it('returns text unchanged when within the limit', () => {
+    expect(truncateForMeta('short text', 160)).toBe('short text');
+  });
+
+  it('truncates on a word boundary and appends an ellipsis', () => {
+    const text = 'one two three four five six seven eight nine ten';
+    const result = truncateForMeta(text, 20);
+    expect(result.length).toBeLessThanOrEqual(21);
+    expect(result.endsWith('…')).toBe(true);
+    expect(result).not.toContain('  ');
+    // Should not cut a word in half.
+    expect(result.slice(0, -1).trim().split(' ').pop()).not.toBe('thr');
+  });
+
+  it('strips trailing punctuation before the ellipsis', () => {
+    expect(truncateForMeta('alpha beta, gamma delta', 12)).toBe('alpha beta…');
+  });
+});
+
+describe('getEventMetaDescription', () => {
+  it('prefers the short description when present', () => {
+    expect(
+      getEventMetaDescription({
+        title: 'My Event',
+        description: 'A focused workshop on accessible design.',
+      })
+    ).toBe('A focused workshop on accessible design.');
+  });
+
+  it('falls back to richDescription plain text when description is blank', () => {
+    expect(
+      getEventMetaDescription({
+        title: 'My Event',
+        description: '   ',
+        richDescription: [block('A deep dive into ARIA patterns.')],
+      })
+    ).toBe('A deep dive into ARIA patterns.');
+  });
+
+  it('falls back to a title-based sentence when no content exists', () => {
+    expect(getEventMetaDescription({ title: 'My Event' })).toBe(
+      'My Event — a digital accessibility event on Eventua11y.'
+    );
+  });
+
+  it('truncates long descriptions', () => {
+    const long = 'word '.repeat(60).trim();
+    const result = getEventMetaDescription({
+      title: 'My Event',
+      description: long,
+    });
+    expect(result.length).toBeLessThanOrEqual(161);
+    expect(result.endsWith('…')).toBe(true);
+  });
+});
 
 describe('isCallForSpeakersOpen', () => {
   afterEach(() => {
