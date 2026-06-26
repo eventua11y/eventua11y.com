@@ -340,27 +340,39 @@ const jsonLd = {
 
         {
           event.dateStart ? (
-            <EventDate
-              client:only="vue"
-              dateStart={event.dateStart}
-              dateEnd={event.dateEnd}
-              timezone={event.timezone}
-              day={event.day}
-              type={event.type}
-              showCountdown={true}
-              showEnded={true}
-            />
+            eventDuration ? (
+              <div class="event__meta">
+                <EventDate
+                  client:only="vue"
+                  dateStart={event.dateStart}
+                  dateEnd={event.dateEnd}
+                  timezone={event.timezone}
+                  day={event.day}
+                  type={event.type}
+                  showCountdown={true}
+                  showEnded={true}
+                />
+                <span class="event__duration">
+                  <span class="sr-only">Duration</span>
+                  <time datetime={eventDuration.iso}>
+                    {eventDuration.label}
+                  </time>
+                </span>
+              </div>
+            ) : (
+              <EventDate
+                client:only="vue"
+                dateStart={event.dateStart}
+                dateEnd={event.dateEnd}
+                timezone={event.timezone}
+                day={event.day}
+                type={event.type}
+                showCountdown={true}
+                showEnded={true}
+              />
+            )
           ) : (
             <p class="text-muted">Not yet scheduled</p>
-          )
-        }
-
-        {
-          eventDuration && (
-            <span class="event__duration">
-              <span class="sr-only">Duration</span>
-              <time datetime={eventDuration.iso}>{eventDuration.label}</time>
-            </span>
           )
         }
 
@@ -663,10 +675,9 @@ const jsonLd = {
      EventChild components mean we can't use a direct-child combinator. */
   .event-detail
     :global(.event__dates:not(.event-detail__children .event__dates)),
+  .event-detail :global(.event__meta:not(.event-detail__children .event__meta)),
   .event-detail
-    :global(.event__delivery:not(.event-detail__children .event__delivery)),
-  .event-detail
-    :global(.event__duration:not(.event-detail__children .event__duration)) {
+    :global(.event__delivery:not(.event-detail__children .event__delivery)) {
     font-size: var(--p-step-0);
   }
 
