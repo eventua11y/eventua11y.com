@@ -79,7 +79,7 @@ try {
                 {item._type === 'book' ? (
                   <StaticEventBook book={item as Book} />
                 ) : (
-                  <StaticEvent event={item as Event} />
+                  <StaticEvent event={item as Event} isPast={type === 'past'} />
                 )}
               </li>
             ))}
