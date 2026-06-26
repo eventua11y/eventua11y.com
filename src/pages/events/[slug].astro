@@ -131,6 +131,20 @@ const enumeratedChildTypes = (() => {
   return `${joined} at ${event.title}`;
 })();
 
+// Duration display for child events with both start and end dates.
+const eventDuration = (() => {
+  if (!isChildEvent || !event.dateStart || !event.dateEnd) return null;
+  const minutes = dayjs(event.dateEnd).diff(dayjs(event.dateStart), 'minutes');
+  if (minutes <= 0) return null;
+  if (minutes <= 60)
+    return { iso: `PT${minutes}M`, label: `${minutes} minutes long` };
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  const label =
+    mins > 0 ? `${hours} hours ${mins} minutes long` : `${hours} hours long`;
+  return { iso: `PT${minutes}M`, label };
+})();
+
 // Has the event ended? Used to hide supplementary links (registration,
 // schedule, etc.) once they're no longer relevant. Uses the same end-date
 // resolution as progressUtils.hasEnded() but without the showEnded gate,
@@ -338,6 +352,15 @@ const jsonLd = {
             />
           ) : (
             <p class="text-muted">Not yet scheduled</p>
+          )
+        }
+
+        {
+          eventDuration && (
+            <span class="event__duration">
+              <span class="sr-only">Duration</span>
+              <time datetime={eventDuration.iso}>{eventDuration.label}</time>
+            </span>
           )
         }
 
@@ -641,7 +664,9 @@ const jsonLd = {
   .event-detail
     :global(.event__dates:not(.event-detail__children .event__dates)),
   .event-detail
-    :global(.event__delivery:not(.event-detail__children .event__delivery)) {
+    :global(.event__delivery:not(.event-detail__children .event__delivery)),
+  .event-detail
+    :global(.event__duration:not(.event-detail__children .event__duration)) {
     font-size: var(--p-step-0);
   }
 
