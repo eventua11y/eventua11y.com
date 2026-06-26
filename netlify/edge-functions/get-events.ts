@@ -120,6 +120,20 @@ function processEventsForTimezone(
     const todayStart = now.startOf('day');
     const todayEnd = now.endOf('day');
 
+    // The user's current calendar day, used to classify local (timezoned)
+    // events by the day they are displayed on rather than by absolute-instant
+    // overlap. This prevents an event that has already ended in its own
+    // timezone from leaking into an adjacent day in the user's timezone.
+    const userTodayDay = now.format('YYYY-MM-DD');
+
+    /**
+     * Returns the calendar day (YYYY-MM-DD) an event date falls on in the
+     * timezone it is displayed in. Local events (with a timezone) are shown
+     * in their own timezone by default, so their day is computed there.
+     */
+    const eventDay = (dateStr: string, eventTz: string) =>
+      dayjs(dateStr).tz(eventTz).format('YYYY-MM-DD');
+
     /**
      * Converts event time to user's timezone
      * - Handles international events (no timezone) differently
@@ -208,13 +222,37 @@ function processEventsForTimezone(
         return isToday;
       }
 
-      // For events with start and end dates, check if they overlap with today
-      const eventStart = dayjs(event.dateStart).tz(event.timezone);
-      const eventEnd = event.dateEnd
-        ? dayjs(event.dateEnd).tz(event.timezone)
-        : eventStart.endOf('day'); // Use end of start date for events without end date
+      // For local events (with a timezone), compare calendar days in the
+      // event's own timezone — which is how the dates are displayed by default
+      // (useLocalTimezone is off) — against the user's current calendar day.
+      //
+      // Using absolute-instant overlap here misclassifies events that have
+      // already ended in their own timezone but spill a few minutes past
+      // midnight in the user's timezone. For example, an event ending
+      // 2026-06-25T23:59Z (16:59 PT on June 25) lands at 00:59 BST on June 26,
+      // wrongly appearing in a London user's "Today" the day after it ended.
+      const eventStartDay = eventDay(event.dateStart, event.timezone);
+      const eventEndDay = event.dateEnd
+        ? eventDay(event.dateEnd, event.timezone)
+        : eventStartDay; // Single-day event when no end date
 
-      return eventStart.isBefore(todayEnd) && eventEnd.isAfter(todayStart);
+      const isToday =
+        userTodayDay >= eventStartDay && userTodayDay <= eventEndDay;
+
+      debugLogs.push({
+        eventId: event._id,
+        eventTitle: event.title,
+        rawStartDate: event.dateStart,
+        rawEndDate: event.dateEnd || 'No end date',
+        eventStartDay,
+        eventEndDay,
+        userTodayDay,
+        isToday,
+        eventTimezone: event.timezone,
+        userTimezone,
+      });
+
+      return isToday;
     };
 
     const today = sortEventsByDate(
@@ -224,6 +262,11 @@ function processEventsForTimezone(
     const future = sortEventsByDate(
       events.filter((event) => {
         if (!event.parent) {
+          // Local events: classify by their displayed calendar day so the
+          // future/today/past buckets stay consistent with the today logic.
+          if (event.timezone) {
+            return eventDay(event.dateStart, event.timezone) > userTodayDay;
+          }
           const eventStart = getEventTimeInUserTz(
             event.dateStart,
             event.timezone
@@ -236,9 +279,18 @@ function processEventsForTimezone(
 
     // Calculate the date 12 months ago from today
     const twelveMonthsAgo = todayStart.subtract(12, 'month');
+    const twelveMonthsAgoDay = twelveMonthsAgo.format('YYYY-MM-DD');
 
     const past = events.filter((event) => {
       if (!event.parent && event.dateStart) {
+        // Local events: classify by their displayed calendar day (see above).
+        if (event.timezone) {
+          const endDay = eventDay(
+            event.dateEnd || event.dateStart,
+            event.timezone
+          );
+          return endDay < userTodayDay && endDay >= twelveMonthsAgoDay;
+        }
         const eventEnd = getEventTimeInUserTz(
           event.dateEnd || event.dateStart,
           event.timezone
