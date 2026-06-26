@@ -18,6 +18,7 @@ import {
   getFormatLabel,
   getFormatPreposition,
   capitalize,
+  getEventMetaDescription,
 } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
 import dayjs from '../../lib/dayjs';
@@ -64,11 +65,10 @@ Astro.response.headers.set(
   'private, max-age=300, stale-while-revalidate=60'
 );
 
-// Build meta description from event data
-const metaDescription = event.description
-  ? event.description.slice(0, 160) +
-    (event.description.length > 160 ? '...' : '')
-  : `${event.title} — a digital accessibility event on Eventua11y.`;
+// Build meta description from event data. Prefers the event's own short
+// description, falling back to its rich description so each event page
+// gets a distinct SERP snippet rather than the site-wide default.
+const metaDescription = getEventMetaDescription(event);
 
 // Check states
 const callForSpeakersOpen = isCallForSpeakersOpen(event);
