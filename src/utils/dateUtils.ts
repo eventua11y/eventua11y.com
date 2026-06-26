@@ -541,11 +541,7 @@ export function formatDateRange(options: {
           nonBreakingTime(start.format(formats.timedSameYear.start)),
           formats.timedSameYear.start
         ),
-        relativeDay(
-          end,
-          nonBreakingTime(end.format(timedEndFmt)),
-          timedEndFmt
-        ),
+        relativeDay(end, nonBreakingTime(end.format(timedEndFmt)), timedEndFmt),
       ];
     }
     return [

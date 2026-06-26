@@ -916,10 +916,7 @@ describe('formatDateRange', () => {
         type: 'theme',
       });
       // Oct 1–30 is not the full month (31 days), should show normal range; no year for upcoming
-      expect(result).toEqual([
-        'Thursday, October 1',
-        'Friday, October 30',
-      ]);
+      expect(result).toEqual(['Thursday, October 1', 'Friday, October 30']);
     });
 
     it('does not apply to ranges starting after the 1st', () => {
@@ -931,10 +928,7 @@ describe('formatDateRange', () => {
         type: 'theme',
       });
       // No year for upcoming
-      expect(result).toEqual([
-        'Friday, October 2',
-        'Saturday, October 31',
-      ]);
+      expect(result).toEqual(['Friday, October 2', 'Saturday, October 31']);
     });
 
     it('does not apply to cross-month ranges', () => {
@@ -946,10 +940,7 @@ describe('formatDateRange', () => {
         type: 'theme',
       });
       // Oct 1 – Nov 30 spans two months; no year for upcoming
-      expect(result).toEqual([
-        'Thursday, October 1',
-        'Monday, November 30',
-      ]);
+      expect(result).toEqual(['Thursday, October 1', 'Monday, November 30']);
     });
 
     it('does not apply to timed events (not date-only)', () => {
