@@ -289,7 +289,7 @@ function processEventsForTimezone(
             event.dateEnd || event.dateStart,
             event.timezone
           );
-          return endDay < userTodayDay && endDay > twelveMonthsAgoDay;
+          return endDay < userTodayDay && endDay >= twelveMonthsAgoDay;
         }
         const eventEnd = getEventTimeInUserTz(
           event.dateEnd || event.dateStart,
