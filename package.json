@@ -73,7 +73,7 @@
     "@openfeature/flagsmith-provider": "~0.1.2",
     "@openfeature/server-sdk": "^1.21.0",
     "@sanity/client": "^7.22.1",
-    "@sentry/astro": "^10.56.0",
+    "@sentry/astro": "^10.61.0",
     "@sentry/cli": "^3.4.2",
     "astro-portabletext": "^0.13.0",
     "dayjs": "^1.11.21",
