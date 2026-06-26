@@ -697,8 +697,8 @@ describe('formatDateRange', () => {
         locale: 'de',
         day: true,
       });
-      // "Sonntag, 8." / "Freitag, 13." — no year for upcoming
-      expect(result).toEqual(['Sonntag, 8.', 'Freitag, 13.']);
+      // "Sonntag, 8." / "Freitag, 13. März" — no year for upcoming
+      expect(result).toEqual(['Sonntag, 8.', 'Freitag, 13. März']);
     });
 
     it('formats same-month range in German (past — year on end)', () => {
@@ -750,8 +750,8 @@ describe('formatDateRange', () => {
         locale: 'fr',
         day: true,
       });
-      // "dimanche 8" / "vendredi 13" — no year for upcoming
-      expect(result).toEqual(['dimanche 8', 'vendredi 13']);
+      // "dimanche 8" / "vendredi 13 mars" — no year for upcoming
+      expect(result).toEqual(['dimanche 8', 'vendredi 13 mars']);
     });
 
     it('formats same-month range in French (past — year on end)', () => {
@@ -800,8 +800,8 @@ describe('formatDateRange', () => {
         locale: 'es',
         day: true,
       });
-      // "domingo, 8" / "viernes, 13" — no year for upcoming
-      expect(result).toEqual(['domingo, 8', 'viernes, 13']);
+      // "domingo, 8" / "viernes, 13 de marzo" — no year for upcoming
+      expect(result).toEqual(['domingo, 8', 'viernes, 13 de marzo']);
     });
 
     it('formats same-month range in Spanish (past — year on end)', () => {

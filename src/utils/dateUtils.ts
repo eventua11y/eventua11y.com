@@ -571,8 +571,10 @@ export function formatDateRange(options: {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
-    // For upcoming events, omit the year from the end date too
-    const endFmt = showYear ? fmt.end : fmt.start;
+    // For upcoming events, strip the year but keep the month. diffMonth.start
+    // always includes the month without year, so it serves as the year-free
+    // end format for both sameMonth and diffMonth cases.
+    const endFmt = showYear ? fmt.end : formats.diffMonth.start;
     return [
       relativeDay(start, nonBreakingTime(start.format(fmt.start)), fmt.start),
       relativeDay(end, nonBreakingTime(end.format(endFmt)), endFmt),
