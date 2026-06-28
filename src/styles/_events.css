@@ -128,6 +128,17 @@
   flex: 1 1 100%;
 }
 
+/* When a countdown/progress element forces the dates block to span the full
+   row, the duration drops onto its own line. Suppress the leading separator
+   so it reads cleanly ("3 hours long") instead of as a dangling "· 3 hours
+   long" bullet. Matches the direct child of .event__meta that contains the
+   progress element so it works whether or not EventDate is wrapped in an
+   Astro island (client:only) on the detail page. */
+.event__meta > *:has(.event__progress) ~ .event__duration::before {
+  content: none;
+  margin-right: 0;
+}
+
 .event > .event__description {
   order: 4;
 }
