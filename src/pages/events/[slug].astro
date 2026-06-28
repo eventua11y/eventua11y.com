@@ -22,7 +22,7 @@ import {
 } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
 import dayjs from '../../lib/dayjs';
-import { getEventEnd } from '../../utils/progressUtils';
+import { getEventEnd, isHappeningNow } from '../../utils/progressUtils';
 
 export const prerender = false;
 
@@ -132,8 +132,20 @@ const enumeratedChildTypes = (() => {
 })();
 
 // Duration display for child events with both start and end dates.
+// Hidden once the event is in progress or has ended, matching the listing
+// (EventChild.vue) where progress/ended state replaces the duration.
 const eventDuration = (() => {
   if (!isChildEvent || !event.dateStart || !event.dateEnd) return null;
+  const progressOptions = {
+    dateStart: event.dateStart,
+    dateEnd: event.dateEnd,
+    timezone: event.timezone,
+    day: event.day,
+    type: event.type,
+  };
+  const now = dayjs();
+  if (isHappeningNow(now, progressOptions)) return null;
+  if (now.isAfter(getEventEnd(progressOptions))) return null;
   const minutes = dayjs(event.dateEnd).diff(dayjs(event.dateStart), 'minutes');
   if (minutes <= 0) return null;
   if (minutes <= 60) {
