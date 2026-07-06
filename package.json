@@ -56,7 +56,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^2.1.1",
     "eslint-plugin-playwright": "^2.10.4",
-    "eslint-plugin-vue": "^10.5.1",
+    "eslint-plugin-vue": "^10.9.2",
     "globals": "^17.6.0",
     "knip": "^6.10.0",
     "netlify-cli": "^26.1.0",
