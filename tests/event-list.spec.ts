@@ -254,11 +254,18 @@ test.describe('Event List', () => {
       return;
     }
 
-    // Calculate the date 12 months ago, truncated to the start of the day (UTC)
-    // to avoid flaky failures caused by timezone differences between the test
-    // runner and event datetimes (see #502)
+    // Calculate the date 12 months ago, truncated to the start of the month
+    // (UTC). Truncating to the start of the day (see #502) is not enough:
+    // month-long "theme" events (e.g. awareness months) render only their
+    // start date in the DOM (`<time datetime="2025-07-01">` for all of July),
+    // even though the server classifies them by their end date. Comparing that
+    // start-of-month datetime against a same-day boundary flakes on any run
+    // after the 1st of the month. Truncating the boundary to the start of the
+    // month gives such events a full-month tolerance while still excluding
+    // anything older than ~12 months.
     const twelveMonthsAgo = new Date();
-    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+    twelveMonthsAgo.setUTCFullYear(twelveMonthsAgo.getUTCFullYear() - 1);
+    twelveMonthsAgo.setUTCDate(1);
     twelveMonthsAgo.setUTCHours(0, 0, 0, 0);
 
     // Check each event's date to ensure it's not older than 12 months
