@@ -136,6 +136,9 @@ const SELF_CANCELLING_PHRASES = [
  *  3. Drop if current and suggested are equivalent (datetime instants
  *     match, booleans/enums match literally).
  *  4. Drop if the reason text contradicts the suggestion.
+ *  5. Drop datetime suggestions that resolve to a past date.
+ *  6. Drop callForSpeakers toggles once the closing date has passed
+ *     (no visible/behavioural effect).
  */
 function validateChange(change, event) {
   const { field, current, suggested, reason } = change;
@@ -257,6 +260,25 @@ function validateChange(change, event) {
       return {
         keep: false,
         drop: `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`,
+      };
+    }
+  }
+
+  // Rule 6: no-op callForSpeakers toggles once the deadline has passed
+  //
+  // `callForSpeakers` only has a visible/behavioural effect while the
+  // call is open: the frontend derives openness via isCallForSpeakersOpen
+  // (callForSpeakers === true AND now < callForSpeakersClosingDate), and a
+  // CFS deadline event is only synthesised when the closing date is in the
+  // future. So once callForSpeakersClosingDate is in the past, flipping the
+  // boolean either way changes nothing users can see. Drop those to avoid
+  // surfacing purely cosmetic data-tidiness edits.
+  if (field === 'callForSpeakers' && event.callForSpeakersClosingDate) {
+    const closingDay = dayjs(event.callForSpeakersClosingDate);
+    if (closingDay.isValid() && closingDay.isBefore(dayjs())) {
+      return {
+        keep: false,
+        drop: `callForSpeakers closing date (${event.callForSpeakersClosingDate}) has passed; toggling the flag has no effect`,
       };
     }
   }
