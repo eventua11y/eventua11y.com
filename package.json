@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@astrojs/netlify": "^8.0.0",
-    "@astrojs/vue": "^7.0.0",
+    "@astrojs/vue": "^7.0.1",
     "@awesome.me/webawesome": "^3.5.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
     "@openfeature/server-sdk": "^1.21.0",
