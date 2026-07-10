@@ -67,7 +67,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "@astrojs/netlify": "^8.0.0",
+    "@astrojs/netlify": "^8.1.1",
     "@astrojs/vue": "^7.0.1",
     "@awesome.me/webawesome": "^3.5.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
