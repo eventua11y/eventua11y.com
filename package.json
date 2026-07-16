@@ -50,7 +50,7 @@
     "@vitest/coverage-v8": "^4.1.7",
     "astro": "^7.0.2",
     "autoprefixer": "^10.5.2",
-    "concurrently": "^9.2.3",
+    "concurrently": "^10.0.3",
     "cssnano": "^7.1.7",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
