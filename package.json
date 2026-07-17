@@ -71,7 +71,7 @@
     "@astrojs/vue": "^7.0.1",
     "@awesome.me/webawesome": "^3.5.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
-    "@openfeature/server-sdk": "^1.21.0",
+    "@openfeature/server-sdk": "^1.22.0",
     "@sanity/client": "^7.22.1",
     "@sentry/astro": "^10.64.0",
     "@sentry/cli": "^3.4.2",
