@@ -72,7 +72,7 @@
     "@awesome.me/webawesome": "^3.5.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
     "@openfeature/server-sdk": "^1.22.0",
-    "@sanity/client": "^7.22.1",
+    "@sanity/client": "^7.23.2",
     "@sentry/astro": "^10.64.0",
     "@sentry/cli": "^3.4.2",
     "astro-portabletext": "^0.13.0",
