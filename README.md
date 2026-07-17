@@ -124,7 +124,9 @@ This runs Prettier/ESLint checks, builds the Astro site, and uploads source maps
 
 ## CI/CD
 
-Pull requests trigger a GitHub Actions workflow that runs unit tests and end-to-end tests against Netlify deploy previews. An additional workflow checks for missing alt text on images.
+Pull requests trigger a GitHub Actions workflow that runs unit tests and end-to-end tests against Netlify deploy previews. Additional workflows check for missing alt text on images and run the GitHub accessibility scanner against key production pages on a weekly schedule (or manually).
+
+The accessibility scanner workflow requires an `A11Y_SCANNER_TOKEN` repository secret (a fine-grained PAT with `actions: write`, `contents: write`, `issues: write`, `pull-requests: write`, and `metadata: read`).
 
 Dependency updates are managed by [Dependabot](https://docs.github.com/en/code-security/dependabot).
 

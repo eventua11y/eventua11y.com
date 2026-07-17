@@ -1,0 +1,29 @@
+name: Accessibility Scanner
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Monday at 10:00 UTC
+    - cron: '0 10 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan production pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: github/accessibility-scanner@v3
+        with:
+          urls: |
+            https://eventua11y.com/
+            https://eventua11y.com/past-events
+            https://eventua11y.com/accessibility
+            https://eventua11y.com/curation-policy
+          repository: ${{ github.repository }}
+          token: ${{ secrets.A11Y_SCANNER_TOKEN }}
+          cache_key: .github/accessibility-scanner/eventua11y.com-main.json
+          open_grouped_issues: true
+          group_by: rule+url
