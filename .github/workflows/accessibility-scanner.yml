@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   scan:
@@ -27,3 +28,22 @@ jobs:
           cache_key: .github/accessibility-scanner/eventua11y.com-main.json
           open_grouped_issues: true
           group_by: rule+url
+
+      - name: Add accessibility label to scanner issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f scanner-results.json ]; then
+            echo "No scanner results file found; skipping labeling."
+            exit 0
+          fi
+
+          jq -r '.[] | select(.issue and .issue.number) | .issue.number' scanner-results.json \
+            | sort -u \
+            | while read -r issue_number; do
+                if [ -n "$issue_number" ]; then
+                  gh issue edit "$issue_number" \
+                    --repo "${{ github.repository }}" \
+                    --add-label "accessibility"
+                fi
+              done
