@@ -48,6 +48,15 @@ jobs:
                 fi
               done
 
+      - name: Debug scanner-results.json shape
+        if: always()
+        run: |
+          if [ -f scanner-results.json ]; then
+            jq '.[0:2]' scanner-results.json
+          else
+            echo "no scanner-results.json"
+          fi
+
       - name: Report scan to Ablebase
         if: always()
         env:
