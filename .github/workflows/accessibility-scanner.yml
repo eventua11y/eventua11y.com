@@ -47,3 +47,31 @@ jobs:
                     --add-label "accessibility"
                 fi
               done
+
+      - name: Report scan to Ablebase
+        if: always()
+        env:
+          ABLEBASE_INGEST_KEY: ${{ secrets.ABLEBASE_INGEST_KEY }}
+        run: |
+          if [ -f scanner-results.json ]; then
+            # Field names (rule/id, impact, url) follow axe-core violation
+            # convention; scanner's own output schema isn't publicly documented.
+            findings=$(jq '[.[] | {
+              title: (.rule // .id // .description // "Accessibility issue"),
+              severity: (.impact // .severity // "unknown"),
+              sourceUrl: (.url // .pageUrl // .sourceUrl // "")
+            }]' scanner-results.json)
+          else
+            findings='[]'
+          fi
+
+          payload=$(jq -n \
+            --arg productRef "eventua11ycom" \
+            --arg idempotencyKey "${{ github.run_id }}-${{ github.run_attempt }}" \
+            --argjson findings "$findings" \
+            '{productRef: $productRef, type: "automated_scan", tool: "github-accessibility-scanner", idempotencyKey: $idempotencyKey, findings: $findings}')
+
+          curl -sf -X POST https://api.ablebase.org/ingest/test-activity \
+            -H "Authorization: Bearer $ABLEBASE_INGEST_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload"
