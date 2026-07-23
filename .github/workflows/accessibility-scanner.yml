@@ -71,7 +71,13 @@ jobs:
             --argjson findings "$findings" \
             '{productRef: $productRef, type: "automated_scan", tool: "github-accessibility-scanner", idempotencyKey: $idempotencyKey, findings: $findings}')
 
-          curl -sf -X POST https://api.ablebase.org/ingest/test-activity \
+          http_code=$(curl -s -o response.txt -w "%{http_code}" -X POST https://api.ablebase.org/ingest/test-activity \
             -H "Authorization: Bearer $ABLEBASE_INGEST_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload"
+            -d "$payload")
+
+          cat response.txt
+          if [ "$http_code" -ge 400 ]; then
+            echo "Ablebase ingest failed with HTTP $http_code"
+            exit 1
+          fi
