@@ -48,27 +48,19 @@ jobs:
                 fi
               done
 
-      - name: Debug scanner-results.json shape
-        if: always()
-        run: |
-          if [ -f scanner-results.json ]; then
-            jq '.[0:2]' scanner-results.json
-          else
-            echo "no scanner-results.json"
-          fi
-
       - name: Report scan to Ablebase
         if: always()
         env:
           ABLEBASE_INGEST_KEY: ${{ secrets.ABLEBASE_INGEST_KEY }}
         run: |
           if [ -f scanner-results.json ]; then
-            # Field names (rule/id, impact, url) follow axe-core violation
-            # convention; scanner's own output schema isn't publicly documented.
-            findings=$(jq '[.[] | {
-              title: (.rule // .id // .description // "Accessibility issue"),
-              severity: (.impact // .severity // "unknown"),
-              sourceUrl: (.url // .pageUrl // .sourceUrl // "")
+            # scanner-results.json is [{issue, findings: [{problemShort, ruleId, url, ...}]}];
+            # findings carry no severity/impact field, so Ablebase's high|medium|low
+            # enum has nothing to map from - default to medium.
+            findings=$(jq '[.[] | .findings[] | {
+              title: (.problemShort // .ruleId // "Accessibility issue"),
+              severity: "medium",
+              sourceUrl: .url
             }]' scanner-results.json)
           else
             findings='[]'
