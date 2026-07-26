@@ -71,7 +71,7 @@ jobs:
           payload=$(jq -n \
             --arg productRef "eventua11ycom" \
             --arg idempotencyKey "${{ github.run_id }}-${{ github.run_attempt }}" \
-            --arg externalUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg externalUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}" \
             --arg trigger "${{ github.event_name == 'schedule' && 'schedule' || 'manual' }}" \
             --argjson runNumber ${{ github.run_number }} \
             --argjson runAttempt ${{ github.run_attempt }} \
