@@ -54,7 +54,7 @@
     "cssnano": "^8.0.2",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-astro": "^2.1.1",
+    "eslint-plugin-astro": "^3.0.1",
     "eslint-plugin-playwright": "^2.10.4",
     "eslint-plugin-vue": "^10.9.2",
     "globals": "^17.7.0",
