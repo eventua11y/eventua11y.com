@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: github/accessibility-scanner@v3.4.0
+      - uses: github/accessibility-scanner@v3.4.1
         with:
           urls: |
             https://eventua11y.com/
