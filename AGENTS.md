@@ -2,6 +2,10 @@
 
 Instructions for AI agents and subagents working in this repository.
 
+## Product context
+
+At the start of a session, run `npx chocks context` and use its feature tree as context for the product's scope, status and terminology. The tree lives in `.chocks/` as a directory of markdown files: one per feature, each with a `status` of `planned`, `pre-release`, `released`, `deprecated`, or `dropped`. Edit these files directly (or run `npx chocks` for a UI) when a change ships or a feature's status moves.
+
 ## Agent Team
 
 Agent instruction files live in `.agents/` (platform-agnostic). Platform-specific configs live in `.opencode/agents/` and reference the `.agents/` files. Skills are in `.agents/skills/` (installed from [mattobee/skills](https://github.com/mattobee/skills)) and `.opencode/skills/` (project-specific).
