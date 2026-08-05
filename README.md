@@ -16,15 +16,13 @@ See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this p
 
 ## Feature tree
 
-This project records what the product does and the state of each part in [`.chocks/`](.chocks), a tree of markdown files managed by [Chocks](https://github.com/mattobee/chocks). Each feature has a status (`planned`, `pre-release`, `released`, `deprecated`, or `dropped`), tags, and a short description. GitHub Issues is still used to track work.
+This project records what the product does and the state of each part in [`.chocks/`](.chocks), a tree of markdown files managed by [Chocks](https://github.com/mattobee/chocks).
 
 Browse or edit the tree with the Chocks UI:
 
 ```sh
 npm run chocks
 ```
-
-This runs on port 5959, since Chocks' default port (4321) is the fixed port the Astro dev server uses (see [Fixed Development Ports](AGENTS.md#fixed-development-ports) in AGENTS.md).
 
 Coding agents should run `npx chocks context` at the start of a session to load the tree as product context; see [AGENTS.md](AGENTS.md).
 
