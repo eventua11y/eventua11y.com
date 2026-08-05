@@ -19,7 +19,7 @@
     "lint": "eslint . --fix",
     "knip": "knip",
     "check:freshness": "node scripts/check-event-freshness.mjs --dry-run",
-    "chocks": "chocks"
+    "chocks": "chocks -p 5959"
   },
   "repository": {
     "type": "git",
