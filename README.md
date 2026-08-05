@@ -14,6 +14,18 @@ The goal is for each page of this website to meet the requirements of [WCAG 2.2]
 
 See the [contributing guide](CONTRIBUTING.md) for ways to get involved in this project, including some that don't require you to write a single line of code.
 
+## Feature tree
+
+This project records what the product does and the state of each part in [`.chocks/`](.chocks), a tree of markdown files managed by [Chocks](https://github.com/mattobee/chocks).
+
+Browse or edit the tree with the Chocks UI:
+
+```sh
+npm run chocks
+```
+
+Coding agents should run `npx chocks context` at the start of a session to load the tree as product context; see [AGENTS.md](AGENTS.md).
+
 ## Technology
 
 ### Frameworks and languages
