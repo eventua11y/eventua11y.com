@@ -45,7 +45,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
-    "@mattobee/chocks": "^0.6.0",
+    "@mattobee/chocks": "^0.8.0",
     "@playwright/test": "^1.60.0",
     "@portabletext/types": "^4.0.2",
     "@types/node": "^26.0.1",
