@@ -32,6 +32,27 @@ jobs:
       - name: Check for unused code
         run: npm run knip
 
+  code_intelligence:
+    name: Analyse codebase
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # fallow audit compares the PR against its base ref, so it needs the
+          # full history rather than a shallow clone.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      # Gates only what the PR changes: pre-existing findings are reported but
+      # do not fail the job. The CLI version comes from package.json.
+      - uses: fallow-rs/fallow@v3
+        with:
+          command: audit
+
   tests_e2e:
     name: Run end-to-end tests
     runs-on: ubuntu-latest
@@ -93,8 +114,11 @@ jobs:
           key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Playwright browsers
+        # No --with-deps: the system libraries Chromium needs are already in the
+        # runner image, and the apt update it triggers regularly stalls on a
+        # dead Azure mirror for longer than the timeout allows.
         run: |
-          timeout 5m npx playwright install chromium --with-deps || (echo "Playwright installation timed out" && exit 1)
+          timeout 5m npx playwright install chromium || (echo "Playwright installation timed out" && exit 1)
 
       - name: Run tests
         run: npx playwright test --retries=1 --timeout=90000
