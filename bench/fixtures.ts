@@ -67,6 +67,66 @@ export function makeRichDescription(paragraphs = 4): unknown[] {
   return blocks;
 }
 
+/** Start and end dates for a generated event, some of them open-ended. */
+function makeEventDates(
+  random: () => number,
+  isAllDay: boolean
+): { dayOffset: number; dateStart: string; dateEnd?: string } {
+  const dayOffset = Math.floor(random() * 365);
+  const hasEnd = random() < 0.8;
+  const extraDays = isAllDay ? Math.floor(random() * 4) : 0;
+
+  return {
+    dayOffset,
+    dateStart: isoOffset(dayOffset, Math.floor(random() * 12)),
+    dateEnd: hasEnd ? isoOffset(dayOffset + extraDays, 3) : undefined,
+  };
+}
+
+/** Descriptions for a generated event: short, rich, both or neither. */
+function makeEventText(
+  random: () => number,
+  index: number,
+  type: string
+): { description?: string; richDescription?: Event['richDescription'] } {
+  const hasDescription = random() < 0.5;
+  const hasRichDescription = random() < 0.5;
+
+  return {
+    description: hasDescription
+      ? `A ${type} about digital accessibility, session ${index}.`
+      : undefined,
+    richDescription: hasRichDescription
+      ? (makeRichDescription() as Event['richDescription'])
+      : undefined,
+  };
+}
+
+/** A single generated event in the shape the event list renders. */
+function makeEvent(random: () => number, index: number): Event {
+  const isAllDay = random() < 0.3;
+  const type = pick(random, TYPES);
+  const { dayOffset, dateStart, dateEnd } = makeEventDates(random, isAllDay);
+
+  return {
+    _id: `event-${index}`,
+    _type: 'event',
+    type,
+    title: `Accessibility event number ${index}`,
+    slug: { current: `accessibility-event-${index}` },
+    ...makeEventText(random, index, type),
+    dateStart,
+    dateEnd,
+    timezone: pick(random, TIMEZONES),
+    day: isAllDay,
+    callForSpeakers: random() < 0.4,
+    callForSpeakersClosingDate: isoOffset(dayOffset - 30),
+    attendanceMode: pick(random, ['online', 'offline']),
+    isFree: random() < 0.5,
+    format: pick(random, FORMATS),
+  };
+}
+
 /**
  * Builds a list of events spread across a year, mixing timezones,
  * all-day events, themes, deadlines and calls for speakers. This mirrors
@@ -74,41 +134,7 @@ export function makeRichDescription(paragraphs = 4): unknown[] {
  */
 export function makeEvents(count = 250): Event[] {
   const random = createRandom();
-  const events: Event[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const day = Math.floor(random() * 365);
-    const isAllDay = random() < 0.3;
-    const hasEnd = random() < 0.8;
-    const type = pick(random, TYPES);
-
-    events.push({
-      _id: `event-${i}`,
-      _type: 'event',
-      type,
-      title: `Accessibility event number ${i}`,
-      slug: { current: `accessibility-event-${i}` },
-      description:
-        random() < 0.5
-          ? `A ${type} about digital accessibility, session ${i}.`
-          : undefined,
-      richDescription:
-        random() < 0.5 ? (makeRichDescription() as never) : undefined,
-      dateStart: isoOffset(day, Math.floor(random() * 12)),
-      dateEnd: hasEnd
-        ? isoOffset(day + (isAllDay ? Math.floor(random() * 4) : 0), 3)
-        : undefined,
-      timezone: pick(random, TIMEZONES),
-      day: isAllDay,
-      callForSpeakers: random() < 0.4,
-      callForSpeakersClosingDate: isoOffset(day - 30),
-      attendanceMode: random() < 0.5 ? 'online' : 'offline',
-      isFree: random() < 0.5,
-      format: pick(random, FORMATS),
-    });
-  }
-
-  return events;
+  return Array.from({ length: count }, (_, i) => makeEvent(random, i));
 }
 
 /** Book club entries, which are grouped alongside events in the lists. */
