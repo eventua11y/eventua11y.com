@@ -121,6 +121,19 @@ This project uses **fixed, non-negotiable ports** for local development:
 
 Both ports are configured with strict enforcement — the server will **error and exit** rather than silently switching to an alternative port. **Never** pass `--port` flags, change port numbers in configuration files, or suggest alternative ports. If a port conflict occurs, identify and stop whatever process is occupying the port instead.
 
+## Codebase Analysis
+
+This project uses [fallow](https://fallow.tools) for static codebase intelligence: unused files, exports and dependencies, circular dependencies, duplication, complexity hotspots, and CSS drift. Config lives in `.fallowrc.json` (migrated from `knip.json`, which still runs in CI alongside it).
+
+- `npm run fallow` — full pipeline (dead code, duplication, health)
+- `npm run fallow:audit` — changed-file gate; fails only on findings a change introduces
+- `npm run fallow:fix` — preview auto-fixes (`npx fallow fix` applies them)
+- `npx fallow dead-code --trace src/file.ts:symbol` — prove a symbol is unused before deleting it
+
+Add `--format json --quiet` for machine-readable output. Exit codes 0 and 1 both mean the run succeeded (1 = findings); exit 2 is a real error. Never run `fallow watch` from an agent. A `fallow-mcp` server is registered in `.mcp.json`.
+
+Suppress a false positive with `// fallow-ignore-next-line <issue-type> -- <reason>` at the site, not by widening the config.
+
 ## Accessibility Testing
 
 This project uses a two-layer accessibility testing strategy in `tests/accessibility.spec.ts`:

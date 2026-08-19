@@ -32,6 +32,23 @@ jobs:
       - name: Check for unused code
         run: npm run knip
 
+  code_intelligence:
+    name: Analyse codebase
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # fallow audit compares the PR against its base ref, so it needs the
+          # full history rather than a shallow clone.
+          fetch-depth: 0
+
+      # Gates only what the PR changes: pre-existing findings are reported but
+      # do not fail the job. The CLI version comes from package.json.
+      - uses: fallow-rs/fallow@v3
+        with:
+          command: audit
+
   tests_e2e:
     name: Run end-to-end tests
     runs-on: ubuntu-latest

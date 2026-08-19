@@ -23,6 +23,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run format` - Format code with Prettier
 - `npm run lint` - Lint and auto-fix with ESLint
 - `npm run check:watch` - Watch mode for formatting and linting
+- `npm run knip` - Report unused files, exports, and dependencies
+- `npm run fallow` - Full fallow analysis (dead code, duplication, health)
+- `npm run fallow:audit` - fallow changed-file gate, as run in CI
 
 ### Testing
 

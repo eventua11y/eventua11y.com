@@ -29,3 +29,6 @@ dist
 
 # Sentry Config File
 .sentryclirc
+
+# fallow analysis cache
+.fallow/
