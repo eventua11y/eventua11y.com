@@ -3,6 +3,7 @@
 # Eventua11y.com
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/147b62a2-2d05-4693-a42f-9f675c3c478d/deploy-status)](https://app.netlify.com/sites/eventua11y/deploys)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/eventua11y/eventua11y.com?utm_source=badge)
 
 A curated list of digital accessibility events.
 
@@ -126,6 +127,16 @@ npm run test:unit
 npm run test:unit:watch
 ```
 
+### Running benchmarks
+
+Performance benchmarks live in [`bench/`](bench) and cover the pure date, event
+and assembly utilities. They run with Vitest and are tracked continuously by
+[CodSpeed](https://codspeed.io).
+
+```sh
+npm run bench
+```
+
 ### Building
 
 ```sh
@@ -136,7 +147,7 @@ This runs Prettier/ESLint checks, builds the Astro site, and uploads source maps
 
 ## CI/CD
 
-Pull requests trigger a GitHub Actions workflow that runs unit tests and end-to-end tests against Netlify deploy previews. Additional workflows check for missing alt text on images and run the GitHub accessibility scanner against key production pages on a weekly schedule (or manually).
+Pull requests trigger a GitHub Actions workflow that runs unit tests and end-to-end tests against Netlify deploy previews. A separate workflow runs the benchmarks on CodSpeed and reports performance changes on the pull request. Additional workflows check for missing alt text on images and run the GitHub accessibility scanner against key production pages on a weekly schedule (or manually).
 
 The accessibility scanner workflow requires an `A11Y_SCANNER_TOKEN` repository secret (a fine-grained PAT with `actions: write`, `contents: write`, `issues: write`, `pull-requests: write`, and `metadata: read`).
 

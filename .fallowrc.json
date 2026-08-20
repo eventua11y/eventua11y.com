@@ -6,7 +6,8 @@
     "src/middleware/index.ts",
     "netlify/edge-functions/*.ts",
     "scripts/*.mjs",
-    "postcss.config.mjs"
+    "postcss.config.mjs",
+    "bench/**/*.bench.ts"
   ],
   "ignoreFindings": ["src/components/EventDebug.vue"],
   "ignoreDependencies": [
