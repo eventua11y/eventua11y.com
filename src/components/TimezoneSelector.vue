@@ -110,4 +110,11 @@ onMounted(async () => {
   margin-block-end: 0;
   white-space: nowrap;
 }
+
+/* Let the combobox take the remaining space, as it did when the label was
+   stacked above it, so the control keeps its full width. */
+#timezone-select::part(form-control-input) {
+  flex: 1;
+  min-width: 0;
+}
 </style>
