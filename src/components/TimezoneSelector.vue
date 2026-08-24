@@ -97,6 +97,9 @@ onMounted(async () => {
 </script>
 
 <style>
+/* Unscoped (like FilterBar.vue) because scoped styles cannot reach ::part();
+   every rule is namespaced to #timezone-select. */
+
 /* Lay the label out inline with the control so it stays visible without
    adding a second row to the sticky filter bar (WCAG 3.3.2, axe
    label-title-only). */
