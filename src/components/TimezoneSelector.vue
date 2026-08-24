@@ -5,7 +5,6 @@
       label="Timezone"
       placement="bottom"
       appearance="outlined"
-      class="wa-visually-hidden-label"
       :size="size"
       :value="selectedValue"
       @change="updateTimezone"
@@ -96,3 +95,19 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style>
+/* Lay the label out inline with the control so it stays visible without
+   adding a second row to the sticky filter bar (WCAG 3.3.2, axe
+   label-title-only). */
+#timezone-select::part(form-control) {
+  align-items: center;
+  display: flex;
+  gap: var(--p-space-2xs);
+}
+
+#timezone-select::part(form-control-label) {
+  margin-block-end: 0;
+  white-space: nowrap;
+}
+</style>
