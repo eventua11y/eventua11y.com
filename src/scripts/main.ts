@@ -10,29 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // the device already asks for. See https://lea.verou.me/blog/2026/dark-mode-toggles/
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
-  // Check whether localStorage is available (it can be null in restricted
-  // browsing contexts such as some bots, iframes, or privacy-focused browsers).
-  function storageAvailable(): boolean {
-    try {
-      return typeof localStorage !== 'undefined' && localStorage !== null;
-    } catch {
-      return false;
-    }
-  }
-
   /**
    * Reads the stored override. Anything unrecognised means no override, which
    * is also how the pre-paint script in the layouts reads a missing value.
+   * localStorage throws rather than returning null in some restricted
+   * browsing contexts, so every access to it is guarded.
    */
   function storedTheme(): 'light' | 'dark' | null {
-    if (!storageAvailable()) return null;
-    const stored = localStorage.getItem('theme');
-    return stored === 'light' || stored === 'dark' ? stored : null;
+    try {
+      const stored = localStorage.getItem('theme');
+      return stored === 'light' || stored === 'dark' ? stored : null;
+    } catch {
+      return null;
+    }
   }
 
   function systemTheme(): 'light' | 'dark' {
     return prefersDarkScheme.matches ? 'dark' : 'light';
   }
+
+  const toggleButton = document.getElementById('theme-selector-button');
 
   /**
    * Paints a resolved theme and points the toggle at the other one. Storage is
@@ -45,18 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.classList.toggle('wa-dark', theme === 'dark');
 
     // Absent on the error layout, which has a logo-only masthead.
-    const icon = document
-      .getElementById('theme-selector-button')
-      ?.querySelector('wa-icon');
+    const icon = toggleButton?.querySelector('wa-icon');
     if (!icon) return;
 
-    if (theme === 'dark') {
-      icon.setAttribute('name', 'sun-bright');
-      icon.setAttribute('label', 'Switch to light mode');
-    } else {
-      icon.setAttribute('name', 'moon');
-      icon.setAttribute('label', 'Switch to dark mode');
-    }
+    const dark = theme === 'dark';
+    icon.setAttribute('name', dark ? 'sun-bright' : 'moon');
+    icon.setAttribute(
+      'label',
+      dark ? 'Switch to light mode' : 'Switch to dark mode'
+    );
   }
 
   /**
@@ -66,21 +60,21 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function toggleTheme() {
     const next = (storedTheme() ?? systemTheme()) === 'dark' ? 'light' : 'dark';
-    if (storageAvailable()) {
+    try {
       if (next === systemTheme()) {
         localStorage.removeItem('theme');
       } else {
         localStorage.setItem('theme', next);
       }
+    } catch {
+      // Storage unavailable; the theme still applies for this page view.
     }
     applyTheme(next);
   }
 
   applyTheme(storedTheme() ?? systemTheme());
 
-  document
-    .getElementById('theme-selector-button')
-    ?.addEventListener('click', toggleTheme);
+  toggleButton?.addEventListener('click', toggleTheme);
 
   // A device that switches at sunset moves the page only when no override is
   // stored. It never clears one, so a deliberate choice survives.
