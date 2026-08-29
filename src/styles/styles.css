@@ -47,10 +47,7 @@ main {
     wa-badge,
     wa-button,
     wa-callout,
-    wa-divider,
     wa-drawer,
-    wa-dropdown,
-    wa-dropdown-item,
     wa-icon,
     wa-option,
     wa-radio,
@@ -80,10 +77,6 @@ wa-switch:focus-within::part(control) {
 /* Completely hides elements with the hidden attribute */
 [hidden] {
   display: none !important;
-}
-
-.no-js {
-  display: none;
 }
 
 /* Adds a top margin to elements with an id attribute when scrolled into view */

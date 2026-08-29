@@ -1,131 +1,84 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Find all elements with the "no-js" class and remove that class
-  const noJsElements = document.querySelectorAll<HTMLElement>('.no-js');
-  noJsElements.forEach((element) => {
-    element.classList.remove('no-js');
-  });
-
-  // Theme selection functionality
+  // Theme switching. Three states are stored - "light", "dark", or nothing at
+  // all, meaning follow the device - but only two are offered, because the
+  // toggle clears the override when the state you're switching to is the one
+  // the device already asks for. See https://lea.verou.me/blog/2026/dark-mode-toggles/
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
-  // Check whether localStorage is available (it can be null in restricted
-  // browsing contexts such as some bots, iframes, or privacy-focused browsers).
-  function storageAvailable(): boolean {
+  /**
+   * Reads the stored override. Anything unrecognised means no override, which
+   * is how the pre-paint scripts in the layouts read it too.
+   * localStorage throws rather than returning null in some restricted
+   * browsing contexts, so every access to it is guarded.
+   */
+  function storedTheme(): 'light' | 'dark' | null {
     try {
-      return typeof localStorage !== 'undefined' && localStorage !== null;
+      const stored = localStorage.getItem('theme');
+      return stored === 'light' || stored === 'dark' ? stored : null;
     } catch {
-      return false;
+      return null;
     }
   }
 
+  function systemTheme(): 'light' | 'dark' {
+    return prefersDarkScheme.matches ? 'dark' : 'light';
+  }
+
+  /** The theme on screen: the override if there is one, the device if not. */
+  function resolvedTheme(): 'light' | 'dark' {
+    return storedTheme() ?? systemTheme();
+  }
+
+  const toggleButton = document.getElementById('theme-selector-button');
+
   /**
-   * Updates the theme selector button icon to reflect the current theme.
-   * The button contains a child wa-icon element whose name and label we update.
+   * Paints a resolved theme and points the toggle at the other one. Storage is
+   * written by toggleTheme(), never here, so this stays safe to call from the
+   * system preference listener.
+   * @param theme - The theme to paint ('light' or 'dark').
    */
-  function updateThemeIcon(
-    button: HTMLElement,
-    iconName: string,
-    label: string
-  ) {
-    const icon = button.querySelector('wa-icon');
-    if (icon) {
-      icon.setAttribute('name', iconName);
-      icon.setAttribute('label', label);
-    }
+  function applyTheme(theme: 'light' | 'dark') {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('wa-dark', theme === 'dark');
+
+    // Absent on the error layout, which has a logo-only masthead.
+    const icon = toggleButton?.querySelector('wa-icon');
+    if (!icon) return;
+
+    const dark = theme === 'dark';
+    icon.setAttribute('name', dark ? 'sun-bright' : 'moon');
+    icon.setAttribute(
+      'label',
+      dark ? 'Switch to light mode' : 'Switch to dark mode'
+    );
   }
 
   /**
-   * Applies the selected theme to the document.
-   * @param theme - The theme to apply ('light', 'dark', or null for system default).
+   * Stores the opposite of what's on screen, unless that opposite is what the
+   * device already asks for, in which case the override is cleared so the
+   * device setting is followed again rather than pinned to a matching value.
    */
-  function applyTheme(theme: string | null) {
-    const themeSelectorButton = document.getElementById(
-      'theme-selector-button'
-    ) as HTMLElement;
-
-    if (!themeSelectorButton) {
-      console.error('Theme selector button not found');
-      return;
-    }
-
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.classList.remove('wa-dark');
-      if (storageAvailable()) localStorage.setItem('theme', 'light');
-      updateThemeIcon(themeSelectorButton, 'sun-bright', 'Light mode');
-    } else if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('wa-dark');
-      if (storageAvailable()) localStorage.setItem('theme', 'dark');
-      updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      document.documentElement.classList.remove('wa-dark');
-      if (storageAvailable()) localStorage.removeItem('theme');
-      if (prefersDarkScheme.matches) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.classList.add('wa-dark');
-        updateThemeIcon(themeSelectorButton, 'moon', 'Dark mode');
+  function toggleTheme() {
+    const next = resolvedTheme() === 'dark' ? 'light' : 'dark';
+    try {
+      if (next === systemTheme()) {
+        localStorage.removeItem('theme');
       } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        updateThemeIcon(themeSelectorButton, 'sun-bright', 'Light mode');
+        localStorage.setItem('theme', next);
       }
+    } catch {
+      // Storage unavailable; the theme still applies for this page view.
     }
+    applyTheme(next);
   }
 
-  /**
-   * Updates the theme selection UI based on the current theme.
-   * @param theme - The current theme ('light', 'dark', or null for system default).
-   */
-  function updateSelection(theme: string | null) {
-    const lightModeItem = document.getElementById(
-      'light-mode'
-    ) as HTMLInputElement;
-    const darkModeItem = document.getElementById(
-      'dark-mode'
-    ) as HTMLInputElement;
-    const systemDefaultItem = document.getElementById(
-      'system-default'
-    ) as HTMLInputElement;
+  applyTheme(resolvedTheme());
 
-    if (!lightModeItem || !darkModeItem || !systemDefaultItem) {
-      console.error('Theme selection items not found');
-      return;
-    }
+  toggleButton?.addEventListener('click', toggleTheme);
 
-    lightModeItem.checked = theme === 'light';
-    darkModeItem.checked = theme === 'dark';
-    systemDefaultItem.checked = theme === null;
-  }
-
-  // Apply the stored theme or the system default theme on initial load
-  const storedTheme = storageAvailable() ? localStorage.getItem('theme') : null;
-  if (storedTheme) {
-    applyTheme(storedTheme);
-    updateSelection(storedTheme);
-  } else {
-    applyTheme(null);
-    updateSelection(null);
-  }
-
-  // Add event listener for theme selection changes
-  const themeDropdown = document.querySelector('#theme-selector');
-  if (themeDropdown) {
-    themeDropdown.addEventListener('wa-select', ((event: CustomEvent) => {
-      const selectedTheme = event.detail.item.value;
-      applyTheme(selectedTheme);
-      updateSelection(selectedTheme);
-    }) as EventListener);
-  }
-
-  // Listen for changes to the user's system preference and update the theme accordingly
-  prefersDarkScheme.addEventListener('change', (event) => {
-    if (!storageAvailable() || !localStorage.getItem('theme')) {
-      if (event.matches) {
-        applyTheme('dark');
-      } else {
-        applyTheme('light');
-      }
-    }
+  // A device that switches at sunset moves the page only when no override is
+  // stored. It never clears one, so a deliberate choice survives.
+  prefersDarkScheme.addEventListener('change', () => {
+    if (!storedTheme()) applyTheme(systemTheme());
   });
 });

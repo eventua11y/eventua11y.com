@@ -42,7 +42,7 @@
     margin-bottom: var(--p-space-s);
   }
 
-  #theme-selector {
+  #theme-selector-button {
     display: none;
   }
 
@@ -95,10 +95,9 @@
   outline-color: var(--c-focus-ring-color);
 }
 
-/* Hide theme-selector dropdown until the custom element upgrades,
-   preventing a FOUC where menu items appear as a horizontal text list.
-   display:none avoids reserving space for the unstyled text content;
+/* Hide the theme toggle until the custom element upgrades, preventing a FOUC
+   where it appears as unstyled text. display:none avoids reserving space;
    margin-left:auto on .masthead__actions keeps the nav pinned right. */
-#theme-selector:not(:defined) {
+#theme-selector-button:not(:defined) {
   display: none;
 }
