@@ -65,16 +65,19 @@ const faKitCode = import.meta.env.FA_KIT_CODE || '';
             storedTheme = localStorage.getItem('theme');
           }
         } catch (e) {}
-        var prefersDarkScheme = window.matchMedia(
+        var prefersDark = window.matchMedia(
           '(prefers-color-scheme: dark)'
         ).matches;
-        if (storedTheme) {
-          document.documentElement.setAttribute('data-theme', storedTheme);
-        } else if (prefersDarkScheme) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'light');
-        }
+        // Anything other than 'light' or 'dark' means no override, matching
+        // storedTheme() in src/scripts/main.ts. Keep the two in step.
+        var theme =
+          storedTheme === 'light' || storedTheme === 'dark'
+            ? storedTheme
+            : prefersDark
+              ? 'dark'
+              : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.classList.toggle('wa-dark', theme === 'dark');
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

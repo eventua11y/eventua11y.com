@@ -90,6 +90,22 @@ test.describe('Theme Switching', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 
+  test('should treat an unrecognised stored value as no override', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('theme', 'system');
+    });
+    await page.reload();
+
+    // Only 'light' and 'dark' count as an override, so the device wins. This
+    // asserts the settled state; it would not catch the pre-paint script
+    // regressing on its own, because main.ts corrects that on load.
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('html')).toHaveClass(/wa-dark/);
+  });
+
   test('should keep a stored override when the system preference changes', async ({
     page,
   }) => {

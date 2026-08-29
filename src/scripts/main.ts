@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Reads the stored override. Anything unrecognised means no override, which
-   * is also how the pre-paint script in the layouts reads a missing value.
+   * is how the pre-paint scripts in the layouts read it too.
    * localStorage throws rather than returning null in some restricted
    * browsing contexts, so every access to it is guarded.
    */
