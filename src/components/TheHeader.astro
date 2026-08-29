@@ -49,28 +49,9 @@ const topicPagesEnabled = Astro.locals.flags.topic_pages_enabled;
           }
         </ul>
       </nav>
-      <wa-dropdown id="theme-selector" placement="bottom-end" distance="3">
-        <wa-button
-          slot="trigger"
-          id="theme-selector-button"
-          variant="brand"
-          appearance="plain"
-          ><wa-icon name="sun-bright" label="Light mode"></wa-icon></wa-button
-        >
-        <wa-dropdown-item type="checkbox" id="light-mode" value="light"
-          >Light mode</wa-dropdown-item
-        >
-        <wa-dropdown-item type="checkbox" id="dark-mode" value="dark"
-          >Dark mode</wa-dropdown-item
-        >
-        <wa-divider></wa-divider>
-        <wa-dropdown-item
-          type="checkbox"
-          id="system-default"
-          value="system"
-          checked>System default</wa-dropdown-item
-        >
-      </wa-dropdown>
+      <wa-button id="theme-selector-button" variant="brand" appearance="plain">
+        <wa-icon name="moon" label="Switch to dark mode"></wa-icon>
+      </wa-button>
     </div>
   </div>
 </header>

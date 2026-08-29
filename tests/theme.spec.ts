@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+// The switcher is two-state over a three-state model: "light", "dark", or no
+// stored value at all, meaning follow the device. Toggling to the state the
+// device already asks for clears the override rather than pinning a match.
+const storedTheme = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => window.localStorage.getItem('theme'));
+
 test.describe('Theme Switching', () => {
   test.beforeEach(async ({ context, page }) => {
     // Set initial state
@@ -20,91 +26,84 @@ test.describe('Theme Switching', () => {
     }
   });
 
-  test('should start with system theme', async ({ page }) => {
+  test('should start with system theme and no stored override', async ({
+    page,
+  }) => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    expect(await storedTheme(page)).toBeNull();
     // wa-button is a Web Component — the label lives on the child wa-icon,
     // not on the wa-button host element (see AGENTS.md shadow DOM caveat).
+    // It names the theme the toggle switches to, not the current one.
     await expect(
       page.locator('#theme-selector-button wa-icon')
-    ).toHaveAttribute('label', 'Light mode');
+    ).toHaveAttribute('label', 'Switch to dark mode');
   });
 
-  test('should switch to light theme and persist', async ({
-    context,
-    page,
-  }) => {
-    // Switch theme
-    await page.click('#theme-selector-button');
-    await page.click('#light-mode');
-
-    // Verify initial change
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(
-      page.locator('#theme-selector-button wa-icon')
-    ).toHaveAttribute('label', 'Light mode');
-
-    // Verify persistence
-    const newPage = await context.newPage();
-    await newPage.goto('/');
-    await expect(newPage.locator('html')).toHaveAttribute(
-      'data-theme',
-      'light'
-    );
-  });
-
-  test('should switch to dark theme and persist', async ({
-    context,
-    page,
+  test('should toggle away from the system theme and persist', async ({
     browser,
+    context,
+    page,
   }) => {
-    // Switch theme
     await page.click('#theme-selector-button');
-    await page.click('#dark-mode');
 
-    // Verify initial change
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(
       page.locator('#theme-selector-button wa-icon')
-    ).toHaveAttribute('label', 'Dark mode');
+    ).toHaveAttribute('label', 'Switch to light mode');
+    expect(await storedTheme(page)).toBe('dark');
 
-    // Get storage state
-    const storageState = await context.storageState();
-
-    // Create new context with storage state
-    const newContext = await browser.newContext({ storageState });
+    // Verify persistence in a fresh context. Reusing this one would not work:
+    // its init script clears localStorage on every page it opens.
+    const newContext = await browser.newContext({
+      storageState: await context.storageState(),
+    });
     const newPage = await newContext.newPage();
-
     await newPage.goto('/');
     await expect(newPage.locator('html')).toHaveAttribute('data-theme', 'dark');
     await newContext.close();
   });
 
-  test('should respect system preference when set to system theme', async ({
+  test('should clear the override when toggling back to the system theme', async ({
     page,
   }) => {
-    // Test dark preference
-    await page.emulateMedia({ colorScheme: 'dark' });
     await page.click('#theme-selector-button');
-    await page.click('#system-default');
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    expect(await storedTheme(page)).toBe('dark');
 
-    // Test light preference
+    await page.click('#theme-selector-button');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    // Light matches the device, so nothing is stored and the device is
+    // followed again rather than pinned to a value that happens to match.
+    expect(await storedTheme(page)).toBeNull();
+  });
+
+  test('should follow the system theme while no override is stored', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    expect(await storedTheme(page)).toBeNull();
+    await expect(
+      page.locator('#theme-selector-button wa-icon')
+    ).toHaveAttribute('label', 'Switch to light mode');
+
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 
-  test('should handle theme selector interactions correctly', async ({
+  test('should keep a stored override when the system preference changes', async ({
     page,
   }) => {
-    const dropdown = page.locator('#theme-selector');
-
-    // Test menu opening — wa-dropdown sets the `open` attribute when visible
     await page.click('#theme-selector-button');
-    await expect(dropdown).toHaveAttribute('open', '');
+    expect(await storedTheme(page)).toBe('dark');
 
-    // Test click outside — click main content area to dismiss the dropdown
-    await page.click('main');
-    await expect(dropdown).not.toHaveAttribute('open');
+    // A device that switches at sunset leaves a deliberate choice alone.
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    expect(await storedTheme(page)).toBe('dark');
+
+    // Toggling now stores light, because light is no longer what the device asks for.
+    await page.click('#theme-selector-button');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    expect(await storedTheme(page)).toBe('light');
   });
 });
