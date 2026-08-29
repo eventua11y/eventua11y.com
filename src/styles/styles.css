@@ -79,10 +79,6 @@ wa-switch:focus-within::part(control) {
   display: none !important;
 }
 
-.no-js {
-  display: none;
-}
-
 /* Adds a top margin to elements with an id attribute when scrolled into view */
 [id] {
   scroll-margin-top: 7rem;

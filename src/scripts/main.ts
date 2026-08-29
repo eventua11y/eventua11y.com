@@ -1,9 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Find all elements with the "no-js" class and remove that class
-  const noJsElements = document.querySelectorAll<HTMLElement>('.no-js');
-  noJsElements.forEach((element) => {
-    element.classList.remove('no-js');
-  });
   // Theme switching. Three states are stored - "light", "dark", or nothing at
   // all, meaning follow the device - but only two are offered, because the
   // toggle clears the override when the state you're switching to is the one
@@ -27,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function systemTheme(): 'light' | 'dark' {
     return prefersDarkScheme.matches ? 'dark' : 'light';
+  }
+
+  /** The theme on screen: the override if there is one, the device if not. */
+  function resolvedTheme(): 'light' | 'dark' {
+    return storedTheme() ?? systemTheme();
   }
 
   const toggleButton = document.getElementById('theme-selector-button');
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * device setting is followed again rather than pinned to a matching value.
    */
   function toggleTheme() {
-    const next = (storedTheme() ?? systemTheme()) === 'dark' ? 'light' : 'dark';
+    const next = resolvedTheme() === 'dark' ? 'light' : 'dark';
     try {
       if (next === systemTheme()) {
         localStorage.removeItem('theme');
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(next);
   }
 
-  applyTheme(storedTheme() ?? systemTheme());
+  applyTheme(resolvedTheme());
 
   toggleButton?.addEventListener('click', toggleTheme);
 
