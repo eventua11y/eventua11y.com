@@ -54,7 +54,7 @@
     "@playwright/test": "^1.60.0",
     "@portabletext/types": "^4.0.2",
     "@types/node": "^26.2.0",
-    "@vitest/coverage-v8": "^4.1.7",
+    "@vitest/coverage-v8": "^4.1.11",
     "astro": "^7.1.6",
     "autoprefixer": "^10.5.4",
     "concurrently": "^10.0.5",
