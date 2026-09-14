@@ -59,6 +59,7 @@ jobs:
             # enum has nothing to map from - default to medium.
             findings=$(jq '[.[] | .findings[] | {
               title: (.problemShort // .ruleId // "Accessibility issue"),
+              ruleId: (.ruleId // "unknown"),
               severity: "medium",
               sourceUrl: .url
             }]' scanner-results.json)
