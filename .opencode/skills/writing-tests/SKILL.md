@@ -5,7 +5,7 @@ description: Conventions and patterns for writing Playwright E2E tests and Vites
 
 ## Test frameworks
 
-- **Playwright** (`@playwright/test`) for E2E browser tests. Chromium only (via `playwright-chromium`).
+- **Playwright** (`@playwright/test`) for Chromium E2E browser tests.
 - **Vitest** (`vitest` with `@vitest/coverage-v8`) for unit tests.
 
 ## File structure
