@@ -14,7 +14,6 @@
     "scripts/**/*.{js,mjs}",
     "tests/**/*.ts"
   ],
-  "ignore": ["src/components/EventDebug.vue"],
   "ignoreDependencies": [
     "eslint-config-prettier",
     "eslint-plugin-astro",

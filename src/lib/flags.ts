@@ -111,18 +111,11 @@ export async function resolveFlags(): Promise<Flags> {
   const client = OpenFeature.getClient();
   const ctx = {};
 
-  const [user_accounts_enabled, topic_pages_enabled] = await Promise.all([
-    client.getBooleanValue(
-      'user_accounts_enabled',
-      FLAG_DEFAULTS.user_accounts_enabled,
-      ctx
-    ),
-    client.getBooleanValue(
-      'topic_pages_enabled',
-      FLAG_DEFAULTS.topic_pages_enabled,
-      ctx
-    ),
-  ]);
+  const topic_pages_enabled = await client.getBooleanValue(
+    'topic_pages_enabled',
+    FLAG_DEFAULTS.topic_pages_enabled,
+    ctx
+  );
 
-  return { user_accounts_enabled, topic_pages_enabled };
+  return { topic_pages_enabled };
 }
