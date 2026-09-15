@@ -9,7 +9,6 @@
     "postcss.config.mjs",
     "bench/**/*.bench.ts"
   ],
-  "ignoreFindings": ["src/components/EventDebug.vue"],
   "ignoreDependencies": [
     "eslint-config-prettier",
     "eslint-plugin-astro",
