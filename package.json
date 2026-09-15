@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/eventua11y/eventua11y.com#readme",
   "resolutions": {
-    "astro": "^7.1.6"
+    "astro": "^7.3.2"
   },
   "overrides": {
     "vue": "^3.5.25",
@@ -55,7 +55,7 @@
     "@portabletext/types": "^4.0.2",
     "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
-    "astro": "^7.1.6",
+    "astro": "^7.3.2",
     "autoprefixer": "^10.5.4",
     "concurrently": "^10.0.5",
     "cssnano": "^9.0.3",
@@ -75,7 +75,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "@astrojs/netlify": "^8.1.1",
+    "@astrojs/netlify": "^8.2.5",
     "@astrojs/vue": "^7.0.2",
     "@awesome.me/webawesome": "^3.10.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
