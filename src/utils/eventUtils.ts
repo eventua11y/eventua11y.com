@@ -243,40 +243,27 @@ export function getEventMetaDescription(
 // ── Format display helpers ─────────────────────────────────────────────
 
 /**
- * Maps event format codes to human-readable display labels.
- * Used by child event components and the event detail page.
+ * Display labels for format codes that differ from the code itself.
+ * Every other code is already the word we want to show.
  */
-export const FORMAT_LABELS: Record<string, string> = {
-  talk: 'talk',
-  tutorial: 'tutorial',
-  workshop: 'workshop',
-  webinar: 'webinar',
-  panel: 'panel',
-  meetup: 'meetup',
-  interview: 'interview',
+const FORMAT_LABELS: Record<string, string> = {
   qna: 'Q&A',
-  keynote: 'keynote',
-  roundtable: 'roundtable',
-  hackathon: 'hackathon',
 };
 
 /**
- * Maps event format codes to the preposition used before speaker names.
- * "by" for presentation formats, "with" for collaborative formats.
+ * Formats where the speakers take part alongside others rather than present
+ * to them, so their names read "with" instead of "by".
  */
-const FORMAT_PREPOSITIONS: Record<string, string> = {
-  talk: 'by',
-  tutorial: 'by',
-  workshop: 'with',
-  webinar: 'with',
-  panel: 'with',
-  meetup: 'with',
-  interview: 'with',
-  qna: 'with',
-  keynote: 'by',
-  roundtable: 'with',
-  hackathon: 'with',
-};
+const COLLABORATIVE_FORMATS = new Set([
+  'workshop',
+  'webinar',
+  'panel',
+  'meetup',
+  'interview',
+  'qna',
+  'roundtable',
+  'hackathon',
+]);
 
 /**
  * Returns the display label for an event format code.
@@ -297,9 +284,8 @@ export function capitalize(str: string): string {
 
 /**
  * Returns the preposition for an event format code.
- * Defaults to "by" if no mapping exists.
+ * Defaults to "by" for unknown and presentation formats.
  */
 export function getFormatPreposition(format: string | undefined): string {
-  if (!format) return 'by';
-  return FORMAT_PREPOSITIONS[format] || 'by';
+  return format && COLLABORATIVE_FORMATS.has(format) ? 'with' : 'by';
 }
