@@ -17,7 +17,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { getSanityClient } from '../lib/sanity';
+import { sanityClient } from '../lib/sanity';
 
 export const prerender = false;
 
@@ -34,9 +34,7 @@ interface SitemapTopic extends SitemapEntry {}
  * Only includes events that have a slug (required to generate a URL).
  */
 async function getEventSlugs(): Promise<SitemapEvent[]> {
-  const client = getSanityClient();
-
-  return client.fetch<SitemapEvent[]>(`
+  return sanityClient.fetch<SitemapEvent[]>(`
     *[_type == "event" && defined(slug.current) && !(_id in path("drafts.**"))] {
       "slug": slug.current,
       _updatedAt
@@ -49,14 +47,7 @@ async function getEventSlugs(): Promise<SitemapEvent[]> {
  * Only includes topics that have a slug (required to generate a URL).
  */
 async function getTopicSlugs(): Promise<SitemapTopic[]> {
-  const client = createClient({
-    projectId: import.meta.env.SANITY_PROJECT,
-    dataset: import.meta.env.SANITY_DATASET,
-    apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
-    useCdn: true,
-  });
-
-  return client.fetch<SitemapTopic[]>(`
+  return sanityClient.fetch<SitemapTopic[]>(`
     *[_type == "topic" && defined(slug.current) && !(_id in path("drafts.**"))] {
       "slug": slug.current,
       _updatedAt
