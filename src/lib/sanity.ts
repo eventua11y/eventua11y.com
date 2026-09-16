@@ -28,19 +28,12 @@ import {
 
 // ── Sanity client ──────────────────────────────────────────────────────
 
-const sanityClient = createClient({
+export const sanityClient = createClient({
   projectId: import.meta.env.SANITY_PROJECT,
   dataset: import.meta.env.SANITY_DATASET,
   apiVersion: import.meta.env.SANITY_API_VERSION || '2021-03-25',
   useCdn: import.meta.env.SANITY_CDN === 'true',
 });
-
-/**
- * Returns the shared Sanity client instance.
- */
-export function getSanityClient() {
-  return sanityClient;
-}
 
 // ── Event queries (mirrors the edge function GROQ) ─────────────────────
 
@@ -242,9 +235,7 @@ interface TopicListItem {
  * absent). In-progress multi-day events are included.
  */
 export async function getTopics(): Promise<TopicListItem[]> {
-  const client = getSanityClient();
-
-  return client.fetch(`
+  return sanityClient.fetch(`
     *[_type == "topic" && !(_id in path("drafts.**"))] {
       _id,
       name,
@@ -321,9 +312,7 @@ export async function getTopicBySlug(slug: string): Promise<
     })
   | null
 > {
-  const client = getSanityClient();
-
-  const topic: RawTopic | null = await client.fetch(
+  const topic: RawTopic | null = await sanityClient.fetch(
     `
     *[_type == "topic" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
       _id,
