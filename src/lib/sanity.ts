@@ -37,36 +37,13 @@ export const sanityClient = createClient({
 
 // ── Event queries (mirrors the edge function GROQ) ─────────────────────
 
-interface RawEvent {
-  _id: string;
-  _type: string;
-  type: string;
-  title: string;
-  slug?: { current: string };
-  description?: string;
-  richDescription?: PortableTextBlock[];
-  dateStart: string;
-  dateEnd?: string;
-  timezone?: string;
-  day?: boolean;
-  callForSpeakers?: boolean;
-  callForSpeakersClosingDate?: string;
-  attendanceMode?: string;
-  location?: string;
-  isFree?: boolean;
-  website?: string;
-  parent?: { _ref: string };
+/**
+ * A single event exactly as Sanity returns it, before child events are
+ * normalised. Children come back in the same shape as their parent, so the
+ * only difference from `Event` is that recursion.
+ */
+interface RawEvent extends Omit<Event, 'children'> {
   children?: RawEvent[];
-  isParent?: boolean;
-  speakers?: Array<{ _id: string; name: string }>;
-  organizer?: { _id: string; name: string; website?: string };
-  topics?: Array<{
-    _id: string;
-    name: string;
-    slug: { current: string };
-    description?: string;
-  }>;
-  hashtags?: string[];
 }
 
 /**
