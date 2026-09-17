@@ -75,7 +75,7 @@
   "dependencies": {
     "@astrojs/netlify": "^8.2.5",
     "@astrojs/vue": "^7.0.2",
-    "@awesome.me/webawesome": "^3.10.0",
+    "@awesome.me/webawesome": "^3.13.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
     "@openfeature/server-sdk": "^1.23.0",
     "@sanity/client": "^7.26.2",
