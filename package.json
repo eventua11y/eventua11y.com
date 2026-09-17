@@ -55,7 +55,7 @@
     "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
     "astro": "^7.3.2",
-    "autoprefixer": "^10.5.4",
+    "autoprefixer": "^10.6.0",
     "concurrently": "^10.0.5",
     "cssnano": "^9.0.3",
     "eslint": "^10.10.0",
