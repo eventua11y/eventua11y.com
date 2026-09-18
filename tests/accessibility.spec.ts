@@ -440,6 +440,15 @@ test.describe('Shared component accessibility', () => {
       'en-GB-oxendict'
     );
   });
+
+  test('timezone selector has a visible label', async ({ page }) => {
+    // Regression test for #824: label-title-only violation.
+    // The wa-select label must not be hidden via wa-visually-hidden-label.
+    const select = page.locator('#timezone-select');
+    await select.waitFor({ state: 'visible', timeout: 5000 });
+    await expect(select).not.toHaveClass(/wa-visually-hidden-label/);
+    await expect(select).toHaveAttribute('label', 'Timezone');
+  });
 });
 
 // ---------------------------------------------------------------------------
