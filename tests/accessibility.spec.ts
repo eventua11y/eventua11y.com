@@ -152,6 +152,25 @@ test.describe('Homepage accessibility', () => {
     await expect(filterButton).toContainText('Filter');
   });
 
+  test('timezone select has a visible label', async ({ page }) => {
+    // Regression test for #872: the wa-select label must stay visible rather
+    // than visually hidden, otherwise the combobox inside the shadow root is
+    // labelled only by hidden text (axe rule "label-title-only").
+    const label = page.locator('#timezone-select [part~="label"]');
+    await expect(label).toBeVisible();
+    await expect(label).toHaveText('Timezone');
+  });
+
+  test('form elements have visible labels (best practice)', async ({
+    page,
+  }) => {
+    const results = await new AxeBuilder({ page })
+      .exclude('iframe')
+      .withRules(['label-title-only'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test('filter count region is an aria-live region', async ({ page }) => {
     const filterCount = page.locator('.filters__count');
     await expect(filterCount).toHaveAttribute('aria-live', 'polite');
