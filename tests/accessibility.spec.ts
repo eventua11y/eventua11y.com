@@ -21,6 +21,10 @@ async function runAxeScan(page: Page) {
   return results;
 }
 
+// A visually hidden label is clipped to a 1x1px box, so a rendered label
+// measures at least a line of text in each dimension.
+const VISIBLE_LABEL_MIN_PX = 8;
+
 // Helper: parse an rgb/rgba color string into { r, g, b } values (0–255)
 function parseColor(color: string): { r: number; g: number; b: number } {
   const match = color.match(
@@ -434,10 +438,6 @@ test.describe('Shared component accessibility', () => {
     await expect(drawer).toHaveAttribute('label', 'Filters');
   });
 
-  // A visually hidden label is clipped to a 1x1px box; a rendered label is
-  // at least a line of text tall and wide.
-  const VISIBLE_LABEL_MIN_PX = 8;
-
   // Regression test for #922: the timezone select was labelled by a
   // visually hidden label, which axe flags as label-title-only because the
   // combobox input then has no visible label.
@@ -449,20 +449,13 @@ test.describe('Shared component accessibility', () => {
     // relying on Playwright visibility checks, which cannot pierce it.
     const label = await select.evaluate((el) => {
       const node = el.shadowRoot?.querySelector('[part~="form-control-label"]');
-      if (!node) return null;
-      const rect = node.getBoundingClientRect();
+      const rect = node?.getBoundingClientRect();
       return {
-        text: node.textContent?.trim() ?? '',
-        width: rect.width,
-        height: rect.height,
+        text: node?.textContent?.trim() ?? '',
+        width: rect?.width ?? 0,
+        height: rect?.height ?? 0,
       };
     });
-
-    expect(
-      label,
-      'Timezone select has no shadow-DOM label part'
-    ).not.toBeNull();
-    if (!label) return;
 
     expect(label.text).toBe('Timezone');
     expect(label.width).toBeGreaterThan(VISIBLE_LABEL_MIN_PX);
