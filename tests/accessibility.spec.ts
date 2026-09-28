@@ -454,10 +454,13 @@ test.describe('Shared component accessibility', () => {
       };
     });
 
-    expect(label).not.toBeNull();
-    expect(label!.text).toBe('Timezone');
-    expect(label!.width).toBeGreaterThan(1);
-    expect(label!.height).toBeGreaterThan(1);
+    if (!label) throw new Error('Timezone select has no label part');
+
+    expect(label.text).toBe('Timezone');
+    // Visually hidden labels collapse to 1x1px, so anything larger means
+    // the label is genuinely rendered.
+    expect(label.width).toBeGreaterThan(1);
+    expect(label.height).toBeGreaterThan(1);
   });
 
   test('filter controls have no label-title-only violations', async ({
