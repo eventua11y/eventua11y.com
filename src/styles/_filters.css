@@ -20,7 +20,9 @@
       display: flex;
       flex-direction: row;
       gap: var(--p-space-2xs);
-      align-items: center;
+      /* The timezone select carries a visible label, making it taller than
+         the filter button, so align controls along their bottom edge. */
+      align-items: flex-end;
       width: 100%;
       @media (min-width: 700px) {
         width: auto;

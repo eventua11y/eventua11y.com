@@ -434,6 +434,44 @@ test.describe('Shared component accessibility', () => {
     await expect(drawer).toHaveAttribute('label', 'Filters');
   });
 
+  // Regression test for #922: the timezone select was labelled by a
+  // visually hidden label, which axe flags as label-title-only because the
+  // combobox input then has no visible label.
+  test('timezone select has a visible label', async ({ page }) => {
+    const select = page.locator('#timezone-select');
+    await select.waitFor({ state: 'visible', timeout: 5000 });
+
+    // The label lives in shadow DOM, so measure it directly rather than
+    // relying on Playwright visibility checks, which cannot pierce it.
+    const label = await select.evaluate((el) => {
+      const node = el.shadowRoot?.querySelector('[part~="form-control-label"]');
+      if (!node) return null;
+      const rect = node.getBoundingClientRect();
+      return {
+        text: node.textContent?.trim() ?? '',
+        width: rect.width,
+        height: rect.height,
+      };
+    });
+
+    expect(label).not.toBeNull();
+    expect(label!.text).toBe('Timezone');
+    expect(label!.width).toBeGreaterThan(1);
+    expect(label!.height).toBeGreaterThan(1);
+  });
+
+  test('filter controls have no label-title-only violations', async ({
+    page,
+  }) => {
+    // label-title-only is a best-practice rule, so it sits outside the
+    // WCAG-tagged scan used elsewhere in this suite.
+    const results = await new AxeBuilder({ page })
+      .include('#filters')
+      .withRules(['label-title-only'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test('html element has lang attribute', async ({ page }) => {
     await expect(page.locator('html')).toHaveAttribute(
       'lang',
