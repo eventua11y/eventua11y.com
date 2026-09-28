@@ -434,6 +434,10 @@ test.describe('Shared component accessibility', () => {
     await expect(drawer).toHaveAttribute('label', 'Filters');
   });
 
+  // A visually hidden label is clipped to a 1x1px box; a rendered label is
+  // at least a line of text tall and wide.
+  const VISIBLE_LABEL_MIN_PX = 8;
+
   // Regression test for #922: the timezone select was labelled by a
   // visually hidden label, which axe flags as label-title-only because the
   // combobox input then has no visible label.
@@ -457,10 +461,8 @@ test.describe('Shared component accessibility', () => {
     if (!label) throw new Error('Timezone select has no label part');
 
     expect(label.text).toBe('Timezone');
-    // Visually hidden labels collapse to 1x1px, so anything larger means
-    // the label is genuinely rendered.
-    expect(label.width).toBeGreaterThan(1);
-    expect(label.height).toBeGreaterThan(1);
+    expect(label.width).toBeGreaterThan(VISIBLE_LABEL_MIN_PX);
+    expect(label.height).toBeGreaterThan(VISIBLE_LABEL_MIN_PX);
   });
 
   test('filter controls have no label-title-only violations', async ({
