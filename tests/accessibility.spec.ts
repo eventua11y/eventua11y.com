@@ -21,8 +21,9 @@ async function runAxeScan(page: Page) {
   return results;
 }
 
-// A visually hidden label is clipped to a 1x1px box, so a rendered label
-// measures at least a line of text in each dimension.
+// A visually hidden label is clipped to a 1x1px box. 8px sits comfortably
+// above that while staying below the smallest plausible rendered line of
+// text, so it distinguishes a hidden label from a visible one.
 const VISIBLE_LABEL_MIN_PX = 8;
 
 // Helper: parse an rgb/rgba color string into { r, g, b } values (0–255)
