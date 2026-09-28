@@ -458,7 +458,11 @@ test.describe('Shared component accessibility', () => {
       };
     });
 
-    if (!label) throw new Error('Timezone select has no label part');
+    expect(
+      label,
+      'Timezone select has no shadow-DOM label part'
+    ).not.toBeNull();
+    if (!label) return;
 
     expect(label.text).toBe('Timezone');
     expect(label.width).toBeGreaterThan(VISIBLE_LABEL_MIN_PX);
