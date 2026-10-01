@@ -37,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-- **Framework**: Astro 6.x with SSR via `@astrojs/netlify` adapter
+- **Framework**: Astro 7.x with SSR via `@astrojs/netlify` adapter
 - **Frontend**: Vue 3 components with `client:load` for interactive features
 - **UI Components**: Web Awesome 3 web components (shadow DOM)
 - **Content Management**: Sanity CMS with GROQ queries
