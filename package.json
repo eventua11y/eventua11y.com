@@ -50,7 +50,7 @@
     "@codspeed/vitest-plugin": "^5.7.1",
     "@eslint/js": "^10.0.1",
     "@mattobee/chocks": "^0.8.0",
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.63.0",
     "@portabletext/types": "^4.0.2",
     "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
