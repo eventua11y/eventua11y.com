@@ -1,8 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import dayjs from '../lib/dayjs';
 
 /** Non-breaking space used between time digits and AM/PM */
 const nbsp = '\u00A0';
+
+// Pin the clock so hardcoded fixture dates never fall on "today" or "tomorrow"
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date('2026-03-09T12:00:00Z'));
+});
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 import {
   getStartDateFormat,
