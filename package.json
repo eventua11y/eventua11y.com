@@ -68,7 +68,7 @@
     "knip": "^6.35.1",
     "netlify-cli": "^27.8.0",
     "prettier": "^3.9.6",
-    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-astro": "^1.1.0",
     "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"
   },
