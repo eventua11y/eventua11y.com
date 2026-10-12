@@ -68,41 +68,39 @@ for (let code = 65; code <= 90; code++) {
         Eventua11y.
       </p>
 
-      {
-        topics.length === 0 ? (
-          <p>No topics have been published yet.</p>
-        ) : (
-          letterGroups.map(({ letter, topics: group }) => (
-            <>
-              <h2
-                id={`letter-${letter === '#' ? 'other' : letter.toLowerCase()}`}
-              >
-                {letter === '#' ? '#' : letter}
-              </h2>
-              <ul role="list" class="topic-list">
-                {group.map((topic) => (
-                  <li class="topic-list__item flow flow-3xs">
-                    <h3 class="topic-list__name">
-                      <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
-                    </h3>
-                    {topic.description && (
-                      <p class="topic-list__description">{topic.description}</p>
-                    )}
-                    {topic.eventCount > 0 && (
-                      <p class="topic-list__count">
-                        {topic.eventCount}{' '}
-                        {topic.eventCount === 1
-                          ? 'upcoming event'
-                          : 'upcoming events'}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </>
-          ))
-        )
-      }
+      {topics.length === 0 ? (
+        <p>No topics have been published yet.</p>
+      ) : (
+        letterGroups.map(({ letter, topics: group }) => (
+          <>
+            <h2
+              id={`letter-${letter === '#' ? 'other' : letter.toLowerCase()}`}
+            >
+              {letter === '#' ? '#' : letter}
+            </h2>
+            <ul role="list" class="topic-list">
+              {group.map((topic) => (
+                <li class="topic-list__item flow flow-3xs">
+                  <h3 class="topic-list__name">
+                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                  </h3>
+                  {topic.description && (
+                    <p class="topic-list__description">{topic.description}</p>
+                  )}
+                  {topic.eventCount > 0 && (
+                    <p class="topic-list__count">
+                      {topic.eventCount}{' '}
+                      {topic.eventCount === 1
+                        ? 'upcoming event'
+                        : 'upcoming events'}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      )}
     </div>
   </div>
 </DefaultLayout>

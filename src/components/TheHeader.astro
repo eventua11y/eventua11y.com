@@ -32,21 +32,19 @@ const topicPagesEnabled = Astro.locals.flags.topic_pages_enabled;
               Past Events
             </a>
           </li>
-          {
-            topicPagesEnabled && (
-              <li class="primaryNav__item">
-                <a
-                  class="primaryNav__link"
-                  href="/topics"
-                  aria-current={
-                    currentPath.startsWith('/topics') ? 'page' : undefined
-                  }
-                >
-                  Topics
-                </a>
-              </li>
-            )
-          }
+          {topicPagesEnabled && (
+            <li class="primaryNav__item">
+              <a
+                class="primaryNav__link"
+                href="/topics"
+                aria-current={
+                  currentPath.startsWith('/topics') ? 'page' : undefined
+                }
+              >
+                Topics
+              </a>
+            </li>
+          )}
         </ul>
       </nav>
       <wa-button id="theme-selector-button" variant="brand" appearance="plain">

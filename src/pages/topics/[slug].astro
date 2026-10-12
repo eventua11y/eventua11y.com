@@ -46,30 +46,26 @@ const metaDescription = topic.description
   <div class="container readable py-l flow">
     <h1>{topic.name}</h1>
 
-    {
-      topic.body && topic.body.length > 0 && (
-        <div class="flow">
-          <PortableText value={topic.body} />
-        </div>
-      )
-    }
+    {topic.body && topic.body.length > 0 && (
+      <div class="flow">
+        <PortableText value={topic.body} />
+      </div>
+    )}
 
-    {
-      topic.events.length > 0 && (
-        <section class="topic-events flow">
-          <h2>Upcoming events</h2>
-          <ol role="list" class="flow flow-l">
-            {topic.events.map((event) => (
-              <li>
-                <Event event={event} client:visible />
-                <noscript>
-                  <StaticEvent event={event} />
-                </noscript>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )
-    }
+    {topic.events.length > 0 && (
+      <section class="topic-events flow">
+        <h2>Upcoming events</h2>
+        <ol role="list" class="flow flow-l">
+          {topic.events.map((event) => (
+            <li>
+              <Event event={event} client:visible />
+              <noscript>
+                <StaticEvent event={event} />
+              </noscript>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
   </div>
 </DefaultLayout>

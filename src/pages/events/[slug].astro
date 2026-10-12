@@ -314,70 +314,48 @@ const jsonLd = {
   <div class="container py-l">
     <article class="event-detail flow flow-m">
       <header class="event-detail__header">
-        {
-          displayFormat || (isChildEvent && event.parentEvent) ? (
-            <hgroup
-              role="group"
-              aria-roledescription="Heading group"
-              class="mb-s"
-            >
-              <h1 class="event-detail__title mb-s">{event.title}</h1>
-              <p aria-roledescription="subtitle" class="text-muted">
-                {displayFormat && (
-                  <span>
-                    {capitalizedFormat}
-                    {allSpeakers.length > 0 && (
-                      <Fragment>
-                        {' '}
-                        {formatPreposition}{' '}
-                        {allSpeakers.map((s) => s.name).join(', ')}
-                      </Fragment>
-                    )}
-                  </span>
-                )}
-                {displayFormat && isChildEvent && event.parentEvent && (
-                  <span aria-hidden="true"> · </span>
-                )}
-                {isChildEvent && event.parentEvent && (
-                  <span>
-                    Part of{' '}
-                    {parentUrl ? (
-                      <a href={parentUrl}>{event.parentEvent.title}</a>
-                    ) : (
-                      <span>{event.parentEvent.title}</span>
-                    )}
-                  </span>
-                )}
-              </p>
-            </hgroup>
-          ) : (
-            <h1 class="event-detail__title">{event.title}</h1>
-          )
-        }
-
-        {
-          event.dateStart ? (
-            eventDuration ? (
-              <div class="event__meta">
-                <EventDate
-                  client:only="vue"
-                  dateStart={event.dateStart}
-                  dateEnd={event.dateEnd}
-                  timezone={event.timezone}
-                  day={event.day}
-                  type={event.type}
-                  isPast={eventHasEnded}
-                  showCountdown={false}
-                  showEnded={true}
-                />
-                <span class="event__duration">
-                  <span class="sr-only">Duration</span>
-                  <time datetime={eventDuration.iso}>
-                    {eventDuration.label}
-                  </time>
+        {displayFormat || (isChildEvent && event.parentEvent) ? (
+          <hgroup
+            role="group"
+            aria-roledescription="Heading group"
+            class="mb-s"
+          >
+            <h1 class="event-detail__title mb-s">{event.title}</h1>
+            <p aria-roledescription="subtitle" class="text-muted">
+              {displayFormat && (
+                <span>
+                  {capitalizedFormat}
+                  {allSpeakers.length > 0 && (
+                    <Fragment>
+                      {' '}
+                      {formatPreposition}{' '}
+                      {allSpeakers.map((s) => s.name).join(', ')}
+                    </Fragment>
+                  )}
                 </span>
-              </div>
-            ) : (
+              )}
+              {displayFormat && isChildEvent && event.parentEvent && (
+                <span aria-hidden="true"> · </span>
+              )}
+              {isChildEvent && event.parentEvent && (
+                <span>
+                  Part of{' '}
+                  {parentUrl ? (
+                    <a href={parentUrl}>{event.parentEvent.title}</a>
+                  ) : (
+                    <span>{event.parentEvent.title}</span>
+                  )}
+                </span>
+              )}
+            </p>
+          </hgroup>
+        ) : (
+          <h1 class="event-detail__title">{event.title}</h1>
+        )}
+
+        {event.dateStart ? (
+          eventDuration ? (
+            <div class="event__meta">
               <EventDate
                 client:only="vue"
                 dateStart={event.dateStart}
@@ -386,14 +364,30 @@ const jsonLd = {
                 day={event.day}
                 type={event.type}
                 isPast={eventHasEnded}
-                showCountdown={true}
+                showCountdown={false}
                 showEnded={true}
               />
-            )
+              <span class="event__duration">
+                <span class="sr-only">Duration</span>
+                <time datetime={eventDuration.iso}>{eventDuration.label}</time>
+              </span>
+            </div>
           ) : (
-            <p class="text-muted">Not yet scheduled</p>
+            <EventDate
+              client:only="vue"
+              dateStart={event.dateStart}
+              dateEnd={event.dateEnd}
+              timezone={event.timezone}
+              day={event.day}
+              type={event.type}
+              isPast={eventHasEnded}
+              showCountdown={true}
+              showEnded={true}
+            />
           )
-        }
+        ) : (
+          <p class="text-muted">Not yet scheduled</p>
+        )}
 
         <EventDelivery
           client:idle
@@ -403,152 +397,145 @@ const jsonLd = {
           showWebsiteLink={false}
         />
 
-        {
-          hasBadges && (
-            <div class="event-detail__badges mt-s">
-              {isDedicatedToAccessibility && (
-                <wa-badge pill variant="neutral">
-                  Dedicated to accessibility
-                </wa-badge>
-              )}
-              {callForSpeakersOpen && (
-                <wa-badge variant="success" pill attention="pulse">
-                  Call for speakers
-                </wa-badge>
-              )}
-              {event.isFree && event.type !== 'theme' && (
-                <wa-badge pill variant="neutral">
-                  Free
-                </wa-badge>
-              )}
-            </div>
-          )
-        }
+        {hasBadges && (
+          <div class="event-detail__badges mt-s">
+            {isDedicatedToAccessibility && (
+              <wa-badge pill variant="neutral">
+                Dedicated to accessibility
+              </wa-badge>
+            )}
+            {callForSpeakersOpen && (
+              <wa-badge variant="success" pill attention="pulse">
+                Call for speakers
+              </wa-badge>
+            )}
+            {event.isFree && event.type !== 'theme' && (
+              <wa-badge pill variant="neutral">
+                Free
+              </wa-badge>
+            )}
+          </div>
+        )}
       </header>
 
       <div class="event-detail-body">
-        {
-          (event.website ||
-            event.organizer ||
-            hasSidebarLinks ||
-            hasHashtags) && (
-            <aside class="event-detail-sidebar">
-              <wa-card class="event-detail-sidebar__card" appearance="outlined">
-                <div class="event-detail-sidebar__content flow flow-s">
-                  {hasSidebarIntro && (
-                    <p>
-                      {isChildEvent && event.parentEvent && event.organizer ? (
-                        <Fragment>
-                          This event is part of{' '}
-                          {parentUrl ? (
-                            <a href={parentUrl}>{event.parentEvent.title}</a>
-                          ) : (
-                            event.parentEvent.title
-                          )}
-                          {`, organized by `}
-                          {event.organizer.website ? (
-                            <a
-                              href={event.organizer.website}
-                              rel="noopener noreferrer"
-                              set:text={event.organizer.name}
-                            />
-                          ) : (
-                            event.organizer.name
-                          )}
-                          {`.`}
-                        </Fragment>
-                      ) : isChildEvent && event.parentEvent ? (
-                        <Fragment>
-                          This event is part of{' '}
-                          {parentUrl ? (
-                            <a href={parentUrl}>{event.parentEvent.title}</a>
-                          ) : (
-                            event.parentEvent.title
-                          )}
-                          .
-                        </Fragment>
-                      ) : event.organizer ? (
-                        <Fragment>
-                          {`This event is organized by `}
-                          {event.organizer.website ? (
-                            <a
-                              href={event.organizer.website}
-                              rel="noopener noreferrer"
-                              set:text={event.organizer.name}
-                            />
-                          ) : (
-                            event.organizer.name
-                          )}
-                          {`.`}
-                        </Fragment>
-                      ) : (
-                        ''
-                      )}
-                      {event.website && (
-                        <Fragment>
-                          {' '}
-                          Refer to the official event website for the most
-                          accurate information.
-                        </Fragment>
-                      )}
-                    </p>
-                  )}
-                  {event.website && (
-                    <wa-button
-                      href={event.website}
-                      rel="external"
-                      variant="neutral"
-                      appearance="accent"
-                      style="width: 100%;"
-                      class="event-detail-sidebar__website-button"
-                    >
-                      Event website
-                      <span class="sr-only"> (opens external site)</span>
-                      <wa-icon slot="end" name="arrow-up-right-from-square" />
-                    </wa-button>
-                  )}
-                  {hasSidebarLinks && (
-                    <div class="flow flow-3xs">
-                      <h2 class="sr-only">Event resources</h2>
-                      <ul role="list" class="event-detail-sidebar__links">
-                        {supplementaryLinks.map((link) => (
-                          <li>
-                            <a href={link.href} rel="external">
-                              {link.label}
-                              <span class="sr-only">
-                                {' '}
-                                (opens external site)
-                              </span>
-                              <wa-icon name="arrow-up-right-from-square" />
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {hasHashtags && (
-                    <div class="event-detail-sidebar__hashtags-group flow flow-3xs">
-                      <h2 class="event-detail-sidebar__hashtags-heading">
-                        Hashtags
-                      </h2>
-                      <ul role="list" class="event-detail-sidebar__hashtags">
-                        {hashtags.map((tag) => (
-                          <li class="event-detail-sidebar__hashtag">
-                            <span>{`#${tag}`}</span>
-                            <wa-copy-button
-                              value={`#${tag}`}
-                              copy-label={`Copy #${tag}`}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </wa-card>
-            </aside>
-          )
-        }
+        {(event.website ||
+          event.organizer ||
+          hasSidebarLinks ||
+          hasHashtags) && (
+          <aside class="event-detail-sidebar">
+            <wa-card class="event-detail-sidebar__card" appearance="outlined">
+              <div class="event-detail-sidebar__content flow flow-s">
+                {hasSidebarIntro && (
+                  <p>
+                    {isChildEvent && event.parentEvent && event.organizer ? (
+                      <Fragment>
+                        This event is part of{' '}
+                        {parentUrl ? (
+                          <a href={parentUrl}>{event.parentEvent.title}</a>
+                        ) : (
+                          event.parentEvent.title
+                        )}
+                        {`, organized by `}
+                        {event.organizer.website ? (
+                          <a
+                            href={event.organizer.website}
+                            rel="noopener noreferrer"
+                            set:text={event.organizer.name}
+                          />
+                        ) : (
+                          event.organizer.name
+                        )}
+                        {`.`}
+                      </Fragment>
+                    ) : isChildEvent && event.parentEvent ? (
+                      <Fragment>
+                        This event is part of{' '}
+                        {parentUrl ? (
+                          <a href={parentUrl}>{event.parentEvent.title}</a>
+                        ) : (
+                          event.parentEvent.title
+                        )}
+                        .
+                      </Fragment>
+                    ) : event.organizer ? (
+                      <Fragment>
+                        {`This event is organized by `}
+                        {event.organizer.website ? (
+                          <a
+                            href={event.organizer.website}
+                            rel="noopener noreferrer"
+                            set:text={event.organizer.name}
+                          />
+                        ) : (
+                          event.organizer.name
+                        )}
+                        {`.`}
+                      </Fragment>
+                    ) : (
+                      ''
+                    )}
+                    {event.website && (
+                      <Fragment>
+                        {' '}
+                        Refer to the official event website for the most
+                        accurate information.
+                      </Fragment>
+                    )}
+                  </p>
+                )}
+                {event.website && (
+                  <wa-button
+                    href={event.website}
+                    rel="external"
+                    variant="neutral"
+                    appearance="accent"
+                    style="width: 100%;"
+                    class="event-detail-sidebar__website-button"
+                  >
+                    Event website
+                    <span class="sr-only"> (opens external site)</span>
+                    <wa-icon slot="end" name="arrow-up-right-from-square" />
+                  </wa-button>
+                )}
+                {hasSidebarLinks && (
+                  <div class="flow flow-3xs">
+                    <h2 class="sr-only">Event resources</h2>
+                    <ul role="list" class="event-detail-sidebar__links">
+                      {supplementaryLinks.map((link) => (
+                        <li>
+                          <a href={link.href} rel="external">
+                            {link.label}
+                            <span class="sr-only"> (opens external site)</span>
+                            <wa-icon name="arrow-up-right-from-square" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {hasHashtags && (
+                  <div class="event-detail-sidebar__hashtags-group flow flow-3xs">
+                    <h2 class="event-detail-sidebar__hashtags-heading">
+                      Hashtags
+                    </h2>
+                    <ul role="list" class="event-detail-sidebar__hashtags">
+                      {hashtags.map((tag) => (
+                        <li class="event-detail-sidebar__hashtag">
+                          <span>{`#${tag}`}</span>
+                          <wa-copy-button
+                            value={`#${tag}`}
+                            copy-label={`Copy #${tag}`}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </wa-card>
+          </aside>
+        )}
 
         <div
           class:list={[
@@ -564,112 +551,102 @@ const jsonLd = {
             },
           ]}
         >
-          {
-            (event.richDescription || event.description) && (
-              <div class="event-detail__description flow">
-                {event.richDescription ? (
-                  <PortableText value={event.richDescription} />
-                ) : (
-                  <p>{event.description}</p>
-                )}
-              </div>
-            )
-          }
+          {(event.richDescription || event.description) && (
+            <div class="event-detail__description flow">
+              {event.richDescription ? (
+                <PortableText value={event.richDescription} />
+              ) : (
+                <p>{event.description}</p>
+              )}
+            </div>
+          )}
 
-          {
-            allSpeakers.length > 0 && !displayFormat && !hasChildren && (
-              <div class="event-detail__speakers flow">
-                <h2 class="text-large">
-                  {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
-                </h2>
-                <ul role="list" class="event-detail__speaker-list">
-                  {allSpeakers.map((speaker) => (
-                    <li>
-                      <span>{speaker.name}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          }
+          {allSpeakers.length > 0 && !displayFormat && !hasChildren && (
+            <div class="event-detail__speakers flow">
+              <h2 class="text-large">
+                {allSpeakers.length === 1 ? 'Speaker' : 'Speakers'}
+              </h2>
+              <ul role="list" class="event-detail__speaker-list">
+                {allSpeakers.map((speaker) => (
+                  <li>
+                    <span>{speaker.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-          {
-            !isDedicatedToAccessibility && hasChildren && (
-              <section class="event-detail__children flow flow-s">
-                <hgroup role="group" aria-roledescription="Heading group">
-                  <h2>Accessibility highlights</h2>
-                  <p
-                    aria-roledescription="subtitle"
-                    class="text-small text-muted"
-                  >
-                    {enumeratedChildTypes}
-                  </p>
-                </hgroup>
-                <ol
-                  role="list"
-                  class="event-detail__children-list"
-                  aria-label={`Accessibility sessions for ${event.title}`}
+          {!isDedicatedToAccessibility && hasChildren && (
+            <section class="event-detail__children flow flow-s">
+              <hgroup role="group" aria-roledescription="Heading group">
+                <h2>Accessibility highlights</h2>
+                <p
+                  aria-roledescription="subtitle"
+                  class="text-small text-muted"
                 >
-                  {event.children!.map((child) => (
-                    <li>
-                      <wa-card appearance="outlined">
-                        <EventChild
-                          client:visible
-                          event={child}
-                          showEnded={true}
-                        />
-                      </wa-card>
-                    </li>
-                  ))}
-                </ol>
-                {event.website && (
-                  <p>
-                    {`Refer to the `}
-                    <a
-                      href={event.website}
-                      rel="noopener noreferrer"
-                      set:text="official event website"
-                    />
-                    {` for the full schedule.`}
-                  </p>
-                )}
-              </section>
-            )
-          }
-
-          {
-            !isDedicatedToAccessibility && !hasChildren && event.isParent && (
-              <section class="event-detail__children flow">
-                <h2>Schedule</h2>
-                <p>
-                  {event.title} is expected to include one or more
-                  accessibility-themed sessions but the full schedule has not
-                  yet been announced. Details will be published here closer to
-                  the date of the event.
+                  {enumeratedChildTypes}
                 </p>
-              </section>
-            )
-          }
+              </hgroup>
+              <ol
+                role="list"
+                class="event-detail__children-list"
+                aria-label={`Accessibility sessions for ${event.title}`}
+              >
+                {event.children!.map((child) => (
+                  <li>
+                    <wa-card appearance="outlined">
+                      <EventChild
+                        client:visible
+                        event={child}
+                        showEnded={true}
+                      />
+                    </wa-card>
+                  </li>
+                ))}
+              </ol>
+              {event.website && (
+                <p>
+                  {`Refer to the `}
+                  <a
+                    href={event.website}
+                    rel="noopener noreferrer"
+                    set:text="official event website"
+                  />
+                  {` for the full schedule.`}
+                </p>
+              )}
+            </section>
+          )}
 
-          {
-            hasTopics && (
-              <div class="event-detail__topics flow">
-                <h2>
-                  {event.topics!.length === 1
-                    ? 'Related topic'
-                    : 'Related topics'}
-                </h2>
-                <ul role="list" class="event-detail__topic-list flow flow-xs">
-                  {event.topics!.map((topic) => (
-                    <li class="flow flow-3xs">
-                      <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
-                      {topic.description && <p>{topic.description}</p>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          }
+          {!isDedicatedToAccessibility && !hasChildren && event.isParent && (
+            <section class="event-detail__children flow">
+              <h2>Schedule</h2>
+              <p>
+                {event.title} is expected to include one or more
+                accessibility-themed sessions but the full schedule has not yet
+                been announced. Details will be published here closer to the
+                date of the event.
+              </p>
+            </section>
+          )}
+
+          {hasTopics && (
+            <div class="event-detail__topics flow">
+              <h2>
+                {event.topics!.length === 1
+                  ? 'Related topic'
+                  : 'Related topics'}
+              </h2>
+              <ul role="list" class="event-detail__topic-list flow flow-xs">
+                {event.topics!.map((topic) => (
+                  <li class="flow flow-3xs">
+                    <a href={`/topics/${topic.slug.current}`}>{topic.name}</a>
+                    {topic.description && <p>{topic.description}</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </article>
