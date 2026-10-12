@@ -117,6 +117,18 @@ test.describe('Homepage accessibility', () => {
     await expect(icon).toHaveAttribute('label', /.+/);
   });
 
+  test('timezone select has a visible label', async ({ page }) => {
+    const timezoneLabel = page.locator('#timezone-select label');
+    await expect(timezoneLabel).toBeVisible();
+    await expect(timezoneLabel).toHaveText('Timezone');
+
+    const results = await new AxeBuilder({ page })
+      .include('#timezone-select')
+      .withRules(['label-title-only'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test('upcoming events heading exists (visually hidden)', async ({ page }) => {
     const heading = page.getByRole('heading', {
       name: /upcoming accessibility events/i,
