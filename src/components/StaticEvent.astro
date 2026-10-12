@@ -64,9 +64,37 @@ const attendanceMode = event.attendanceMode || 'none';
 const displayLocation = event.location || 'International';
 ---
 
-{
-  isDeadline ? (
-    <div class="event event--deadline">
+{isDeadline ? (
+  <div class="event event--deadline">
+    <div class="event__dates">
+      <span class="event__dateRange">
+        <time datetime={machineStart}>{formattedRange[0]}</time>
+        {formattedRange[1] && machineEnd && (
+          <>
+            <span aria-hidden="true"> &ndash; </span>
+            <span class="sr-only">until</span>
+            <time datetime={machineEnd}>{formattedRange[1]}</time>
+          </>
+        )}
+        {!isInternational && ' UTC'}{' '}
+        <span class="badge badge--danger">Deadline</span>
+      </span>
+    </div>
+    <span class="event__title">
+      Submit proposals for <a href={eventUrl || event.website}>{event.title}</a>
+    </span>
+  </div>
+) : event.type ? (
+  <article class={`event event--${event.type}`} data-event-type={event.type}>
+    <h3 id={headingId} class="event__title">
+      {eventUrl ? (
+        <a href={eventUrl}>{event.title}</a>
+      ) : (
+        <span>{event.title}</span>
+      )}
+    </h3>
+
+    {event.dateStart && (
       <div class="event__dates">
         <span class="event__dateRange">
           <time datetime={machineStart}>{formattedRange[0]}</time>
@@ -77,116 +105,85 @@ const displayLocation = event.location || 'International';
               <time datetime={machineEnd}>{formattedRange[1]}</time>
             </>
           )}
-          {!isInternational && ' UTC'}{' '}
-          <span class="badge badge--danger">Deadline</span>
+          {!isInternational && ' UTC'}
         </span>
       </div>
-      <span class="event__title">
-        Submit proposals for{' '}
-        <a href={eventUrl || event.website}>{event.title}</a>
-      </span>
-    </div>
-  ) : event.type ? (
-    <article class={`event event--${event.type}`} data-event-type={event.type}>
-      <h3 id={headingId} class="event__title">
-        {eventUrl ? (
-          <a href={eventUrl}>{event.title}</a>
-        ) : (
-          <span>{event.title}</span>
+    )}
+
+    {attendanceMode !== 'none' && event.type !== 'deadline' && (
+      <div class="event__delivery text-small">
+        {attendanceMode === 'online' && (
+          <span class="event__online">Online</span>
         )}
-      </h3>
-
-      {event.dateStart && (
-        <div class="event__dates">
-          <span class="event__dateRange">
-            <time datetime={machineStart}>{formattedRange[0]}</time>
-            {formattedRange[1] && machineEnd && (
-              <>
-                <span aria-hidden="true"> &ndash; </span>
-                <span class="sr-only">until</span>
-                <time datetime={machineEnd}>{formattedRange[1]}</time>
-              </>
-            )}
-            {!isInternational && ' UTC'}
-          </span>
-        </div>
-      )}
-
-      {attendanceMode !== 'none' && event.type !== 'deadline' && (
-        <div class="event__delivery text-small">
-          {attendanceMode === 'online' && (
-            <span class="event__online">Online</span>
-          )}
-          {attendanceMode === 'offline' && (
-            <span class="event__location">
-              <span>{displayLocation}</span>
-            </span>
-          )}
-          {attendanceMode === 'mixed' && (
-            <div>
-              <span class="event__location">
-                <span>{displayLocation}</span>
-              </span>
-              <span class="text-muted"> and </span>
-              <span class="event__online">Online</span>
-            </div>
-          )}
-          {event.website && !isTheme && (
-            <Fragment>
-              <span aria-hidden="true" class="event__delivery-separator">
-                ·
-              </span>
-              <a
-                href={event.website}
-                rel="external noopener noreferrer"
-                class="event__website-link"
-                aria-describedby={headingId}
-              >
-                Event website<span class="sr-only"> (opens external site)</span>
-              </a>
-            </Fragment>
-          )}
-        </div>
-      )}
-
-      {attendanceMode === 'none' && event.type !== 'deadline' && (
-        <div class="event__delivery text-small">
+        {attendanceMode === 'offline' && (
           <span class="event__location">
             <span>{displayLocation}</span>
           </span>
-          {event.website && !isTheme && (
-            <Fragment>
-              <span aria-hidden="true" class="event__delivery-separator">
-                ·
-              </span>
-              <a
-                href={event.website}
-                rel="external noopener noreferrer"
-                class="event__website-link"
-                aria-describedby={headingId}
-              >
-                Event website<span class="sr-only"> (opens external site)</span>
-              </a>
-            </Fragment>
-          )}
-        </div>
-      )}
+        )}
+        {attendanceMode === 'mixed' && (
+          <div>
+            <span class="event__location">
+              <span>{displayLocation}</span>
+            </span>
+            <span class="text-muted"> and </span>
+            <span class="event__online">Online</span>
+          </div>
+        )}
+        {event.website && !isTheme && (
+          <Fragment>
+            <span aria-hidden="true" class="event__delivery-separator">
+              ·
+            </span>
+            <a
+              href={event.website}
+              rel="external noopener noreferrer"
+              class="event__website-link"
+              aria-describedby={headingId}
+            >
+              Event website<span class="sr-only"> (opens external site)</span>
+            </a>
+          </Fragment>
+        )}
+      </div>
+    )}
 
-      {event.description && !isTheme && (
-        <details class="event__children flow">
-          <summary>Description</summary>
-          <p class="event__description">{event.description}</p>
-        </details>
-      )}
+    {attendanceMode === 'none' && event.type !== 'deadline' && (
+      <div class="event__delivery text-small">
+        <span class="event__location">
+          <span>{displayLocation}</span>
+        </span>
+        {event.website && !isTheme && (
+          <Fragment>
+            <span aria-hidden="true" class="event__delivery-separator">
+              ·
+            </span>
+            <a
+              href={event.website}
+              rel="external noopener noreferrer"
+              class="event__website-link"
+              aria-describedby={headingId}
+            >
+              Event website<span class="sr-only"> (opens external site)</span>
+            </a>
+          </Fragment>
+        )}
+      </div>
+    )}
 
-      {(callForSpeakersOpen || (event.isFree && !isTheme)) && (
-        <div class="event__badges">
-          {callForSpeakersOpen && (
-            <span class="badge badge--success">Call for speakers</span>
-          )}
-          {event.isFree && !isTheme && <span class="badge">Free</span>}
-        </div>
-      )}
-    </article>
-  ) : null
-}
+    {event.description && !isTheme && (
+      <details class="event__children flow">
+        <summary>Description</summary>
+        <p class="event__description">{event.description}</p>
+      </details>
+    )}
+
+    {(callForSpeakersOpen || (event.isFree && !isTheme)) && (
+      <div class="event__badges">
+        {callForSpeakersOpen && (
+          <span class="badge badge--success">Call for speakers</span>
+        )}
+        {event.isFree && !isTheme && <span class="badge">Free</span>}
+      </div>
+    )}
+  </article>
+) : null}
