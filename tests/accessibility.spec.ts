@@ -21,6 +21,11 @@ async function runAxeScan(page: Page) {
   return results;
 }
 
+// A visually hidden label is clipped to a 1x1px box. 8px sits comfortably
+// above that while staying below the smallest plausible rendered line of
+// text, so it distinguishes a hidden label from a visible one.
+const VISIBLE_LABEL_MIN_PX = 8;
+
 // Helper: parse an rgb/rgba color string into { r, g, b } values (0–255)
 function parseColor(color: string): { r: number; g: number; b: number } {
   const match = color.match(
@@ -432,6 +437,42 @@ test.describe('Shared component accessibility', () => {
 
     await expect(drawer).toHaveAttribute('open', '');
     await expect(drawer).toHaveAttribute('label', 'Filters');
+  });
+
+  // Regression test for #922: the timezone select was labelled by a
+  // visually hidden label, which axe flags as label-title-only because the
+  // combobox input then has no visible label.
+  test('timezone select has a visible label', async ({ page }) => {
+    const select = page.locator('#timezone-select');
+    await select.waitFor({ state: 'visible', timeout: 5000 });
+
+    // The label lives in shadow DOM, so measure it directly rather than
+    // relying on Playwright visibility checks, which cannot pierce it.
+    const label = await select.evaluate((el) => {
+      const node = el.shadowRoot?.querySelector('[part~="form-control-label"]');
+      const rect = node?.getBoundingClientRect();
+      return {
+        text: node?.textContent?.trim() ?? '',
+        width: rect?.width ?? 0,
+        height: rect?.height ?? 0,
+      };
+    });
+
+    expect(label.text).toBe('Timezone');
+    expect(label.width).toBeGreaterThan(VISIBLE_LABEL_MIN_PX);
+    expect(label.height).toBeGreaterThan(VISIBLE_LABEL_MIN_PX);
+  });
+
+  test('filter controls have no label-title-only violations', async ({
+    page,
+  }) => {
+    // label-title-only is a best-practice rule, so it sits outside the
+    // WCAG-tagged scan used elsewhere in this suite.
+    const results = await new AxeBuilder({ page })
+      .include('#filters')
+      .withRules(['label-title-only'])
+      .analyze();
+    expect(results.violations).toEqual([]);
   });
 
   test('html element has lang attribute', async ({ page }) => {
