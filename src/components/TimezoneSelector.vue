@@ -5,7 +5,6 @@
       label="Timezone"
       placement="bottom"
       appearance="outlined"
-      class="wa-visually-hidden-label"
       :size="size"
       :value="selectedValue"
       @change="updateTimezone"
