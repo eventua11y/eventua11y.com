@@ -36,6 +36,10 @@ jobs:
     name: Analyse codebase
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -52,6 +56,11 @@ jobs:
       - uses: fallow-rs/fallow@v3
         with:
           command: audit
+          comment: true
+          # Post as github-actions[bot] with the workflow token. The branded
+          # alternative mints an app token from an external broker, which needs
+          # id-token: write and isn't worth it for the name on a comment.
+          branded-token: false
 
   tests_e2e:
     name: Run end-to-end tests
