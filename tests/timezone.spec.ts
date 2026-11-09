@@ -27,6 +27,13 @@ test.describe('Timezone Selector', () => {
     await expect(select).toHaveAttribute('open', '');
   });
 
+  test('timezone select has a visible label', async ({ page }) => {
+    const timezoneLabel = page
+      .locator('#timezone-select')
+      .getByText('Timezone', { exact: true });
+    await expect(timezoneLabel).toBeVisible();
+  });
+
   test('timezone can be changed between local and event times', async ({
     page,
   }) => {
