@@ -39,10 +39,10 @@
     "astro": "^7.3.3"
   },
   "overrides": {
-    "vue": "^3.5.25",
-    "@vue/compiler-sfc": "^3.5.25",
-    "@vue/compiler-core": "^3.5.25",
-    "@vue/compiler-dom": "^3.5.25",
+    "vue": "^3.5.45",
+    "@vue/compiler-sfc": "^3.5.45",
+    "@vue/compiler-core": "^3.5.45",
+    "@vue/compiler-dom": "^3.5.45",
     "@fastify/static": "^10.1.2"
   },
   "devDependencies": {
@@ -63,17 +63,17 @@
     "eslint-plugin-astro": "^3.2.1",
     "eslint-plugin-playwright": "^2.12.1",
     "eslint-plugin-vue": "^10.12.0",
-    "fallow": "^3.17.0",
+    "fallow": "^3.34.0",
     "globals": "^17.13.0",
     "knip": "^6.44.2",
-    "netlify-cli": "^27.12.0",
+    "netlify-cli": "^27.16.3",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^1.1.0",
     "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "@astrojs/netlify": "^8.2.5",
+    "@astrojs/netlify": "^8.2.12",
     "@astrojs/vue": "^7.0.2",
     "@awesome.me/webawesome": "^3.13.0",
     "@openfeature/flagsmith-provider": "~0.1.2",
@@ -84,6 +84,6 @@
     "astro-portabletext": "^0.13.0",
     "dayjs": "^1.11.23",
     "flagsmith-nodejs": "^8.1.2",
-    "vue": "^3.5.25"
+    "vue": "^3.5.45"
   }
 }
