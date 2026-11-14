@@ -1,3 +1,35 @@
+import posthog from 'posthog-js';
+
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST;
+const posthogLogger = posthog.logger;
+
+if (posthogKey && posthogHost) {
+  posthog.init(posthogKey, {
+    api_host: posthogHost,
+    defaults: '2026-08-30',
+    capture_exceptions: {
+      capture_unhandled_errors: true,
+      capture_unhandled_rejections: true,
+      capture_console_errors: false,
+    },
+    logs: {
+      serviceName: 'eventua11y-web',
+      environment: import.meta.env.MODE,
+    },
+  });
+  posthogLogger.info('PostHog browser log capture initialized', {
+    lifecycle_stage: 'client_initialization',
+  });
+} else if (import.meta.env.DEV) {
+  const missingVariable = posthogKey
+    ? 'PUBLIC_POSTHOG_HOST'
+    : 'PUBLIC_POSTHOG_KEY';
+  throw new Error(
+    `${missingVariable} variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once ${missingVariable} is configured`
+  );
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Theme switching. Three states are stored - "light", "dark", or nothing at
   // all, meaning follow the device - but only two are offered, because the
@@ -73,6 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   applyTheme(resolvedTheme());
+
+  if (posthogKey && posthogHost) {
+    posthogLogger.info('Browser interface ready', {
+      lifecycle_stage: 'dom_content_loaded',
+    });
+  }
 
   toggleButton?.addEventListener('click', toggleTheme);
 

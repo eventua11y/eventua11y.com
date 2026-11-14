@@ -216,6 +216,7 @@ const speakerDisplay = computed(() => {
       :location="event.location"
       :website="event.type !== 'theme' ? event.website : undefined"
       :headingId="headingId"
+      :eventType="event.type"
       v-if="event.type !== 'deadline'"
     />
 

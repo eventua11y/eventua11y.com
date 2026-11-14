@@ -20,6 +20,7 @@
 import { computed, onMounted } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from '../lib/dayjs';
+import posthog from 'posthog-js';
 
 withDefaults(
   defineProps<{
@@ -70,6 +71,14 @@ function updateTimezone(event: Event) {
   const select = event.target as HTMLElement & { value: string };
   const isLocal = select.value !== 'event';
   userStore.setTimezone(isLocal ? userTimezone.value : 'event', isLocal);
+  if (
+    import.meta.env.PUBLIC_POSTHOG_KEY &&
+    import.meta.env.PUBLIC_POSTHOG_HOST
+  ) {
+    posthog.capture('timezone_preference_changed', {
+      timezone_mode: isLocal ? 'local' : 'event',
+    });
+  }
 }
 
 /**
