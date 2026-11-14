@@ -86,6 +86,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
+import posthog from 'posthog-js';
 
 const awarenessDaysSwitch = ref(null);
 const booksSwitch = ref(null);
@@ -107,20 +108,41 @@ onMounted(() => {
   });
 });
 
+function captureFilterChange(filterName: string, value: string | boolean) {
+  if (
+    import.meta.env.PUBLIC_POSTHOG_KEY &&
+    import.meta.env.PUBLIC_POSTHOG_HOST
+  ) {
+    posthog.capture('filters_changed', {
+      filter_name: filterName,
+      filter_value: value,
+    });
+  }
+}
+
 function resetFilters() {
   filtersStore.resetFilters();
+  if (
+    import.meta.env.PUBLIC_POSTHOG_KEY &&
+    import.meta.env.PUBLIC_POSTHOG_HOST
+  ) {
+    posthog.capture('filters_reset');
+  }
 }
 
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
+  captureFilterChange('show_awareness_days', event.target.checked);
 }
 
 function toggleBooks(event) {
   filtersStore.filters.showBooks = event.target.checked;
+  captureFilterChange('show_books', event.target.checked);
 }
 
 function toggleDeadlines(event) {
   filtersStore.filters.showDeadlines = event.target.checked;
+  captureFilterChange('show_deadlines', event.target.checked);
 }
 
 // Add update handler for radio groups
@@ -129,6 +151,7 @@ function updateFilter(
   event: CustomEvent
 ) {
   filtersStore.filters[filterName] = event.target.value;
+  captureFilterChange(filterName, event.target.value);
 }
 </script>
 

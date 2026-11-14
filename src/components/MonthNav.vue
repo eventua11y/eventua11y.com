@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import posthog from 'posthog-js';
 
 interface MonthLink {
   text: string;
@@ -86,6 +87,14 @@ function updateMonthNav() {
  */
 function handleLinkClick(e: MouseEvent, link: MonthLink) {
   e.preventDefault();
+  if (
+    import.meta.env.PUBLIC_POSTHOG_KEY &&
+    import.meta.env.PUBLIC_POSTHOG_HOST
+  ) {
+    posthog.capture('month_navigation_clicked', {
+      destination: link.identifier === 'today' ? 'today' : 'month',
+    });
+  }
   if (link.identifier === 'today') {
     const todaySection = document.getElementById('today');
     scrollToSection(todaySection);

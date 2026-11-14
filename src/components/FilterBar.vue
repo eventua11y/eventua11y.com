@@ -60,6 +60,7 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
+import posthog from 'posthog-js';
 
 /**
  * FilterBar component
@@ -96,6 +97,12 @@ function updateIsNarrow(e: MediaQueryListEvent | MediaQueryList) {
  */
 function resetFilters() {
   filtersStore.resetFilters();
+  if (
+    import.meta.env.PUBLIC_POSTHOG_KEY &&
+    import.meta.env.PUBLIC_POSTHOG_HOST
+  ) {
+    posthog.capture('filters_reset');
+  }
 }
 
 /**
@@ -104,6 +111,15 @@ function resetFilters() {
  */
 function toggleAwarenessDays(event) {
   filtersStore.filters.showAwarenessDays = event.target.checked;
+  if (
+    import.meta.env.PUBLIC_POSTHOG_KEY &&
+    import.meta.env.PUBLIC_POSTHOG_HOST
+  ) {
+    posthog.capture('filters_changed', {
+      filter_name: 'show_awareness_days',
+      filter_value: event.target.checked,
+    });
+  }
 }
 
 /**
