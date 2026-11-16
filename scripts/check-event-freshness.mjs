@@ -801,6 +801,25 @@ function validateAnalyses(analyses, expected) {
   return byId;
 }
 
+export function trustedWebsiteDomains(snapshot) {
+  const domains = new Set();
+  for (const { event } of snapshot.results) {
+    const url = URL.parse(event.website);
+    if (
+      !url ||
+      url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
+      !/^[a-z0-9.-]+$/.test(url.hostname)
+    ) {
+      console.warn(`Not allowing unsafe report website for ${event._id}`);
+      continue;
+    }
+    domains.add(url.hostname);
+  }
+  return [...domains];
+}
+
 export function buildValidatedReport(snapshot, output, sanitize = String) {
   const analyses = parseReportAnalyses(output);
   const expected = new Set(
