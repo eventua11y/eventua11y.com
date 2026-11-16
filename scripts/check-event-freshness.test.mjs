@@ -115,14 +115,19 @@ describe('freshness safe-output validation', () => {
 
   it.each([
     ['missing', []],
+    ['null entry', [null]],
     ['unexpected', [analysis([], { _id: 'unknown' })]],
     ['extra', [analysis(), analysis()]],
     ['malformed change', [analysis([{ field: 'location' }])]],
+    ['invalid changes', [analysis([], { changes: {} })]],
+    ['invalid all-clear flag', [analysis([], { noChanges: 'true' })]],
+    ['invalid notes', [analysis([], { notes: 123 })]],
     [
       'contradictory all-clear',
       [analysis([change('location', 'New venue')], { noChanges: true })],
     ],
     ['unexplained discrepancy', [analysis([], { noChanges: false })]],
+    ['blank explanation', [analysis([], { noChanges: false, notes: '  ' })]],
   ])('fails closed on %s analyses', (_, analyses) => {
     expect(() => buildValidatedReport(snapshot(), output(analyses))).toThrow();
   });
@@ -178,6 +183,60 @@ describe('freshness safe-output validation', () => {
     expect(() =>
       buildValidatedReport(original, output([analysis(), analysis()]))
     ).toThrow(/duplicate/);
+  });
+
+  it('preserves all-day timing, hidden fields and redirect findings during preparation', async () => {
+    vi.useFakeTimers();
+    vi.stubEnv('SANITY_PROJECT', 'example');
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    sanityFetch.mockResolvedValue([
+      {
+        ...event,
+        _id: 'international',
+        day: true,
+        timezone: null,
+        dateEnd: null,
+        callForSpeakers: true,
+        callForSpeakersClosingDate: '2027-05-01T12:00:00Z',
+      },
+      { ...event, _id: 'theme', type: 'theme', timezone: 'UTC' },
+      event,
+    ]);
+    const fetch = vi.fn();
+    for (const url of [
+      event.website,
+      'https://www.example.com',
+      'https://example.org',
+    ]) {
+      fetch.mockResolvedValueOnce({
+        status: 200,
+        url,
+        headers: new Headers({ 'content-type': 'text/html' }),
+        text: async () => 'Event information. '.repeat(20),
+      });
+    }
+    vi.stubGlobal('fetch', fetch);
+    const pending = prepareSnapshot();
+    await vi.runAllTimersAsync();
+    const { results } = await pending;
+    expect(results[0].prompt).toContain(
+      'dateStart (datetime): Wednesday, 9 June 2027 (international event, no specific timezone)'
+    );
+    expect(results[0].prompt).toContain('dateEnd (datetime): not set');
+    expect(results[0].prompt).toContain('callForSpeakers (boolean): true');
+    expect(results[0].prompt).toContain(
+      'callForSpeakersClosingDate (datetime): 1 May 2027 at 12:00'
+    );
+    expect(results[1].prompt).not.toContain('attendanceMode (enum):');
+    expect(results[1].prompt).not.toContain('callForSpeakers (boolean):');
+    expect(results[1].severity).toBe('info');
+    expect(results[1].findings).toEqual([
+      'Website redirected to subdomain: https://www.example.com',
+    ]);
+    expect(results[2].severity).toBe('warning');
+    expect(results[2].findings).toEqual([
+      'Website redirected to a different domain: https://example.org',
+    ]);
   });
 
   it('rejects malformed JSON and multiple publication requests', () => {
@@ -244,6 +303,33 @@ describe('freshness safe-output validation', () => {
     expect(report.body).not.toContain('All events look up to date');
   });
 
+  it('keeps report groups ordered without downgrading existing errors or warnings', () => {
+    const results = ['error', 'warning', 'info', 'ok'].map((severity) => ({
+      event: { ...event, _id: severity, title: `${severity} event` },
+      findings: [],
+      severity,
+      prompt: 'Compare.',
+    }));
+    const analyses = results.map(({ event: record }) =>
+      analysis([change('location', 'New venue', { severity: 'info' })], {
+        _id: record._id,
+      })
+    );
+    analyses[3] = analysis([], { _id: 'ok' });
+    const report = buildValidatedReport(snapshot(results), output(analyses));
+    expect(report.title).toBe('Event freshness check: 2 events need attention');
+    expect(report.body).toContain('### **error event**');
+    expect(report.body).toContain('### warning event');
+    expect(report.body).toContain('## For review (1)');
+    expect(report.body).toContain('<summary>No issues detected (1)</summary>');
+    expect(report.body.indexOf('## Needs attention')).toBeLessThan(
+      report.body.indexOf('## For review')
+    );
+    expect(report.body.indexOf('## For review')).toBeLessThan(
+      report.body.indexOf('<details>')
+    );
+  });
+
   it('keeps schema, timezone, stale-date and expired-CFS filtering', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-11-16T10:00:00Z'));
@@ -286,6 +372,28 @@ describe('freshness safe-output validation', () => {
       ])
     );
     expect(report.title).toBe('Event freshness check: all clear');
+  });
+
+  it('retains explicit same-day time changes while filtering equivalent or unrepresentable values', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-16T10:00:00Z'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const report = buildValidatedReport(
+      snapshot(),
+      output([
+        analysis([
+          change('dateStart', '10 June 2027 at 13:00'),
+          change('callForSpeakers', ' FALSE '),
+          change('attendanceMode', ' ONLINE '),
+          change('dateEnd', 'not set'),
+        ]),
+      ])
+    );
+    expect(report.body).toContain('10 June 2027 at 13:00');
+    expect(report.body).not.toContain('`callForSpeakers`');
+    expect(report.body).not.toContain('`attendanceMode`');
+    expect(report.body).not.toContain('`dateEnd`');
+    expect(warn).toHaveBeenCalledTimes(3);
   });
 
   it('sanitizes agent text before publication and preserves table structure', () => {

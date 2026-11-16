@@ -99,167 +99,122 @@ const SELF_CANCELLING_PHRASES = [
   'already correct',
 ];
 
-/**
- * Decide whether a single suggested change should be kept.
- * Returns { keep: boolean, drop?: string } where `drop` explains why.
- *
- * Rules:
- *  1. Drop if the field is hidden for this event's type.
- *  2. Drop if the suggested value isn't representable in the schema.
- *  3. Drop if current and suggested are equivalent (datetime instants
- *     match, booleans/enums match literally).
- *  4. Drop if the reason text contradicts the suggestion.
- *  5. Drop datetime suggestions that resolve to a past date.
- *  6. Drop callForSpeakers toggles once the closing date has passed
- *     (no visible/behavioural effect).
- */
-function validateChange(change, event) {
-  const { field, current, suggested, reason } = change;
+function representabilityIssue({ field, suggested }) {
+  const value = String(suggested).toLowerCase().trim();
+  switch (FIELD_TYPES[field]) {
+    case 'boolean':
+      if (!['true', 'false'].includes(value)) {
+        return `${field} is boolean; suggested "${suggested}" is not true/false`;
+      }
+      break;
+    case 'enum':
+      if (!FIELD_ENUMS[field].includes(value)) {
+        return `${field} must be one of ${FIELD_ENUMS[field].join('|')}; suggested "${suggested}"`;
+      }
+      break;
+    case 'datetime':
+      if (
+        value === 'unknown' ||
+        value.includes('time unknown') ||
+        value === 'not set'
+      ) {
+        return `${field} is datetime; cannot store "${suggested}"`;
+      }
+      break;
+  }
+  return null;
+}
 
-  if (!field) return { keep: false, drop: 'missing field name' };
+function normalizeComparableValue(value) {
+  const normalized = String(value).toLowerCase().trim();
+  if (normalized === 'yes') return 'true';
+  if (normalized === 'no') return 'false';
+  if (['not set', 'null', ''].includes(normalized)) return '';
+  return normalized;
+}
 
-  // Rule 1: hidden for theme events
-  if (event.type === 'theme' && HIDDEN_FOR_THEME.has(field)) {
-    return {
-      keep: false,
-      drop: `${field} is hidden for theme-type events`,
-    };
+function equivalentDateIssue({ field, suggested }, event) {
+  // Compare calendar days in the event's timezone unless the source
+  // explicitly supplies a time.
+  const suggestedDay = parseSuggestedDate(suggested);
+  const currentDay = event[field]
+    ? dayjs.utc(event[field]).tz(event.timezone || 'UTC')
+    : null;
+  if (
+    suggestedDay.isValid() &&
+    currentDay &&
+    suggestedDay.format('YYYY-MM-DD') === currentDay.format('YYYY-MM-DD') &&
+    !/\b\d{1,2}:\d{2}\b/.test(String(suggested))
+  ) {
+    return `${field} suggested value resolves to same date as current`;
+  }
+  return null;
+}
+
+function equivalenceIssue(change, event) {
+  const { field, current, suggested } = change;
+  const type = FIELD_TYPES[field];
+  if (type === 'datetime' && current && suggested) {
+    return equivalentDateIssue(change, event);
+  }
+  if (
+    ['boolean', 'enum'].includes(type) &&
+    normalizeComparableValue(current) === normalizeComparableValue(suggested)
+  ) {
+    return `${field} current and suggested are equivalent (${suggested})`;
+  }
+  return null;
+}
+
+function contradictoryReasonIssue(reason) {
+  const text = String(reason || '').toLowerCase();
+  const phrase = SELF_CANCELLING_PHRASES.find((phrase) =>
+    text.includes(phrase)
+  );
+  return phrase ? `reason indicates no change needed ("${phrase}")` : null;
+}
+
+function staleChangeIssue({ field, suggested }, event) {
+  // Upcoming events may still link to a previous edition's website.
+  if (FIELD_TYPES[field] === 'datetime') {
+    const suggestedDay = parseSuggestedDate(suggested);
+    if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
+      return `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`;
+    }
   }
 
-  const type = FIELD_TYPES[field];
+  // Toggling an expired call no longer changes anything on the site.
+  if (field === 'callForSpeakers' && event.callForSpeakersClosingDate) {
+    const closingDay = dayjs(event.callForSpeakersClosingDate);
+    if (closingDay.isValid() && closingDay.isBefore(dayjs())) {
+      return `callForSpeakers closing date (${event.callForSpeakersClosingDate}) has passed; toggling the flag has no effect`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Validate a proposed change in rule order so the first rejection stays
+ * the reported reason.
+ *
+ * @returns {{ keep: boolean, drop?: string }}
+ */
+function validateChange(change, event) {
+  const { field } = change;
+  if (!field) return { keep: false, drop: 'missing field name' };
+  if (event.type === 'theme' && HIDDEN_FOR_THEME.has(field)) {
+    return { keep: false, drop: `${field} is hidden for theme-type events` };
+  }
   if (!Object.hasOwn(FIELD_TYPES, field)) {
     return { keep: false, drop: `unsupported field: ${field}` };
   }
 
-  // Rule 2: representability
-  if (type === 'boolean') {
-    const s = String(suggested).toLowerCase().trim();
-    if (s !== 'true' && s !== 'false') {
-      return {
-        keep: false,
-        drop: `${field} is boolean; suggested "${suggested}" is not true/false`,
-      };
-    }
-  }
-
-  if (type === 'enum') {
-    const allowed = FIELD_ENUMS[field] || [];
-    const s = String(suggested).toLowerCase().trim();
-    if (!allowed.includes(s)) {
-      return {
-        keep: false,
-        drop: `${field} must be one of ${allowed.join('|')}; suggested "${suggested}"`,
-      };
-    }
-  }
-
-  if (type === 'datetime') {
-    // The suggested value is allowed to be a date string the model
-    // extracted from the website (e.g. "31 May 2026"). Reject only if
-    // it's literally "unknown" or "time unknown" — these can't be stored.
-    const s = String(suggested).toLowerCase().trim();
-    if (s === 'unknown' || s.includes('time unknown') || s === 'not set') {
-      return {
-        keep: false,
-        drop: `${field} is datetime; cannot store "${suggested}"`,
-      };
-    }
-  }
-
-  // Rule 3: equivalence
-  if (type === 'datetime' && current && suggested) {
-    // Parse the suggested string against a small set of human-readable
-    // date formats the prompt encourages. We compare calendar days in
-    // the event's timezone, not instants, because the model rarely
-    // includes a time component for date-only sources.
-    const tz = event.timezone || 'UTC';
-    const suggestedDay = parseSuggestedDate(suggested);
-    const currentDay = event[field] ? dayjs.utc(event[field]).tz(tz) : null;
-    if (
-      suggestedDay.isValid() &&
-      currentDay &&
-      suggestedDay.format('YYYY-MM-DD') === currentDay.format('YYYY-MM-DD')
-    ) {
-      // Same calendar day -- treat as equivalent unless the suggestion
-      // explicitly carries a different time component.
-      const reasonHasTimeChange = /\b\d{1,2}:\d{2}\b/.test(String(suggested));
-      if (!reasonHasTimeChange) {
-        return {
-          keep: false,
-          drop: `${field} suggested value resolves to same date as current`,
-        };
-      }
-    }
-  }
-
-  if (type === 'boolean' || type === 'enum') {
-    const c = String(current).toLowerCase().trim();
-    const s = String(suggested).toLowerCase().trim();
-    // Map the prompt's "yes"/"no"/"not set" prose for booleans so we
-    // can detect equivalence with the canonical true/false value.
-    const norm = (v) => {
-      if (v === 'yes') return 'true';
-      if (v === 'no') return 'false';
-      if (v === 'not set' || v === 'null' || v === '') return '';
-      return v;
-    };
-    if (norm(c) === norm(s)) {
-      return {
-        keep: false,
-        drop: `${field} current and suggested are equivalent (${suggested})`,
-      };
-    }
-  }
-
-  // Rule 4: self-cancelling reason text
-  const r = String(reason || '').toLowerCase();
-  for (const phrase of SELF_CANCELLING_PHRASES) {
-    if (r.includes(phrase)) {
-      return {
-        keep: false,
-        drop: `reason indicates no change needed ("${phrase}")`,
-      };
-    }
-  }
-
-  // Rule 5: past-dated datetime suggestions for upcoming events
-  //
-  // The freshness check only runs against events whose dateEnd is in
-  // the future, so a suggestion that resolves to a past date is almost
-  // always a confused reading of a website that hasn't been updated for
-  // the new edition yet (e.g. DAW 2026 record vs. site still showing
-  // DAW 2025 wrap-up text). Those need a human eye, not a structured
-  // change. Surface as a note instead by dropping the change here.
-  if (type === 'datetime') {
-    const suggestedDay = parseSuggestedDate(suggested);
-    if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
-      return {
-        keep: false,
-        drop: `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`,
-      };
-    }
-  }
-
-  // Rule 6: no-op callForSpeakers toggles once the deadline has passed
-  //
-  // `callForSpeakers` only has a visible/behavioural effect while the
-  // call is open: the frontend derives openness via isCallForSpeakersOpen
-  // (callForSpeakers === true AND now < callForSpeakersClosingDate), and a
-  // CFS deadline event is only synthesised when the closing date is in the
-  // future. So once callForSpeakersClosingDate is in the past, flipping the
-  // boolean either way changes nothing users can see. Drop those to avoid
-  // surfacing purely cosmetic data-tidiness edits.
-  if (field === 'callForSpeakers' && event.callForSpeakersClosingDate) {
-    const closingDay = dayjs(event.callForSpeakersClosingDate);
-    if (closingDay.isValid() && closingDay.isBefore(dayjs())) {
-      return {
-        keep: false,
-        drop: `callForSpeakers closing date (${event.callForSpeakersClosingDate}) has passed; toggling the flag has no effect`,
-      };
-    }
-  }
-
-  return { keep: true };
+  const issue =
+    representabilityIssue(change) ||
+    equivalenceIssue(change, event) ||
+    contradictoryReasonIssue(change.reason) ||
+    staleChangeIssue(change, event);
+  return issue ? { keep: false, drop: issue } : { keep: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -391,14 +346,7 @@ function stripHtml(html, maxLength = 12000) {
 // Agent analysis prompt
 // ---------------------------------------------------------------------------
 
-/**
- * Prepare the same comparison instructions for each event.
- *
- * @param {object} event - The Sanity event document
- * @param {string} pageText - Plain text extracted from the event website
- * @returns {string}
- */
-function buildAnalysisPrompt(event, pageText) {
+function eventTimingSummary(event) {
   // Convert UTC dates to the event's local timezone so comparisons with
   // the website are like-for-like.  International events (no timezone)
   // are presented in UTC.
@@ -417,35 +365,58 @@ function buildAnalysisPrompt(event, pageText) {
     ? ` (${event.timezone})`
     : ' (international event, no specific timezone)';
 
-  // Render values in their stored form so the model sees -- and the report
-  // surfaces -- literal database values, not English prose. This avoids the
-  // "yes -> false" confusion where the model thinks they differ.
-  const isTheme = event.type === 'theme';
+  return {
+    start: `${startStr}${tzNote}`,
+    end: `${endStr}${tzNote}`,
+    tz,
+    tzNote,
+  };
+}
+
+function attendanceSummary(event, { tz, tzNote }) {
+  // Keep literal stored values rather than translating booleans to yes/no.
+  const lines = [
+    `attendanceMode (enum): ${event.attendanceMode ?? 'null'}`,
+    `location (string): ${event.location ?? 'null'}`,
+    `callForSpeakers (boolean): ${event.callForSpeakers === true ? 'true' : event.callForSpeakers === false ? 'false' : 'null'}`,
+  ];
+  if (event.callForSpeakersClosingDate) {
+    lines.push(
+      `callForSpeakersClosingDate (datetime): ${dayjs.utc(event.callForSpeakersClosingDate).tz(tz).format('D MMMM YYYY [at] HH:mm')}${tzNote} (UTC: ${event.callForSpeakersClosingDate})`
+    );
+  }
+  return lines;
+}
+
+function buildEventSummary(event) {
+  const timing = eventTimingSummary(event);
   const summaryLines = [
     `Title: ${event.title}`,
     `Type: ${event.type}`,
-    `dateStart (datetime): ${startStr}${tzNote}`,
-    `dateEnd (datetime): ${endStr}${tzNote}`,
+    `dateStart (datetime): ${timing.start}`,
+    `dateEnd (datetime): ${timing.end}`,
     `eventStatus (enum): ${event.eventStatus || 'scheduled (default)'}`,
     `Is parent event (conference with sessions): ${event.isParent ? 'true' : 'false'}`,
   ];
-  if (!isTheme) {
-    summaryLines.push(
-      `attendanceMode (enum): ${event.attendanceMode ?? 'null'}`,
-      `location (string): ${event.location ?? 'null'}`,
-      `callForSpeakers (boolean): ${event.callForSpeakers === true ? 'true' : event.callForSpeakers === false ? 'false' : 'null'}`
-    );
-    if (event.callForSpeakersClosingDate) {
-      summaryLines.push(
-        `callForSpeakersClosingDate (datetime): ${dayjs.utc(event.callForSpeakersClosingDate).tz(tz).format('D MMMM YYYY [at] HH:mm')}${tzNote} (UTC: ${event.callForSpeakersClosingDate})`
-      );
-    }
+  if (event.type !== 'theme') {
+    summaryLines.push(...attendanceSummary(event, timing));
   }
-  const eventSummary = summaryLines.join('\n');
+  return summaryLines.join('\n');
+}
 
-  const themeFieldNote = isTheme
-    ? `\n\nIMPORTANT: This is a theme/awareness-day event (type === "theme"). The fields callForSpeakers, callForSpeakersClosingDate, and attendanceMode are HIDDEN in the CMS for theme events and must not appear in your "changes". Do not suggest values for them under any circumstances.`
-    : '';
+/**
+ * Prepare the same comparison instructions for each event.
+ *
+ * @param {object} event - The Sanity event document
+ * @param {string} pageText - Plain text extracted from the event website
+ * @returns {string}
+ */
+function buildAnalysisPrompt(event, pageText) {
+  const eventSummary = buildEventSummary(event);
+  const themeFieldNote =
+    event.type === 'theme'
+      ? `\n\nIMPORTANT: This is a theme/awareness-day event (type === "theme"). The fields callForSpeakers, callForSpeakersClosingDate, and attendanceMode are HIDDEN in the CMS for theme events and must not appear in your "changes". Do not suggest values for them under any circumstances.`
+      : '';
 
   return `You are helping maintain a curated calendar of accessibility and inclusive design events. Compare the following event record from our database against the text extracted from the event's official website.
 
@@ -525,6 +496,29 @@ Rules:
 // Check a single event
 // ---------------------------------------------------------------------------
 
+function redirectFinding(originalUrl, finalUrl) {
+  if (finalUrl === originalUrl) return null;
+  const originalHost = new URL(originalUrl).hostname;
+  const finalHost = new URL(finalUrl).hostname;
+  if (
+    finalHost !== originalHost &&
+    !finalHost.endsWith('.' + originalHost) &&
+    !originalHost.endsWith('.' + finalHost)
+  ) {
+    return {
+      message: `Website redirected to a different domain: ${finalUrl}`,
+      severity: 'warning',
+    };
+  }
+  if (finalHost !== originalHost) {
+    return {
+      message: `Website redirected to subdomain: ${finalUrl}`,
+      severity: 'info',
+    };
+  }
+  return null;
+}
+
 /**
  * @returns {Promise<{ event, findings: string[], severity: 'ok'|'info'|'warning'|'error', prompt?: string }>}
  */
@@ -542,35 +536,20 @@ async function prepareEvent(event) {
   }
 
   const { status, finalUrl, text, error } = await fetchPage(event.website);
-
-  // --- Connection / HTTP errors ---
   if (error) {
     findings.push(`Could not reach website: ${error}`);
     return { event, findings, severity: 'error', analysis: null };
   }
-
   if (status >= 400) {
     findings.push(`Website returned HTTP ${status}`);
     severity = status === 404 ? 'error' : 'warning';
     return { event, findings, severity, analysis: null };
   }
 
-  // --- Redirect detection ---
-  if (finalUrl !== event.website) {
-    const originalHost = new URL(event.website).hostname;
-    const finalHost = new URL(finalUrl).hostname;
-
-    if (
-      finalHost !== originalHost &&
-      !finalHost.endsWith('.' + originalHost) &&
-      !originalHost.endsWith('.' + finalHost)
-    ) {
-      findings.push(`Website redirected to a different domain: ${finalUrl}`);
-      severity = 'warning';
-    } else if (finalHost !== originalHost) {
-      findings.push(`Website redirected to subdomain: ${finalUrl}`);
-      if (severity === 'ok') severity = 'info';
-    }
+  const redirect = redirectFinding(event.website, finalUrl);
+  if (redirect) {
+    findings.push(redirect.message);
+    severity = redirect.severity;
   }
 
   // --- Prepare page content for the agent ---
@@ -592,58 +571,56 @@ async function prepareEvent(event) {
   };
 }
 
+function validatedChanges(changes, event) {
+  const kept = [];
+  const dropped = [];
+  for (const change of changes) {
+    const candidate = { ...change, current: event[change.field] ?? null };
+    const verdict = validateChange(candidate, event);
+    if (verdict.keep) {
+      kept.push(candidate);
+    } else {
+      dropped.push({ change, reason: verdict.drop });
+    }
+  }
+
+  for (const { change, reason } of dropped) {
+    console.warn(`  Dropped suggestion (${change.field || '?'}): ${reason}`);
+  }
+  return kept;
+}
+
+function analysisSeverity(current, changes, notes) {
+  if (current === 'error') return current;
+  if (changes.some((change) => change.severity === 'warning')) return 'warning';
+  if (current === 'ok' && (changes.length > 0 || notes)) return 'info';
+  return current;
+}
+
 function applyAnalysis(result, analysis) {
   const { event } = result;
   const findings = [...result.findings];
-  let severity = result.severity;
-
-  // Validate every suggested change against the schema. The model's
-  // instructions cover this, but we double-check deterministically so a
-  // single bad model response can't introduce noisy or invalid suggestions.
-  const dropped = [];
-  if (analysis.changes && analysis.changes.length > 0) {
-    const kept = [];
-    for (const change of analysis.changes) {
-      const current = event[change.field] ?? null;
-      const candidate = { ...change, current };
-      const verdict = validateChange(candidate, event);
-      if (verdict.keep) {
-        kept.push(candidate);
-      } else {
-        dropped.push({ change, reason: verdict.drop });
-      }
-    }
-    analysis.changes = kept;
-    if (kept.length === 0 && (!analysis.notes || analysis.notes === null)) {
-      analysis.noChanges = true;
-    }
+  const hadChanges = analysis.changes.length > 0;
+  analysis.changes = validatedChanges(analysis.changes, event);
+  if (hadChanges && analysis.changes.length === 0 && !analysis.notes) {
+    analysis.noChanges = true;
   }
 
-  if (dropped.length > 0) {
-    // Surface drops at debug verbosity so failures are diagnosable without
-    // polluting the human-facing report.
-    for (const { change, reason } of dropped) {
-      console.warn(`  Dropped suggestion (${change.field || '?'}): ${reason}`);
-    }
-  }
-
-  if (analysis.changes && analysis.changes.length > 0) {
-    for (const change of analysis.changes) {
-      findings.push(change);
-      if (change.severity === 'warning' && severity !== 'error') {
-        severity = 'warning';
-      } else if (change.severity === 'info' && severity === 'ok') {
-        severity = 'info';
-      }
-    }
-  }
-
+  findings.push(...analysis.changes);
   if (analysis.notes) {
     findings.push({ note: analysis.notes });
-    if (severity === 'ok') severity = 'info';
   }
 
-  return { event, findings, severity, analysis };
+  return {
+    event,
+    findings,
+    severity: analysisSeverity(
+      result.severity,
+      analysis.changes,
+      analysis.notes
+    ),
+    analysis,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -702,6 +679,22 @@ function formatFindings(findings, sanitize) {
   return lines;
 }
 
+function formatReportSection(title, results, sanitize) {
+  if (results.length === 0) return [];
+  const lines = [`## ${title} (${results.length})`, ''];
+  for (const { event, findings, severity } of results) {
+    const emphasis = severity === 'error' ? '**' : '';
+    lines.push(`### ${emphasis}${sanitize(event.title)}${emphasis}`);
+    lines.push(
+      `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
+    );
+    lines.push('');
+    lines.push(...formatFindings(findings, sanitize));
+    lines.push('');
+  }
+  return lines;
+}
+
 function buildReport(results, sanitize, checkedAt) {
   const warnings = results.filter(
     (r) => r.severity === 'warning' || r.severity === 'error'
@@ -724,36 +717,8 @@ function buildReport(results, sanitize, checkedAt) {
     };
   }
 
-  // --- Issues needing attention ---
-  if (warnings.length > 0) {
-    lines.push(`## Needs attention (${warnings.length})`);
-    lines.push('');
-    for (const { event, findings, severity } of warnings) {
-      const icon = severity === 'error' ? '**' : '';
-      lines.push(`### ${icon}${sanitize(event.title)}${icon}`);
-      lines.push(
-        `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
-      );
-      lines.push('');
-      lines.push(...formatFindings(findings, sanitize));
-      lines.push('');
-    }
-  }
-
-  // --- Informational ---
-  if (infos.length > 0) {
-    lines.push(`## For review (${infos.length})`);
-    lines.push('');
-    for (const { event, findings } of infos) {
-      lines.push(`### ${sanitize(event.title)}`);
-      lines.push(
-        `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
-      );
-      lines.push('');
-      lines.push(...formatFindings(findings, sanitize));
-      lines.push('');
-    }
-  }
+  lines.push(...formatReportSection('Needs attention', warnings, sanitize));
+  lines.push(...formatReportSection('For review', infos, sanitize));
 
   // --- Clean ---
   if (clean.length > 0) {
@@ -780,51 +745,71 @@ function buildReport(results, sanitize, checkedAt) {
 // Safe-output validation
 // ---------------------------------------------------------------------------
 
-export function buildValidatedReport(snapshot, output, sanitize = String) {
+function parseReportAnalyses(output) {
   const requests = output.items.filter(
     (item) => item.type === 'publish_freshness_report'
   );
   if (requests.length !== 1 || typeof requests[0].analyses !== 'string') {
     throw new Error('Exactly one freshness report request is required');
   }
-  const analyses = JSON.parse(requests[0].analyses);
+  return JSON.parse(requests[0].analyses);
+}
+
+function isAnalysisShape(analysis) {
+  return (
+    Boolean(analysis) &&
+    Array.isArray(analysis.changes) &&
+    typeof analysis.noChanges === 'boolean' &&
+    (analysis.notes === null || typeof analysis.notes === 'string')
+  );
+}
+
+function isConsistentAnalysis(analysis) {
+  if (analysis.noChanges) return analysis.changes.length === 0;
+  return analysis.changes.length > 0 || Boolean(analysis.notes?.trim());
+}
+
+function isSuggestedChange(change) {
+  return (
+    Boolean(change) &&
+    typeof change.field === 'string' &&
+    ['warning', 'info'].includes(change.severity) &&
+    typeof change.suggested === 'string' &&
+    typeof change.reason === 'string' &&
+    Boolean(change.reason.trim())
+  );
+}
+
+function validateAnalyses(analyses, expected) {
+  const byId = new Map();
+  for (const analysis of analyses) {
+    if (
+      !isAnalysisShape(analysis) ||
+      !expected.has(analysis._id) ||
+      byId.has(analysis._id) ||
+      !isConsistentAnalysis(analysis)
+    ) {
+      throw new Error('Invalid, duplicate or unexpected event analysis');
+    }
+    for (const change of analysis.changes) {
+      if (!isSuggestedChange(change)) {
+        throw new Error('Invalid suggested change');
+      }
+    }
+    byId.set(analysis._id, analysis);
+  }
+  return byId;
+}
+
+export function buildValidatedReport(snapshot, output, sanitize = String) {
+  const analyses = parseReportAnalyses(output);
   const expected = new Set(
     snapshot.results.filter((result) => result.prompt).map((r) => r.event._id)
   );
   if (!Array.isArray(analyses) || analyses.length !== expected.size) {
     throw new Error('Analysis must cover every event with a comparison prompt');
   }
-
-  const byId = new Map();
-  for (const analysis of analyses) {
-    if (
-      !analysis ||
-      !expected.has(analysis._id) ||
-      byId.has(analysis._id) ||
-      !Array.isArray(analysis.changes) ||
-      typeof analysis.noChanges !== 'boolean' ||
-      (analysis.noChanges && analysis.changes.length > 0) ||
-      !(analysis.notes === null || typeof analysis.notes === 'string') ||
-      (!analysis.noChanges &&
-        analysis.changes.length === 0 &&
-        !analysis.notes?.trim())
-    ) {
-      throw new Error('Invalid, duplicate or unexpected event analysis');
-    }
-    for (const change of analysis.changes) {
-      if (
-        !change ||
-        typeof change.field !== 'string' ||
-        !['warning', 'info'].includes(change.severity) ||
-        typeof change.suggested !== 'string' ||
-        typeof change.reason !== 'string' ||
-        !change.reason.trim()
-      ) {
-        throw new Error('Invalid suggested change');
-      }
-    }
-    byId.set(analysis._id, analysis);
-  }
+  const byId = validateAnalyses(analyses, expected);
 
   const results = snapshot.results.map((result) =>
     result.prompt ? applyAnalysis(result, byId.get(result.event._id)) : result
