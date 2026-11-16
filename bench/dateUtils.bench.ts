@@ -55,7 +55,8 @@ test('dateUtils - single date', async ({ bench }) => {
   }).run();
 });
 
-test('dateUtils - full event list', async ({ bench }) => {
+// CodSpeed simulation shares this timeout across all three benchmarks.
+test('dateUtils - full event list', { timeout: 180_000 }, async ({ bench }) => {
   await bench('formatDateRange over 250 events (en)', () => {
     for (const event of events) {
       formatDateRange({
