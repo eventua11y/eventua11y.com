@@ -50,6 +50,7 @@ jobs:
           FRESHNESS_ANALYSES: ${{ inputs.analyses }}
           GH_AW_WORKFLOW_ID: event-freshness
           GH_AW_WORKFLOW_NAME: Event Freshness Check
+          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
         with:
           script: |
             const fs = require('node:fs');
