@@ -3,6 +3,7 @@ import {
   buildValidatedReport,
   confirmedPublication,
   prepareSnapshot,
+  trustedWebsiteDomains,
 } from './check-event-freshness.mjs';
 
 const { sanityFetch } = vi.hoisted(() => ({ sanityFetch: vi.fn() }));
@@ -89,6 +90,50 @@ describe('freshness publication confirmation', () => {
   ])('rejects unconfirmed publication %j', (result) => {
     expect(() => confirmedPublication(result)).toThrow(
       'No validated freshness report was published.'
+    );
+  });
+});
+
+describe('freshness report domains', () => {
+  it('uses unique canonical hostnames from the immutable website records', () => {
+    const data = snapshot(
+      [
+        'https://EXAMPLE.com/path',
+        'https://example.com/another',
+        'https://conference.example.org:8443/programme',
+      ].map((website) => ({ event: { ...event, website } }))
+    );
+    expect(trustedWebsiteDomains(data)).toEqual([
+      'example.com',
+      'conference.example.org',
+    ]);
+  });
+
+  it('does not allow domains from comparison evidence or findings', () => {
+    const data = snapshot([
+      {
+        event,
+        prompt: 'Visit https://untrusted.example',
+        findings: [{ note: 'See https://another-untrusted.example' }],
+      },
+    ]);
+    expect(trustedWebsiteDomains(data)).toEqual(['example.com']);
+  });
+
+  it.each([
+    'not a URL',
+    'http://example.com',
+    'javascript:alert(1)',
+    'https://example.com@untrusted.example',
+    'https://user:password@example.com',
+    'https://*/',
+  ])('does not broaden the allowlist for an unsafe website %s', (website) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(
+      trustedWebsiteDomains(snapshot([{ event: { ...event, website } }]))
+    ).toEqual([]);
+    expect(warn).toHaveBeenCalledWith(
+      'Not allowing unsafe report website for conference'
     );
   });
 });

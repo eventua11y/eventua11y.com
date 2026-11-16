@@ -58,10 +58,19 @@ jobs:
             const actionsDir = `${process.env.RUNNER_TEMP}/gh-aw/actions`;
             const { setupGlobals, createIssue } = require(`${actionsDir}/index.cjs`);
             const { sanitizeContent } = require(`${actionsDir}/sanitize_content.cjs`);
+            const { buildAllowedDomains } = require(`${actionsDir}/sanitize_content_core.cjs`);
             setupGlobals(core, github, context, exec, io, getOctokit);
             const moduleUrl = pathToFileURL(`${process.env.GITHUB_WORKSPACE}/scripts/check-event-freshness.mjs`);
-            const { buildValidatedReport, confirmedPublication } = await import(moduleUrl.href);
+            const {
+              buildValidatedReport,
+              confirmedPublication,
+              trustedWebsiteDomains,
+            } = await import(moduleUrl.href);
             const snapshot = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/freshness/freshness-snapshot.json`, 'utf8'));
+            process.env.GH_AW_ALLOWED_DOMAINS = [
+              ...buildAllowedDomains(),
+              ...trustedWebsiteDomains(snapshot),
+            ].join(',');
             const analyses = process.env.FRESHNESS_ANALYSES;
             if (analyses.length > 60000) throw new Error('Freshness analyses exceed 60000 characters.');
             const output = { items: [{ type: 'publish_freshness_report', analyses }] };
