@@ -137,6 +137,10 @@ and assembly utilities. They run with Vitest and are tracked continuously by
 npm run bench
 ```
 
+Use Vitest 5's `bench` fixture inside `test()` and await each `bench(...).run()`.
+Keep test and benchmark names stable. CodSpeed includes both in the benchmark
+identity, so renaming either starts a new performance history.
+
 ### Building
 
 ```sh

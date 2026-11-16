@@ -4,7 +4,7 @@
  * timezone or filters change.
  */
 
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import dayjs from '../src/lib/dayjs';
 import {
   formatDateRange,
@@ -21,14 +21,14 @@ import { makeEvents, NOW_ISO } from './fixtures';
 const events = makeEvents(250);
 const now = dayjs.utc(NOW_ISO);
 
-describe('dateUtils - single date', () => {
+test('dateUtils - single date', async ({ bench }) => {
   const event = events[0];
 
-  bench('getStartDateFormat', () => {
+  await bench('getStartDateFormat', () => {
     getStartDateFormat({ type: event.type, day: event.day, locale: 'en' });
-  });
+  }).run();
 
-  bench('getEndDateFormat', () => {
+  await bench('getEndDateFormat', () => {
     getEndDateFormat({
       day: event.day,
       dateStart: event.dateStart,
@@ -36,27 +36,28 @@ describe('dateUtils - single date', () => {
       timezone: event.timezone,
       locale: 'en',
     });
-  });
+  }).run();
 
-  bench('formatEventDate (event timezone)', () => {
+  await bench('formatEventDate (event timezone)', () => {
     formatEventDate(event.dateStart, 'LLLL', {
       timezone: 'America/New_York',
       locale: 'en',
     });
-  });
+  }).run();
 
-  bench('isSameDay', () => {
+  await bench('isSameDay', () => {
     isSameDay(event.dateStart, event.dateEnd, { timezone: event.timezone });
-  });
+  }).run();
 
-  bench('isToday / isTomorrow', () => {
+  await bench('isToday / isTomorrow', () => {
     isToday(event.dateStart, { timezone: event.timezone }, now);
     isTomorrow(event.dateStart, { timezone: event.timezone }, now);
-  });
+  }).run();
 });
 
-describe('dateUtils - full event list', () => {
-  bench('formatDateRange over 250 events (en)', () => {
+// CodSpeed simulation shares this timeout across all three benchmarks.
+test('dateUtils - full event list', { timeout: 180_000 }, async ({ bench }) => {
+  await bench('formatDateRange over 250 events (en)', () => {
     for (const event of events) {
       formatDateRange({
         dateStart: event.dateStart,
@@ -68,9 +69,9 @@ describe('dateUtils - full event list', () => {
         now,
       });
     }
-  });
+  }).run();
 
-  bench('formatDateRange over 250 events (fr, user timezone)', () => {
+  await bench('formatDateRange over 250 events (fr, user timezone)', () => {
     for (const event of events) {
       formatDateRange({
         dateStart: event.dateStart,
@@ -85,9 +86,9 @@ describe('dateUtils - full event list', () => {
         now,
       });
     }
-  });
+  }).run();
 
-  bench('getYearMonth over 250 events', () => {
+  await bench('getYearMonth over 250 events', () => {
     for (const event of events) {
       getYearMonth(event.dateStart, {
         timezone: event.timezone,
@@ -95,5 +96,5 @@ describe('dateUtils - full event list', () => {
         userTimezone: 'Europe/London',
       });
     }
-  });
+  }).run();
 });
