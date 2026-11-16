@@ -832,6 +832,18 @@ export function buildValidatedReport(snapshot, output, sanitize = String) {
   return buildReport(results, sanitize, snapshot.checkedAt);
 }
 
+export function confirmedPublication(result) {
+  const url = result?.issue?.html_url;
+  if (
+    result?.staged !== false ||
+    typeof url !== 'string' ||
+    url.trim() === ''
+  ) {
+    throw new Error('No validated freshness report was published.');
+  }
+  return { status: 'success', url };
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------

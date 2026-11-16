@@ -1,5 +1,5 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"2421d0089d623b1b77bf28063dba0e7b553e6a7dbda08e113793198e562242cd","body_hash":"bc88901d8347b9eb208f5b4d9c4eb6820fb30f5afb1af469bb90ee6810fbed6d","compiler_version":"v1.2.2","strict":true,"agent_id":"copilot","engine_versions":{"copilot":"1.0.103"}}
-# gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_DEFAULT_OTLP_ENDPOINT","GH_AW_DEFAULT_OTLP_HEADERS","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","SANITY_PROJECT"],"actions":[{"repo":"actions/checkout","sha":"3d3c42e5aac5ba805825da76410c181273ba90b1","version":"v7.0.1"},{"repo":"actions/download-artifact","sha":"9000827ccba6bdab643e8b6fd33ac0654aef8333","version":"v8.0.2"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"949feb2413d6458794dcd2491c4babbbce0c15c1","version":"v7.1.0"},{"repo":"actions/upload-artifact","sha":"cf430e030ddbb5b0abf93d22962f4752f3646cd9","version":"v7.0.2"},{"repo":"github/gh-aw-actions/setup","sha":"53d0749e19424a918acd82b4d140264ce48f2f14","version":"v1.2.2"},{"repo":"github/gh-aw/actions/setup","sha":"399a445fe2d8926c616b54b1b82a16b5b2be4445","version":"399a445fe2d8926c616b54b1b82a16b5b2be4445"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.29.11","digest":"sha256:8774a73c351395b41d2ad0af4ddb4689007c67de3cd08bd9f43bb8a0e300690e","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.29.11@sha256:8774a73c351395b41d2ad0af4ddb4689007c67de3cd08bd9f43bb8a0e300690e"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.29.11","digest":"sha256:88d2d0e315a504d93fd4fb8847fd0f6b7f4469f41a6fc6047b3dc9654c56ab2c","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.29.11@sha256:88d2d0e315a504d93fd4fb8847fd0f6b7f4469f41a6fc6047b3dc9654c56ab2c"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.29.11","digest":"sha256:861739ecf924dd2db5e5fb652db2ad82aaafd1615623297ddabc8f41a36b2847","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.29.11@sha256:861739ecf924dd2db5e5fb652db2ad82aaafd1615623297ddabc8f41a36b2847"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.5.6","digest":"sha256:342cd624e1f179d91be2de7a146fc4f387092e62e6c8a47506d7932e113d2311","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.5.6@sha256:342cd624e1f179d91be2de7a146fc4f387092e62e6c8a47506d7932e113d2311"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:8735428c2d4e602f90781ba0c571c400e8ff93c7ee1508a75d71f87e34e415cc","pinned_image":"ghcr.io/github/gh-aw-node@sha256:8735428c2d4e602f90781ba0c571c400e8ff93c7ee1508a75d71f87e34e415cc"},{"image":"ghcr.io/github/github-mcp-server:v2.1.0","digest":"sha256:f6056fc10bfffcc8c81a6417a2e9ca12808647e8dd6049642a4feaadee0e0f8a","pinned_image":"ghcr.io/github/github-mcp-server:v2.1.0@sha256:f6056fc10bfffcc8c81a6417a2e9ca12808647e8dd6049642a4feaadee0e0f8a"}],"mcp_servers":[{"name":"github","tools":["get_commit","get_file_contents","get_latest_release","get_me","get_pull_request","get_pull_request_comments","get_pull_request_diff","get_pull_request_files","get_pull_request_review_comments","get_pull_request_reviews","get_pull_request_status","get_release_by_tag","get_tag","issue_read","list_branches","list_commits","list_issue_types","list_issues","list_pull_requests","list_releases","list_starred_repositories","list_tags","pull_request_read","search_code","search_issues","search_pull_requests","search_repositories"]},{"name":"safeoutputs","tools":["noop","publish_freshness_report","report_incomplete","report_missing_data","report_missing_tool"]}],"threat_detection":{"mode":"enabled"},"admission":false,"agent_metadata":{}}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"e1ad4f5180545348f4f1cbef5b81f9dc7f171dc0731c63b936480413c0a47e64","body_hash":"bc88901d8347b9eb208f5b4d9c4eb6820fb30f5afb1af469bb90ee6810fbed6d","compiler_version":"v1.2.2","strict":true,"agent_id":"copilot","engine_versions":{"copilot":"1.0.103"}}
+# gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_DEFAULT_OTLP_ENDPOINT","GH_AW_DEFAULT_OTLP_HEADERS","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","SANITY_PROJECT"],"actions":[{"repo":"actions/checkout","sha":"3d3c42e5aac5ba805825da76410c181273ba90b1","version":"v7.0.1"},{"repo":"actions/download-artifact","sha":"9000827ccba6bdab643e8b6fd33ac0654aef8333","version":"v8.0.2"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"949feb2413d6458794dcd2491c4babbbce0c15c1","version":"v7.1.0"},{"repo":"actions/upload-artifact","sha":"cf430e030ddbb5b0abf93d22962f4752f3646cd9","version":"v7.0.2"},{"repo":"github/gh-aw-actions/setup","sha":"53d0749e19424a918acd82b4d140264ce48f2f14","version":"v1.2.2"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.29.11","digest":"sha256:8774a73c351395b41d2ad0af4ddb4689007c67de3cd08bd9f43bb8a0e300690e","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.29.11@sha256:8774a73c351395b41d2ad0af4ddb4689007c67de3cd08bd9f43bb8a0e300690e"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.29.11","digest":"sha256:88d2d0e315a504d93fd4fb8847fd0f6b7f4469f41a6fc6047b3dc9654c56ab2c","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.29.11@sha256:88d2d0e315a504d93fd4fb8847fd0f6b7f4469f41a6fc6047b3dc9654c56ab2c"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.29.11","digest":"sha256:861739ecf924dd2db5e5fb652db2ad82aaafd1615623297ddabc8f41a36b2847","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.29.11@sha256:861739ecf924dd2db5e5fb652db2ad82aaafd1615623297ddabc8f41a36b2847"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.5.6","digest":"sha256:342cd624e1f179d91be2de7a146fc4f387092e62e6c8a47506d7932e113d2311","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.5.6@sha256:342cd624e1f179d91be2de7a146fc4f387092e62e6c8a47506d7932e113d2311"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:8735428c2d4e602f90781ba0c571c400e8ff93c7ee1508a75d71f87e34e415cc","pinned_image":"ghcr.io/github/gh-aw-node@sha256:8735428c2d4e602f90781ba0c571c400e8ff93c7ee1508a75d71f87e34e415cc"},{"image":"ghcr.io/github/github-mcp-server:v2.1.0","digest":"sha256:f6056fc10bfffcc8c81a6417a2e9ca12808647e8dd6049642a4feaadee0e0f8a","pinned_image":"ghcr.io/github/github-mcp-server:v2.1.0@sha256:f6056fc10bfffcc8c81a6417a2e9ca12808647e8dd6049642a4feaadee0e0f8a"}],"mcp_servers":[{"name":"github","tools":["get_commit","get_file_contents","get_latest_release","get_me","get_pull_request","get_pull_request_comments","get_pull_request_diff","get_pull_request_files","get_pull_request_review_comments","get_pull_request_reviews","get_pull_request_status","get_release_by_tag","get_tag","issue_read","list_branches","list_commits","list_issue_types","list_issues","list_pull_requests","list_releases","list_starred_repositories","list_tags","pull_request_read","search_code","search_issues","search_pull_requests","search_repositories"]},{"name":"safeoutputs","tools":["call_workflow","noop","publish_freshness_report","report_incomplete","report_missing_data","report_missing_tool"]}],"threat_detection":{"mode":"enabled"},"admission":false,"agent_metadata":{}}
 # This file was automatically generated by gh-aw (v1.2.2). DO NOT EDIT. To debug this workflow, load the skill at https://github.com/github/gh-aw/blob/main/debug.md
 #
 # To update this file, edit the corresponding .md file and run:
@@ -26,7 +26,6 @@
 #   - actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
 #   - actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
 #   - github/gh-aw-actions/setup@53d0749e19424a918acd82b4d140264ce48f2f14 # v1.2.2
-#   - github/gh-aw/actions/setup@399a445fe2d8926c616b54b1b82a16b5b2be4445
 #
 # Container images used:
 #   - ghcr.io/github/gh-aw-firewall/agent:0.29.11@sha256:8774a73c351395b41d2ad0af4ddb4689007c67de3cd08bd9f43bb8a0e300690e
@@ -295,7 +294,8 @@ jobs:
             <system>
           GH_AW_PROMPT_CONTENT_0001: |
             <safe-output-tools>
-            Tools: report_missing_tool, report_missing_data, noop(max:2), publish_freshness_report
+            Tools: publish_freshness_report, report_missing_tool, report_missing_data, noop(max:2)
+            Shared budgets: call-workflow [publish_freshness_report](max:1 total)
           GH_AW_PROMPT_CONTENT_0002: |
             </safe-output-tools>
           GH_AW_PROMPT_CONTENT_0003: |+
@@ -694,7 +694,7 @@ jobs:
         env:
           GH_AW_FILE_ROOT: "${{ runner.temp }}/gh-aw"
           GH_AW_FILE_CONFIG: "{\"files\":[{\"path\":\"safeoutputs/config.json\",\"content_env\":\"GH_AW_SAFE_OUTPUTS_CONFIG\"}]}"
-          GH_AW_SAFE_OUTPUTS_CONFIG: "{\"create_report_incomplete_issue\":{},\"noop\":{\"max\":2,\"report-as-issue\":\"false\"},\"publish-freshness-report\":{\"description\":\"Validate every event analysis and publish exactly one freshness report. Call once, including when there are no discrepancies.\",\"inputs\":{\"analyses\":{\"default\":null,\"description\":\"JSON array of objects with _id, changes, noChanges and notes. Include exactly one object per event with a prompt.\",\"maxLength\":60000,\"required\":true,\"type\":\"string\"}},\"supports_dependencies\":false},\"report_incomplete\":{},\"report_missing_data\":{},\"report_missing_tool\":{}}"
+          GH_AW_SAFE_OUTPUTS_CONFIG: "{\"call_workflow\":{\"max\":1,\"workflow_files\":{\"publish-freshness-report\":\"./.github/workflows/publish-freshness-report.yml\"},\"workflows\":[\"publish-freshness-report\"]},\"create_report_incomplete_issue\":{},\"noop\":{\"max\":2,\"report-as-issue\":\"false\"},\"report_incomplete\":{},\"report_missing_data\":{},\"report_missing_tool\":{}}"
         with:
           script: |
             const path = require('path');
@@ -711,13 +711,17 @@ jobs:
               "repo_params": {},
               "dynamic_tools": [
                 {
-                  "description": "Validate every event analysis and publish exactly one freshness report. Call once, including when there are no discrepancies.",
+                  "_call_workflow_name": "publish-freshness-report",
+                  "description": "Call the 'publish-freshness-report' reusable workflow via workflow_call. This workflow must support workflow_call and be in .github/workflows/ directory in the same repository.",
                   "inputSchema": {
                     "additionalProperties": false,
                     "properties": {
                       "analyses": {
                         "description": "JSON array of objects with _id, changes, noChanges and notes. Include exactly one object per event with a prompt.",
-                        "maxLength": 60000,
+                        "type": "string"
+                      },
+                      "payload": {
+                        "description": "Serialized safe-output arguments.",
                         "type": "string"
                       }
                     },
@@ -732,6 +736,23 @@ jobs:
             }
           GH_AW_VALIDATION_JSON: |
             {
+              "call_workflow": {
+                "defaultMax": 1,
+                "fields": {
+                  "inputs": {
+                    "type": "object"
+                  },
+                  "workflow_name": {
+                    "required": true,
+                    "type": "string",
+                    "sanitize": true,
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "pattern": ".*\\S.*",
+                    "patternError": "must not be empty"
+                  }
+                }
+              },
               "noop": {
                 "defaultMax": 2,
                 "fields": {
@@ -1378,14 +1399,30 @@ jobs:
           if-no-files-found: ignore
           retention-days: ${{ vars.GH_AW_DEFAULT_ARTIFACT_RETENTION_DAYS || '0' }}
 
+  call-publish-freshness-report:
+    name: call-publish-freshness-report
+    needs: safe_outputs
+    if: "${{ (needs.safe_outputs.outputs.call_workflow_name == 'publish-freshness-report') }}"
+    # Imported from called workflow "publish-freshness-report" because GitHub requires the caller job to grant permissions requested by reusable workflow jobs.
+    # Review the called workflow's job-level permissions in ./.github/workflows/publish-freshness-report.yml.
+    permissions:
+      contents: read
+      copilot-requests: none # Deny access to copilot-requests.
+      issues: write # Create or update issues and comments.
+    uses: ./.github/workflows/publish-freshness-report.yml
+    with:
+      analyses: ${{ fromJSON(needs.safe_outputs.outputs.call_workflow_payload).analyses }}
+      payload: ${{ needs.safe_outputs.outputs.call_workflow_payload }}
+    secrets: inherit
+
   conclusion:
     name: conclusion
     needs:
       - activation
       - agent
+      - call-publish-freshness-report
       - detection
       - prepare
-      - publish_freshness_report
       - safe_outputs
       - verify-report
     if: >
@@ -1405,9 +1442,9 @@ jobs:
       cancel-in-progress: false
       queue: max
     env:
-      GH_AW_JOB_DISPLAY_NAMES: "{\"activation\":\"activation\",\"agent\":\"agent\",\"conclusion\":\"conclusion\",\"detection\":\"detection\",\"prepare\":\"Fetch event records and websites\",\"publish_freshness_report\":\"publish_freshness_report\",\"safe_outputs\":\"safe_outputs\",\"verify-report\":\"Require a validated report\"}"
-      GH_AW_JOB_RESULTS: "{\"activation\":{\"result\":\"${{ needs.activation.result }}\"},\"agent\":{\"result\":\"${{ needs.agent.result }}\"},\"detection\":{\"result\":\"${{ needs.detection.result }}\"},\"prepare\":{\"result\":\"${{ needs.prepare.result }}\"},\"publish_freshness_report\":{\"result\":\"${{ needs.publish_freshness_report.result }}\"},\"safe_outputs\":{\"result\":\"${{ needs.safe_outputs.result }}\"},\"verify-report\":{\"result\":\"${{ needs.verify-report.result }}\"}}"
-      GH_AW_JOB_TIMING_ELIGIBLE: "{\"activation\":true,\"agent\":true,\"conclusion\":true,\"detection\":true,\"prepare\":true,\"publish_freshness_report\":true,\"safe_outputs\":true,\"verify-report\":true}"
+      GH_AW_JOB_DISPLAY_NAMES: "{\"activation\":\"activation\",\"agent\":\"agent\",\"call-publish-freshness-report\":\"call-publish-freshness-report\",\"conclusion\":\"conclusion\",\"detection\":\"detection\",\"prepare\":\"Fetch event records and websites\",\"safe_outputs\":\"safe_outputs\",\"verify-report\":\"Require a validated report\"}"
+      GH_AW_JOB_RESULTS: "{\"activation\":{\"result\":\"${{ needs.activation.result }}\"},\"agent\":{\"result\":\"${{ needs.agent.result }}\"},\"call-publish-freshness-report\":{\"result\":\"${{ needs.call-publish-freshness-report.result }}\"},\"detection\":{\"result\":\"${{ needs.detection.result }}\"},\"prepare\":{\"result\":\"${{ needs.prepare.result }}\"},\"safe_outputs\":{\"result\":\"${{ needs.safe_outputs.result }}\"},\"verify-report\":{\"result\":\"${{ needs.verify-report.result }}\"}}"
+      GH_AW_JOB_TIMING_ELIGIBLE: "{\"activation\":true,\"agent\":true,\"call-publish-freshness-report\":false,\"conclusion\":true,\"detection\":true,\"prepare\":true,\"safe_outputs\":true,\"verify-report\":true}"
       GH_AW_RUNTIME_FEATURES: ${{ vars.GH_AW_RUNTIME_FEATURES }}
     outputs:
       incomplete_count: ${{ steps.report_incomplete.outputs.incomplete_count }}
@@ -1656,8 +1693,6 @@ jobs:
         env:
           GH_AW_GRADER_MANIFEST_0: '{"version":2,"graders":[]}'
           GH_AW_GRADER_MANIFEST_CHUNKS: '1'
-          GH_AW_SAFE_JOB_NAMES: "[\"publish_freshness_report\"]"
-          GH_AW_SAFE_JOB_RESULTS: "{\"publish_freshness_report\":{\"result\":${{ toJSON(needs.publish_freshness_report.result) }},\"outputs\":{\"status\":${{ toJSON(needs.publish_freshness_report.outputs.status) }},\"url\":${{ toJSON(needs.publish_freshness_report.outputs.url) }}}}}"
           GH_AW_JOB_DURATIONS: ${{ steps.report_failed_jobs.outputs.job_durations }}
           GH_AW_DAILY_AI_CREDITS_GUARDRAIL_STATUS: ${{ needs.activation.outputs.daily_ai_credits_guardrail_status }}
           GH_AW_DAILY_AI_CREDITS_EXCEEDED: ${{ needs.activation.outputs.daily_ai_credits_exceeded }}
@@ -2143,110 +2178,6 @@ jobs:
           path: ${{ runner.temp }}/freshness-snapshot.json
           retention-days: ${{ vars.GH_AW_DEFAULT_ARTIFACT_RETENTION_DAYS || '7' }}
 
-  publish_freshness_report:
-    name: publish_freshness_report
-    needs:
-      - agent
-      - detection
-    if: >
-      (!cancelled()) && needs.agent.result != 'skipped' && contains(needs.agent.outputs.output_types, 'publish_freshness_report') &&
-      needs.detection.result == 'success'
-    runs-on: ubuntu-latest
-    # Permissions for the publish_freshness_report job (workflow permissions default to none).
-    permissions:
-      contents: read
-      issues: write # Create or update issues and comments.
-    env:
-      GH_AW_AGENT_AIC: ${{ needs.agent.outputs.aic }}
-      GH_AW_AIC: ${{ needs.agent.outputs.aic }}
-      GH_AW_AMBIENT_CONTEXT: ${{ needs.agent.outputs.ambient_context }}
-      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/event-freshness"
-      GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-      GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
-      GH_AW_DETECTION_THREAT_KINDS: ${{ needs.detection.outputs.detection_threat_kinds }}
-      GH_AW_ENGINE_ID: "copilot"
-      GH_AW_ENGINE_MODEL: ${{ needs.agent.outputs.model }}
-      GH_AW_OBJECT_PACK_FETCH_DEPTHS: ${{ vars.GH_AW_OBJECT_PACK_FETCH_DEPTHS }}
-      GH_AW_OBJECT_PACK_MAX_BYTES: ${{ vars.GH_AW_OBJECT_PACK_MAX_BYTES }}
-      GH_AW_OBJECT_PACK_MAX_OBJECTS: ${{ vars.GH_AW_OBJECT_PACK_MAX_OBJECTS }}
-      GH_AW_OBJECT_PACK_TIMEOUT_MS: ${{ vars.GH_AW_OBJECT_PACK_TIMEOUT_MS }}
-      GH_AW_RUN_DETECTION: ${{ needs.detection.outputs.run_detection }}
-      GH_AW_THREAT_DETECTION_AIC: ${{ needs.detection.outputs.aic }}
-      GH_AW_WORKFLOW_ID: "event-freshness"
-      GH_AW_WORKFLOW_NAME: "Event Freshness Check"
-      GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/event-freshness.md"
-    outputs:
-      status: "${{ steps.publish.outputs.status }}"
-      url: "${{ steps.publish.outputs.url }}"
-    steps:
-      - name: Download agent output artifact
-        continue-on-error: true
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: "{agent,agent-output-fallback}"
-          merge-multiple: true
-          path: ${{ runner.temp }}/gh-aw/safe-jobs/
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        env:
-          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
-          GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        env:
-          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
-          GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
-        with:
-          cache: npm
-          node-version: 24
-      - run: npm ci --ignore-scripts
-        env:
-          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
-          GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        env:
-          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
-          GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
-        with:
-          name: freshness-snapshot
-          path: ${{ runner.temp }}/freshness
-      - uses: github/gh-aw/actions/setup@399a445fe2d8926c616b54b1b82a16b5b2be4445
-        env:
-          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
-          GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
-      - name: Validate and publish report
-        id: publish
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
-          GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
-          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
-        with:
-          script: |
-            const fs = require('node:fs');
-            const { pathToFileURL } = require('node:url');
-            const actionsDir = `${process.env.RUNNER_TEMP}/gh-aw/actions`;
-            const { setupGlobals, createIssue } = require(`${actionsDir}/index.cjs`);
-            const { sanitizeContent } = require(`${actionsDir}/sanitize_content.cjs`);
-            setupGlobals(core, github, context, exec, io, getOctokit);
-            const moduleUrl = pathToFileURL(`${process.env.GITHUB_WORKSPACE}/scripts/check-event-freshness.mjs`);
-            const { buildValidatedReport } = await import(moduleUrl.href);
-            const snapshot = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/freshness/freshness-snapshot.json`, 'utf8'));
-            const output = JSON.parse(fs.readFileSync(process.env.GH_AW_AGENT_OUTPUT, 'utf8'));
-            const report = buildValidatedReport(snapshot, output, sanitizeContent);
-            const result = await createIssue({
-              ...report,
-              labels: ['content'],
-              assignees: ['mattobee'],
-            });
-            core.setOutput('status', result.staged ? 'skipped' : 'success');
-            if (!result.staged) core.setOutput('url', result.issue.html_url);
-
   safe_outputs:
     name: safe_outputs
     needs:
@@ -2280,6 +2211,8 @@ jobs:
       GH_AW_WORKFLOW_NAME: "Event Freshness Check"
       GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/event-freshness.md"
     outputs:
+      call_workflow_name: ${{ steps.process_safe_outputs.outputs.call_workflow_name }}
+      call_workflow_payload: ${{ steps.process_safe_outputs.outputs.call_workflow_payload }}
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
       code_push_failure_errors: ${{ steps.process_safe_outputs.outputs.code_push_failure_errors }}
       create_discussion_error_count: ${{ steps.process_safe_outputs.outputs.create_discussion_error_count }}
@@ -2347,8 +2280,7 @@ jobs:
           GH_AW_MENTIONS_GITHUB_TOKEN: ${{ github.token }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUT_JOBS: "{\"publish_freshness_report\":\"\"}"
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"create_report_incomplete_issue\":{},\"noop\":{\"max\":2,\"report-as-issue\":\"false\"},\"report_incomplete\":{},\"report_missing_data\":{},\"report_missing_tool\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"call_workflow\":{\"max\":1,\"workflow_files\":{\"publish-freshness-report\":\"./.github/workflows/publish-freshness-report.yml\"},\"workflows\":[\"publish-freshness-report\"]},\"create_report_incomplete_issue\":{},\"noop\":{\"max\":2,\"report-as-issue\":\"false\"},\"report_incomplete\":{},\"report_missing_data\":{},\"report_missing_tool\":{}}"
           GH_AW_GITHUB_TOKEN_SOURCE: ${{ secrets.GH_AW_GITHUB_TOKEN != '' && 'pat' || 'github_actions' }}
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
@@ -2376,9 +2308,9 @@ jobs:
     name: Require a validated report
     needs:
       - agent
+      - call-publish-freshness-report
       - detection
-      - publish_freshness_report
-    if: "${{ needs.detection.result == 'success' && needs.detection.outputs.detection_success == 'true' && (always()) }}"
+    if: always()
     runs-on: ubuntu-latest
     # Permissions for the verify-report job (workflow permissions default to none).
     permissions: {}
@@ -2400,4 +2332,4 @@ jobs:
             exit 1
           fi
         env:
-          PUBLICATION_RESULT: ${{ needs.publish_freshness_report.result }}
+          PUBLICATION_RESULT: ${{ needs.call-publish-freshness-report.result }}

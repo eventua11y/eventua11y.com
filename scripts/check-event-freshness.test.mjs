@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   buildValidatedReport,
+  confirmedPublication,
   prepareSnapshot,
 } from './check-event-freshness.mjs';
 
@@ -63,6 +64,33 @@ afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+});
+
+describe('freshness publication confirmation', () => {
+  it('accepts only a published issue with its confirmed URL', () => {
+    const url = 'https://github.com/eventua11y/eventua11y.com/issues/123';
+    expect(
+      confirmedPublication({ staged: false, issue: { html_url: url } })
+    ).toEqual({
+      status: 'success',
+      url,
+    });
+  });
+
+  it.each([
+    undefined,
+    { staged: true },
+    { staged: true, issue: { html_url: 'https://example.com/preview' } },
+    { staged: false },
+    { staged: false, issue: {} },
+    { staged: false, issue: { html_url: '' } },
+    { staged: false, issue: { html_url: '   ' } },
+    { staged: false, issue: { html_url: 123 } },
+  ])('rejects unconfirmed publication %j', (result) => {
+    expect(() => confirmedPublication(result)).toThrow(
+      'No validated freshness report was published.'
+    );
+  });
 });
 
 describe('freshness safe-output validation', () => {

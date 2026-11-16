@@ -45,7 +45,8 @@ jobs:
           retention-days: 7
   verify-report:
     name: Require a validated report
-    needs: [agent, publish_freshness_report]
+    needs: [agent, call-publish-freshness-report]
+    detection-gate: status-only
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -53,7 +54,7 @@ jobs:
     steps:
       - name: Reject missing publication
         env:
-          PUBLICATION_RESULT: ${{ needs.publish_freshness_report.result }}
+          PUBLICATION_RESULT: ${{ needs.call-publish-freshness-report.result }}
         run: |
           if [ "$PUBLICATION_RESULT" != success ]; then
             echo "::error::No validated freshness report was published."
@@ -67,59 +68,9 @@ steps:
 safe-outputs:
   create-issue: false
   timeout-minutes: 5
-  jobs:
-    publish-freshness-report:
-      description: Validate every event analysis and publish exactly one freshness report. Call once, including when there are no discrepancies.
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-        issues: write
-      inputs:
-        analyses:
-          description: JSON array of objects with _id, changes, noChanges and notes. Include exactly one object per event with a prompt.
-          type: string
-          required: true
-          max-length: 60000
-      outputs:
-        status: ${{ steps.publish.outputs.status }}
-        url: ${{ steps.publish.outputs.url }}
-      steps:
-        - uses: actions/checkout@v7
-          with:
-            persist-credentials: false
-        - uses: actions/setup-node@v7
-          with:
-            node-version: 24
-            cache: npm
-        - run: npm ci --ignore-scripts
-        - uses: actions/download-artifact@v8
-          with:
-            name: freshness-snapshot
-            path: ${{ runner.temp }}/freshness
-        - uses: github/gh-aw/actions/setup@399a445fe2d8926c616b54b1b82a16b5b2be4445
-        - name: Validate and publish report
-          id: publish
-          uses: actions/github-script@v9
-          with:
-            script: |
-              const fs = require('node:fs');
-              const { pathToFileURL } = require('node:url');
-              const actionsDir = `${process.env.RUNNER_TEMP}/gh-aw/actions`;
-              const { setupGlobals, createIssue } = require(`${actionsDir}/index.cjs`);
-              const { sanitizeContent } = require(`${actionsDir}/sanitize_content.cjs`);
-              setupGlobals(core, github, context, exec, io, getOctokit);
-              const moduleUrl = pathToFileURL(`${process.env.GITHUB_WORKSPACE}/scripts/check-event-freshness.mjs`);
-              const { buildValidatedReport } = await import(moduleUrl.href);
-              const snapshot = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/freshness/freshness-snapshot.json`, 'utf8'));
-              const output = JSON.parse(fs.readFileSync(process.env.GH_AW_AGENT_OUTPUT, 'utf8'));
-              const report = buildValidatedReport(snapshot, output, sanitizeContent);
-              const result = await createIssue({
-                ...report,
-                labels: ['content'],
-                assignees: ['mattobee'],
-              });
-              core.setOutput('status', result.staged ? 'skipped' : 'success');
-              if (!result.staged) core.setOutput('url', result.issue.html_url);
+  call-workflow:
+    workflows: [publish-freshness-report]
+    max: 1
 ---
 
 # Check event freshness

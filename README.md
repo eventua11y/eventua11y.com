@@ -164,15 +164,20 @@ account's Copilot subscription. The `SANITY_PROJECT` secret is also required.
 
 A deterministic job fetches Sanity records and website text into an immutable
 artifact. The agent reads that snapshot without website network access or CMS
-credentials. A separate safe-output job checks complete event coverage, validates
+credentials. A separate reusable publishing workflow, called through a safe output,
+checks complete event coverage, validates
 suggestions against the schema and timezone rules, and creates at most one
 `content`-labelled report assigned to `mattobee`. It never changes Sanity records.
 Notes and website failures remain visible even when there are no suggested edits.
 The comparison agent is limited to 15 turns, 100 AI credits (a best-effort inference
 budget), and 10 minutes for inference (15 minutes for its job including setup).
+The publishing job has a five-minute limit. It must return a confirmed issue URL;
+staged previews don't count as publication. A final check runs even if threat
+detection fails and rejects runs without a successfully published report.
 gh-aw's built-in threat detection has separate framework limits.
 
-Edit the Markdown workflow, then regenerate its committed lock file with
+Edit the Markdown workflow or `.github/workflows/publish-freshness-report.yml`,
+then regenerate the committed lock file with
 `gh aw compile event-freshness` using gh-aw v1.2.2. Do not edit the generated
 `.lock.yml` directly.
 
