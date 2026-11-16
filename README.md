@@ -151,6 +151,43 @@ Pull requests trigger a GitHub Actions workflow that runs unit tests and end-to-
 
 The accessibility scanner workflow requires an `A11Y_SCANNER_TOKEN` repository secret (a fine-grained PAT with `actions: write`, `contents: write`, `issues: write`, `pull-requests: write`, and `metadata: read`).
 
+### Event freshness
+
+The [Event Freshness Check](.github/workflows/event-freshness.md) runs every Monday
+at 09:00 UTC and supports manual runs. It uses [GitHub Agentic Workflows](https://github.github.com/gh-aw/)
+with Copilot to compare upcoming events against their official websites.
+
+Add a `COPILOT_GITHUB_TOKEN` Actions repository secret containing a fine-grained
+PAT owned by your personal account with **Copilot Requests: Read**. Runs use that
+account's Copilot subscription. The `SANITY_PROJECT` secret is also required.
+`ANTHROPIC_API_KEY` is no longer used. See the [gh-aw authentication guide](https://github.github.com/gh-aw/reference/auth/#copilot_github_token).
+
+A deterministic job fetches Sanity records and website text into an immutable
+artifact. The agent reads that snapshot without website network access or CMS
+credentials. A separate safe-output job checks complete event coverage, validates
+suggestions against the schema and timezone rules, and creates at most one
+`content`-labelled report assigned to `mattobee`. It never changes Sanity records.
+Notes and website failures remain visible even when there are no suggested edits.
+The comparison agent is limited to 15 turns, 100 AI credits (a best-effort inference
+budget), and 10 minutes for inference (15 minutes for its job including setup).
+gh-aw's built-in threat detection has separate framework limits.
+
+Edit the Markdown workflow, then regenerate its committed lock file with
+`gh aw compile event-freshness` using gh-aw v1.2.2. Do not edit the generated
+`.lock.yml` directly.
+
+To inspect preparation or replay validation locally without invoking an AI model
+or creating issues:
+
+```sh
+SANITY_PROJECT=<project-id> npm run check:freshness -- --prepare snapshot.json
+npm run check:freshness -- --report snapshot.json agent-output.json
+```
+
+The report command expects the safe-output envelope
+`{"items":[{"type":"publish_freshness_report","analyses":"[...]"}]}`, with one
+analysis per snapshot result that has a comparison prompt.
+
 Dependency updates are managed by [Dependabot](https://docs.github.com/en/code-security/dependabot).
 
 ## License
