@@ -151,42 +151,16 @@ function processEventsForTimezone(
 
     /**
      * Determines if event is happening today
-     * Event types and rules:
-     * 1. Deadline events: Must match user's today exactly
-     * 2. International events (no timezone):
+     * Deadlines follow the same rules, so they land in exactly one of
+     * today / future / past:
+     * 1. International events (no timezone):
      *    - Single day: Must match user's today
      *    - Multi-day: Must overlap with user's today
-     * 3. Local events (with timezone):
+     * 2. Local events (with timezone):
      *    - Must overlap with user's today considering timezone
      */
     const isEventToday = (event: Event): boolean => {
       const userToday = dayjs().tz(userTimezone).startOf('day');
-
-      // For CFS deadlines, only check if they fall within today
-      if (event.type === 'deadline') {
-        // Convert event time to user timezone first
-        const eventDateInEventTz = event.timezone
-          ? dayjs(event.dateStart).tz(event.timezone)
-          : dayjs.tz(event.dateStart, userTimezone);
-        const eventDateInUserTz = eventDateInEventTz.tz(userTimezone);
-
-        // Add debug logging
-        debugLogs.push({
-          eventId: event._id,
-          eventTitle: event.title,
-          rawStartDate: event.dateStart,
-          eventDateInEventTz: eventDateInEventTz.format(
-            'YYYY-MM-DD HH:mm:ss Z'
-          ),
-          eventDateInUserTz: eventDateInUserTz.format('YYYY-MM-DD HH:mm:ss Z'),
-          userToday: userToday.format('YYYY-MM-DD HH:mm:ss Z'),
-          isDeadline: true,
-          eventTimezone: event.timezone,
-          userTimezone: userTimezone,
-        });
-
-        return eventDateInUserTz.isSame(userToday, 'day');
-      }
 
       if (!event.timezone) {
         // For international events, use user's timezone but only compare dates
@@ -380,26 +354,17 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
  * - Fetches and processes events
  * - Adds debug information to response
  * - Sets caching headers
- * @param {Request} request - HTTP request object
+ * @param {Request} _request - HTTP request object (unused)
  * @returns {Response} JSON response with events data
  */
 export default async function handler(
-  request: Request,
+  _request: Request,
   context: Context
 ): Promise<Response> {
-  console.log('[handler] Received request:', request);
   try {
     // Use the context directly instead of making another request
     const userTimezone = context.geo?.timezone || 'UTC';
 
-    const timezoneDebug = {
-      userInfoTimezone: context.geo?.timezone,
-      resolvedTimezone: userTimezone,
-      geo: context.geo,
-      headers: Object.fromEntries(request.headers),
-    };
-
-    console.log('[handler] Timezone debug:', timezoneDebug);
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
     console.log('[handler] Events fetched successfully:', events.events.length);
