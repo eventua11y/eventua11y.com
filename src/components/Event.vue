@@ -208,7 +208,7 @@ const speakerDisplay = computed(() => {
     />
 
     <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
-      featuring <span v-html="speakerDisplay"></span>
+      featuring <span>{{ speakerDisplay }}</span>
     </div>
 
     <EventDelivery

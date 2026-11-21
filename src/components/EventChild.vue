@@ -72,13 +72,6 @@ const formatPreposition = computed(() =>
  * Internal URL for the child event detail page, or undefined if no slug.
  */
 const childEventUrl = computed(() => getEventUrl(props.event));
-
-const speakersList = computed(() => {
-  if (!props.event.speakers?.length) return '';
-  return props.event.speakers
-    .map((speaker) => `<span>${speaker.name}</span>`)
-    .join(', ');
-});
 </script>
 
 <template>
@@ -93,7 +86,14 @@ const speakersList = computed(() => {
       {{ displayFormat }}
       <template v-if="event.speakers?.length">
         {{ formatPreposition }}
-        <span v-html="speakersList"></span>
+        <span
+          ><template
+            v-for="(speaker, index) in event.speakers"
+            :key="speaker._id"
+            ><template v-if="index > 0">, </template
+            ><span>{{ speaker.name }}</span></template
+          ></span
+        >
       </template>
     </div>
 
