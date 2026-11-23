@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import filtersStore from '../store/filtersStore';
+import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
 interface MonthLink {
   text: string;
@@ -20,7 +22,18 @@ const props = withDefaults(
 
 const monthLinks = ref<MonthLink[]>([]);
 const activeLink = ref('today');
+const monthNav = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
+
+watch(
+  () => filtersStore.eventsStatus,
+  (status) => {
+    if (status === 'error') {
+      focusEventRegionIfNeeded([monthNav.value], props.contentRegion);
+    }
+  },
+  { flush: 'sync' }
+);
 
 /**
  * Scrolls smoothly to the target section and sets focus
@@ -167,7 +180,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav aria-label="Months" class="month-nav pr-xl">
+  <nav
+    v-show="filtersStore.eventsStatus !== 'error'"
+    ref="monthNav"
+    aria-label="Months"
+    class="month-nav pr-xl"
+  >
     <ul role="list" class="month-list">
       <li v-for="link in monthLinks" :key="link.identifier" class="mb-xs">
         <a

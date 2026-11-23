@@ -19,10 +19,10 @@ test.describe('Theme Switching', () => {
 
     // Load page
     await page.goto('/');
-    const filterDrawer = page.locator('#filter-drawer');
-    if ((await filterDrawer.getAttribute('open')) !== null) {
+    const openFilterDrawer = page.locator('#filter-drawer[open]');
+    if ((await openFilterDrawer.count()) > 0) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toHaveAttribute('open');
+      await expect(openFilterDrawer).toHaveCount(0);
     }
   });
 

@@ -59,10 +59,10 @@ test.describe('Homepage accessibility', () => {
     // wa-drawer uses <dialog showModal()> which renders in the top layer;
     // the host element has height: 0 so isVisible() is unreliable.
     // Check the open attribute instead.
-    const filterDrawer = page.locator('#filter-drawer');
-    if ((await filterDrawer.getAttribute('open')) !== null) {
+    const openFilterDrawer = page.locator('#filter-drawer[open]');
+    if ((await openFilterDrawer.count()) > 0) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toHaveAttribute('open');
+      await expect(openFilterDrawer).toHaveCount(0);
     }
   });
 
@@ -386,10 +386,10 @@ test.describe('Shared component accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('#upcoming-events');
-    const filterDrawer = page.locator('#filter-drawer');
-    if ((await filterDrawer.getAttribute('open')) !== null) {
+    const openFilterDrawer = page.locator('#filter-drawer[open]');
+    if ((await openFilterDrawer.count()) > 0) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toHaveAttribute('open');
+      await expect(openFilterDrawer).toHaveCount(0);
     }
   });
 
@@ -479,13 +479,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
         }
 
         // Close filter drawer if open (homepage only)
-        const filterDrawer = page.locator('#filter-drawer');
-        if (
-          (await filterDrawer.count()) > 0 &&
-          (await filterDrawer.getAttribute('open')) !== null
-        ) {
+        const openFilterDrawer = page.locator('#filter-drawer[open]');
+        if ((await openFilterDrawer.count()) > 0) {
           await page.keyboard.press('Escape');
-          await expect(filterDrawer).not.toHaveAttribute('open');
+          await expect(openFilterDrawer).toHaveCount(0);
         }
 
         await expect(page.locator('html')).toHaveAttribute(

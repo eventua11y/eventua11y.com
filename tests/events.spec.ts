@@ -5,10 +5,10 @@ import AxeBuilder from '@axe-core/playwright';
 test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(baseURL);
   // await page.waitForLoadState('networkidle');
-  const filterDrawer = page.locator('#filter-drawer');
-  if ((await filterDrawer.getAttribute('open')) !== null) {
+  const openFilterDrawer = page.locator('#filter-drawer[open]');
+  if ((await openFilterDrawer.count()) > 0) {
     await page.keyboard.press('Escape');
-    await expect(filterDrawer).not.toHaveAttribute('open');
+    await expect(openFilterDrawer).toHaveCount(0);
   }
   await page.waitForSelector('#upcoming-events');
 });
