@@ -282,7 +282,7 @@ onUnmounted(removeArrowListeners);
   bottom: -7px;
 }
 
-@supports (position-area: bottom) {
+@supports (position-area: top) {
   @position-try --timezone-center {
     inset: 1rem;
     margin: auto;
@@ -292,8 +292,8 @@ onUnmounted(removeArrowListeners);
   .timezone-popover {
     inset: auto;
     margin: 0;
-    margin-block-start: 10px;
-    position-area: bottom;
+    margin-block-end: 10px;
+    position-area: top;
     position-try-fallbacks:
       flip-block,
       flip-inline,
