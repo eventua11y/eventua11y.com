@@ -57,6 +57,32 @@ for (const viewport of [
   });
 }
 
+test('colour mode button matches the timezone control and keeps keyboard focus', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await mockUserInfo(page);
+  await page.goto('/curation-policy');
+
+  const select = page.locator('#timezone-select');
+  const combobox = select.getByRole('combobox');
+  const themeButton = page.locator('#theme-selector-button button');
+  await expect(themeButton).toBeVisible();
+  const selectBounds = await select.locator('[part~="combobox"]').boundingBox();
+  const buttonBounds = await themeButton.boundingBox();
+  if (!selectBounds || !buttonBounds)
+    throw new Error('Controls are not visible');
+  expect(buttonBounds.width).toBeGreaterThanOrEqual(24);
+  expect(buttonBounds.height).toBeGreaterThanOrEqual(24);
+  expect(Math.abs(buttonBounds.height - selectBounds.height)).toBeLessThan(1);
+
+  await combobox.focus();
+  await page.keyboard.press('Tab');
+  await expect(themeButton).toBeFocused();
+  await expect(themeButton).toHaveCSS('outline-style', 'solid');
+  await expect(themeButton).not.toHaveCSS('outline-width', '0px');
+});
+
 test('switches listing times and month groups and persists across navigation', async ({
   page,
 }) => {
