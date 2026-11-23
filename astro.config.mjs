@@ -43,10 +43,9 @@ export default defineConfig({
       devtools: false,
     }),
     sentry({
-      sourceMapsUploadOptions: {
-        project: 'eventua11y',
-        authToken: SENTRY_AUTH_TOKEN,
-      },
+      org: 'matt-obee',
+      project: 'eventua11y',
+      authToken: SENTRY_AUTH_TOKEN,
     }),
   ],
 });

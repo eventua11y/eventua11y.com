@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Building and Deployment
 
-- `npm run build` - Run checks, build the site, and upload source maps to Sentry
+- `npm run build` - Run checks and build the site; the Sentry Astro integration uploads source maps when configured
 - `npm run preview` - Preview the built site locally
 - `astro build` - Build the site without additional steps
 
@@ -69,12 +69,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - International events (`internationalEvent: true`) use timezone-agnostic display
 - Local events show times converted to the user's selected timezone
 - CFS deadlines are auto-generated from CFS dates on events
-- Filter state persists in `localStorage` under `eventua11y-filters`
+- Filter state persists in `localStorage` under `filters`
 - User preferences (theme, timezone) stored under `eventua11y-user`
 
 ## Environment Variables
 
-- `SENTRY_AUTH_TOKEN`: Required for source map uploads during build
+- `SENTRY_AUTH_TOKEN`: Used by the Sentry Astro integration to upload source maps during a production build
 - `PLAYWRIGHT_TEST_BASE_URL`: Override test target URL (set by CI for deploy previews)
 - `PUBLIC_SUPABASE_URL`: Supabase project URL (client-safe)
 - `PUBLIC_SUPABASE_ANON_KEY`: Supabase publishable key (client-safe)
