@@ -37,6 +37,9 @@ for (const viewport of [
     const combobox = select.getByRole('combobox');
     await expect(combobox).toHaveAccessibleName('Timezone');
     await expect(combobox).toHaveValue('Event local times');
+    const bounds = await select.locator('[part~="combobox"]').boundingBox();
+    expect(bounds?.width).toBeGreaterThanOrEqual(24);
+    expect(bounds?.height).toBeGreaterThanOrEqual(24);
     await page.locator('#global-header nav a').last().focus();
     await page.keyboard.press('Tab');
     await expect(combobox).toBeFocused();

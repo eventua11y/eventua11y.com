@@ -92,12 +92,16 @@ test.describe('Homepage accessibility', () => {
     await expect(header).toBeVisible();
   });
 
-  test('timezone selector has a visible label in the header', async ({
+  test('timezone selector has a visually hidden accessible label', async ({
     page,
   }) => {
     const select = page.locator('#global-header #timezone-select');
     await expect(select).toHaveJSProperty('label', 'Timezone');
-    await expect(select.locator('[part~="form-control-label"]')).toBeVisible();
+    await expect(select.locator('[part~="form-control-label"]')).toHaveCSS(
+      'clip-path',
+      'inset(50%)'
+    );
+    await expect(select.getByRole('combobox')).toHaveAccessibleName('Timezone');
   });
 
   test('footer contentinfo landmark is present', async ({ page }) => {

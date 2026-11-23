@@ -4,6 +4,7 @@
       v-if="!loading || userStore.geo?.timezone"
       id="timezone-select"
       label="Timezone"
+      class="wa-visually-hidden-label"
       placement="bottom"
       appearance="outlined"
       :size="size"
@@ -29,10 +30,10 @@ import dayjs from '../lib/dayjs';
 
 withDefaults(
   defineProps<{
-    size?: 'small' | 'medium' | 'large';
+    size?: 's' | 'm' | 'l';
   }>(),
   {
-    size: 'medium',
+    size: 'm',
   }
 );
 
