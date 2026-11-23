@@ -102,9 +102,10 @@ onMounted(async () => {
       eventsFetchFailed.value = status === 'error';
       if (status === 'loading') {
         loading.value = true;
-      } else if (status === 'error') {
-        loading.value = false;
-      } else {
+        return;
+      }
+
+      if (status === 'success') {
         try {
           groupEvents(
             props.type === 'past'
@@ -115,8 +116,8 @@ onMounted(async () => {
           error.value = `Error updating ${props.type} events.`;
           console.error('Error:', e);
         }
-        loading.value = false;
       }
+      loading.value = false;
     },
     { immediate: true }
   );

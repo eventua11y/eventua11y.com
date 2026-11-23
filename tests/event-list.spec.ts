@@ -2,6 +2,17 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Event API failures', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/get-books', (route) =>
+      route.fulfill({ json: [] })
+    );
+    await page.route('**/api/get-user-info', (route) =>
+      route.fulfill({
+        json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
+      })
+    );
+  });
+
   test('keeps the event error while user information is still loading', async ({
     page,
   }) => {
@@ -18,9 +29,6 @@ test.describe('Event API failures', () => {
       await eventsGate;
       await route.fulfill({ status: 500, json: { error: 'API error' } });
     });
-    await page.route('**/api/get-books', (route) =>
-      route.fulfill({ json: [] })
-    );
     await page.route('**/api/get-user-info', async (route) => {
       await userInfoGate;
       await route.fulfill({
@@ -68,12 +76,6 @@ test.describe('Event API failures', () => {
           await booksGate;
           await route.fulfill({ json: [] });
         });
-        await page.route('**/api/get-user-info', (route) =>
-          route.fulfill({
-            json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
-          })
-        );
-
         await page.goto(path, { waitUntil: 'domcontentloaded' });
         const list = page.locator(listId);
         const status = list.getByRole('status');
@@ -113,14 +115,6 @@ test.describe('Event API failures', () => {
       await page.route('**/api/get-events', (route) =>
         route.fulfill({ json: { today: [], future: [], past: [] } })
       );
-      await page.route('**/api/get-books', (route) =>
-        route.fulfill({ json: [] })
-      );
-      await page.route('**/api/get-user-info', (route) =>
-        route.fulfill({
-          json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
-        })
-      );
       await page.goto(path);
       const list = page.locator(listId);
       await expect(list).toContainText(
@@ -148,14 +142,6 @@ test.describe('Event API failures', () => {
             future: type === 'upcoming' ? [event] : [],
             past: type === 'past' ? [event] : [],
           },
-        })
-      );
-      await page.route('**/api/get-books', (route) =>
-        route.fulfill({ json: [] })
-      );
-      await page.route('**/api/get-user-info', (route) =>
-        route.fulfill({
-          json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
         })
       );
       await page.goto(path);

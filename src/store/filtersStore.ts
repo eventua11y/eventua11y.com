@@ -75,7 +75,7 @@ const getStoredFilters = (): Filters => {
 // this self-referential unwrapping without an explicit interface.
 const filtersStore = reactive({
   filters: getStoredFilters(),
-  eventsStatus: 'loading' as 'loading' | 'success' | 'error',
+  eventsStatus: 'loading' as FiltersStore['eventsStatus'],
   events: [] as Event[],
   todayEvents: [] as Event[],
   futureEvents: [] as Event[],
