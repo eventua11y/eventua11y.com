@@ -3,7 +3,7 @@ let nextPopoverId = 0;
 </script>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
 
@@ -18,6 +18,10 @@ const popoverId = ref('');
 const deviceTimezone = ref('');
 const expanded = ref(false);
 const now = ref(Date.now());
+const trigger = ref<HTMLButtonElement | null>(null);
+const popover = ref<HTMLDivElement | null>(null);
+const arrowSide = ref<'top' | 'bottom' | null>(null);
+const arrowOffset = ref(0);
 
 onMounted(() => {
   deviceTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -26,7 +30,7 @@ onMounted(() => {
   }
 });
 
-function formattedTime(timezone: string): string {
+function formattedTime(timezone: string) {
   const locale = userStore.locale || 'en';
   const format = (date: string, short: boolean) => {
     const local = dayjs.utc(date).tz(timezone).locale(locale);
@@ -38,18 +42,33 @@ function formattedTime(timezone: string): string {
         .formatToParts(new Date(date))
         .find((part) => part.type === 'timeZoneName')?.value || timezone;
     return {
-      date: local.format(short ? 'LT' : 'LLLL'),
+      date: short
+        ? local.format('LT')
+        : new Intl.DateTimeFormat(locale, {
+            timeZone: timezone,
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          }).format(new Date(date)),
       zone: `${local.format('z')} (${name})`,
+      datetime: local.format('YYYY-MM-DDTHH:mm:ssZ'),
       local,
     };
   };
   const start = format(props.dateStart, false);
-  if (!props.dateEnd) return `${start.date} ${start.zone}`;
-  const endDate = dayjs.utc(props.dateEnd).tz(timezone);
-  const end = format(props.dateEnd, start.local.isSame(endDate, 'day'));
-  return start.zone === end.zone
-    ? `${start.date} – ${end.date} ${end.zone}`
-    : `${start.date} ${start.zone} – ${end.date} ${end.zone}`;
+  const parts = [
+    { date: start.date, datetime: start.datetime, zone: start.zone },
+  ];
+  if (props.dateEnd) {
+    const endDate = dayjs.utc(props.dateEnd).tz(timezone);
+    const end = format(props.dateEnd, start.local.isSame(endDate, 'day'));
+    if (start.zone === end.zone) {
+      parts[0].zone = '';
+    }
+    parts.push({ date: end.date, datetime: end.datetime, zone: end.zone });
+  }
+  return parts;
 }
 
 const sameTimezone = computed(
@@ -62,29 +81,6 @@ const sameTimezone = computed(
         timeZone: deviceTimezone.value,
       }).resolvedOptions().timeZone
 );
-
-function dateDifference(value: string): number {
-  if (!deviceTimezone.value) return 0;
-  const date = dayjs.utc(value);
-  const eventDay = date.tz(props.timezone).format('YYYY-MM-DD');
-  const deviceDay = date.tz(deviceTimezone.value).format('YYYY-MM-DD');
-  return dayjs.utc(deviceDay).diff(dayjs.utc(eventDay), 'day');
-}
-
-// fallow-ignore-next-line complexity -- Date-boundary cases are covered by browser tests.
-const dayHint = computed(() => {
-  const start = dateDifference(props.dateStart);
-  const end = dateDifference(props.dateEnd ?? props.dateStart);
-  if (start * end < 0) return 'Dates differ in your timezone';
-  const difference = start || end;
-  const labels: Record<number, string> = {
-    1: 'Next day',
-    '-1': 'Previous day',
-    2: '2 days later',
-    '-2': '2 days earlier',
-  };
-  return labels[difference] ? `${labels[difference]} in your timezone` : '';
-});
 
 const relativeTime = computed(() => {
   const difference = dayjs.utc(props.dateStart).valueOf() - now.value;
@@ -100,60 +96,110 @@ const relativeTime = computed(() => {
 
 const rows = computed(() => {
   const eventRow = {
-    label: 'Event time',
-    timezone: props.timezone,
-    value: formattedTime(props.timezone),
-    copyLabel: 'Copy event time',
+    label: 'Event local time',
+    displayParts: formattedTime(props.timezone),
   };
   if (sameTimezone.value) return [eventRow];
   return [
     eventRow,
     {
-      label: 'Your time',
-      timezone: deviceTimezone.value,
-      value: deviceTimezone.value ? formattedTime(deviceTimezone.value) : '',
-      copyLabel: 'Copy your time',
+      label: 'Your local time',
+      displayParts: deviceTimezone.value
+        ? formattedTime(deviceTimezone.value)
+        : [],
     },
   ];
 });
 
 function onToggle(event: Event) {
   expanded.value = (event as ToggleEvent).newState === 'open';
-  if (expanded.value) now.value = Date.now();
+  if (expanded.value) {
+    now.value = Date.now();
+    requestAnimationFrame(updateArrow);
+    window.addEventListener('resize', updateArrow);
+    window.addEventListener('scroll', updateArrow, true);
+  } else {
+    removeArrowListeners();
+  }
 }
+
+function updateArrow() {
+  if (!trigger.value || !popover.value) return;
+  const anchor = trigger.value.getBoundingClientRect();
+  const panel = popover.value.getBoundingClientRect();
+  const gap = 16;
+  arrowSide.value =
+    Math.abs(panel.top - anchor.bottom) <= gap
+      ? 'top'
+      : Math.abs(panel.bottom - anchor.top) <= gap
+        ? 'bottom'
+        : null;
+  arrowOffset.value = Math.max(
+    16,
+    Math.min(panel.width - 16, anchor.left + anchor.width / 2 - panel.left)
+  );
+}
+
+function removeArrowListeners() {
+  window.removeEventListener('resize', updateArrow);
+  window.removeEventListener('scroll', updateArrow, true);
+}
+
+onUnmounted(removeArrowListeners);
 </script>
 
 <template>
   <template v-if="popoverId">
     <button
       type="button"
+      ref="trigger"
       class="timezone-trigger"
       :popovertarget="popoverId"
       :aria-expanded="expanded"
     >
-      {{ abbreviation }}<span class="sr-only">: Show in your timezone</span>
+      <span class="timezone-trigger__label"
+        >{{ abbreviation
+        }}<span class="sr-only">: Show in your timezone</span></span
+      >
+      <wa-icon name="square-question" auto-width aria-hidden="true"></wa-icon>
     </button>
-    <div :id="popoverId" class="timezone-popover" popover @toggle="onToggle">
-      <p class="timezone-popover__relative">
-        {{ dayjs.utc(dateStart).valueOf() < now ? 'Started' : 'Starts' }}
-        {{ relativeTime }}
-      </p>
-      <div v-for="row in rows" :key="row.label" class="timezone-popover__row">
-        <div>
-          <strong>{{ row.label }}</strong>
-          <div>{{ row.value }}</div>
-          <div class="timezone-popover__zone">{{ row.timezone }}</div>
+    <div
+      :id="popoverId"
+      ref="popover"
+      class="timezone-popover"
+      :class="arrowSide && `timezone-popover--arrow-${arrowSide}`"
+      :style="{ '--arrow-offset': `${arrowOffset}px` }"
+      popover
+      @toggle="onToggle"
+    >
+      <div class="timezone-popover__content flow flow-xs">
+        <p class="timezone-popover__relative">
+          {{ dayjs.utc(dateStart).valueOf() < now ? 'Started' : 'Starts' }}
+          {{ relativeTime }}
+        </p>
+        <div v-for="row in rows" :key="row.label" class="timezone-popover__row">
+          <div>
+            <strong>{{ row.label }}</strong>
+            <div>
+              <template v-for="(part, index) in row.displayParts" :key="index">
+                <template v-if="index"
+                  ><span aria-hidden="true"> – </span
+                  ><span class="sr-only">until</span></template
+                ><time :datetime="part.datetime">{{ part.date }}</time
+                >{{ ' ' }}
+                <span
+                  v-if="part.zone"
+                  class="timezone-popover__zone text-muted"
+                  >{{ part.zone }}</span
+                >
+              </template>
+            </div>
+          </div>
         </div>
-        <wa-copy-button
-          :value="row.value"
-          :copy-label="row.copyLabel"
-          tooltip="none"
-        />
+        <p v-if="sameTimezone" class="timezone-popover__hint">
+          Your device uses the event timezone.
+        </p>
       </div>
-      <p v-if="sameTimezone" class="timezone-popover__hint">
-        Your device uses the event timezone.
-      </p>
-      <p v-else-if="dayHint" class="timezone-popover__hint">{{ dayHint }}</p>
     </div>
   </template>
   <abbr v-else>{{ abbreviation }}</abbr>
@@ -161,17 +207,27 @@ function onToggle(event: Event) {
 
 <style scoped>
 .timezone-trigger {
+  align-items: center;
   background: none;
   border: 0;
   color: inherit;
   cursor: pointer;
+  display: inline-flex;
   font: inherit;
+  gap: var(--p-space-3xs);
   min-height: 24px;
   min-width: 24px;
   padding: 0;
+}
+
+.timezone-trigger__label {
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 0.2em;
+}
+
+.timezone-trigger:hover {
+  color: var(--c-color-link-hover);
 }
 
 .timezone-trigger:focus-visible {
@@ -186,11 +242,39 @@ function onToggle(event: Event) {
   color: var(--c-body-color-fg);
   inset: 0;
   margin: auto;
-  max-height: calc(100dvh - 2rem);
   max-width: min(24rem, calc(100vw - 2rem));
-  overflow: auto;
-  padding: var(--p-space-s);
+  overflow: visible;
   white-space: normal;
+}
+
+.timezone-popover__content {
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: var(--p-space-xs);
+}
+
+.timezone-popover--arrow-top::before,
+.timezone-popover--arrow-bottom::before {
+  background: var(--c-panel-color-bg);
+  border: 1px solid var(--wa-color-surface-border);
+  content: '';
+  height: 12px;
+  left: var(--arrow-offset);
+  position: absolute;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+}
+
+.timezone-popover--arrow-top::before {
+  border-bottom: 0;
+  border-right: 0;
+  top: -7px;
+}
+
+.timezone-popover--arrow-bottom::before {
+  border-left: 0;
+  border-top: 0;
+  bottom: -7px;
 }
 
 @supports (position-area: bottom) {
@@ -203,6 +287,7 @@ function onToggle(event: Event) {
   .timezone-popover {
     inset: auto;
     margin: 0;
+    margin-block-start: 10px;
     position-area: bottom;
     position-try-fallbacks:
       flip-block,
@@ -212,27 +297,8 @@ function onToggle(event: Event) {
   }
 }
 
-.timezone-popover__row {
-  align-items: start;
-  display: flex;
-  gap: var(--p-space-s);
-  justify-content: space-between;
-}
-
-.timezone-popover__relative {
-  margin: 0 0 var(--p-space-s);
-}
-
-.timezone-popover__hint {
-  margin: var(--p-space-s) 0 0;
-}
-
-.timezone-popover__row + .timezone-popover__row {
-  margin-top: var(--p-space-s);
-}
-
 .timezone-popover__zone {
-  font-size: 0.875em;
-  overflow-wrap: anywhere;
+  display: block;
+  font-size: var(--p-step--2);
 }
 </style>
