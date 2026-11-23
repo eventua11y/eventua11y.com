@@ -1,5 +1,9 @@
 <template>
-  <section id="today">
+  <section
+    v-show="filtersStore.eventsStatus !== 'error'"
+    id="today"
+    ref="todaySection"
+  >
     <div class="container flow">
       <hgroup role="group" aria-roledescription="Heading group">
         <h2>Today</h2>
@@ -44,6 +48,19 @@ import userStore from '../store/userStore';
 import dayjs from '../lib/dayjs';
 import Event from './Event.vue';
 import filtersStore from '../store/filtersStore';
+import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
+
+const todaySection = ref<HTMLElement | null>(null);
+
+watch(
+  () => filtersStore.eventsStatus,
+  (status) => {
+    if (status === 'error') {
+      focusEventRegionIfNeeded([todaySection.value], '#upcoming-events');
+    }
+  },
+  { flush: 'sync' }
+);
 
 // Get the start of the day using the timezone from the edge function
 const today = computed(() => {

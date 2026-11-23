@@ -23,6 +23,7 @@ interface Filters {
  */
 interface FiltersStore {
   filters: Filters;
+  eventsStatus: 'loading' | 'success' | 'error';
   events: Event[];
   todayEvents: Event[];
   futureEvents: Event[];
@@ -74,6 +75,7 @@ const getStoredFilters = (): Filters => {
 // this self-referential unwrapping without an explicit interface.
 const filtersStore = reactive({
   filters: getStoredFilters(),
+  eventsStatus: 'loading' as FiltersStore['eventsStatus'],
   events: [] as Event[],
   todayEvents: [] as Event[],
   futureEvents: [] as Event[],
@@ -85,14 +87,16 @@ const filtersStore = reactive({
    * Fetches events from the API and sets them in the store.
    */
   async fetchEvents() {
+    this.eventsStatus = 'loading';
+    void this.fetchBooks();
     try {
-      const [eventsResponse] = await Promise.all([
-        fetch('/api/get-events'),
-        this.fetchBooks(),
-      ]);
+      const eventsResponse = await fetch('/api/get-events');
+      if (!eventsResponse.ok) throw new Error('Failed to fetch events');
       const events = await eventsResponse.json();
       this.setEvents(events.future, events.today, events.past);
+      this.eventsStatus = 'success';
     } catch (error) {
+      this.eventsStatus = 'error';
       console.error('Error fetching events:', error);
     }
   },

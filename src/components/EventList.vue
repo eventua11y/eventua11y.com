@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import Event from './Event.vue';
 import EventBook from './EventBook.vue';
 import Skeleton from './Skeleton.vue';
@@ -25,6 +25,12 @@ const props = defineProps<{
 const groupedEvents = ref<GroupedEvents>({});
 const loading = ref(true);
 const error = ref<string | null>(null);
+const eventsFetchFailed = ref(false);
+const displayError = computed(() =>
+  eventsFetchFailed.value
+    ? `Unable to load ${props.type} events. Please try again later.`
+    : error.value
+);
 
 /** Delegates to the shared getYearMonth utility */
 const getYearMonth = (item: ListItem): string => {
@@ -90,6 +96,32 @@ onMounted(async () => {
   loading.value = true;
   error.value = null;
 
+  watch(
+    () => filtersStore.eventsStatus,
+    (status) => {
+      eventsFetchFailed.value = status === 'error';
+      if (status === 'loading') {
+        loading.value = true;
+        return;
+      }
+
+      if (status === 'success') {
+        try {
+          groupEvents(
+            props.type === 'past'
+              ? filtersStore.pastEvents
+              : filtersStore.filteredEvents
+          );
+        } catch (e) {
+          error.value = `Error updating ${props.type} events.`;
+          console.error('Error:', e);
+        }
+      }
+      loading.value = false;
+    },
+    { immediate: true }
+  );
+
   try {
     if (!userStore.userInfoFetched) {
       const response = await fetch('/api/get-user-info');
@@ -105,14 +137,14 @@ onMounted(async () => {
         : filtersStore.filteredEvents;
 
     // Process events if we have them
-    if (events && events.length > 0) {
+    if (filtersStore.eventsStatus === 'success') {
       groupEvents(events);
     }
   } catch (e) {
     error.value = `Unable to load ${props.type} events. Please try again later.`;
     console.error('Error:', e);
   } finally {
-    if (error.value || Object.keys(groupedEvents.value).length > 0) {
+    if (displayError.value || filtersStore.eventsStatus === 'success') {
       loading.value = false;
     }
   }
@@ -129,6 +161,7 @@ watch(
       ? filtersStore.pastEvents
       : filtersStore.filteredEvents,
   (newEvents) => {
+    if (filtersStore.eventsStatus !== 'success') return;
     if (!loading.value) loading.value = true;
     error.value = null;
 
@@ -148,26 +181,27 @@ watch(
 
 <template>
   <div>
+    <div role="status" aria-live="polite" aria-atomic="true">
+      <wa-callout v-if="displayError" variant="danger" class="my-xl">
+        <wa-icon
+          slot="icon"
+          name="octagon-exclamation"
+          variant="regular"
+        ></wa-icon>
+        {{ displayError }}
+      </wa-callout>
+    </div>
+
     <!-- Loading state -->
-    <div v-if="loading" class="flow flow-xl">
+    <div v-if="!displayError && loading" class="flow flow-xl">
       <Skeleton />
       <Skeleton />
       <Skeleton />
     </div>
 
-    <!-- Error state -->
-    <wa-callout v-else-if="error" variant="danger" class="my-xl">
-      <wa-icon
-        slot="icon"
-        name="octagon-exclamation"
-        variant="regular"
-      ></wa-icon>
-      {{ error }}
-    </wa-callout>
-
     <!-- No events state -->
     <wa-callout
-      v-else-if="!loading && Object.keys(groupedEvents).length === 0"
+      v-else-if="!displayError && Object.keys(groupedEvents).length === 0"
       variant="neutral"
       class="my-xl"
     >
@@ -180,7 +214,7 @@ watch(
     </wa-callout>
 
     <!-- Events list -->
-    <div v-else class="flow flow-2xl">
+    <div v-else-if="!displayError" class="flow flow-2xl">
       <section
         v-for="(events, yearMonth) in groupedEvents"
         :key="yearMonth"

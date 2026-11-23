@@ -1,5 +1,10 @@
 <template>
-  <div id="filters" ref="filterToolbar" class="py-xs-s">
+  <div
+    v-show="filtersStore.eventsStatus !== 'error'"
+    id="filters"
+    ref="filterToolbar"
+    class="py-xs-s"
+  >
     <div class="container">
       <div class="filters__status">
         <p
@@ -57,9 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import TimezoneSelector from './TimezoneSelector.vue';
+import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
 /**
  * FilterBar component
@@ -71,7 +77,20 @@ import TimezoneSelector from './TimezoneSelector.vue';
  * Reference to filter toolbar element for intersection observer
  * Used to add sticky positioning when scrolled
  */
-const filterToolbar = ref(null);
+const filterToolbar = ref<HTMLElement | null>(null);
+
+watch(
+  () => filtersStore.eventsStatus,
+  (status) => {
+    if (status === 'error') {
+      focusEventRegionIfNeeded(
+        [filterToolbar.value, document.getElementById('filter-drawer')],
+        '#upcoming-events'
+      );
+    }
+  },
+  { flush: 'sync' }
+);
 
 /**
  * Reference to awareness days switch component
