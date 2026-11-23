@@ -161,7 +161,12 @@ onUnmounted(removeArrowListeners);
         >{{ abbreviation
         }}<span class="sr-only">: Show in your timezone</span></span
       >
-      <wa-icon name="square-question" auto-width aria-hidden="true"></wa-icon>
+      <wa-icon
+        name="square-question"
+        variant="regular"
+        auto-width
+        aria-hidden="true"
+      ></wa-icon>
     </button>
     <div
       :id="popoverId"
