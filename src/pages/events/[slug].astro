@@ -189,10 +189,11 @@ const supplementaryLinks = eventHasEnded
         label: 'Accessibility information',
       },
       event.schedule && { href: event.schedule, label: 'Schedule' },
-      event.callForSpeakersLink && {
-        href: event.callForSpeakersLink,
-        label: 'Call for speakers',
-      },
+      callForSpeakersOpen &&
+        event.callForSpeakersLink && {
+          href: event.callForSpeakersLink,
+          label: 'Call for speakers',
+        },
     ].filter(Boolean) as Array<{ href: string; label: string }>);
 
 const hasSidebarLinks = supplementaryLinks.length > 0;
