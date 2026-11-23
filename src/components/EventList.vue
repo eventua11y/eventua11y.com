@@ -177,6 +177,23 @@ watch(
     }
   }
 );
+
+watch(
+  () => [
+    userStore.useLocalTimezone,
+    userStore.timezone,
+    userStore.geo?.timezone,
+  ],
+  () => {
+    if (filtersStore.eventsStatus === 'success') {
+      groupEvents(
+        props.type === 'past'
+          ? filtersStore.pastEvents
+          : filtersStore.filteredEvents
+      );
+    }
+  }
+);
 </script>
 
 <template>

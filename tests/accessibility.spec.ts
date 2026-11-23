@@ -92,6 +92,14 @@ test.describe('Homepage accessibility', () => {
     await expect(header).toBeVisible();
   });
 
+  test('timezone selector has a visible label in the header', async ({
+    page,
+  }) => {
+    const select = page.locator('#global-header #timezone-select');
+    await expect(select).toHaveJSProperty('label', 'Timezone');
+    await expect(select.locator('[part~="form-control-label"]')).toBeVisible();
+  });
+
   test('footer contentinfo landmark is present', async ({ page }) => {
     const footer = page.getByRole('contentinfo');
     await expect(footer).toBeVisible();

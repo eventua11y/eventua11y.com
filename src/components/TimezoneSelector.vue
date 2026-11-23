@@ -1,23 +1,29 @@
 <template>
   <div>
     <wa-select
+      v-if="!loading || userStore.geo?.timezone"
       id="timezone-select"
       label="Timezone"
       placement="bottom"
       appearance="outlined"
-      class="wa-visually-hidden-label"
       :size="size"
       :value="selectedValue"
+      :hint="
+        !loading && !userStore.geo?.timezone
+          ? 'Timezone unavailable. UTC is available instead.'
+          : undefined
+      "
       @change="updateTimezone"
     >
       <wa-option :value="userTimezone">{{ userTimezoneLabel }}</wa-option>
       <wa-option value="event">Event local times</wa-option>
     </wa-select>
+    <p v-else role="status">Loading timezone...</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import userStore from '../store/userStore';
 import dayjs from '../lib/dayjs';
 
@@ -32,6 +38,7 @@ withDefaults(
 
 // Default timezone if user's timezone cannot be detected
 const defaultTimezone = 'UTC';
+const loading = ref(true);
 
 /**
  * Gets user's timezone from store or falls back to UTC
@@ -45,7 +52,9 @@ const userTimezone = computed(() => userStore.geo?.timezone || defaultTimezone);
  * @returns {string} Formatted timezone string
  */
 const userTimezoneLabel = computed(() => {
-  if (!userStore.geo?.timezone) return 'Loading timezone...';
+  if (!userStore.geo?.timezone) {
+    return loading.value ? 'Loading timezone...' : 'UTC';
+  }
   const location = userTimezone.value.split('/').pop().replace('_', ' ');
   return `${location} (UTC ${dayjs().tz(userTimezone.value).format('Z')})`;
 });
@@ -66,7 +75,6 @@ const selectedValue = computed(() =>
  * @param {Event} event - Native change event from wa-select
  */
 function updateTimezone(event: Event) {
-  if (!userStore.geo?.timezone) return;
   const select = event.target as HTMLElement & { value: string };
   const isLocal = select.value !== 'event';
   userStore.setTimezone(isLocal ? userTimezone.value : 'event', isLocal);
@@ -82,17 +90,17 @@ onMounted(async () => {
   if (!userStore.geo?.timezone && !userStore.userInfoFetched) {
     try {
       const response = await fetch('/api/get-user-info');
-      if (response.ok) {
-        const data = await response.json();
-        userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
-      }
-    } catch {
-      // Silently fall back to UTC if the fetch fails
+      if (!response.ok) throw new Error('Failed to fetch user info');
+      const data = await response.json();
+      userStore.setUserInfo(data.timezone, data.acceptLanguage, data.geo);
+    } catch (error) {
+      console.error('Unable to detect timezone:', error);
     }
   }
 
-  if (userStore.useLocalTimezone && userStore.geo?.timezone) {
+  if (userStore.useLocalTimezone) {
     userStore.setTimezone(userTimezone.value, true);
   }
+  loading.value = false;
 });
 </script>

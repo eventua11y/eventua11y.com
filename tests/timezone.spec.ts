@@ -1,150 +1,195 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
-test.describe('Timezone Selector', () => {
-  test.beforeEach(async ({ context, page }) => {
-    // Clear localStorage to reset timezone preferences
-    await context.addInitScript(() => {
-      window.localStorage.clear();
-    });
+const timezone = 'Asia/Tokyo';
 
-    await page.goto('/');
+async function mockUserInfo(page: Page) {
+  await page.route('**/api/get-user-info', (route) =>
+    route.fulfill({
+      json: { timezone, acceptLanguage: 'en', geo: { timezone } },
+    })
+  );
+}
 
-    // Wait for the wa-select timezone control to appear
-    await page.waitForSelector('#timezone-select', { timeout: 10000 });
+async function chooseTimezone(page: Page, value: string) {
+  const select = page.locator('#timezone-select');
+  await select.click();
+  await page
+    .locator('#timezone-select wa-option')
+    .filter({ hasText: value })
+    .click();
+}
 
-    // Make sure the component is fully initialized and reactive
-    await page.waitForTimeout(1000);
-  });
-
-  test('timezone select is visible and clickable', async ({ page }) => {
-    const select = page.locator('#timezone-select');
-    await expect(select).toBeVisible();
-
-    // Click to open the listbox
-    await select.click();
-
-    // wa-select sets the `open` attribute when the listbox is visible
-    await expect(select).toHaveAttribute('open', '');
-  });
-
-  test('timezone can be changed between local and event times', async ({
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 1280, height: 800 },
+]) {
+  test(`header timezone control is keyboard accessible at ${viewport.width}px`, async ({
     page,
   }) => {
-    const select = page.locator('#timezone-select');
+    await page.setViewportSize(viewport);
+    await mockUserInfo(page);
+    await page.goto('/');
 
-    // Read the initial display text from the select's display input
-    const initialValue = await select.evaluate(
-      (el: HTMLElement & { value: string }) => el.value
-    );
-    console.log(`Initial timezone value: "${initialValue}"`);
-
-    // Open the select
-    await select.click();
-    await expect(select).toHaveAttribute('open', '', { timeout: 5000 });
-
-    // Get all options
-    const options = page.locator('#timezone-select wa-option');
-    const optionCount = await options.count();
-    console.log(`Found ${optionCount} timezone options`);
-
-    // Click the option that is NOT currently selected
-    if (initialValue === 'event') {
-      // Currently "Event local times" — click the user timezone option (first one)
-      console.log('Clicking user local timezone option');
-      await options.first().click({ force: true });
-    } else {
-      // Currently user timezone — click "Event local times"
-      console.log('Clicking event local times option');
-      await page
-        .locator('#timezone-select wa-option[value="event"]')
-        .click({ force: true });
-    }
-
-    // Wait for change to take effect (Vue reactivity + localStorage)
-    await page.waitForTimeout(1000);
-
-    // Verify the value changed
-    const newValue = await select.evaluate(
-      (el: HTMLElement & { value: string }) => el.value
-    );
-    console.log(`New timezone value: "${newValue}"`);
-    expect(newValue).not.toBe(initialValue);
-
-    // Check that localStorage has been updated
-    const timezonePreference = await page.evaluate(() =>
-      localStorage.getItem('userTimezone')
-    );
-    expect(timezonePreference).not.toBeNull();
-
-    const useLocalTimezone = await page.evaluate(() =>
-      localStorage.getItem('useLocalTimezone')
-    );
-    expect(useLocalTimezone).not.toBeNull();
+    const select = page.locator('#global-header #timezone-select');
+    await expect(select).toHaveCount(1);
+    await expect(page.locator('#filters #timezone-select')).toHaveCount(0);
+    const combobox = select.getByRole('combobox');
+    await expect(combobox).toHaveAccessibleName('Timezone');
+    await expect(combobox).toHaveValue('Event local times');
+    await page.locator('#global-header nav a').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(combobox).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(select).toHaveAttribute('open', '');
+    const results = await new AxeBuilder({ page })
+      .include('#global-header')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Enter');
+    await expect(select).not.toHaveAttribute('open', '');
+    await expect(combobox).toHaveValue(/Tokyo/);
   });
+}
 
-  test('timezone selection persists after page reload', async ({ page }) => {
-    const select = page.locator('#timezone-select');
-    await expect(select).toBeVisible({ timeout: 5000 });
+test('switches listing times and month groups and persists across navigation', async ({
+  page,
+}) => {
+  await mockUserInfo(page);
+  await page.route('**/api/get-books', (route) => route.fulfill({ json: [] }));
+  await page.route('**/api/get-events', (route) =>
+    route.fulfill({
+      json: {
+        today: [],
+        future: [
+          {
+            _id: 'timezone-test',
+            title: 'Timezone test event',
+            type: 'conference',
+            dateStart: '2030-12-31T23:30:00Z',
+            timezone: 'America/New_York',
+          },
+        ],
+        past: [],
+      },
+    })
+  );
+  await page.goto('/');
+  const event = page
+    .locator('#upcoming-events')
+    .getByText('Timezone test event');
+  await expect(event).toBeVisible();
+  const date = page.locator('#upcoming-events .event__dates').first();
+  const original = await date.innerText();
+  await expect(page.locator('#section-2030-12')).toBeVisible();
 
-    // Open the select and choose "Event local times"
-    await select.click();
-    await expect(select).toHaveAttribute('open', '', { timeout: 5000 });
+  await chooseTimezone(page, 'Tokyo');
+  await expect(date).not.toHaveText(original);
+  await expect(page.locator('#section-2031-1')).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('useLocalTimezone')))
+    .toBe('true');
 
-    await page
-      .locator('#timezone-select wa-option[value="event"]')
-      .click({ force: true });
+  await page.goto('/past-events');
+  await expect(page.locator('#timezone-select')).toHaveJSProperty(
+    'value',
+    timezone
+  );
+  await page.reload();
+  await expect(page.locator('#timezone-select')).toHaveJSProperty(
+    'value',
+    timezone
+  );
+  await chooseTimezone(page, 'Event local times');
+  await page.goto('/');
+  await expect(page.locator('#timezone-select')).toHaveJSProperty(
+    'value',
+    'event'
+  );
+  await expect(page.locator('#section-2030-12')).toBeVisible();
+});
 
-    // Wait for change to take effect
-    await page.waitForTimeout(1000);
+test('changes event detail times and retains the selection after reload', async ({
+  page,
+}) => {
+  await mockUserInfo(page);
+  await page.goto('/events/well-i-didnt-see-that-coming');
+  const date = page.locator('.event-detail .event__dates').first();
+  await expect(date).toBeVisible();
+  const original = await date.innerText();
 
-    // Read the current value
-    const selectedValue = await select.evaluate(
-      (el: HTMLElement & { value: string }) => el.value
-    );
-    console.log(`Selected timezone value before reload: "${selectedValue}"`);
+  await chooseTimezone(page, 'Tokyo');
+  await expect(date).not.toHaveText(original);
+  const localDate = await date.innerText();
 
-    // Save localStorage values for verification
-    const beforeReloadTimezone = await page.evaluate(() =>
-      localStorage.getItem('userTimezone')
-    );
-    const beforeReloadUseLocal = await page.evaluate(() =>
-      localStorage.getItem('useLocalTimezone')
-    );
-    console.log(
-      `Before reload - userTimezone: "${beforeReloadTimezone}", useLocalTimezone: "${beforeReloadUseLocal}"`
-    );
+  await page.reload();
+  await expect(page.locator('#timezone-select')).toHaveJSProperty(
+    'value',
+    timezone
+  );
+  await expect(date).toHaveText(localDate);
+  await chooseTimezone(page, 'Event local times');
+  await expect(date).toHaveText(original);
+});
 
-    // Reload the page
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('#timezone-select', { timeout: 10000 });
-
-    // Wait for Vue reactivity
-    await page.waitForTimeout(2000);
-
-    // Verify the value persisted
-    const reloadedSelect = page.locator('#timezone-select');
-    await expect(reloadedSelect).toBeVisible({ timeout: 5000 });
-
-    const newValue = await reloadedSelect.evaluate(
-      (el: HTMLElement & { value: string }) => el.value
-    );
-    console.log(`Selected timezone value after reload: "${newValue}"`);
-    expect(newValue).toBe(selectedValue);
-
-    // Also check localStorage values were preserved
-    const timezonePreference = await page.evaluate(() =>
-      localStorage.getItem('userTimezone')
-    );
-    expect(timezonePreference).not.toBeNull();
-
-    const useLocalTimezone = await page.evaluate(() => {
-      if (localStorage.getItem('useLocalTimezone') === null) {
-        console.log('Warning: useLocalTimezone is not in localStorage');
-        localStorage.setItem('useLocalTimezone', 'false');
-      }
-      return localStorage.getItem('useLocalTimezone');
+test('a late user-info response does not overwrite the selected preference', async ({
+  page,
+}) => {
+  let releaseUserInfo!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    releaseUserInfo = resolve;
+  });
+  await page.addInitScript(() => {
+    localStorage.setItem('userGeo', JSON.stringify({ timezone: 'Asia/Tokyo' }));
+    localStorage.setItem('userTimezone', 'Asia/Tokyo');
+    localStorage.setItem('useLocalTimezone', 'true');
+  });
+  await page.route('**/api/get-user-info', async (route) => {
+    await gate;
+    await route.fulfill({
+      json: { timezone, acceptLanguage: 'en', geo: { timezone } },
     });
-    expect(useLocalTimezone).not.toBeNull();
   });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await chooseTimezone(page, 'Event local times');
+  const response = page.waitForResponse('**/api/get-user-info');
+  releaseUserInfo();
+  await response;
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('userLocale')))
+    .toBe('en');
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('userTimezone')))
+    .toBe('event');
+  await expect(page.locator('#timezone-select')).toHaveJSProperty(
+    'value',
+    'event'
+  );
+});
+
+test('uses UTC and explains when timezone detection fails', async ({
+  page,
+}) => {
+  await page.route('**/api/get-user-info', (route) => route.abort());
+  await page.goto('/curation-policy');
+  const select = page.locator('#timezone-select');
+  await expect(select).toHaveJSProperty(
+    'hint',
+    'Timezone unavailable. UTC is available instead.'
+  );
+  await chooseTimezone(page, 'UTC');
+  await expect(select).toHaveJSProperty('value', 'UTC');
+});
+
+test('does not present an unusable selector without JavaScript', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/');
+  await expect(page.locator('#timezone-select')).toHaveCount(0);
+  await expect(page.locator('#global-header')).toBeVisible();
+  await context.close();
 });

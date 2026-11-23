@@ -1,5 +1,6 @@
 ---
 import Logo from '../images/eventua11y_logo_wordmark_white.svg';
+import TimezoneSelector from './TimezoneSelector.vue';
 const currentPath = Astro.url.pathname;
 const topicPagesEnabled = Astro.locals.flags.topic_pages_enabled;
 ---
@@ -47,6 +48,9 @@ const topicPagesEnabled = Astro.locals.flags.topic_pages_enabled;
           )}
         </ul>
       </nav>
+      <div class="masthead__timezone">
+        <TimezoneSelector client:only="vue" />
+      </div>
       <wa-button id="theme-selector-button" variant="brand" appearance="plain">
         <wa-icon name="moon" label="Switch to dark mode"></wa-icon>
       </wa-button>

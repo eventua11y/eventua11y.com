@@ -8,6 +8,23 @@ afterEach(() => {
 });
 
 describe('userStore.setUserInfo', () => {
+  it('preserves an event-local selection when user information arrives later', () => {
+    userStore.setTimezone('event', false);
+    userStore.setUserInfo('Asia/Tokyo', 'en', { timezone: 'Asia/Tokyo' });
+
+    expect(userStore.timezone).toBe('event');
+    expect(userStore.useLocalTimezone).toBe(false);
+    expect(userStore.geo?.timezone).toBe('Asia/Tokyo');
+  });
+
+  it('updates the detected timezone when local time is selected', () => {
+    userStore.setTimezone('Europe/London', true);
+    userStore.setUserInfo('Asia/Tokyo', 'en', { timezone: 'Asia/Tokyo' });
+
+    expect(userStore.timezone).toBe('Asia/Tokyo');
+    expect(userStore.useLocalTimezone).toBe(true);
+  });
+
   it.each([
     ['fr,en;q=0.5', 'fr', 'lundi'],
     ['es,en;q=0.5', 'es', 'lunes'],

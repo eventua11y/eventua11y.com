@@ -14,7 +14,7 @@ interface UserStore {
   useLocalTimezone: boolean;
   userInfoFetched: boolean;
   setUserInfo: (
-    timezone: string,
+    timezone: string | undefined,
     acceptLanguage: string | null,
     geo: Geo
   ) => void;
@@ -62,13 +62,23 @@ const userStore: UserStore = reactive({
    * @param acceptLanguage - The user's Accept-Language header.
    * @param geo - The user's geographical information.
    */
-  setUserInfo(timezone: string, acceptLanguage: string | null, geo: Geo) {
-    this.timezone = timezone;
+  setUserInfo(
+    timezone: string | undefined,
+    acceptLanguage: string | null,
+    geo: Geo
+  ) {
+    const selectedTimezone =
+      !this.useLocalTimezone && this.timezone === 'event'
+        ? 'event'
+        : timezone || this.timezone;
+    this.timezone = selectedTimezone;
     this.locale = getPrimaryLocale(acceptLanguage);
     this.geo = geo;
     this.userInfoFetched = true;
     if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('userTimezone', timezone);
+      if (selectedTimezone) {
+        localStorage.setItem('userTimezone', selectedTimezone);
+      }
       if (this.locale) {
         localStorage.setItem('userLocale', this.locale);
       } else {
