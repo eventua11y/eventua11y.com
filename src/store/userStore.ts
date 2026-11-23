@@ -13,7 +13,11 @@ interface UserStore {
   geo: Geo | null;
   useLocalTimezone: boolean;
   userInfoFetched: boolean;
-  setUserInfo: (timezone: string, locale: string, geo: Geo) => void;
+  setUserInfo: (
+    timezone: string,
+    acceptLanguage: string | null,
+    geo: Geo
+  ) => void;
   setTimezone: (timezone: string, useLocal?: boolean) => void;
 }
 
@@ -22,10 +26,23 @@ let savedLocale: string | null = null;
 let savedGeo: Geo | null = null;
 let savedUseLocalTimezone: boolean | null = null;
 
+function getPrimaryLocale(acceptLanguage: string | null): string | null {
+  const firstLanguage = acceptLanguage?.split(',')[0]?.split(';')[0]?.trim();
+  return firstLanguage?.split('-')[0].toLowerCase() || null;
+}
+
 // Load saved user information from localStorage if available
 if (typeof window !== 'undefined' && window.localStorage) {
   savedTimezone = localStorage.getItem('userTimezone');
-  savedLocale = localStorage.getItem('userLocale');
+  const storedLocale = localStorage.getItem('userLocale');
+  savedLocale = getPrimaryLocale(storedLocale);
+  if (storedLocale && storedLocale !== savedLocale) {
+    if (savedLocale) {
+      localStorage.setItem('userLocale', savedLocale);
+    } else {
+      localStorage.removeItem('userLocale');
+    }
+  }
   savedGeo = localStorage.getItem('userGeo')
     ? JSON.parse(localStorage.getItem('userGeo') as string)
     : null;
@@ -42,17 +59,21 @@ const userStore: UserStore = reactive({
   /**
    * Sets the user information and updates localStorage.
    * @param timezone - The user's timezone.
-   * @param locale - The user's locale.
+   * @param acceptLanguage - The user's Accept-Language header.
    * @param geo - The user's geographical information.
    */
-  setUserInfo(timezone: string, locale: string, geo: Geo) {
+  setUserInfo(timezone: string, acceptLanguage: string | null, geo: Geo) {
     this.timezone = timezone;
-    this.locale = locale;
+    this.locale = getPrimaryLocale(acceptLanguage);
     this.geo = geo;
     this.userInfoFetched = true;
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('userTimezone', timezone);
-      localStorage.setItem('userLocale', locale);
+      if (this.locale) {
+        localStorage.setItem('userLocale', this.locale);
+      } else {
+        localStorage.removeItem('userLocale');
+      }
       localStorage.setItem('userGeo', JSON.stringify(geo));
     }
   },
