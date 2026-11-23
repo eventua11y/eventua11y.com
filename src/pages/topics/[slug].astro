@@ -18,17 +18,17 @@ export const prerender = false;
 const { slug } = Astro.params;
 
 if (!Astro.locals.flags.topic_pages_enabled) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/not-found');
 }
 
 if (!slug) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/not-found');
 }
 
 const topic = await getTopicBySlug(slug);
 
 if (!topic) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/not-found');
 }
 
 Astro.response.headers.set(

@@ -29,13 +29,13 @@ export const prerender = false;
 const { slug } = Astro.params;
 
 if (!slug) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/not-found');
 }
 
 const event = await getEventBySlug(slug);
 
 if (!event) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/not-found');
 }
 
 // Defensive: GROQ `field[]->{...}` returns null entries when a referenced

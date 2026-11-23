@@ -1,10 +1,40 @@
 import { test, expect } from '@playwright/test';
 
+test('a non-existent topic returns the 404 page without redirecting', async ({
+  page,
+}) => {
+  const path = '/topics/this-topic-does-not-exist-12345';
+  const response = await page.goto(path);
+  expect(response?.status()).toBe(404);
+  expect(new URL(page.url()).pathname).toBe(path);
+  await expect(
+    page.getByRole('heading', { name: 'Page not found', level: 1 })
+  ).toBeVisible();
+});
+
+test('the topics index renders the expected page for its flag state', async ({
+  page,
+}) => {
+  const response = await page.goto('/topics');
+  expect(new URL(page.url()).pathname).toBe('/topics');
+
+  if (response?.status() === 200) {
+    await expect(
+      page.getByRole('heading', { name: 'Topics', level: 1 })
+    ).toBeVisible();
+    return;
+  }
+
+  expect(response?.status()).toBe(404);
+  await expect(
+    page.getByRole('heading', { name: 'Page not found', level: 1 })
+  ).toBeVisible();
+});
+
 /**
  * Tests for the `topic_pages_enabled` feature flag gating all topic surfaces.
  *
- * The flag defaults to `false` in all environments. These tests verify the
- * flag-off (default) behaviour only.
+ * The flag defaults to `false`. The tests above run in either flag state.
  *
  * FLAG-ON BEHAVIOUR (topic_pages_enabled = true):
  * Cannot be tested here because Flagsmith cannot be toggled from Playwright.
@@ -33,19 +63,6 @@ import { test, expect } from '@playwright/test';
  *     flag-on assertions per the existing TODO above).
  */
 test.describe.skip('Topics feature flag — flag OFF (default)', () => {
-  test('/topics redirects to 404 when flag is off', async ({ page }) => {
-    await page.goto('/topics');
-    // The page redirects to /404; follow the redirect and check the final URL
-    const url = page.url();
-    expect(url).toContain('404');
-  });
-
-  test('/topics/[slug] redirects to 404 when flag is off', async ({ page }) => {
-    await page.goto('/topics/some-slug');
-    const url = page.url();
-    expect(url).toContain('404');
-  });
-
   test('header nav does not contain a Topics link when flag is off', async ({
     page,
   }) => {

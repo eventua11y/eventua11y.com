@@ -154,10 +154,15 @@ test.describe('Event detail page - sidebar hashtags', () => {
 });
 
 test.describe('Event detail page - 404 handling', () => {
-  test('non-existent slug redirects to 404', async ({ page }) => {
-    const response = await page.goto('/events/this-event-does-not-exist-12345');
-    // The page should redirect to /404 or show a 404 response
-    const url = page.url();
-    expect(url).toContain('404');
+  test('non-existent slug returns the 404 page without redirecting', async ({
+    page,
+  }) => {
+    const path = '/events/this-event-does-not-exist-12345';
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+    expect(new URL(page.url()).pathname).toBe(path);
+    await expect(
+      page.getByRole('heading', { name: 'Page not found', level: 1 })
+    ).toBeVisible();
   });
 });
