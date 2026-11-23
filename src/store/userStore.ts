@@ -34,7 +34,15 @@ function getPrimaryLocale(acceptLanguage: string | null): string | null {
 // Load saved user information from localStorage if available
 if (typeof window !== 'undefined' && window.localStorage) {
   savedTimezone = localStorage.getItem('userTimezone');
-  savedLocale = localStorage.getItem('userLocale');
+  const storedLocale = localStorage.getItem('userLocale');
+  savedLocale = getPrimaryLocale(storedLocale);
+  if (storedLocale && storedLocale !== savedLocale) {
+    if (savedLocale) {
+      localStorage.setItem('userLocale', savedLocale);
+    } else {
+      localStorage.removeItem('userLocale');
+    }
+  }
   savedGeo = localStorage.getItem('userGeo')
     ? JSON.parse(localStorage.getItem('userGeo') as string)
     : null;
