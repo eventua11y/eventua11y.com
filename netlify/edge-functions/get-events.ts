@@ -11,8 +11,8 @@ import utc from 'https://esm.sh/dayjs/plugin/utc';
 import timezone from 'https://esm.sh/dayjs/plugin/timezone';
 import { PARENT_EVENTS_QUERY, CHILD_EVENTS_QUERY } from './lib/queries.ts';
 import { assembleEvents, type AssemblableEvent } from './lib/assembleEvents.ts';
+import { compareByDateAsc } from './lib/dateUtils.ts';
 import { createSanityClient } from './lib/sanity-client.ts';
-import { compareByDateAsc } from '../../src/utils/eventUtils.ts';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

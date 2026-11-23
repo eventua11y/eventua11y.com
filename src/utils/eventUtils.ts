@@ -1,18 +1,9 @@
 import dayjs from 'dayjs';
 import type { Event, ChildEvent, Book } from '../types/event';
+import { compareByDateAsc } from '../../netlify/edge-functions/lib/dateUtils';
+export { compareByDateAsc };
 
 // ── Date comparators ───────────────────────────────────────────────────
-
-/**
- * Comparator: sorts items with a `dateStart` field in ascending
- * chronological order (earliest first).
- */
-export function compareByDateAsc(
-  a: { dateStart: string },
-  b: { dateStart: string }
-): number {
-  return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-}
 
 /**
  * Comparator: sorts items with a `dateStart` field in descending
