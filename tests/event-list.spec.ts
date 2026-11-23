@@ -1,4 +1,170 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test.describe('Event API failures', () => {
+  test('keeps the event error while user information is still loading', async ({
+    page,
+  }) => {
+    let releaseEvents!: () => void;
+    const eventsGate = new Promise<void>((resolve) => {
+      releaseEvents = resolve;
+    });
+    let releaseUserInfo!: () => void;
+    const userInfoGate = new Promise<void>((resolve) => {
+      releaseUserInfo = resolve;
+    });
+
+    await page.route('**/api/get-events', async (route) => {
+      await eventsGate;
+      await route.fulfill({ status: 500, json: { error: 'API error' } });
+    });
+    await page.route('**/api/get-books', (route) =>
+      route.fulfill({ json: [] })
+    );
+    await page.route('**/api/get-user-info', async (route) => {
+      await userInfoGate;
+      await route.fulfill({
+        json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
+      });
+    });
+
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const list = page.locator('#upcoming-events');
+    const status = list.getByRole('status');
+    await expect(status).toBeEmpty();
+    releaseEvents();
+    await expect(status).toContainText('Unable to load upcoming events.');
+    const userInfoResponse = page.waitForResponse('**/api/get-user-info');
+    releaseUserInfo();
+    await userInfoResponse;
+    await expect(status).toContainText('Unable to load upcoming events.');
+    await expect(list.locator('.skeleton-paragraphs')).toHaveCount(0);
+  });
+
+  for (const { path, listId, type } of [
+    { path: '/', listId: '#upcoming-events', type: 'upcoming' },
+    { path: '/past-events', listId: '#past-events', type: 'past' },
+  ]) {
+    for (const failure of ['http', 'network'] as const) {
+      test(`${type} events report a ${failure} failure`, async ({ page }) => {
+        let releaseEvents!: () => void;
+        const eventsGate = new Promise<void>((resolve) => {
+          releaseEvents = resolve;
+        });
+        let releaseBooks!: () => void;
+        const booksGate = new Promise<void>((resolve) => {
+          releaseBooks = resolve;
+        });
+
+        await page.route('**/api/get-events', async (route) => {
+          await eventsGate;
+          if (failure === 'http') {
+            await route.fulfill({ status: 500, json: { error: 'API error' } });
+          } else {
+            await route.abort('failed');
+          }
+        });
+        await page.route('**/api/get-books', async (route) => {
+          await booksGate;
+          await route.fulfill({ json: [] });
+        });
+        await page.route('**/api/get-user-info', (route) =>
+          route.fulfill({
+            json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
+          })
+        );
+
+        await page.goto(path, { waitUntil: 'domcontentloaded' });
+        const list = page.locator(listId);
+        const status = list.getByRole('status');
+        await expect(status).toHaveAttribute('aria-live', 'polite');
+        await expect(status).toBeEmpty();
+        await expect(list.locator('.skeleton-paragraphs')).toHaveCount(3);
+
+        releaseEvents();
+        await expect(status).toContainText(
+          `Unable to load ${type} events. Please try again later.`
+        );
+        await expect(list.locator('.skeleton-paragraphs')).toHaveCount(0);
+        await expect(
+          list.locator('wa-callout[variant="danger"]')
+        ).toBeVisible();
+
+        const booksResponse = page.waitForResponse('**/api/get-books');
+        releaseBooks();
+        await booksResponse;
+        if (type === 'upcoming') {
+          await page.locator('#filter-show-awareness-days-bar').click();
+        }
+        await expect(status).toContainText(`Unable to load ${type} events.`);
+        await expect(list.locator('.skeleton-paragraphs')).toHaveCount(0);
+
+        const results = await new AxeBuilder({ page })
+          .include(listId)
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+          .analyze();
+        expect(results.violations).toEqual([]);
+      });
+    }
+
+    test(`${type} events show the empty state after a successful response`, async ({
+      page,
+    }) => {
+      await page.route('**/api/get-events', (route) =>
+        route.fulfill({ json: { today: [], future: [], past: [] } })
+      );
+      await page.route('**/api/get-books', (route) =>
+        route.fulfill({ json: [] })
+      );
+      await page.route('**/api/get-user-info', (route) =>
+        route.fulfill({
+          json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
+        })
+      );
+      await page.goto(path);
+      const list = page.locator(listId);
+      await expect(list).toContainText(
+        `There are no ${type} events to display.`
+      );
+      await expect(list.locator('.skeleton-paragraphs')).toHaveCount(0);
+    });
+
+    test(`${type} events render after a successful response`, async ({
+      page,
+    }) => {
+      const date = new Date();
+      date.setUTCMonth(date.getUTCMonth() + (type === 'past' ? -2 : 2), 15);
+      const event = {
+        _id: 'test-event',
+        type: 'conference',
+        title: 'Test accessibility event',
+        dateStart: date.toISOString(),
+        timezone: 'UTC',
+      };
+      await page.route('**/api/get-events', (route) =>
+        route.fulfill({
+          json: {
+            today: [],
+            future: type === 'upcoming' ? [event] : [],
+            past: type === 'past' ? [event] : [],
+          },
+        })
+      );
+      await page.route('**/api/get-books', (route) =>
+        route.fulfill({ json: [] })
+      );
+      await page.route('**/api/get-user-info', (route) =>
+        route.fulfill({
+          json: { timezone: 'UTC', acceptLanguage: 'en', geo: {} },
+        })
+      );
+      await page.goto(path);
+      const list = page.locator(listId);
+      await expect(list.getByText(event.title)).toBeVisible();
+      await expect(list.locator('.skeleton-paragraphs')).toHaveCount(0);
+    });
+  }
+});
 
 test.describe('Event List', () => {
   test.beforeEach(async ({ page }) => {
