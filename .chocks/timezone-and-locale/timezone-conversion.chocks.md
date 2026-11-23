@@ -8,4 +8,4 @@ sort: a1
 uid: b1af3ac2de
 ---
 
-Converts event times from the event's own timezone to the visitor's selected timezone, handling international events, single-day events, and multi-day events.
+Timed events show their own local time. A timezone control shows and copies the event time and the visitor's device time, including dates for ranges that cross midnight.

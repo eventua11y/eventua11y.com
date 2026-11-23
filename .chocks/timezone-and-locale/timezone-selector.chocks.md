@@ -1,6 +1,6 @@
 ---
 title: Timezone Selector Dropdown
-status: released
+status: deprecated
 tags:
   - dates
   - javascript
@@ -8,4 +8,4 @@ sort: a3
 uid: bca23be870
 ---
 
-Header dropdown to switch between the visitor's local timezone (with UTC offset) and the event's own local time. Selection persists to localStorage.
+The global timezone dropdown is replaced by a conversion control on each timed event.

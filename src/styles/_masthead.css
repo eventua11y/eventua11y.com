@@ -27,14 +27,6 @@
   margin-left: auto;
 }
 
-.masthead__timezone {
-  max-width: 100%;
-}
-
-.masthead__timezone wa-select::part(hint) {
-  color: var(--c-masthead-color-fg);
-}
-
 .masthead .logo {
   color: var(--c-masthead-logo-color);
   max-width: 12rem;
@@ -57,10 +49,6 @@
   .masthead__actions {
     justify-content: center;
     margin-left: 0;
-  }
-
-  .masthead__timezone {
-    flex-basis: 100%;
   }
 }
 

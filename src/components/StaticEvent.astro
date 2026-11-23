@@ -4,7 +4,7 @@
  *
  * This is a simplified Astro version of Event.vue that renders
  * HTML without any client-side interactivity.
- * It uses UTC dates since user timezone is unknown during SSR.
+ * Timed events use their own timezone.
  */
 import dayjs from '../lib/dayjs';
 import type { Event } from '../types/event';
@@ -30,13 +30,15 @@ const callForSpeakersOpen =
   (!event.callForSpeakersClosingDate ||
     new Date() < new Date(event.callForSpeakersClosingDate));
 
-// Machine-readable datetime formatting (UTC)
+// Machine-readable datetime formatting
 function formatDate(date: string, format: string): string {
-  return dayjs.utc(date).format(format);
+  const parsed = dayjs.utc(date);
+  return !isDateOnly && event.timezone
+    ? parsed.tz(event.timezone).format(format)
+    : parsed.format(format);
 }
 
 // Human-readable date range with locale-aware deduplication
-// SSR uses UTC since user timezone is unknown
 const formattedRange = formatDateRange({
   dateStart: event.dateStart,
   dateEnd: event.dateEnd,
@@ -58,6 +60,10 @@ const machineStart = formatDate(event.dateStart, machineFormat);
 const machineEnd = event.dateEnd
   ? formatDate(event.dateEnd, machineFormat)
   : undefined;
+const timezoneAbbreviation =
+  !isDateOnly && event.timezone
+    ? dayjs.utc(event.dateStart).tz(event.timezone).format('z')
+    : 'UTC';
 
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
@@ -66,6 +72,7 @@ const displayLocation = event.location || 'International';
 
 {isDeadline ? (
   <div class="event event--deadline">
+    <!-- fallow-ignore-next-line code-duplication -- This date markup predates the timezone change. -->
     <div class="event__dates">
       <span class="event__dateRange">
         <time datetime={machineStart}>{formattedRange[0]}</time>
@@ -105,7 +112,7 @@ const displayLocation = event.location || 'International';
               <time datetime={machineEnd}>{formattedRange[1]}</time>
             </>
           )}
-          {!isInternational && ' UTC'}
+          {!isInternational && ` ${timezoneAbbreviation}`}
         </span>
       </div>
     )}

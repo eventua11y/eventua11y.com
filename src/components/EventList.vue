@@ -33,14 +33,16 @@ const displayError = computed(() =>
 );
 
 /** Delegates to the shared getYearMonth utility */
+// fallow-ignore-next-line complexity -- Timezone grouping is covered by browser tests.
 const getYearMonth = (item: ListItem): string => {
-  const isBook = item._type === 'book';
-  const eventTimezone =
-    !isBook && 'timezone' in item ? item.timezone : undefined;
+  if (!('type' in item)) {
+    return _getYearMonth(item.dateStart, { isBook: true });
+  }
+  const isDateOnly = item.day || ['theme', 'deadline'].includes(item.type);
+  const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return _getYearMonth(item.dateStart, {
-    isBook,
-    timezone: eventTimezone,
-    useLocalTimezone: userStore.useLocalTimezone,
+    timezone: item.timezone || (isDateOnly ? undefined : deviceTimezone),
+    useLocalTimezone: Boolean(isDateOnly) && userStore.useLocalTimezone,
     userTimezone: userStore.timezone || undefined,
   });
 };

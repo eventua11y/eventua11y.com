@@ -5,22 +5,25 @@
       <time :datetime="machineStart">{{ formattedRange[0] }}</time
       ><template v-if="formattedRange[1]"
         ><span aria-hidden="true"> &ndash; </span
-        ><span class="sr-only">until</span
-        ><span class="event__time-tz"
-          ><time :datetime="machineEnd">{{ formattedRange[1] }}</time
-          ><template v-if="!isInternational"
-            >{{ ' '
-            }}<abbr
-              :title="getFullTimezoneName(currentTimezone) || undefined"
-              >{{ currentTimezone }}</abbr
-            ></template
-          ></span
-        ></template
-      ><template v-if="isInternational === false && !formattedRange[1]"
-        >{{ ' '
-        }}<abbr :title="getFullTimezoneName(currentTimezone) || undefined">{{
-          currentTimezone
-        }}</abbr></template
+        ><span class="sr-only">until</span></template
+      ><span class="event__time-tz"
+        ><time v-if="formattedRange[1]" :datetime="machineEnd">{{
+          formattedRange[1]
+        }}</time
+        ><template v-if="showTimezone"
+          >{{ ' '
+          }}<TimezoneConversion
+            v-if="timezone && !isDateOnly"
+            :dateStart="dateStart"
+            :dateEnd="dateEnd"
+            :timezone="timezone"
+            :abbreviation="currentTimezone"
+          /><abbr
+            v-else
+            :title="getFullTimezoneName(currentTimezone) || undefined"
+            >{{ currentTimezone }}</abbr
+          ></template
+        ></span
       ><template v-if="isDeadline"
         >{{ ' ' }}<wa-badge variant="danger" pill>Deadline</wa-badge></template
       >
@@ -39,11 +42,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import EventProgress from './EventProgress.vue';
+import TimezoneConversion from './TimezoneConversion.vue';
 import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
-import { formatEventDate, formatDateRange } from '../utils/dateUtils';
+import {
+  formatEventDate,
+  formatDateRange,
+  resolveTimezone,
+} from '../utils/dateUtils';
 import 'dayjs/locale/en';
 import 'dayjs/locale/es';
 import 'dayjs/locale/fr';
@@ -74,6 +82,11 @@ const props = withDefaults(
     showEnded: false,
   }
 );
+
+const deviceTimezone = ref('');
+onMounted(() => {
+  deviceTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+});
 
 // Maps timezone abbreviations to their full names
 const timezoneFullNames: Record<string, string> = {
@@ -121,20 +134,20 @@ function getFullTimezoneName(abbreviation: string): string | null {
 /** Delegates to the shared formatEventDate utility (used for machine-readable datetimes) */
 function formatDate(date: string | Date, format: string): string {
   return formatEventDate(date, format, {
-    timezone: props.timezone,
-    useLocalTimezone: userStore.useLocalTimezone,
+    timezone: displayTimezone.value,
+    useLocalTimezone: isDateOnly.value && userStore.useLocalTimezone,
     userTimezone: userStore.timezone || undefined,
     locale: userStore.locale || 'en',
   });
 }
 
-/** Locale-aware formatted date range, reactive to timezone preference */
+/** Locale-aware formatted date range */
 const formattedRange = computed(() =>
   formatDateRange({
     dateStart: props.dateStart,
     dateEnd: props.dateEnd,
-    timezone: props.timezone,
-    useLocalTimezone: userStore.useLocalTimezone,
+    timezone: displayTimezone.value,
+    useLocalTimezone: isDateOnly.value && userStore.useLocalTimezone,
     userTimezone: userStore.timezone || undefined,
     locale: userStore.locale || 'en',
     day: props.day,
@@ -144,23 +157,21 @@ const formattedRange = computed(() =>
   })
 );
 
-/**
- * Computes current timezone abbreviation based on user preferences
- * @returns {string} Timezone abbreviation (e.g., 'UTC', 'EST')
- */
 const currentTimezone = computed(() => {
   const date = dayjs.utc(props.dateStart);
-  const tz = userStore.useLocalTimezone
-    ? userStore.timezone || 'UTC'
-    : props.timezone || 'UTC';
+  const tz = resolveTimezone({
+    timezone: displayTimezone.value,
+    useLocalTimezone: isDateOnly.value && userStore.useLocalTimezone,
+    userTimezone: userStore.timezone || undefined,
+  });
   return date.tz(tz).format('z');
 });
 
-/**
- * Computes if the event is international based on the absence of timezone
- * @returns {boolean} True if the event is international
- */
-const isInternational = computed(() => !props.timezone);
+const displayTimezone = computed(
+  () => props.timezone || (!isDateOnly.value ? deviceTimezone.value : '')
+);
+
+const showTimezone = computed(() => !!displayTimezone.value);
 
 /** Whether the event uses date-only display (no times shown) */
 const isDateOnly = computed(
