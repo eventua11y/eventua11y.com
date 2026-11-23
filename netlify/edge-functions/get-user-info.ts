@@ -1,6 +1,6 @@
 /**
  * Edge function to get user information from request headers
- * Returns user agent, language preference, timezone and geo data
+ * Returns language preference, timezone and geo data
  */
 
 interface Geo {
@@ -15,7 +15,6 @@ interface Context {
 }
 
 interface UserInfo {
-  userAgent: string | null;
   acceptLanguage: string | null;
   timezone: string | undefined;
   geo: Geo;
@@ -33,7 +32,6 @@ export default async (
 ): Promise<Response> => {
   try {
     // Extract user information from request headers
-    const userAgent = request.headers.get('user-agent');
     const acceptLanguage = request.headers.get('accept-language');
 
     // Get geo data from Netlify Edge context
@@ -42,7 +40,6 @@ export default async (
 
     // Construct response object
     const userInfo: UserInfo = {
-      userAgent, // Browser and OS information
       acceptLanguage, // User's language preferences
       timezone, // User's timezone from geo data
       geo, // Full geo data object
