@@ -2,7 +2,6 @@
  * Edge function to fetch and process events from Sanity CMS
  * - Handles timezone conversion for international/local events
  * - Manages event classification (today/future/past)
- * - Includes debug info for timezone and event processing
  * - Implements caching to reduce API calls
  */
 
@@ -10,18 +9,13 @@ import type { SanityClient } from 'https://esm.sh/@sanity/client';
 import dayjs from 'https://esm.sh/dayjs';
 import utc from 'https://esm.sh/dayjs/plugin/utc';
 import timezone from 'https://esm.sh/dayjs/plugin/timezone';
-import isBetween from 'https://esm.sh/dayjs/plugin/isBetween';
-import isSameOrBefore from 'https://esm.sh/dayjs/plugin/isSameOrBefore';
-import isSameOrAfter from 'https://esm.sh/dayjs/plugin/isSameOrAfter';
 import { PARENT_EVENTS_QUERY, CHILD_EVENTS_QUERY } from './lib/queries.ts';
 import { assembleEvents, type AssemblableEvent } from './lib/assembleEvents.ts';
 import { createSanityClient } from './lib/sanity-client.ts';
+import { compareByDateAsc } from '../../src/utils/eventUtils.ts';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.extend(isBetween);
-dayjs.extend(isSameOrBefore);
-dayjs.extend(isSameOrAfter);
 
 interface Event {
   _id: string;
@@ -45,30 +39,11 @@ interface Event {
 
 /**
  * Response structure for the events API
- * Includes processed event lists and optional debug information
  */
 interface EventsResponse {
-  events: Event[];
   future: Event[];
   past: Event[];
   today: Event[];
-  debug?: {
-    timezone?: {
-      userInfoTimezone: string;
-      resolvedTimezone: string;
-      geo: Record<string, unknown>;
-      headers: Record<string, string>;
-    };
-    events?: Array<{
-      eventId: string;
-      eventTitle: string;
-      eventStart: string;
-      eventEnd: string;
-      userToday: string;
-      isToday: boolean;
-      isInternational: boolean;
-    }>;
-  };
 }
 
 /**
@@ -90,17 +65,6 @@ const cache: RawEventsCache = {
 };
 
 /**
- * Sorts events array by start date
- * @param {Event[]} events - Array of event objects
- * @returns {Event[]} Sorted events array
- */
-function sortEventsByDate(events: Event[]): Event[] {
-  return events.sort(
-    (a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-  );
-}
-
-/**
  * Processes raw events for a specific user timezone
  * - Converts dates to user's timezone
  * - Categorizes events as today/future/past
@@ -112,8 +76,6 @@ function processEventsForTimezone(
   events: Event[],
   userTimezone: string
 ): EventsResponse {
-  const debugLogs: Array<Record<string, unknown>> = [];
-
   try {
     // Use user's timezone for base calculations
     const now = dayjs().tz(userTimezone);
@@ -135,19 +97,11 @@ function processEventsForTimezone(
       dayjs(dateStr).tz(eventTz).format('YYYY-MM-DD');
 
     /**
-     * Converts event time to user's timezone
-     * - Handles international events (no timezone) differently
-     * - For international events: preserves date, uses user's timezone
-     * - For local events: converts from event timezone to user timezone
+     * Converts an international event date to the user's timezone while
+     * preserving its calendar date.
      */
-    const getEventTimeInUserTz = (dateStr: string, eventTz?: string) => {
-      if (!eventTz) {
-        // For international events, preserve the date but use user's timezone
-        return dayjs.utc(dateStr).tz(userTimezone, true);
-      }
-      // For location-specific events, properly convert the time
-      return dayjs(dateStr).tz(eventTz).tz(userTimezone);
-    };
+    const getEventTimeInUserTz = (dateStr: string) =>
+      dayjs.utc(dateStr).tz(userTimezone, true);
 
     /**
      * Determines if event is happening today
@@ -180,19 +134,6 @@ function processEventsForTimezone(
             (eventStart.isBefore(userToday, 'day') &&
               eventEnd.isAfter(userToday, 'day'));
 
-        debugLogs.push({
-          eventId: event._id,
-          eventTitle: event.title,
-          rawStartDate: event.dateStart,
-          rawEndDate: event.dateEnd || 'No end date',
-          isSingleDayEvent,
-          eventStart: eventStart.format('YYYY-MM-DD'),
-          eventEnd: eventEnd.format('YYYY-MM-DD'),
-          userToday: userToday.format('YYYY-MM-DD'),
-          isToday,
-          isInternational: true,
-        });
-
         return isToday;
       }
 
@@ -213,43 +154,27 @@ function processEventsForTimezone(
       const isToday =
         userTodayDay >= eventStartDay && userTodayDay <= eventEndDay;
 
-      debugLogs.push({
-        eventId: event._id,
-        eventTitle: event.title,
-        rawStartDate: event.dateStart,
-        rawEndDate: event.dateEnd || 'No end date',
-        eventStartDay,
-        eventEndDay,
-        userTodayDay,
-        isToday,
-        eventTimezone: event.timezone,
-        userTimezone,
-      });
-
       return isToday;
     };
 
-    const today = sortEventsByDate(
-      events.filter((event) => !event.parent && isEventToday(event))
-    );
+    const today = events
+      .filter((event) => !event.parent && isEventToday(event))
+      .sort(compareByDateAsc);
 
-    const future = sortEventsByDate(
-      events.filter((event) => {
+    const future = events
+      .filter((event) => {
         if (!event.parent) {
           // Local events: classify by their displayed calendar day so the
           // future/today/past buckets stay consistent with the today logic.
           if (event.timezone) {
             return eventDay(event.dateStart, event.timezone) > userTodayDay;
           }
-          const eventStart = getEventTimeInUserTz(
-            event.dateStart,
-            event.timezone
-          );
+          const eventStart = getEventTimeInUserTz(event.dateStart);
           return eventStart.isAfter(todayEnd);
         }
         return false;
       })
-    );
+      .sort(compareByDateAsc);
 
     // Calculate the date 12 months ago from today
     const twelveMonthsAgo = todayStart.subtract(12, 'month');
@@ -265,10 +190,7 @@ function processEventsForTimezone(
           );
           return endDay < userTodayDay && endDay >= twelveMonthsAgoDay;
         }
-        const eventEnd = getEventTimeInUserTz(
-          event.dateEnd || event.dateStart,
-          event.timezone
-        );
+        const eventEnd = getEventTimeInUserTz(event.dateEnd || event.dateStart);
         // Only include events from the last 12 months
         return (
           eventEnd.isBefore(todayStart) && eventEnd.isAfter(twelveMonthsAgo)
@@ -278,11 +200,9 @@ function processEventsForTimezone(
     });
 
     return {
-      events,
       future,
       past,
       today,
-      debug: debugLogs,
     };
   } catch (error) {
     console.error(
@@ -352,10 +272,9 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
  * Edge function handler
  * - Gets user timezone from Netlify geo context
  * - Fetches and processes events
- * - Adds debug information to response
  * - Sets caching headers
  * @param {Request} _request - HTTP request object (unused)
- * @returns {Response} JSON response with events data
+ * @returns {Response} JSON response with today, future, and past events
  */
 export default async function handler(
   _request: Request,
@@ -367,13 +286,9 @@ export default async function handler(
 
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
-    console.log('[handler] Events fetched successfully:', events.events.length);
+    console.log('[handler] Events fetched successfully');
 
-    // Strip debug data from the client response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { debug: _debug, ...clientResponse } = events;
-
-    return new Response(JSON.stringify(clientResponse), {
+    return new Response(JSON.stringify(events), {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'private, max-age=300, stale-while-revalidate=60',
