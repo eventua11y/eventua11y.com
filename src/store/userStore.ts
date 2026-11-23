@@ -31,25 +31,57 @@ function getPrimaryLocale(acceptLanguage: string | null): string | null {
   return firstLanguage?.split('-')[0].toLowerCase() || null;
 }
 
-// Load saved user information from localStorage if available
-if (typeof window !== 'undefined' && window.localStorage) {
-  savedTimezone = localStorage.getItem('userTimezone');
-  const storedLocale = localStorage.getItem('userLocale');
-  savedLocale = getPrimaryLocale(storedLocale);
-  if (storedLocale && storedLocale !== savedLocale) {
-    if (savedLocale) {
-      localStorage.setItem('userLocale', savedLocale);
-    } else {
-      localStorage.removeItem('userLocale');
-    }
+function getStoredValue(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    console.warn(`Could not restore ${key} from local storage.`);
+    return null;
   }
-  savedGeo = localStorage.getItem('userGeo')
-    ? JSON.parse(localStorage.getItem('userGeo') as string)
-    : null;
-  savedUseLocalTimezone = localStorage.getItem('useLocalTimezone') === 'true';
 }
 
-const userStore: UserStore = reactive({
+function saveStoredValue(key: string, value: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (value === null) {
+      window.localStorage.removeItem(key);
+    } else {
+      window.localStorage.setItem(key, value);
+    }
+  } catch {
+    console.warn(`Could not save ${key} to local storage.`);
+  }
+}
+
+function getStoredGeo(): Geo | null {
+  const saved = getStoredValue('userGeo');
+  if (!saved) return null;
+  try {
+    const geo: unknown = JSON.parse(saved);
+    if (geo && typeof geo === 'object' && !Array.isArray(geo)) {
+      return geo as Geo;
+    }
+  } catch {
+    // Invalid saved data is handled below.
+  }
+  console.warn('Saved user geo is invalid; ignoring it.');
+  return null;
+}
+
+// Load saved user information from localStorage if available
+if (typeof window !== 'undefined') {
+  savedTimezone = getStoredValue('userTimezone');
+  const storedLocale = getStoredValue('userLocale');
+  savedLocale = getPrimaryLocale(storedLocale);
+  if (storedLocale && storedLocale !== savedLocale) {
+    saveStoredValue('userLocale', savedLocale);
+  }
+  savedGeo = getStoredGeo();
+  savedUseLocalTimezone = getStoredValue('useLocalTimezone') === 'true';
+}
+
+const userStore = reactive<UserStore>({
   timezone: savedTimezone,
   locale: savedLocale,
   geo: savedGeo,
@@ -67,15 +99,9 @@ const userStore: UserStore = reactive({
     this.locale = getPrimaryLocale(acceptLanguage);
     this.geo = geo;
     this.userInfoFetched = true;
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('userTimezone', timezone);
-      if (this.locale) {
-        localStorage.setItem('userLocale', this.locale);
-      } else {
-        localStorage.removeItem('userLocale');
-      }
-      localStorage.setItem('userGeo', JSON.stringify(geo));
-    }
+    saveStoredValue('userTimezone', timezone);
+    saveStoredValue('userLocale', this.locale);
+    saveStoredValue('userGeo', JSON.stringify(geo));
   },
 
   /**
@@ -86,10 +112,8 @@ const userStore: UserStore = reactive({
   setTimezone(timezone: string, useLocal: boolean = false) {
     this.timezone = timezone;
     this.useLocalTimezone = useLocal;
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('userTimezone', timezone);
-      localStorage.setItem('useLocalTimezone', useLocal.toString());
-    }
+    saveStoredValue('userTimezone', timezone);
+    saveStoredValue('useLocalTimezone', useLocal.toString());
   },
 });
 
