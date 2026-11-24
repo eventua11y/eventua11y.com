@@ -34,6 +34,7 @@ import {
   isStartingSoon as _isStartingSoon,
   hasEnded as _hasEnded,
   getProgress,
+  getAllDayEventEnd,
   getTimeRemaining,
   getCountdownLabel,
   getTimeSinceEnded,
@@ -85,7 +86,7 @@ function allDayProgressDates(
   const dateStart = dayjs.tz(storedCalendarDate(start), timezone).toISOString();
   // The stored end date is inclusive, including when its timestamp is midnight.
   const dateEnd = end
-    ? dayjs.tz(storedCalendarDate(end), timezone).endOf('day').toISOString()
+    ? getAllDayEventEnd(end, timezone).toISOString()
     : undefined;
   return { dateStart, dateEnd, timezone };
 }

@@ -22,7 +22,12 @@ import {
 } from '../../utils/eventUtils';
 import { PortableText } from 'astro-portabletext';
 import dayjs from '../../lib/dayjs';
-import { getEventEnd, isHappeningNow } from '../../utils/progressUtils';
+import {
+  getAllDayEventEnd,
+  getEventEnd,
+  isHappeningNow,
+} from '../../utils/progressUtils';
+import { usesStoredCalendarDate } from '../../../netlify/edge-functions/lib/dateUtils';
 
 export const prerender = false;
 
@@ -162,18 +167,12 @@ const eventDuration = (() => {
   return { iso: `PT${minutes}M`, label };
 })();
 
-// Has the event ended? Used to hide supplementary links (registration,
-// schedule, etc.) once they're no longer relevant. Uses the same end-date
-// resolution as progressUtils.hasEnded() but without the showEnded gate,
-// which is a UI-context flag specific to the listing pages.
-const eventHasEnded = dayjs().isAfter(
-  getEventEnd({
-    dateStart: event.dateStart,
-    dateEnd: event.dateEnd,
-    timezone: event.timezone,
-    day: event.day,
-  })
-);
+// SSR doesn't know the device timezone, so calendar dates use the same UTC
+// fallback as the no-JavaScript list.
+const eventEnd = usesStoredCalendarDate(event)
+  ? getAllDayEventEnd(event.dateEnd || event.dateStart, 'UTC')
+  : getEventEnd(event);
+const eventHasEnded = dayjs().isAfter(eventEnd);
 
 // Supplementary sidebar links — hidden once the event has ended.
 const supplementaryLinks = eventHasEnded

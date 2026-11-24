@@ -1,4 +1,5 @@
 import dayjs from '../lib/dayjs';
+import { storedCalendarDate } from '../../netlify/edge-functions/lib/dateUtils';
 import type { Dayjs } from 'dayjs';
 import { formatRelativeStart, resolveTimezone } from './dateUtils';
 
@@ -16,6 +17,11 @@ export interface ProgressOptions {
   showEnded?: boolean;
   useLocalTimezone?: boolean;
   userTimezone?: string;
+}
+
+/** Resolves the inclusive final day of an event with stored calendar dates. */
+export function getAllDayEventEnd(date: string, timezone: string): Dayjs {
+  return dayjs.tz(storedCalendarDate(date), timezone).endOf('day');
 }
 
 /**
