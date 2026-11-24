@@ -1,0 +1,37 @@
+---
+interface Props {
+  machineStart: string;
+  machineEnd?: string;
+  formattedRange: string[];
+  timezone?: string;
+  isDeadline?: boolean;
+}
+
+const {
+  machineStart,
+  machineEnd,
+  formattedRange,
+  timezone,
+  isDeadline = false,
+} = Astro.props;
+---
+
+<div class="event__dates">
+  <span class="event__dateRange">
+    <time datetime={machineStart}>{formattedRange[0]}</time>
+    {formattedRange[1] && machineEnd && (
+      <>
+        <span aria-hidden="true"> &ndash; </span>
+        <span class="sr-only">until</span>
+        <time datetime={machineEnd}>{formattedRange[1]}</time>
+      </>
+    )}
+    {timezone && ` ${timezone}`}
+    {isDeadline && (
+      <>
+        {' '}
+        <span class="badge badge--danger">Deadline</span>
+      </>
+    )}
+  </span>
+</div>

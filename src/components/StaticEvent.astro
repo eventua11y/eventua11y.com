@@ -10,6 +10,7 @@ import dayjs from '../lib/dayjs';
 import type { Event } from '../types/event';
 import { getEventUrl } from '../utils/eventUtils';
 import { formatDateRange } from '../utils/dateUtils';
+import StaticEventDate from './StaticEventDate.astro';
 
 interface Props {
   event: Event;
@@ -68,25 +69,22 @@ const timezoneAbbreviation =
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
 const displayLocation = event.location || 'International';
+const showLocation = ['offline', 'none'].includes(attendanceMode);
+const showWebsiteLink = event.website && !isTheme;
+const showDescription = event.description && !isTheme;
+const showFreeBadge = event.isFree && !isTheme;
+const showBadges = callForSpeakersOpen || showFreeBadge;
 ---
 
 {isDeadline ? (
   <div class="event event--deadline">
-    <!-- fallow-ignore-next-line code-duplication -- This date markup predates the timezone change. -->
-    <div class="event__dates">
-      <span class="event__dateRange">
-        <time datetime={machineStart}>{formattedRange[0]}</time>
-        {formattedRange[1] && machineEnd && (
-          <>
-            <span aria-hidden="true"> &ndash; </span>
-            <span class="sr-only">until</span>
-            <time datetime={machineEnd}>{formattedRange[1]}</time>
-          </>
-        )}
-        {!isInternational && ' UTC'}{' '}
-        <span class="badge badge--danger">Deadline</span>
-      </span>
-    </div>
+    <StaticEventDate
+      machineStart={machineStart}
+      machineEnd={machineEnd}
+      formattedRange={formattedRange}
+      timezone={isInternational ? undefined : 'UTC'}
+      isDeadline
+    />
     <span class="event__title">
       Submit proposals for <a href={eventUrl || event.website}>{event.title}</a>
     </span>
@@ -102,27 +100,20 @@ const displayLocation = event.location || 'International';
     </h3>
 
     {event.dateStart && (
-      <div class="event__dates">
-        <span class="event__dateRange">
-          <time datetime={machineStart}>{formattedRange[0]}</time>
-          {formattedRange[1] && machineEnd && (
-            <>
-              <span aria-hidden="true"> &ndash; </span>
-              <span class="sr-only">until</span>
-              <time datetime={machineEnd}>{formattedRange[1]}</time>
-            </>
-          )}
-          {!isInternational && ` ${timezoneAbbreviation}`}
-        </span>
-      </div>
+      <StaticEventDate
+        machineStart={machineStart}
+        machineEnd={machineEnd}
+        formattedRange={formattedRange}
+        timezone={isInternational ? undefined : timezoneAbbreviation}
+      />
     )}
 
-    {attendanceMode !== 'none' && event.type !== 'deadline' && (
+    {event.type !== 'deadline' && (
       <div class="event__delivery text-small">
         {attendanceMode === 'online' && (
           <span class="event__online">Online</span>
         )}
-        {attendanceMode === 'offline' && (
+        {showLocation && (
           <span class="event__location">
             <span>{displayLocation}</span>
           </span>
@@ -136,7 +127,7 @@ const displayLocation = event.location || 'International';
             <span class="event__online">Online</span>
           </div>
         )}
-        {event.website && !isTheme && (
+        {showWebsiteLink && (
           <Fragment>
             <span aria-hidden="true" class="event__delivery-separator">
               ·
@@ -154,42 +145,19 @@ const displayLocation = event.location || 'International';
       </div>
     )}
 
-    {attendanceMode === 'none' && event.type !== 'deadline' && (
-      <div class="event__delivery text-small">
-        <span class="event__location">
-          <span>{displayLocation}</span>
-        </span>
-        {event.website && !isTheme && (
-          <Fragment>
-            <span aria-hidden="true" class="event__delivery-separator">
-              ·
-            </span>
-            <a
-              href={event.website}
-              rel="external noopener noreferrer"
-              class="event__website-link"
-              aria-describedby={headingId}
-            >
-              Event website<span class="sr-only"> (opens external site)</span>
-            </a>
-          </Fragment>
-        )}
-      </div>
-    )}
-
-    {event.description && !isTheme && (
+    {showDescription && (
       <details class="event__children flow">
         <summary>Description</summary>
         <p class="event__description">{event.description}</p>
       </details>
     )}
 
-    {(callForSpeakersOpen || (event.isFree && !isTheme)) && (
+    {showBadges && (
       <div class="event__badges">
         {callForSpeakersOpen && (
           <span class="badge badge--success">Call for speakers</span>
         )}
-        {event.isFree && !isTheme && <span class="badge">Free</span>}
+        {showFreeBadge && <span class="badge">Free</span>}
       </div>
     )}
   </article>
