@@ -148,7 +148,11 @@ test.describe('Event timezone conversion', () => {
         },
       })
     );
+    const eventsRequest = page.waitForRequest('**/api/get-events');
     await page.reload();
+    expect((await eventsRequest).headers()['x-event-timezone']).toBe(
+      'Asia/Tokyo'
+    );
     const event = page.locator('#today .event').filter({
       hasText: 'Event without timezone in progress',
     });
