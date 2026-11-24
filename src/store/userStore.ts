@@ -28,7 +28,16 @@ let savedUseLocalTimezone: boolean | null = null;
 
 function getPrimaryLocale(acceptLanguage: string | null): string | null {
   const firstLanguage = acceptLanguage?.split(',')[0]?.split(';')[0]?.trim();
-  return firstLanguage?.split('-')[0].toLowerCase() || null;
+  const primaryLocale = firstLanguage?.split('-')[0].toLowerCase();
+  if (!primaryLocale) return null;
+
+  try {
+    Intl.getCanonicalLocales(primaryLocale);
+    return primaryLocale;
+  } catch {
+    // A wildcard is valid in Accept-Language but not in Intl formatters.
+    return null;
+  }
 }
 
 // Load saved user information from localStorage if available
