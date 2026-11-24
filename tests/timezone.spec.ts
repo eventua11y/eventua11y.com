@@ -192,6 +192,12 @@ test.describe('Event timezone conversion', () => {
     await expect(button).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(popover).toBeVisible();
+    const content = popover.getByRole('group', { name: 'Your local time' });
+    await expect(content).toBeFocused();
+    await expect(popover).toHaveCSS('outline-style', 'solid');
+    await expect(content).toHaveAccessibleDescription(
+      /January 1.*8:30\s*AM.*until.*9:30\s*AM.*Japan Standard Time/i
+    );
     await expect(popover).toContainText('Your local time');
     const results = await new AxeBuilder({ page })
       .include('#upcoming-events')
@@ -203,6 +209,57 @@ test.describe('Event timezone conversion', () => {
     await expect(button).toBeFocused();
     await page.keyboard.press('Space');
     await expect(popover).toBeVisible();
+    await expect(content).toBeFocused();
+  });
+
+  test('moves pointer focus into the popover and returns it when toggled closed', async ({
+    page,
+  }) => {
+    const event = eventCard(page, 'New York event');
+    const button = event.getByRole('button', {
+      name: /show in your timezone/i,
+    });
+    const popover = event.locator('[popover]');
+    await button.click();
+    await expect(popover.getByRole('group')).toBeFocused();
+    await expect(popover).toHaveCSS('outline-style', 'none');
+    await button.click();
+    await expect(popover).toBeHidden();
+    await expect(button).toBeFocused();
+  });
+
+  test('does not steal focus when another control light-dismisses the popover', async ({
+    page,
+  }) => {
+    const event = eventCard(page, 'New York event');
+    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    const popover = event.locator('[popover]');
+    await expect(popover.getByRole('group')).toBeFocused();
+    const otherControl = page.getByRole('switch', { name: 'Awareness days' });
+    await page.locator('#filter-show-awareness-days-bar').click();
+    await expect(popover).toBeHidden();
+    await expect(otherControl).toBeFocused();
+  });
+
+  test('does not return focus after Tab has moved out of the popover', async ({
+    page,
+  }) => {
+    const event = eventCard(page, 'New York event');
+    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    const popover = event.locator('[popover]');
+    await expect(popover.getByRole('group')).toBeFocused();
+    await page.keyboard.press('Tab');
+    const focused = page.locator(':focus');
+    const focusedElement = await focused.elementHandle();
+    expect(focusedElement).not.toBeNull();
+    await expect(popover.getByRole('group')).not.toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(popover).toBeHidden();
+    expect(
+      await focusedElement!.evaluate(
+        (element) => element === document.activeElement
+      )
+    ).toBe(true);
   });
 
   test('shows only the converted time, without relative labels or copy controls', async ({
@@ -467,6 +524,11 @@ test.describe('Event timezone conversion', () => {
     const event = eventCard(page, 'New York event');
     await event.getByRole('button', { name: /show in your timezone/i }).click();
     const popover = event.locator('[popover]:not([popover="manual"])');
+    await expect(
+      popover.getByRole('group', {
+        name: 'Your device uses the event timezone.',
+      })
+    ).toBeFocused();
     await expect(popover).toContainText(
       /same (?:time ?zone|local time)|device uses the event time ?zone/i
     );

@@ -179,11 +179,20 @@ onUnmounted(removeArrowListeners);
       popover
       @toggle="onToggle"
     >
-      <div class="timezone-popover__content flow flow-xs">
+      <div
+        class="timezone-popover__content flow flow-xs"
+        tabindex="-1"
+        autofocus
+        role="group"
+        :aria-labelledby="`${popoverId}-label`"
+        :aria-describedby="
+          localTimeParts.length ? `${popoverId}-time` : undefined
+        "
+      >
         <div v-if="localTimeParts.length" class="timezone-popover__row">
           <div>
-            <strong>Your local time</strong>
-            <div>
+            <strong :id="`${popoverId}-label`">Your local time</strong>
+            <div :id="`${popoverId}-time`">
               <div v-for="(part, index) in localTimeParts" :key="index">
                 <template v-if="index"
                   ><span aria-hidden="true">–&nbsp;</span
@@ -199,7 +208,11 @@ onUnmounted(removeArrowListeners);
             </div>
           </div>
         </div>
-        <p v-if="sameTimezone" class="timezone-popover__hint">
+        <p
+          v-if="sameTimezone"
+          :id="`${popoverId}-label`"
+          class="timezone-popover__hint"
+        >
           Your device uses the event timezone.
         </p>
       </div>
@@ -257,9 +270,25 @@ onUnmounted(removeArrowListeners);
 }
 
 .timezone-popover__content {
+  border-radius: inherit;
   max-height: calc(100dvh - 2rem);
   overflow: auto;
   padding: var(--p-space-xs);
+}
+
+.timezone-popover__content:focus {
+  outline: none;
+}
+
+/* The panel's own edge, arrow included, is the keyboard focus indicator for its content. */
+.timezone-popover:has(> .timezone-popover__content:focus-visible) {
+  outline: 2px solid var(--c-focus-ring-color);
+  outline-offset: -1px;
+}
+
+.timezone-popover:has(> .timezone-popover__content:focus-visible)::before {
+  border-color: var(--c-focus-ring-color);
+  border-width: 2px;
 }
 
 .timezone-popover--arrow-top::before,
@@ -318,6 +347,14 @@ onUnmounted(removeArrowListeners);
 }
 
 @media (forced-colors: active) {
+  .timezone-popover:has(> .timezone-popover__content:focus-visible) {
+    outline-color: Highlight;
+  }
+
+  .timezone-popover:has(> .timezone-popover__content:focus-visible)::before {
+    border-color: Highlight;
+  }
+
   .timezone-popover {
     filter: none;
   }
