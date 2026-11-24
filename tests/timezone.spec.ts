@@ -35,6 +35,22 @@ const events = [
     timezone: 'Asia/Tokyo',
   },
   {
+    _id: 'overnight-event',
+    type: 'conference',
+    title: 'Overnight event',
+    dateStart: '2030-12-29T14:00:00Z',
+    dateEnd: '2030-12-29T16:00:00Z',
+    timezone: 'Asia/Tokyo',
+  },
+  {
+    _id: 'multi-day-event',
+    type: 'conference',
+    title: 'Multi-day event',
+    dateStart: '2031-02-08T21:00:00Z',
+    dateEnd: '2031-02-10T21:00:00Z',
+    timezone: 'Europe/London',
+  },
+  {
     _id: 'no-timezone-event',
     type: 'conference',
     title: 'Event without timezone',
@@ -156,7 +172,7 @@ test.describe('Event timezone conversion', () => {
     );
     await expect(londonPopover).toBeVisible();
     await expect(londonPopover).toContainText('Your local time');
-    await expect(londonPopover).toContainText(/December 31/);
+    await expect(londonPopover).not.toContainText(/December|January/);
     await expect(londonPopover).toContainText(/9:00\s*PM/i);
     await expect(londonPopover).not.toContainText(/8:30\s*AM/i);
   });
@@ -213,6 +229,44 @@ test.describe('Event timezone conversion', () => {
       event.locator('[popover]:not([popover="manual"])')
     ).toContainText(
       /(?:in\s+(?:[\d,]+|an?)\s+(?:minutes?|hours?|days?|weeks?|months?|years?)|(?:[\d,]+|an?)\s+(?:minutes?|hours?|days?|weeks?|months?|years?)\s+(?:ago|from now))/i
+    );
+  });
+
+  test('shows dates only when the event crosses midnight in a shown timezone', async ({
+    page,
+  }) => {
+    const openRows = async (title: string) => {
+      const event = eventCard(page, title);
+      await event
+        .getByRole('button', { name: /show in your timezone/i })
+        .click();
+      return event.locator('[popover]:popover-open .timezone-popover__row');
+    };
+
+    // Same calendar date in New York and Tokyo: times only.
+    const sameDay = await openRows('Offset change event');
+    await expect(sameDay).toHaveCount(2);
+    await expect(sameDay.last()).toContainText(/3:30\s*PM.*4:30\s*PM/i);
+    await expect(sameDay.last()).not.toContainText(/March/);
+    await expect(sameDay.last().locator('time').first()).toHaveAttribute(
+      'datetime',
+      '2031-03-09T15:30:00+09:00'
+    );
+    await page.keyboard.press('Escape');
+
+    // One Tokyo date, but the event's own date differs: keep the date.
+    const shifted = await openRows('New York event');
+    await expect(shifted).toHaveCount(2);
+    await expect(shifted.last()).toContainText(
+      /January 1.*8:30\s*AM.*9:30\s*AM/i
+    );
+    await page.keyboard.press('Escape');
+
+    // Range that crosses midnight in the viewer's timezone.
+    const overnight = await openRows('Multi-day event');
+    await expect(overnight).toHaveCount(2);
+    await expect(overnight.last()).toContainText(
+      /February 9.*6:00\s*AM.*February 11.*6:00\s*AM/i
     );
   });
 

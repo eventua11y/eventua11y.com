@@ -30,9 +30,9 @@ onMounted(() => {
   }
 });
 
-function formattedTime(timezone: string) {
+function formattedTime(timezone: string, includeDate: boolean) {
   const locale = userStore.locale || 'en';
-  const format = (date: string, short: boolean) => {
+  const format = (date: string, timeOnly: boolean) => {
     const local = dayjs.utc(date).tz(timezone).locale(locale);
     const name =
       new Intl.DateTimeFormat(locale, {
@@ -42,7 +42,7 @@ function formattedTime(timezone: string) {
         .formatToParts(new Date(date))
         .find((part) => part.type === 'timeZoneName')?.value || timezone;
     return {
-      date: short
+      date: timeOnly
         ? local.format('LT')
         : new Intl.DateTimeFormat(locale, {
             timeZone: timezone,
@@ -56,13 +56,16 @@ function formattedTime(timezone: string) {
       local,
     };
   };
-  const start = format(props.dateStart, false);
+  const start = format(props.dateStart, !includeDate);
   const parts = [
     { date: start.date, datetime: start.datetime, zone: start.zone },
   ];
   if (props.dateEnd) {
     const endDate = dayjs.utc(props.dateEnd).tz(timezone);
-    const end = format(props.dateEnd, start.local.isSame(endDate, 'day'));
+    const end = format(
+      props.dateEnd,
+      !includeDate || start.local.isSame(endDate, 'day')
+    );
     if (start.zone === end.zone) {
       parts[0].zone = '';
     }
@@ -94,10 +97,25 @@ const relativeTime = computed(() => {
   return relative.format(Math.round(hours / 24), 'day');
 });
 
+const displayedTimezones = computed(() =>
+  sameTimezone.value || !deviceTimezone.value
+    ? [props.timezone]
+    : [props.timezone, deviceTimezone.value]
+);
+
+// Dates only add meaning when the event crosses midnight in a shown timezone.
+const includeDates = computed(() => {
+  const endpoints = [props.dateStart, props.dateEnd ?? props.dateStart];
+  const localDates = displayedTimezones.value.flatMap((timezone) =>
+    endpoints.map((date) => dayjs.utc(date).tz(timezone).format('YYYY-MM-DD'))
+  );
+  return new Set(localDates).size > 1;
+});
+
 const rows = computed(() => {
   const eventRow = {
     label: 'Event local time',
-    displayParts: formattedTime(props.timezone),
+    displayParts: formattedTime(props.timezone, includeDates.value),
   };
   if (sameTimezone.value) return [eventRow];
   return [
@@ -105,7 +123,7 @@ const rows = computed(() => {
     {
       label: 'Your local time',
       displayParts: deviceTimezone.value
-        ? formattedTime(deviceTimezone.value)
+        ? formattedTime(deviceTimezone.value, includeDates.value)
         : [],
     },
   ];
