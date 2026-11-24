@@ -237,6 +237,10 @@ onUnmounted(removeArrowListeners);
   border: 1px solid var(--wa-color-surface-border);
   border-radius: var(--wa-border-radius-m);
   color: var(--c-body-color-fg);
+  filter: drop-shadow(
+    var(--wa-shadow-offset-x-l) var(--wa-shadow-offset-y-l)
+      var(--wa-shadow-blur-l) var(--wa-color-shadow)
+  );
   font-size: var(--p-step--1);
   inset: 0;
   margin: auto;
@@ -298,5 +302,17 @@ onUnmounted(removeArrowListeners);
 .timezone-popover__zone {
   display: block;
   font-size: var(--p-step--2);
+}
+
+@media (forced-colors: active) {
+  .timezone-popover {
+    filter: none;
+  }
+
+  .timezone-popover,
+  .timezone-popover::before {
+    background: Canvas;
+    border-color: CanvasText;
+  }
 }
 </style>
