@@ -291,6 +291,17 @@ describe('compareByDateDesc', () => {
   });
 });
 
+it('sorts calendar events by their written dates without changing instant ordering', () => {
+  const july1 = { dateStart: '2030-07-01T23:00:00Z', day: true };
+  const july2 = { dateStart: '2030-07-02T00:00:00+11:00', type: 'theme' };
+  expect([july2, july1].sort(compareByDateAsc)).toEqual([july1, july2]);
+  expect([july1, july2].sort(compareByDateDesc)).toEqual([july2, july1]);
+
+  const timed = { dateStart: july1.dateStart };
+  const deadline = { dateStart: july2.dateStart, type: 'deadline' };
+  expect([timed, deadline].sort(compareByDateAsc)).toEqual([deadline, timed]);
+});
+
 // ── groupByMonth ───────────────────────────────────────────────────────
 
 describe('groupByMonth', () => {

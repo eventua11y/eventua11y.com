@@ -16,13 +16,18 @@ export function storedCalendarDate(date: string): string {
   return /^\d{4}-\d{2}-\d{2}(?=T|$)/.exec(date)?.[0] ?? date;
 }
 
-/**
- * Comparator: sorts items with a `dateStart` field in ascending
- * chronological order (earliest first).
- */
-export function compareByDateAsc(
-  a: { dateStart: string },
-  b: { dateStart: string }
-): number {
-  return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
+type DatedItem = Parameters<typeof usesStoredCalendarDate>[0] & {
+  dateStart: string;
+};
+
+function dateSortKey(item: DatedItem): number {
+  const date = usesStoredCalendarDate(item)
+    ? storedCalendarDate(item.dateStart)
+    : item.dateStart;
+  return Date.parse(date);
+}
+
+/** Sorts by written date for calendar events, and by instant otherwise. */
+export function compareByDateAsc(a: DatedItem, b: DatedItem): number {
+  return dateSortKey(a) - dateSortKey(b);
 }
