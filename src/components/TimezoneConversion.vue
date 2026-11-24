@@ -237,6 +237,7 @@ onUnmounted(removeArrowListeners);
   border: 1px solid var(--wa-color-surface-border);
   border-radius: var(--wa-border-radius-m);
   color: var(--c-body-color-fg);
+  font-size: var(--p-step--1);
   inset: 0;
   margin: auto;
   max-width: min(24rem, calc(100vw - 2rem));
