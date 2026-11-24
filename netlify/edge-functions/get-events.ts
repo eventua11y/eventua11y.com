@@ -114,6 +114,20 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
   return classifyEvents(rawEvents, userTimezone);
 }
 
+function getViewerTimezone(request: Request, fallback: string): string {
+  const timezone = request.headers.get('X-Event-Timezone');
+  if (!timezone || timezone.length > 100) return fallback;
+
+  try {
+    return new Intl.DateTimeFormat('en', {
+      timeZone: timezone,
+    }).resolvedOptions().timeZone;
+  } catch {
+    // Ignore invalid client input and use the geolocation fallback.
+    return fallback;
+  }
+}
+
 /**
  * Edge function handler
  * - Uses the browser timezone, falling back to Netlify geolocation or UTC
@@ -127,17 +141,10 @@ export default async function handler(
   context: Context
 ): Promise<Response> {
   try {
-    let userTimezone = context.geo?.timezone || 'UTC';
-    const requestedTimezone = request.headers.get('X-Event-Timezone');
-    if (requestedTimezone && requestedTimezone.length <= 100) {
-      try {
-        userTimezone = new Intl.DateTimeFormat('en', {
-          timeZone: requestedTimezone,
-        }).resolvedOptions().timeZone;
-      } catch {
-        // Ignore invalid client input and use the geolocation fallback.
-      }
-    }
+    const userTimezone = getViewerTimezone(
+      request,
+      context.geo?.timezone || 'UTC'
+    );
 
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
