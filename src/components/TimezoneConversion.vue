@@ -163,8 +163,9 @@ onUnmounted(removeArrowListeners);
       >
       <wa-icon
         name="square-question"
+        class="text-muted"
         variant="regular"
-        auto-width
+        canvas="auto"
         aria-hidden="true"
       ></wa-icon>
     </button>
@@ -231,7 +232,8 @@ onUnmounted(removeArrowListeners);
   text-underline-offset: 0.2em;
 }
 
-.timezone-trigger:hover {
+.timezone-trigger:hover,
+.timezone-trigger:hover wa-icon {
   color: var(--c-color-link-hover);
 }
 
