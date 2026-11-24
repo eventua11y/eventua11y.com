@@ -6,6 +6,7 @@ let nextPopoverId = 0;
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
+import TimezoneConversionTimes from './TimezoneConversionTimes.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -33,41 +34,48 @@ onMounted(() => {
   }
 });
 
-function formattedTime(timezone: string, includeDate: boolean) {
+function timezoneName(date: string, timezone: string, locale: string) {
+  return (
+    new Intl.DateTimeFormat(locale, {
+      timeZone: timezone,
+      timeZoneName: 'long',
+    })
+      .formatToParts(new Date(date))
+      .find((part) => part.type === 'timeZoneName')?.value || timezone
+  );
+}
+
+function formatTime(date: string, timezone: string, includeDate: boolean) {
   const locale = userStore.locale || 'en';
-  const format = (date: string, timeOnly: boolean) => {
-    const local = dayjs.utc(date).tz(timezone).locale(locale);
-    const name =
-      new Intl.DateTimeFormat(locale, {
-        timeZone: timezone,
-        timeZoneName: 'long',
-      })
-        .formatToParts(new Date(date))
-        .find((part) => part.type === 'timeZoneName')?.value || timezone;
-    return {
-      date: timeOnly
-        ? local.format('LT')
-        : new Intl.DateTimeFormat(locale, {
-            timeZone: timezone,
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-          }).format(new Date(date)),
-      zone: `${local.format('z')} (${name})`,
-      datetime: local.format('YYYY-MM-DDTHH:mm:ssZ'),
-      local,
-    };
+  const local = dayjs.utc(date).tz(timezone).locale(locale);
+  const name = timezoneName(date, timezone, locale);
+  return {
+    date: includeDate
+      ? new Intl.DateTimeFormat(locale, {
+          timeZone: timezone,
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        }).format(new Date(date))
+      : local.format('LT'),
+    zone: `${local.format('z')} (${name})`,
+    datetime: local.format('YYYY-MM-DDTHH:mm:ssZ'),
+    local,
   };
-  const start = format(props.dateStart, !includeDate);
+}
+
+function formattedTime(timezone: string, includeDate: boolean) {
+  const start = formatTime(props.dateStart, timezone, includeDate);
   const parts = [
     { date: start.date, datetime: start.datetime, zone: start.zone },
   ];
   if (props.dateEnd) {
     const endDate = dayjs.utc(props.dateEnd).tz(timezone);
-    const end = format(
+    const end = formatTime(
       props.dateEnd,
-      !includeDate || start.local.isSame(endDate, 'day')
+      timezone,
+      includeDate && !start.local.isSame(endDate, 'day')
     );
     if (start.zone === end.zone) {
       parts[0].zone = '';
@@ -110,6 +118,10 @@ const localTimeParts = computed(() =>
     : formattedTime(deviceTimezone.value, includeDates.value)
 );
 
+const timeDescriptionId = computed(() =>
+  localTimeParts.value.length ? `${popoverId.value}-time` : undefined
+);
+
 function onToggle(event: Event) {
   expanded.value = (event as ToggleEvent).newState === 'open';
   if (expanded.value) {
@@ -121,17 +133,18 @@ function onToggle(event: Event) {
   }
 }
 
+function getArrowSide(anchor: DOMRect, panel: DOMRect) {
+  const gap = 16;
+  if (Math.abs(panel.top - anchor.bottom) <= gap) return 'top';
+  if (Math.abs(panel.bottom - anchor.top) <= gap) return 'bottom';
+  return null;
+}
+
 function updateArrow() {
   if (!trigger.value || !popover.value) return;
   const anchor = trigger.value.getBoundingClientRect();
   const panel = popover.value.getBoundingClientRect();
-  const gap = 16;
-  arrowSide.value =
-    Math.abs(panel.top - anchor.bottom) <= gap
-      ? 'top'
-      : Math.abs(panel.bottom - anchor.top) <= gap
-        ? 'bottom'
-        : null;
+  arrowSide.value = getArrowSide(anchor, panel);
   arrowOffset.value = Math.max(
     16,
     Math.min(panel.width - 16, anchor.left + anchor.width / 2 - panel.left)
@@ -147,78 +160,64 @@ onUnmounted(removeArrowListeners);
 </script>
 
 <template>
-  <template v-if="popoverId">
-    <button
-      type="button"
-      ref="trigger"
-      class="timezone-trigger"
-      :popovertarget="popoverId"
-      :aria-expanded="expanded"
+  <button
+    v-if="popoverId"
+    type="button"
+    ref="trigger"
+    class="timezone-trigger"
+    :popovertarget="popoverId"
+    :aria-expanded="expanded"
+  >
+    <span class="timezone-trigger__label"
+      >{{ abbreviation
+      }}<span class="sr-only">: Show in your timezone</span></span
     >
-      <span class="timezone-trigger__label"
-        >{{ abbreviation
-        }}<span class="sr-only">: Show in your timezone</span></span
-      >
-      <wa-icon
-        name="square-question"
-        class="text-muted"
-        variant="regular"
-        canvas="auto"
-        aria-hidden="true"
-      ></wa-icon>
-    </button>
-    <div
-      :id="popoverId"
-      ref="popover"
-      class="timezone-popover"
-      :class="[
-        arrowSide && `timezone-popover--arrow-${arrowSide}`,
-        { 'timezone-popover--below': placement === 'bottom' },
-      ]"
-      :style="{ '--arrow-offset': `${arrowOffset}px` }"
-      popover
-      @toggle="onToggle"
-    >
-      <div
-        class="timezone-popover__content flow flow-xs"
-        tabindex="-1"
-        autofocus
-        role="group"
-        :aria-labelledby="`${popoverId}-label`"
-        :aria-describedby="
-          localTimeParts.length ? `${popoverId}-time` : undefined
-        "
-      >
-        <div v-if="localTimeParts.length" class="timezone-popover__row">
-          <div>
-            <strong :id="`${popoverId}-label`">Your local time</strong>
-            <div :id="`${popoverId}-time`">
-              <div v-for="(part, index) in localTimeParts" :key="index">
-                <template v-if="index"
-                  ><span aria-hidden="true">–&nbsp;</span
-                  ><span class="sr-only">until </span></template
-                ><time :datetime="part.datetime">{{ part.date }}</time
-                >{{ ' ' }}
-                <span
-                  v-if="part.zone"
-                  class="timezone-popover__zone text-muted"
-                  >{{ part.zone }}</span
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-        <p
-          v-if="sameTimezone"
-          :id="`${popoverId}-label`"
-          class="timezone-popover__hint"
-        >
-          Your device uses the event timezone.
-        </p>
-      </div>
-    </div>
-  </template>
+    <wa-icon
+      name="square-question"
+      class="text-muted"
+      variant="regular"
+      canvas="auto"
+      aria-hidden="true"
+    ></wa-icon>
+  </button>
   <abbr v-else>{{ abbreviation }}</abbr>
+  <div
+    v-if="popoverId"
+    :id="popoverId"
+    ref="popover"
+    class="timezone-popover"
+    :class="{
+      'timezone-popover--arrow-top': arrowSide === 'top',
+      'timezone-popover--arrow-bottom': arrowSide === 'bottom',
+      'timezone-popover--below': placement === 'bottom',
+    }"
+    :style="{ '--arrow-offset': `${arrowOffset}px` }"
+    popover
+    @toggle="onToggle"
+  >
+    <div
+      class="timezone-popover__content flow flow-xs"
+      tabindex="-1"
+      autofocus
+      role="group"
+      :aria-labelledby="`${popoverId}-label`"
+      :aria-describedby="timeDescriptionId"
+    >
+      <TimezoneConversionTimes
+        v-if="localTimeParts.length"
+        :parts="localTimeParts"
+        :labelId="`${popoverId}-label`"
+        :timeId="timeDescriptionId"
+      />
+      <p
+        v-if="sameTimezone"
+        :id="`${popoverId}-label`"
+        class="timezone-popover__hint"
+      >
+        Your device uses the event timezone.
+      </p>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -339,11 +338,6 @@ onUnmounted(removeArrowListeners);
     margin-block-start: 10px;
     position-area: bottom;
   }
-}
-
-.timezone-popover__zone {
-  display: block;
-  font-size: var(--p-step--2);
 }
 
 @media (forced-colors: active) {
