@@ -3,6 +3,7 @@ import dayjs from '../lib/dayjs';
 import {
   getEventStart,
   getEventEnd,
+  getAllDayEventEnd,
   isMultiDayAllDay,
   isHappeningNow,
   isStartingSoon,
@@ -23,6 +24,16 @@ import {
 
 /** Shorthand for a fixed UTC instant. */
 const now = (iso: string) => dayjs.utc(iso);
+
+describe('getAllDayEventEnd', () => {
+  it.each([
+    ['UTC', '2030-07-03T23:59:59.999Z'],
+    ['Asia/Tokyo', '2030-07-03T14:59:59.999Z'],
+  ])('keeps the written final day inclusive in %s', (timezone, expected) => {
+    const end = getAllDayEventEnd('2030-07-03T00:00:00+11:00', timezone);
+    expect(end.toISOString()).toBe(expected);
+  });
+});
 
 /** <abbr> helpers matching the module constants. */
 const HR = ' <abbr title="hours">hr</abbr>';

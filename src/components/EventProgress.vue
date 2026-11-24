@@ -27,12 +27,14 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import dayjs from '../lib/dayjs';
+import { storedCalendarDate } from '../../netlify/edge-functions/lib/dateUtils';
 import userStore from '../store/userStore';
 import {
   isHappeningNow as _isHappeningNow,
   isStartingSoon as _isStartingSoon,
   hasEnded as _hasEnded,
   getProgress,
+  getAllDayEventEnd,
   getTimeRemaining,
   getCountdownLabel,
   getTimeSinceEnded,
@@ -45,6 +47,7 @@ const props = withDefaults(
     dateEnd?: string;
     timezone?: string;
     useLocalTimezone?: boolean;
+    preserveCalendarDate?: boolean;
     day?: boolean;
     type?: string;
     showCountdown?: boolean;
@@ -75,16 +78,42 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 
-/** Builds the ProgressOptions from component props and user store. */
+function allDayProgressDates(
+  start: string,
+  end: string | undefined,
+  timezone: string
+) {
+  const dateStart = dayjs.tz(storedCalendarDate(start), timezone).toISOString();
+  // The stored end date is inclusive, including when its timestamp is midnight.
+  const dateEnd = end
+    ? getAllDayEventEnd(end, timezone).toISOString()
+    : undefined;
+  return { dateStart, dateEnd, timezone };
+}
+
+const progressDates = computed(() => {
+  if (!props.preserveCalendarDate) {
+    return {
+      dateStart: props.dateStart,
+      dateEnd: props.dateEnd,
+      timezone: props.timezone || undefined,
+    };
+  }
+
+  return allDayProgressDates(
+    props.dateStart,
+    props.dateEnd,
+    viewerTimezone.value || 'UTC'
+  );
+});
+
 const options = computed<ProgressOptions>(() => ({
-  dateStart: props.dateStart,
-  dateEnd: props.dateEnd,
-  timezone: props.timezone || undefined,
+  ...progressDates.value,
   day: props.day,
   type: props.type,
   showCountdown: props.showCountdown,
   showEnded: props.showEnded,
-  useLocalTimezone: props.useLocalTimezone,
+  useLocalTimezone: !props.preserveCalendarDate && props.useLocalTimezone,
   userTimezone: userStore.timezone,
 }));
 

@@ -10,10 +10,10 @@ export { compareByDateAsc };
  * chronological order (latest first).
  */
 export function compareByDateDesc(
-  a: { dateStart: string },
-  b: { dateStart: string }
+  a: Parameters<typeof compareByDateAsc>[0],
+  b: Parameters<typeof compareByDateAsc>[0]
 ): number {
-  return new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime();
+  return compareByDateAsc(b, a);
 }
 
 // ── Grouping helpers ───────────────────────────────────────────────────

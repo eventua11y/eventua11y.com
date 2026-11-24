@@ -44,7 +44,6 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
-import userStore from '../store/userStore';
 import dayjs from '../lib/dayjs';
 import Event from './Event.vue';
 import filtersStore from '../store/filtersStore';
@@ -62,11 +61,7 @@ watch(
   { flush: 'sync' }
 );
 
-// Get the start of the day using the timezone from the edge function
-const today = computed(() => {
-  const timezone = userStore.geo?.timezone || 'UTC';
-  return dayjs().tz(timezone).startOf('day');
-});
+const deviceTimezone = ref('UTC');
 
 // Live-updating "now" so the displayed date and time stay current while the
 // page is open. Mirrors the pattern used in EventProgress.vue.
@@ -75,10 +70,8 @@ let timer: ReturnType<typeof setInterval> | null = null;
 
 // "now" in the user's timezone, used for the subtitle date and time,
 // e.g. "June 26, 2026, 9:41 AM GMT+1"
-const localNow = computed(() => {
-  const timezone = userStore.geo?.timezone || 'UTC';
-  return now.value.tz(timezone);
-});
+const localNow = computed(() => now.value.tz(deviceTimezone.value));
+const today = computed(() => localNow.value.startOf('day'));
 
 const todaysEvents = ref([]);
 
@@ -99,7 +92,8 @@ const shouldShowDate = (event) => {
   return !(event.type === 'theme' && !event.dateEnd);
 };
 
-onMounted(async () => {
+onMounted(() => {
+  deviceTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
   updateTodaysEvents();
   // Update "now" every minute so the displayed time advances in real time
   timer = setInterval(() => {

@@ -33,6 +33,7 @@
       :dateStart="dateStart"
       :dateEnd="dateEnd"
       :timezone="displayTimezone"
+      :preserveCalendarDate="preserveCalendarDate"
       :useLocalTimezone="useLocalTimezone"
       :day="day"
       :type="type"
@@ -47,6 +48,10 @@ import { computed, onMounted, ref } from 'vue';
 import EventProgress from './EventProgress.vue';
 import TimezoneConversion from './TimezoneConversion.vue';
 import dayjs from '../lib/dayjs';
+import {
+  storedCalendarDate,
+  usesStoredCalendarDate,
+} from '../../netlify/edge-functions/lib/dateUtils';
 import userStore from '../store/userStore';
 import {
   formatEventDate,
@@ -147,8 +152,8 @@ function formatDate(date: string | Date, format: string): string {
 /** Locale-aware formatted date range */
 const formattedRange = computed(() =>
   formatDateRange({
-    dateStart: props.dateStart,
-    dateEnd: props.dateEnd,
+    dateStart: displayStart.value,
+    dateEnd: displayEnd.value,
     timezone: displayTimezone.value,
     useLocalTimezone: useLocalTimezone.value,
     userTimezone: userStore.timezone || undefined,
@@ -157,6 +162,9 @@ const formattedRange = computed(() =>
     type: props.type,
     isDeadline: props.isDeadline,
     isPast: props.isPast,
+    relativeDayTimezone: preserveCalendarDate.value
+      ? deviceTimezone.value
+      : undefined,
   })
 );
 
@@ -174,9 +182,21 @@ const timezoneTitle = computed(
   () => getFullTimezoneName(currentTimezone.value) || undefined
 );
 
-const displayTimezone = computed(
-  () => props.timezone || (!isDateOnly.value ? deviceTimezone.value : '')
+const preserveCalendarDate = computed(() => usesStoredCalendarDate(props));
+const displayStart = computed(() =>
+  preserveCalendarDate.value
+    ? storedCalendarDate(props.dateStart)
+    : props.dateStart
 );
+const displayEnd = computed(() =>
+  preserveCalendarDate.value && props.dateEnd
+    ? storedCalendarDate(props.dateEnd)
+    : props.dateEnd
+);
+const displayTimezone = computed(() => {
+  if (preserveCalendarDate.value) return '';
+  return props.timezone || (!isDateOnly.value ? deviceTimezone.value : '');
+});
 
 const showTimezone = computed(() => !!displayTimezone.value);
 const useLocalTimezone = computed(
@@ -195,11 +215,13 @@ const machineFormat = computed(() =>
 
 /** Machine-readable start date for the start <time> element */
 const machineStart = computed(() =>
-  formatDate(props.dateStart, machineFormat.value)
+  formatDate(displayStart.value, machineFormat.value)
 );
 
 /** Machine-readable end date for the end <time> element */
 const machineEnd = computed(() =>
-  props.dateEnd ? formatDate(props.dateEnd, machineFormat.value) : undefined
+  displayEnd.value
+    ? formatDate(displayEnd.value, machineFormat.value)
+    : undefined
 );
 </script>

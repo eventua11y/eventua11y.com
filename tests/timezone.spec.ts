@@ -60,8 +60,8 @@ const events = [
     _id: 'all-day-event',
     type: 'conference',
     title: 'All-day event',
-    dateStart: '2030-12-31T12:00:00Z',
-    timezone: 'Europe/London',
+    dateStart: '2031-01-01T00:00:00Z',
+    timezone: 'America/Los_Angeles',
     day: true,
   },
   {
@@ -148,7 +148,10 @@ test.describe('Event timezone conversion', () => {
         },
       })
     );
+    const eventsRequest = page.waitForRequest('**/api/get-events');
     await page.reload();
+    const request = await eventsRequest;
+    expect(request.headers()['x-event-timezone']).toBe('Asia/Tokyo');
     const event = page.locator('#today .event').filter({
       hasText: 'Event without timezone in progress',
     });
@@ -601,6 +604,118 @@ test.describe('Event timezone conversion', () => {
     await expect(popover).toContainText(/December 31.*8:00\s*AM/i);
     await expect(popover).not.toContainText(/previous day in your timezone/i);
     await context.close();
+  });
+
+  for (const { now, relativeDate, remaining } of [
+    {
+      now: '2030-06-30T15:30:00Z',
+      relativeDate: 'Today',
+      remaining: 'Ends in 2 days',
+    },
+    {
+      now: '2030-07-01T15:30:00Z',
+      relativeDate: 'Tomorrow',
+      remaining: 'Ends tomorrow',
+    },
+    {
+      now: '2030-07-02T15:30:00Z',
+      relativeDate: 'Today',
+      remaining: 'Ends today',
+    },
+  ]) {
+    test(`uses the device calendar for all-day labels at ${now}`, async ({
+      page,
+    }) => {
+      await page.clock.setFixedTime(new Date(now));
+      await page.route('**/api/get-events', (route) =>
+        route.fulfill({
+          json: {
+            today: [
+              {
+                _id: 'all-day-range',
+                type: 'conference',
+                title: 'All-day range',
+                day: true,
+                timezone: 'America/Los_Angeles',
+                dateStart: '2030-07-01T00:00:00Z',
+                dateEnd: '2030-07-03T00:00:00Z',
+              },
+            ],
+            future: [],
+            past: [],
+          },
+        })
+      );
+      await page.reload();
+      const event = page
+        .locator('#today .event')
+        .filter({ hasText: 'All-day range' });
+      const date = event
+        .locator('.event__dates time')
+        .filter({ hasText: relativeDate });
+      await expect(date).toHaveAttribute(
+        'datetime',
+        remaining === 'Ends in 2 days' ? '2030-07-01' : '2030-07-03'
+      );
+      await expect(event.locator('.event__progress-label')).toHaveText(
+        remaining
+      );
+    });
+  }
+
+  test('shows all-day child progress without an hour-based duration', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date('2030-06-30T15:30:00Z'));
+    const allDayChild = {
+      _id: 'all-day-child',
+      type: 'conference',
+      title: 'All-day child event',
+      day: true,
+      timezone: 'America/Los_Angeles',
+      dateStart: '2030-07-01T00:00:00Z',
+      dateEnd: '2030-07-03T00:00:00Z',
+    };
+    await page.route('**/api/get-events', (route) =>
+      route.fulfill({
+        json: {
+          today: [
+            {
+              ...allDayChild,
+              _id: 'parent-event',
+              title: 'Parent event',
+              isParent: true,
+              children: [allDayChild],
+            },
+          ],
+          future: [],
+          past: [],
+        },
+      })
+    );
+    await page.reload();
+    await page.getByText('Accessibility highlights:', { exact: false }).click();
+    const child = page
+      .locator('.child-event')
+      .filter({ hasText: allDayChild.title });
+    await expect(child.locator('.event__progress-label')).toHaveText(
+      'Ends in 2 days'
+    );
+    await expect(child.locator('.event__duration')).toHaveCount(0);
+  });
+
+  test('keeps a timezoned all-day event on its stored date and month', async ({
+    page,
+  }) => {
+    const event = eventCard(page, 'All-day event');
+    const date = event.locator('.event__dates time');
+    await expect(date).toHaveText(/January 1/);
+    await expect(date).toHaveAttribute('datetime', '2031-01-01');
+    await expect(
+      page
+        .locator('#section-2031-1')
+        .getByText('All-day event', { exact: true })
+    ).toBeVisible();
   });
 
   test('does not offer timezone conversion for date-only events', async ({

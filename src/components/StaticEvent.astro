@@ -7,6 +7,10 @@
  * Timed events use their own timezone.
  */
 import dayjs from '../lib/dayjs';
+import {
+  storedCalendarDate,
+  usesStoredCalendarDate,
+} from '../../netlify/edge-functions/lib/dateUtils';
 import type { Event } from '../types/event';
 import { getEventUrl } from '../utils/eventUtils';
 import { formatDateRange } from '../utils/dateUtils';
@@ -23,6 +27,14 @@ const isDeadline = event.type === 'deadline';
 const isTheme = event.type === 'theme';
 const headingId = `event-title-${event._id}`;
 const isAllDay = event.day === true;
+const preserveCalendarDate = usesStoredCalendarDate(event);
+const dateStart = preserveCalendarDate
+  ? storedCalendarDate(event.dateStart)
+  : event.dateStart;
+const dateEnd =
+  preserveCalendarDate && event.dateEnd
+    ? storedCalendarDate(event.dateEnd)
+    : event.dateEnd;
 const isInternational = !event.timezone;
 
 // CFS open check
@@ -41,9 +53,9 @@ function formatDate(date: string, format: string): string {
 
 // Human-readable date range with locale-aware deduplication
 const formattedRange = formatDateRange({
-  dateStart: event.dateStart,
-  dateEnd: event.dateEnd,
-  timezone: event.timezone,
+  dateStart,
+  dateEnd,
+  timezone: preserveCalendarDate ? undefined : event.timezone,
   day: isAllDay,
   type: event.type,
   isDeadline,
@@ -57,12 +69,10 @@ const eventUrl = getEventUrl(event);
 // Machine-readable datetime values for <time> elements
 const isDateOnly = isAllDay || isTheme || isDeadline;
 const machineFormat = isDateOnly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZ';
-const machineStart = formatDate(event.dateStart, machineFormat);
-const machineEnd = event.dateEnd
-  ? formatDate(event.dateEnd, machineFormat)
-  : undefined;
+const machineStart = formatDate(dateStart, machineFormat);
+const machineEnd = dateEnd ? formatDate(dateEnd, machineFormat) : undefined;
 let timezoneAbbreviation: string | undefined;
-if (!isInternational) {
+if (!isInternational && !preserveCalendarDate) {
   timezoneAbbreviation =
     !isDateOnly && event.timezone
       ? dayjs.utc(event.dateStart).tz(event.timezone).format('z')

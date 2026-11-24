@@ -20,6 +20,10 @@ import {
 } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
 import dayjs from '../lib/dayjs';
+import {
+  storedCalendarDate,
+  usesStoredCalendarDate,
+} from '../../netlify/edge-functions/lib/dateUtils';
 import { getYearMonth } from '../utils/dateUtils';
 
 interface Props {
@@ -42,12 +46,13 @@ try {
     type === 'past' ? [...events] : [...events, ...books];
 
   const monthKey = (item: Event | Book) => {
-    const isBook = item._type === 'book';
-    const isTimedEvent =
-      !isBook && !item.day && !['theme', 'deadline'].includes(item.type);
+    if (item._type === 'book')
+      return getYearMonth(item.dateStart, { isBook: true });
+    if (usesStoredCalendarDate(item)) {
+      return getYearMonth(storedCalendarDate(item.dateStart), {});
+    }
     return getYearMonth(item.dateStart, {
-      isBook,
-      timezone: isTimedEvent ? item.timezone : undefined,
+      timezone: item.type === 'deadline' ? undefined : item.timezone,
     });
   };
 
