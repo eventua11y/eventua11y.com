@@ -60,6 +60,32 @@ describe('classifyEvents', () => {
     ).toEqual([event]);
   });
 
+  it.each([
+    {
+      dateStart: '2030-07-01T00:00:00Z',
+      timezone: 'America/Los_Angeles',
+      day: true,
+    },
+    {
+      dateStart: '2030-07-01T00:00:00+11:00',
+      timezone: 'Australia/Sydney',
+      day: true,
+    },
+    {
+      dateStart: '2030-07-01T00:00:00Z',
+      timezone: 'America/Los_Angeles',
+      type: 'theme',
+    },
+  ])('keeps the written date at the month boundary for $timezone', (event) => {
+    expect(
+      classifyEvents([event], 'UTC', new Date('2030-07-01T12:00:00Z'))
+    ).toEqual({
+      today: [event],
+      future: [],
+      past: [],
+    });
+  });
+
   it('includes the last day of February at the leap-day cutoff', () => {
     const event = { dateStart: '2027-02-28T12:00:00Z' };
     const now = new Date('2028-02-29T00:00:00Z');

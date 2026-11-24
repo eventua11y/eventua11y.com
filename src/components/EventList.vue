@@ -7,6 +7,10 @@ import userStore from '../store/userStore';
 import filtersStore from '../store/filtersStore';
 import type { Event as EventType, Book } from '../types/event';
 import dayjs from '../lib/dayjs';
+import {
+  storedCalendarDate,
+  usesStoredCalendarDate,
+} from '../../netlify/edge-functions/lib/dateUtils';
 import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
 import {
   groupByMonth,
@@ -38,11 +42,14 @@ const getYearMonth = (item: ListItem): string => {
   if (!('type' in item)) {
     return _getYearMonth(item.dateStart, { isBook: true });
   }
-  const isDateOnly = item.day || ['theme', 'deadline'].includes(item.type);
+  const isDeadline = item.type === 'deadline';
+  if (usesStoredCalendarDate(item)) {
+    return _getYearMonth(storedCalendarDate(item.dateStart), {});
+  }
   const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return _getYearMonth(item.dateStart, {
-    timezone: item.timezone || (isDateOnly ? undefined : deviceTimezone),
-    useLocalTimezone: Boolean(isDateOnly) && userStore.useLocalTimezone,
+    timezone: item.timezone || (isDeadline ? undefined : deviceTimezone),
+    useLocalTimezone: isDeadline && userStore.useLocalTimezone,
     userTimezone: userStore.timezone || undefined,
   });
 };

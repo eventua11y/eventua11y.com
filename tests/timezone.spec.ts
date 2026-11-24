@@ -60,8 +60,8 @@ const events = [
     _id: 'all-day-event',
     type: 'conference',
     title: 'All-day event',
-    dateStart: '2030-12-31T12:00:00Z',
-    timezone: 'Europe/London',
+    dateStart: '2031-01-01T00:00:00Z',
+    timezone: 'America/Los_Angeles',
     day: true,
   },
   {
@@ -604,6 +604,20 @@ test.describe('Event timezone conversion', () => {
     await expect(popover).toContainText(/December 31.*8:00\s*AM/i);
     await expect(popover).not.toContainText(/previous day in your timezone/i);
     await context.close();
+  });
+
+  test('keeps a timezoned all-day event on its stored date and month', async ({
+    page,
+  }) => {
+    const event = eventCard(page, 'All-day event');
+    const date = event.locator('.event__dates time');
+    await expect(date).toHaveText(/January 1/);
+    await expect(date).toHaveAttribute('datetime', '2031-01-01');
+    await expect(
+      page
+        .locator('#section-2031-1')
+        .getByText('All-day event', { exact: true })
+    ).toBeVisible();
   });
 
   test('does not offer timezone conversion for date-only events', async ({

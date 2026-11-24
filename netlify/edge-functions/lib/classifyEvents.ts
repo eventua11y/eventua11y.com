@@ -1,4 +1,8 @@
-import { compareByDateAsc } from './dateUtils.ts';
+import {
+  compareByDateAsc,
+  storedCalendarDate,
+  usesStoredCalendarDate,
+} from './dateUtils.ts';
 
 interface ClassifiableEvent {
   dateStart: string;
@@ -57,10 +61,30 @@ function readEventDates(event: ClassifiableEvent) {
 
 function eventTimezone(event: ClassifiableEvent, viewerTimezone: string) {
   if (event.timezone) return event.timezone;
-  if (event.day || event.type === 'theme' || event.type === 'deadline') {
+  if (event.type === 'deadline') {
     return 'UTC';
   }
   return viewerTimezone;
+}
+
+function eventCalendarDays(
+  event: ClassifiableEvent,
+  dates: { start: Date; end: Date },
+  viewerTimezone: string,
+  formatCalendarDay: ReturnType<typeof createCalendarDayFormatter>
+) {
+  if (usesStoredCalendarDate(event)) {
+    const startDay = storedCalendarDate(event.dateStart);
+    return {
+      startDay,
+      endDay: storedCalendarDate(event.dateEnd || event.dateStart),
+    };
+  }
+  const timezone = eventTimezone(event, viewerTimezone);
+  return {
+    startDay: formatCalendarDay(dates.start, timezone),
+    endDay: formatCalendarDay(dates.end, timezone),
+  };
 }
 
 function getEventBucket(
@@ -95,11 +119,12 @@ export function classifyEvents<T extends ClassifiableEvent>(
     const dates = readEventDates(event);
     if (!dates) continue;
 
-    const timezone = eventTimezone(event, viewerTimezone);
-    const startDay = formatCalendarDay(dates.start, timezone);
-    const endDay = event.dateEnd
-      ? formatCalendarDay(dates.end, timezone)
-      : startDay;
+    const { startDay, endDay } = eventCalendarDays(
+      event,
+      dates,
+      viewerTimezone,
+      formatCalendarDay
+    );
     const isDeadline = event.type === 'deadline';
     if (isDeadline && dates.end <= now) continue;
 
