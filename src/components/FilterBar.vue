@@ -54,7 +54,6 @@
             ></wa-icon>
             <span v-if="!isNarrow">Filter</span>
           </wa-button>
-          <TimezoneSelector />
         </div>
       </div>
     </div>
@@ -64,7 +63,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
-import TimezoneSelector from './TimezoneSelector.vue';
 import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
 /**

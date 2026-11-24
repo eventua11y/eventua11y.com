@@ -10,7 +10,7 @@ import dayjs from '../lib/dayjs';
 import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
 import {
   groupByMonth,
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
 } from '../utils/eventUtils';
 
@@ -33,14 +33,16 @@ const displayError = computed(() =>
 );
 
 /** Delegates to the shared getYearMonth utility */
+// fallow-ignore-next-line complexity -- Timezone grouping is covered by browser tests.
 const getYearMonth = (item: ListItem): string => {
-  const isBook = item._type === 'book';
-  const eventTimezone =
-    !isBook && 'timezone' in item ? item.timezone : undefined;
+  if (!('type' in item)) {
+    return _getYearMonth(item.dateStart, { isBook: true });
+  }
+  const isDateOnly = item.day || ['theme', 'deadline'].includes(item.type);
+  const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return _getYearMonth(item.dateStart, {
-    isBook,
-    timezone: eventTimezone,
-    useLocalTimezone: userStore.useLocalTimezone,
+    timezone: item.timezone || (isDateOnly ? undefined : deviceTimezone),
+    useLocalTimezone: Boolean(isDateOnly) && userStore.useLocalTimezone,
     userTimezone: userStore.timezone || undefined,
   });
 };
@@ -75,11 +77,11 @@ const groupEvents = (events: ListItem[]) => {
 
   let groups = groupByMonth(filtered, props.type, getYearMonth);
 
-  // Filter out past months for upcoming events
+  // Events are already classified; only books need a month cutoff.
   if (props.type !== 'past') {
     const userTz = userStore.geo?.timezone || 'UTC';
     const now = dayjs().tz(userTz);
-    groups = filterPastMonths(groups, now.year(), now.month() + 1);
+    groups = filterPastBooks(groups, now.year(), now.month() + 1);
   }
 
   groupedEvents.value = groups;
@@ -174,6 +176,23 @@ watch(
       error.value = `Error updating ${props.type} events.`;
       console.error('Error:', e);
       loading.value = false;
+    }
+  }
+);
+
+watch(
+  () => [
+    userStore.useLocalTimezone,
+    userStore.timezone,
+    userStore.geo?.timezone,
+  ],
+  () => {
+    if (filtersStore.eventsStatus === 'success') {
+      groupEvents(
+        props.type === 'past'
+          ? filtersStore.pastEvents
+          : filtersStore.filteredEvents
+      );
     }
   }
 );

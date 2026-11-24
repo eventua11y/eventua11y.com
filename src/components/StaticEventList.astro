@@ -3,7 +3,7 @@
  * Server-rendered event list for the <noscript> fallback.
  *
  * This component fetches events and books from Sanity during Astro SSR,
- * groups them by month using UTC, and renders them as static HTML.
+ * groups them by the event's calendar month, and renders them as static HTML.
  * It is only visible when JavaScript is disabled (wrapped in <noscript>
  * by the consuming page).
  *
@@ -15,11 +15,12 @@ import StaticEventBook from './StaticEventBook.astro';
 import { getEvents, getBooks } from '../lib/sanity';
 import {
   groupByMonth,
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
 } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
 import dayjs from '../lib/dayjs';
+import { getYearMonth } from '../utils/dateUtils';
 
 interface Props {
   type: 'upcoming' | 'past';
@@ -40,16 +41,21 @@ try {
   const items: (Event | Book)[] =
     type === 'past' ? [...events] : [...events, ...books];
 
-  const utcKey = (item: Event | Book) => {
-    const d = dayjs.utc(item.dateStart);
-    return `${d.year()}-${d.month() + 1}`;
+  const monthKey = (item: Event | Book) => {
+    const isBook = item._type === 'book';
+    const isTimedEvent =
+      !isBook && !item.day && !['theme', 'deadline'].includes(item.type);
+    return getYearMonth(item.dateStart, {
+      isBook,
+      timezone: isTimedEvent ? item.timezone : undefined,
+    });
   };
 
-  let grouped = groupByMonth(items, type, utcKey);
+  let grouped = groupByMonth(items, type, monthKey);
 
   if (type !== 'past') {
     const now = dayjs.utc();
-    grouped = filterPastMonths(grouped, now.year(), now.month() + 1);
+    grouped = filterPastBooks(grouped, now.year(), now.month() + 1);
   }
 
   groupedItems = grouped;

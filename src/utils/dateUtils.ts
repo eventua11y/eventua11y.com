@@ -644,3 +644,79 @@ export function resolveTimezone(options: {
   }
   return options.timezone || 'UTC';
 }
+
+type RelativeUnit = 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+
+function englishRelative(
+  value: number,
+  unit: RelativeUnit,
+  approximate: boolean
+): string {
+  const amount = Math.abs(value);
+  const article = unit === 'hour' ? 'an' : 'a';
+  const count = amount === 1 ? `${article} ${unit}` : `${amount} ${unit}s`;
+  const quantity = approximate ? `about ${count}` : count;
+  let phrase = `${quantity} from now`;
+  if (value < 0) phrase = `${quantity} ago`;
+  else if (unit === 'minute' || unit === 'hour') phrase = `in ${quantity}`;
+  return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+}
+
+/**
+ * Describes when an event starts relative to now, as a standalone phrase
+ * such as "In 3 hours", "Tomorrow" or "3 weeks from now".
+ *
+ * "Today", "Tomorrow" and "Yesterday" use calendar days in the given timezone,
+ * so they stay accurate around midnight and DST changes. Longer spans are
+ * rounded, and a month is described as "about a month" rather than "next
+ * month" because the rounded span rarely matches the calendar month.
+ */
+export function formatRelativeStart(
+  start: string | Date,
+  now: string | number | Date,
+  timezone: string,
+  locale = 'en'
+): string {
+  const startTime = dayjs.utc(start);
+  const nowTime = dayjs.utc(now);
+  const minutes = Math.round(startTime.diff(nowTime, 'minute', true));
+  const hours = Math.round(minutes / 60);
+  // Compare local calendar dates as UTC midnights so DST never shortens a day.
+  const calendarDays = dayjs
+    .utc(startTime.tz(timezone).format('YYYY-MM-DD'))
+    .diff(dayjs.utc(nowTime.tz(timezone).format('YYYY-MM-DD')), 'day');
+  const english = locale.toLowerCase().startsWith('en');
+  const intl = new Intl.RelativeTimeFormat(locale, { numeric: 'always' });
+  const capitalize = (text: string) =>
+    text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
+  const relative = (value: number, unit: RelativeUnit, approximate = false) =>
+    english
+      ? englishRelative(value, unit, approximate)
+      : capitalize(intl.format(value, unit));
+
+  const minutesAway = Math.abs(minutes);
+  if (minutesAway < 1) {
+    return english ? 'Now' : capitalize(intl.format(0, 'minute'));
+  }
+  if (minutesAway < 60) return relative(minutes, 'minute');
+  // Within a few hours, or later today, the hour count is more useful.
+  if (calendarDays === 0 || minutesAway < 6 * 60) {
+    return relative(hours, 'hour');
+  }
+  const days = Math.abs(calendarDays);
+  if (days === 1) {
+    return capitalize(
+      new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(
+        calendarDays,
+        'day'
+      )
+    );
+  }
+  if (days < 7) return relative(calendarDays, 'day');
+  const sign = Math.sign(calendarDays);
+  if (days < 25) return relative(sign * Math.round(days / 7), 'week');
+  const months = Math.round(days / 30.44);
+  if (months <= 1) return relative(sign, 'month', true);
+  if (months < 12) return relative(sign * months, 'month');
+  return relative(sign * Math.max(1, Math.round(days / 365.25)), 'year');
+}

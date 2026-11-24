@@ -8,4 +8,4 @@ sort: a1
 uid: b1af3ac2de
 ---
 
-Converts event times from the event's own timezone to the visitor's selected timezone, handling international events, single-day events, and multi-day events.
+Timed events with a timezone show the event's local time. If your device uses a different timezone, open the popover to see the time on your device. Dates appear when the timezones show different calendar dates or the event crosses midnight.

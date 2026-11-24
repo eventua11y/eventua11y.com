@@ -68,10 +68,10 @@ export function groupByMonth(
 }
 
 /**
- * Removes month groups that are before the current month.
- * Used by upcoming event lists to hide past months.
+ * Removes books before the current month without dropping events already
+ * classified as upcoming. An event's local month can differ from the viewer's.
  */
-export function filterPastMonths(
+export function filterPastBooks(
   groups: GroupedItems,
   currentYear: number,
   currentMonth: number
@@ -79,9 +79,12 @@ export function filterPastMonths(
   const filtered: GroupedItems = {};
   for (const [key, items] of Object.entries(groups)) {
     const [year, month] = key.split('-').map(Number);
-    if (year > currentYear || (year === currentYear && month >= currentMonth)) {
-      filtered[key] = items;
-    }
+    const isPast =
+      year < currentYear || (year === currentYear && month < currentMonth);
+    const visibleItems = isPast
+      ? items.filter((item) => item._type !== 'book')
+      : items;
+    if (visibleItems.length) filtered[key] = visibleItems;
   }
   return filtered;
 }
