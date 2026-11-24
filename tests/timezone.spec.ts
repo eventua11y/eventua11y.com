@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const events = [
@@ -303,6 +303,69 @@ test.describe('Event timezone conversion', () => {
         (element) => element.scrollWidth <= element.clientWidth
       )
     ).toBe(true);
+  });
+
+  test('prefers below on detail pages and above on cards, with opposite-side fallbacks', async ({
+    page,
+  }) => {
+    const checkPlacement = async (
+      button: Locator,
+      top: number,
+      side: 'top' | 'bottom'
+    ) => {
+      await button.evaluate((element, top) => {
+        Object.assign(element.style, {
+          position: 'fixed',
+          top: `${top}px`,
+          left: '150px',
+        });
+      }, top);
+      await button.press('Space');
+      const popover = page.locator(
+        `#${await button.getAttribute('popovertarget')}`
+      );
+      await expect(popover).toBeVisible();
+      await expect
+        .poll(async () => {
+          const anchor = await button.boundingBox();
+          const panel = await popover.boundingBox();
+          return Math.round(
+            side === 'bottom'
+              ? panel!.y - (anchor!.y + anchor!.height)
+              : anchor!.y - (panel!.y + panel!.height)
+          );
+        })
+        .toBe(10);
+      await expect(popover).toHaveClass(
+        new RegExp(
+          `timezone-popover--arrow-${side === 'bottom' ? 'top' : 'bottom'}`
+        )
+      );
+      const typeSizes = await popover.evaluate((element) => ({
+        panel: getComputedStyle(element).fontSize,
+        label: getComputedStyle(element.querySelector('strong, p')!).fontSize,
+      }));
+      await page.keyboard.press('Escape');
+      return typeSizes;
+    };
+
+    for (const width of [1280, 375]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      const cardButton = eventCard(page, 'New York event').getByRole('button', {
+        name: /show in your timezone/i,
+      });
+      const cardTypeSizes = await checkPlacement(cardButton, 420, 'top');
+      await checkPlacement(cardButton, 20, 'bottom');
+
+      await page.goto('/events/test-fixture-event-tutorial');
+      const detailButton = page
+        .locator('.event-detail .timezone-trigger')
+        .first();
+      const detailTypeSizes = await checkPlacement(detailButton, 420, 'bottom');
+      expect(detailTypeSizes).toEqual(cardTypeSizes);
+      await checkPlacement(detailButton, 820, 'top');
+    }
   });
 
   test('exposes range endpoints and until in reading order', async ({

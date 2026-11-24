@@ -18,6 +18,7 @@
             :dateEnd="dateEnd"
             :timezone="timezone"
             :abbreviation="currentTimezone"
+            :placement="timezonePlacement"
           /><abbr
             v-else
             :title="getFullTimezoneName(currentTimezone) || undefined"
@@ -71,6 +72,7 @@ const props = withDefaults(
     isPast?: boolean;
     showCountdown?: boolean;
     showEnded?: boolean;
+    timezonePlacement?: 'top' | 'bottom';
   }>(),
   {
     timezone: '',
@@ -80,6 +82,7 @@ const props = withDefaults(
     isPast: false,
     showCountdown: false,
     showEnded: false,
+    timezonePlacement: 'top',
   }
 );
 

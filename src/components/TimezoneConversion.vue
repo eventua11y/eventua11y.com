@@ -7,12 +7,16 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import dayjs from '../lib/dayjs';
 import userStore from '../store/userStore';
 
-const props = defineProps<{
-  dateStart: string;
-  dateEnd?: string;
-  timezone: string;
-  abbreviation: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    dateStart: string;
+    dateEnd?: string;
+    timezone: string;
+    abbreviation: string;
+    placement?: 'top' | 'bottom';
+  }>(),
+  { placement: 'top' }
+);
 
 const popoverId = ref('');
 const deviceTimezone = ref('');
@@ -167,7 +171,10 @@ onUnmounted(removeArrowListeners);
       :id="popoverId"
       ref="popover"
       class="timezone-popover"
-      :class="arrowSide && `timezone-popover--arrow-${arrowSide}`"
+      :class="[
+        arrowSide && `timezone-popover--arrow-${arrowSide}`,
+        { 'timezone-popover--below': placement === 'bottom' },
+      ]"
       :style="{ '--arrow-offset': `${arrowOffset}px` }"
       popover
       @toggle="onToggle"
@@ -296,6 +303,12 @@ onUnmounted(removeArrowListeners);
       flip-inline,
       flip-block flip-inline,
       --timezone-center;
+  }
+
+  .timezone-popover--below {
+    margin-block-end: 0;
+    margin-block-start: 10px;
+    position-area: bottom;
   }
 }
 
