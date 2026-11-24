@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import dayjs from 'dayjs';
+import { usesStoredCalendarDate } from '../../netlify/edge-functions/lib/dateUtils';
 import {
   getEventUrl,
   capitalize,
@@ -108,7 +109,14 @@ const childEventUrl = computed(() => getEventUrl(props.event));
           :isPast="isPast"
           :showEnded="showEnded"
         />
-        <template v-if="event.dateEnd && !inProgress && !ended">
+        <template
+          v-if="
+            event.dateEnd &&
+            !usesStoredCalendarDate(event) &&
+            !inProgress &&
+            !ended
+          "
+        >
           <EventDuration :event="event" />
         </template>
       </template>

@@ -663,6 +663,47 @@ test.describe('Event timezone conversion', () => {
     });
   }
 
+  test('shows all-day child progress without an hour-based duration', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date('2030-06-30T15:30:00Z'));
+    const allDayChild = {
+      _id: 'all-day-child',
+      type: 'conference',
+      title: 'All-day child event',
+      day: true,
+      timezone: 'America/Los_Angeles',
+      dateStart: '2030-07-01T00:00:00Z',
+      dateEnd: '2030-07-03T00:00:00Z',
+    };
+    await page.route('**/api/get-events', (route) =>
+      route.fulfill({
+        json: {
+          today: [
+            {
+              ...allDayChild,
+              _id: 'parent-event',
+              title: 'Parent event',
+              isParent: true,
+              children: [allDayChild],
+            },
+          ],
+          future: [],
+          past: [],
+        },
+      })
+    );
+    await page.reload();
+    await page.getByText('Accessibility highlights:', { exact: false }).click();
+    const child = page
+      .locator('.child-event')
+      .filter({ hasText: allDayChild.title });
+    await expect(child.locator('.event__progress-label')).toHaveText(
+      'Ends in 2 days'
+    );
+    await expect(child.locator('.event__duration')).toHaveCount(0);
+  });
+
   test('keeps a timezoned all-day event on its stored date and month', async ({
     page,
   }) => {

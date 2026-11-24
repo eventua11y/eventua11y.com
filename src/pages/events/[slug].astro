@@ -139,33 +139,41 @@ const enumeratedChildTypes = (() => {
 // Duration display for child events with both start and end dates.
 // Hidden once the event is in progress or has ended, matching the listing
 // (EventChild.vue) where progress/ended state replaces the duration.
-const eventDuration = (() => {
-  if (!isChildEvent || !event.dateStart || !event.dateEnd) return null;
-  const progressOptions = {
-    dateStart: event.dateStart,
-    dateEnd: event.dateEnd,
-    timezone: event.timezone,
-    day: event.day,
-    type: event.type,
-  };
-  const now = dayjs();
-  if (isHappeningNow(now, progressOptions)) return null;
-  if (now.isAfter(getEventEnd(progressOptions))) return null;
-  const minutes = dayjs(event.dateEnd).diff(dayjs(event.dateStart), 'minutes');
-  if (minutes <= 0) return null;
-  if (minutes <= 60) {
-    const minuteLabel = minutes === 1 ? 'minute' : 'minutes';
-    return { iso: `PT${minutes}M`, label: `${minutes} ${minuteLabel} long` };
-  }
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  const hourLabel = hours === 1 ? 'hour' : 'hours';
-  const label =
-    mins > 0
-      ? `${hours} ${hourLabel} ${mins} ${mins === 1 ? 'minute' : 'minutes'} long`
-      : `${hours} ${hourLabel} long`;
-  return { iso: `PT${minutes}M`, label };
-})();
+const eventDuration = usesStoredCalendarDate(event)
+  ? null
+  : (() => {
+      if (!isChildEvent || !event.dateStart || !event.dateEnd) return null;
+      const progressOptions = {
+        dateStart: event.dateStart,
+        dateEnd: event.dateEnd,
+        timezone: event.timezone,
+        day: event.day,
+        type: event.type,
+      };
+      const now = dayjs();
+      if (isHappeningNow(now, progressOptions)) return null;
+      if (now.isAfter(getEventEnd(progressOptions))) return null;
+      const minutes = dayjs(event.dateEnd).diff(
+        dayjs(event.dateStart),
+        'minutes'
+      );
+      if (minutes <= 0) return null;
+      if (minutes <= 60) {
+        const minuteLabel = minutes === 1 ? 'minute' : 'minutes';
+        return {
+          iso: `PT${minutes}M`,
+          label: `${minutes} ${minuteLabel} long`,
+        };
+      }
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      const hourLabel = hours === 1 ? 'hour' : 'hours';
+      const label =
+        mins > 0
+          ? `${hours} ${hourLabel} ${mins} ${mins === 1 ? 'minute' : 'minutes'} long`
+          : `${hours} ${hourLabel} long`;
+      return { iso: `PT${minutes}M`, label };
+    })();
 
 // SSR doesn't know the device timezone, so calendar dates use the same UTC
 // fallback as the no-JavaScript list.
