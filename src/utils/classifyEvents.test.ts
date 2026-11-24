@@ -27,17 +27,21 @@ describe('classifyEvents', () => {
     });
   });
 
-  it('does not move a local event into the next day just because the viewer has crossed midnight', () => {
-    const event = {
-      dateStart: '2030-06-25T20:00:00Z',
-      dateEnd: '2030-06-25T23:59:00Z',
-      timezone: 'America/Los_Angeles',
-    };
-    const now = new Date('2030-06-26T00:00:00Z');
+  it.each(['Europe/London', 'UTC'])(
+    'keeps an ended local event in the past for a viewer in %s',
+    (viewerTimezone) => {
+      const event = {
+        dateStart: '2030-06-25T20:00:00Z',
+        dateEnd: '2030-06-25T23:59:00Z',
+        timezone: 'America/Los_Angeles',
+      };
+      const now = new Date('2030-06-26T00:00:00Z');
 
-    expect(classifyEvents([event], 'Europe/London', now).past).toEqual([event]);
-    expect(classifyEvents([event], 'UTC', now).past).toEqual([event]);
-  });
+      expect(classifyEvents([event], viewerTimezone, now).past).toEqual([
+        event,
+      ]);
+    }
+  );
 
   it('keeps the stored dates of an international multi-day event', () => {
     const event = {
@@ -54,6 +58,13 @@ describe('classifyEvents', () => {
       classifyEvents([event], 'Asia/Tokyo', new Date('2030-12-31T15:00:00Z'))
         .past
     ).toEqual([event]);
+  });
+
+  it('includes the last day of February at the leap-day cutoff', () => {
+    const event = { dateStart: '2027-02-28T12:00:00Z' };
+    const now = new Date('2028-02-29T00:00:00Z');
+
+    expect(classifyEvents([event], 'UTC', now).past).toEqual([event]);
   });
 
   it('excludes children, unscheduled events and events older than twelve calendar months', () => {

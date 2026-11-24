@@ -14,7 +14,7 @@ import { createClient } from '@sanity/client';
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book, Topic } from '../types/event';
-import { compareByDateAsc } from '../utils/eventUtils';
+import { compareByDateAsc } from '../../netlify/edge-functions/lib/dateUtils';
 import { classifyEvents } from '../../netlify/edge-functions/lib/classifyEvents';
 import {
   PARENT_EVENTS_QUERY,

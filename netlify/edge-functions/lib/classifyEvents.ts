@@ -9,6 +9,20 @@ interface ClassifiableEvent {
   parent?: unknown;
 }
 
+function twelveMonthsBefore(calendarDay: string): string {
+  const [year, month, day] = calendarDay.split('-').map(Number);
+  const previousYear = year - 1;
+  // Clamp leap day to the last day of February in the previous year.
+  const lastDayOfMonth = new Date(
+    Date.UTC(previousYear, month, 0)
+  ).getUTCDate();
+  return new Date(
+    Date.UTC(previousYear, month - 1, Math.min(day, lastDayOfMonth))
+  )
+    .toISOString()
+    .slice(0, 10);
+}
+
 /** Classifies top-level events by the calendar dates shown to the visitor. */
 export function classifyEvents<T extends ClassifiableEvent>(
   events: T[],
@@ -17,7 +31,7 @@ export function classifyEvents<T extends ClassifiableEvent>(
 ): { today: T[]; future: T[]; past: T[] } {
   // This module runs in both Node and Deno. Reuse a formatter per timezone.
   const formatters = new Map<string, Intl.DateTimeFormat>();
-  function calendarDay(date: Date, timezone: string): string {
+  function formatCalendarDay(date: Date, timezone: string): string {
     let formatter = formatters.get(timezone);
     if (!formatter) {
       formatter = new Intl.DateTimeFormat('en-CA', {
@@ -29,19 +43,13 @@ export function classifyEvents<T extends ClassifiableEvent>(
       formatters.set(timezone, formatter);
     }
     const parts = formatter.formatToParts(date);
-    const get = (type: Intl.DateTimeFormatPartTypes) =>
+    const partValue = (type: 'year' | 'month' | 'day') =>
       parts.find((part) => part.type === type)?.value;
-    return `${get('year')}-${get('month')}-${get('day')}`;
+    return `${partValue('year')}-${partValue('month')}-${partValue('day')}`;
   }
 
-  const viewerDay = calendarDay(now, viewerTimezone);
-  const [year, month, day] = viewerDay.split('-').map(Number);
-  const lastDayOfMonth = new Date(Date.UTC(year - 1, month, 0)).getUTCDate();
-  const oldestDay = new Date(
-    Date.UTC(year - 1, month - 1, Math.min(day, lastDayOfMonth))
-  )
-    .toISOString()
-    .slice(0, 10);
+  const viewerDay = formatCalendarDay(now, viewerTimezone);
+  const oldestDay = twelveMonthsBefore(viewerDay);
 
   const today: T[] = [];
   const future: T[] = [];
@@ -57,8 +65,8 @@ export function classifyEvents<T extends ClassifiableEvent>(
     const isDeadline = event.type === 'deadline';
     const dateOnly = event.day || event.type === 'theme' || isDeadline;
     const timezone = event.timezone || (dateOnly ? 'UTC' : viewerTimezone);
-    const startDay = calendarDay(start, timezone);
-    const endDay = end === start ? startDay : calendarDay(end, timezone);
+    const startDay = formatCalendarDay(start, timezone);
+    const endDay = event.dateEnd ? formatCalendarDay(end, timezone) : startDay;
 
     // An open deadline must not disappear just because the viewer is a day ahead.
     if (isDeadline && end <= now) continue;
