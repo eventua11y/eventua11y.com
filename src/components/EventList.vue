@@ -10,7 +10,7 @@ import dayjs from '../lib/dayjs';
 import { getYearMonth as _getYearMonth } from '../utils/dateUtils';
 import {
   groupByMonth,
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
 } from '../utils/eventUtils';
 
@@ -77,11 +77,11 @@ const groupEvents = (events: ListItem[]) => {
 
   let groups = groupByMonth(filtered, props.type, getYearMonth);
 
-  // Filter out past months for upcoming events
+  // Events are already classified; only books need a month cutoff.
   if (props.type !== 'past') {
     const userTz = userStore.geo?.timezone || 'UTC';
     const now = dayjs().tz(userTz);
-    groups = filterPastMonths(groups, now.year(), now.month() + 1);
+    groups = filterPastBooks(groups, now.year(), now.month() + 1);
   }
 
   groupedEvents.value = groups;

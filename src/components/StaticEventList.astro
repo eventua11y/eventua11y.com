@@ -15,7 +15,7 @@ import StaticEventBook from './StaticEventBook.astro';
 import { getEvents, getBooks } from '../lib/sanity';
 import {
   groupByMonth,
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
 } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
@@ -55,7 +55,7 @@ try {
 
   if (type !== 'past') {
     const now = dayjs.utc();
-    grouped = filterPastMonths(grouped, now.year(), now.month() + 1);
+    grouped = filterPastBooks(grouped, now.year(), now.month() + 1);
   }
 
   groupedItems = grouped;
