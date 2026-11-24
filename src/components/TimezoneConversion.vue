@@ -14,6 +14,7 @@ const props = withDefaults(
     dateEnd?: string;
     timezone: string;
     abbreviation: string;
+    abbreviationTitle?: string;
     placement?: 'top' | 'bottom';
   }>(),
   { placement: 'top' }
@@ -158,10 +159,10 @@ onUnmounted(removeArrowListeners);
     :popovertarget="popoverId"
     :aria-expanded="expanded"
   >
-    <span class="timezone-trigger__label"
-      >{{ abbreviation
-      }}<span class="sr-only">: Show in your timezone</span></span
-    >
+    <abbr class="timezone-trigger__label" :title="abbreviationTitle">{{
+      abbreviation
+    }}</abbr
+    ><span class="sr-only">: Show in your timezone</span>
     <wa-icon
       name="square-question"
       class="text-muted"
@@ -170,7 +171,7 @@ onUnmounted(removeArrowListeners);
       aria-hidden="true"
     ></wa-icon>
   </button>
-  <abbr v-else>{{ abbreviation }}</abbr>
+  <abbr v-else :title="abbreviationTitle">{{ abbreviation }}</abbr>
   <div
     v-if="showPopover"
     :id="popoverId"

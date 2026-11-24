@@ -18,12 +18,11 @@
             :dateEnd="dateEnd"
             :timezone="timezone"
             :abbreviation="currentTimezone"
+            :abbreviationTitle="timezoneTitle"
             :placement="timezonePlacement"
-          /><abbr
-            v-else
-            :title="getFullTimezoneName(currentTimezone) || undefined"
-            >{{ currentTimezone }}</abbr
-          ></template
+          /><abbr v-else :title="timezoneTitle">{{
+            currentTimezone
+          }}</abbr></template
         ></span
       ><template v-if="isDeadline"
         >{{ ' ' }}<wa-badge variant="danger" pill>Deadline</wa-badge></template
@@ -169,6 +168,10 @@ const currentTimezone = computed(() => {
   });
   return date.tz(tz).format('z');
 });
+
+const timezoneTitle = computed(
+  () => getFullTimezoneName(currentTimezone.value) || undefined
+);
 
 const displayTimezone = computed(
   () => props.timezone || (!isDateOnly.value ? deviceTimezone.value : '')

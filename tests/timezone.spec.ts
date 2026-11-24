@@ -142,7 +142,12 @@ test.describe('Event timezone conversion', () => {
       /December 31/
     );
     await expect(newYorkDate.locator('time').first()).toContainText(/6:30/i);
-    await expect(newYorkButton).toContainText('EST');
+    const newYorkAbbreviation = newYorkButton.locator('abbr');
+    await expect(newYorkAbbreviation).toHaveText('EST');
+    await expect(newYorkAbbreviation).toHaveAttribute(
+      'title',
+      'Eastern Standard Time'
+    );
     await expect(londonButton).toContainText('GMT');
 
     await newYorkButton.click();
@@ -527,7 +532,12 @@ test.describe('Event timezone conversion', () => {
     await mockEvents(page);
     await page.goto('/');
     const event = eventCard(page, 'New York event');
-    await expect(event.locator('.event__dates abbr')).toHaveText('EST');
+    const abbreviation = event.locator('.event__dates abbr');
+    await expect(abbreviation).toHaveText('EST');
+    await expect(abbreviation).toHaveAttribute(
+      'title',
+      'Eastern Standard Time'
+    );
     await expect(
       event.getByRole('button', { name: timezoneButtonName })
     ).toHaveCount(0);
