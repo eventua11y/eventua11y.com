@@ -96,6 +96,9 @@ function eventCard(page: Page, title: string) {
   return page.locator('#upcoming-events .event').filter({ hasText: title });
 }
 
+const timezoneButtonName = /show in your timezone/i;
+const timezonePopoverSelector = '[popover]:not([popover="manual"])';
+
 test.describe('Event timezone conversion', () => {
   test.use({ timezoneId: 'Asia/Tokyo', locale: 'en-US', hasTouch: true });
 
@@ -143,9 +146,7 @@ test.describe('Event timezone conversion', () => {
     await expect(londonButton).toContainText('GMT');
 
     await newYorkButton.click();
-    const newYorkPopover = newYorkDate.locator(
-      '[popover]:not([popover="manual"])'
-    );
+    const newYorkPopover = newYorkDate.locator(timezonePopoverSelector);
     const popoverId = await newYorkPopover.getAttribute('id');
     expect(popoverId).toBeTruthy();
     await expect(newYorkButton).toHaveAttribute('popovertarget', popoverId!);
@@ -184,9 +185,9 @@ test.describe('Event timezone conversion', () => {
   }) => {
     const event = eventCard(page, 'New York event');
     const button = event.getByRole('button', {
-      name: /show in your timezone/i,
+      name: timezoneButtonName,
     });
-    const popover = event.locator('[popover]:not([popover="manual"])');
+    const popover = event.locator(timezonePopoverSelector);
     await event.getByRole('link', { name: 'New York event' }).focus();
     await page.keyboard.press('Tab');
     await expect(button).toBeFocused();
@@ -217,7 +218,7 @@ test.describe('Event timezone conversion', () => {
   }) => {
     const event = eventCard(page, 'New York event');
     const button = event.getByRole('button', {
-      name: /show in your timezone/i,
+      name: timezoneButtonName,
     });
     const popover = event.locator('[popover]');
     await button.click();
@@ -232,7 +233,7 @@ test.describe('Event timezone conversion', () => {
     page,
   }) => {
     const event = eventCard(page, 'New York event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    await event.getByRole('button', { name: timezoneButtonName }).click();
     const popover = event.locator('[popover]');
     await expect(popover.getByRole('group')).toBeFocused();
     const otherControl = page.getByRole('switch', { name: 'Awareness days' });
@@ -245,7 +246,7 @@ test.describe('Event timezone conversion', () => {
     page,
   }) => {
     const event = eventCard(page, 'New York event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    await event.getByRole('button', { name: timezoneButtonName }).click();
     const popover = event.locator('[popover]');
     await expect(popover.getByRole('group')).toBeFocused();
     await page.keyboard.press('Tab');
@@ -266,8 +267,8 @@ test.describe('Event timezone conversion', () => {
     page,
   }) => {
     const event = eventCard(page, 'New York event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
-    const popover = event.locator('[popover]:not([popover="manual"])');
+    await event.getByRole('button', { name: timezoneButtonName }).click();
+    const popover = event.locator(timezonePopoverSelector);
     await expect(popover).toBeVisible();
     await expect(popover.locator('.timezone-popover__row')).toHaveCount(1);
     await expect(popover.locator('.timezone-popover__row')).toContainText(
@@ -284,9 +285,7 @@ test.describe('Event timezone conversion', () => {
   }) => {
     const openRows = async (title: string) => {
       const event = eventCard(page, title);
-      await event
-        .getByRole('button', { name: /show in your timezone/i })
-        .click();
+      await event.getByRole('button', { name: timezoneButtonName }).click();
       return event.locator('[popover]:popover-open .timezone-popover__row');
     };
 
@@ -319,7 +318,7 @@ test.describe('Event timezone conversion', () => {
     page,
   }) => {
     const event = eventCard(page, 'Multi-day event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    await event.getByRole('button', { name: timezoneButtonName }).click();
     const popover = event.locator('[popover]:popover-open');
     const rows = popover.locator('.timezone-popover__row');
     await expect(rows).toHaveCount(1);
@@ -410,7 +409,7 @@ test.describe('Event timezone conversion', () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/');
       const cardButton = eventCard(page, 'New York event').getByRole('button', {
-        name: /show in your timezone/i,
+        name: timezoneButtonName,
       });
       const cardTypeSizes = await checkPlacement(cardButton, 420, 'top');
       await checkPlacement(cardButton, 20, 'bottom');
@@ -430,9 +429,7 @@ test.describe('Event timezone conversion', () => {
   }) => {
     for (const title of ['New York event', 'Offset change event']) {
       const event = eventCard(page, title);
-      await event
-        .getByRole('button', { name: /show in your timezone/i })
-        .click();
+      await event.getByRole('button', { name: timezoneButtonName }).click();
       const popover = event.locator('[popover]:popover-open');
       for (const row of await popover.locator('.timezone-popover__row').all()) {
         await expect(row.locator('time')).toHaveCount(2);
@@ -464,9 +461,7 @@ test.describe('Event timezone conversion', () => {
     }
 
     const single = eventCard(page, 'London event');
-    await single
-      .getByRole('button', { name: /show in your timezone/i })
-      .click();
+    await single.getByRole('button', { name: timezoneButtonName }).click();
     const singlePopover = single.locator('[popover]:popover-open');
     await expect(singlePopover.locator('time')).toHaveCount(1);
     await expect(singlePopover.locator('.sr-only')).toHaveCount(0);
@@ -485,11 +480,9 @@ test.describe('Event timezone conversion', () => {
       '2031-01-01T08:30:00+09:00'
     );
     await expect(
-      event.getByRole('button', { name: /show in your timezone/i })
+      event.getByRole('button', { name: timezoneButtonName })
     ).toHaveCount(0);
-    await expect(
-      event.locator('[popover]:not([popover="manual"])')
-    ).toHaveCount(0);
+    await expect(event.locator(timezonePopoverSelector)).toHaveCount(0);
   });
 
   test('keeps event links usable after opening the timezone popover', async ({
@@ -502,7 +495,7 @@ test.describe('Event timezone conversion', () => {
       })
     );
     const event = eventCard(page, 'New York event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    await event.getByRole('button', { name: timezoneButtonName }).click();
     await expect(page).toHaveURL('/');
     await event.getByRole('link', { name: 'New York event' }).click();
     await expect(page).toHaveURL('/events/new-york-event');
@@ -522,8 +515,8 @@ test.describe('Event timezone conversion', () => {
     await mockEvents(page);
     await page.goto('/');
     const event = eventCard(page, 'New York event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
-    const popover = event.locator('[popover]:not([popover="manual"])');
+    await event.getByRole('button', { name: timezoneButtonName }).click();
+    const popover = event.locator(timezonePopoverSelector);
     await expect(
       popover.getByRole('group', {
         name: 'Your device uses the event timezone.',
@@ -551,8 +544,8 @@ test.describe('Event timezone conversion', () => {
     await mockEvents(page);
     await page.goto('/');
     const event = eventCard(page, 'Tokyo event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
-    const popover = event.locator('[popover]:not([popover="manual"])');
+    await event.getByRole('button', { name: timezoneButtonName }).click();
+    const popover = event.locator(timezonePopoverSelector);
     await expect(popover).not.toContainText(/January 1/);
     await expect(popover).toContainText(/December 31.*8:00\s*AM/i);
     await expect(popover).not.toContainText(/previous day in your timezone/i);
@@ -567,11 +560,9 @@ test.describe('Event timezone conversion', () => {
       await expect(event).toBeVisible();
       await expect(event.locator('.event__dates time').first()).toBeVisible();
       await expect(
-        event.getByRole('button', { name: /show in your timezone/i })
+        event.getByRole('button', { name: timezoneButtonName })
       ).toHaveCount(0);
-      await expect(
-        event.locator('[popover]:not([popover="manual"])')
-      ).toHaveCount(0);
+      await expect(event.locator(timezonePopoverSelector)).toHaveCount(0);
     }
   });
 });

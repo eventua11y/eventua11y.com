@@ -41,16 +41,15 @@ try {
   const items: (Event | Book)[] =
     type === 'past' ? [...events] : [...events, ...books];
 
-  const monthKey = (item: Event | Book) =>
-    getYearMonth(item.dateStart, {
-      isBook: item._type === 'book',
-      timezone:
-        item._type !== 'book' &&
-        !item.day &&
-        !['theme', 'deadline'].includes(item.type)
-          ? item.timezone
-          : undefined,
+  const monthKey = (item: Event | Book) => {
+    const isBook = item._type === 'book';
+    const isTimedEvent =
+      !isBook && !item.day && !['theme', 'deadline'].includes(item.type);
+    return getYearMonth(item.dateStart, {
+      isBook,
+      timezone: isTimedEvent ? item.timezone : undefined,
     });
+  };
 
   let grouped = groupByMonth(items, type, monthKey);
 

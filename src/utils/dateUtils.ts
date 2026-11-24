@@ -653,11 +653,9 @@ function englishRelative(
   approximate: boolean
 ): string {
   const amount = Math.abs(value);
-  const quantity =
-    (approximate ? 'about ' : '') +
-    (amount === 1
-      ? `${unit === 'hour' ? 'an' : 'a'} ${unit}`
-      : `${amount} ${unit}s`);
+  const article = unit === 'hour' ? 'an' : 'a';
+  const count = amount === 1 ? `${article} ${unit}` : `${amount} ${unit}s`;
+  const quantity = approximate ? `about ${count}` : count;
   let phrase = `${quantity} from now`;
   if (value < 0) phrase = `${quantity} ago`;
   else if (unit === 'minute' || unit === 'hour') phrase = `in ${quantity}`;
@@ -696,14 +694,17 @@ export function formatRelativeStart(
       ? englishRelative(value, unit, approximate)
       : capitalize(intl.format(value, unit));
 
-  if (Math.abs(minutes) < 1)
+  const minutesAway = Math.abs(minutes);
+  if (minutesAway < 1) {
     return english ? 'Now' : capitalize(intl.format(0, 'minute'));
-  if (Math.abs(minutes) < 60) return relative(minutes, 'minute');
+  }
+  if (minutesAway < 60) return relative(minutes, 'minute');
   // Within a few hours, or later today, the hour count is more useful.
-  if (calendarDays === 0 || Math.abs(minutes) < 6 * 60) {
+  if (calendarDays === 0 || minutesAway < 6 * 60) {
     return relative(hours, 'hour');
   }
-  if (Math.abs(calendarDays) === 1) {
+  const days = Math.abs(calendarDays);
+  if (days === 1) {
     return capitalize(
       new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(
         calendarDays,
@@ -711,9 +712,8 @@ export function formatRelativeStart(
       )
     );
   }
-  const days = Math.abs(calendarDays);
-  const sign = Math.sign(calendarDays);
   if (days < 7) return relative(calendarDays, 'day');
+  const sign = Math.sign(calendarDays);
   if (days < 25) return relative(sign * Math.round(days / 7), 'week');
   const months = Math.round(days / 30.44);
   if (months <= 1) return relative(sign, 'month', true);

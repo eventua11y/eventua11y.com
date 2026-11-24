@@ -34,89 +34,77 @@ onMounted(() => {
   }
 });
 
-function timezoneName(date: string, timezone: string, locale: string) {
+function timezoneName(date: Date, timezone: string, locale: string) {
   return (
     new Intl.DateTimeFormat(locale, {
       timeZone: timezone,
       timeZoneName: 'long',
     })
-      .formatToParts(new Date(date))
+      .formatToParts(date)
       .find((part) => part.type === 'timeZoneName')?.value || timezone
   );
 }
 
-function formatTime(date: string, timezone: string, includeDate: boolean) {
+function formatTimeRange(timezone: string, includeDate: boolean) {
   const locale = userStore.locale || 'en';
-  const local = dayjs.utc(date).tz(timezone).locale(locale);
-  const name = timezoneName(date, timezone, locale);
-  return {
-    date: includeDate
-      ? new Intl.DateTimeFormat(locale, {
-          timeZone: timezone,
-          month: 'long',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        }).format(new Date(date))
-      : local.format('LT'),
-    zone: `${local.format('z')} (${name})`,
-    datetime: local.format('YYYY-MM-DDTHH:mm:ssZ'),
-    local,
-  };
+  const inTimezone = (date: string) =>
+    dayjs.utc(date).tz(timezone).locale(locale);
+
+  function formatEndpoint(date: string, local: dayjs.Dayjs, showDate: boolean) {
+    const instant = new Date(date);
+    const name = timezoneName(instant, timezone, locale);
+    return {
+      date: showDate
+        ? new Intl.DateTimeFormat(locale, {
+            timeZone: timezone,
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          }).format(instant)
+        : local.format('LT'),
+      zone: `${local.format('z')} (${name})`,
+      datetime: local.format('YYYY-MM-DDTHH:mm:ssZ'),
+    };
+  }
+
+  const localStart = inTimezone(props.dateStart);
+  const start = formatEndpoint(props.dateStart, localStart, includeDate);
+  if (!props.dateEnd) return [start];
+
+  const localEnd = inTimezone(props.dateEnd);
+  const end = formatEndpoint(
+    props.dateEnd,
+    localEnd,
+    includeDate && !localStart.isSame(localEnd, 'day')
+  );
+  if (start.zone === end.zone) start.zone = '';
+  return [start, end];
 }
 
-function formattedTime(timezone: string, includeDate: boolean) {
-  const start = formatTime(props.dateStart, timezone, includeDate);
-  const parts = [
-    { date: start.date, datetime: start.datetime, zone: start.zone },
-  ];
-  if (props.dateEnd) {
-    const endDate = dayjs.utc(props.dateEnd).tz(timezone);
-    const end = formatTime(
-      props.dateEnd,
-      timezone,
-      includeDate && !start.local.isSame(endDate, 'day')
-    );
-    if (start.zone === end.zone) {
-      parts[0].zone = '';
-    }
-    parts.push({ date: end.date, datetime: end.datetime, zone: end.zone });
-  }
-  return parts;
+function canonicalTimezone(timeZone: string) {
+  return new Intl.DateTimeFormat('en', { timeZone }).resolvedOptions().timeZone;
 }
 
 const sameTimezone = computed(
   () =>
     !!deviceTimezone.value &&
-    new Intl.DateTimeFormat('en', {
-      timeZone: props.timezone,
-    }).resolvedOptions().timeZone ===
-      new Intl.DateTimeFormat('en', {
-        timeZone: deviceTimezone.value,
-      }).resolvedOptions().timeZone
+    canonicalTimezone(props.timezone) ===
+      canonicalTimezone(deviceTimezone.value)
 );
-
-const displayedTimezones = computed(() =>
-  sameTimezone.value || !deviceTimezone.value
-    ? [props.timezone]
-    : [props.timezone, deviceTimezone.value]
-);
-
-// Dates only add meaning when the event crosses midnight in a shown timezone.
-const includeDates = computed(() => {
-  const endpoints = [props.dateStart, props.dateEnd ?? props.dateStart];
-  const localDates = displayedTimezones.value.flatMap((timezone) =>
-    endpoints.map((date) => dayjs.utc(date).tz(timezone).format('YYYY-MM-DD'))
-  );
-  return new Set(localDates).size > 1;
-});
 
 // The event's own time is already shown in-page, so only the conversion is listed.
-const localTimeParts = computed(() =>
-  sameTimezone.value || !deviceTimezone.value
-    ? []
-    : formattedTime(deviceTimezone.value, includeDates.value)
-);
+const localTimeParts = computed(() => {
+  if (sameTimezone.value || !deviceTimezone.value) return [];
+
+  // Include dates when the event and device dates differ or the range crosses midnight.
+  const endpoints = [props.dateStart, props.dateEnd ?? props.dateStart];
+  const localDates = [props.timezone, deviceTimezone.value].flatMap(
+    (timezone) =>
+      endpoints.map((date) => dayjs.utc(date).tz(timezone).format('YYYY-MM-DD'))
+  );
+  return formatTimeRange(deviceTimezone.value, new Set(localDates).size > 1);
+});
 
 const timeDescriptionId = computed(() =>
   localTimeParts.value.length ? `${popoverId.value}-time` : undefined

@@ -34,9 +34,9 @@ const callForSpeakersOpen =
 // Machine-readable datetime formatting
 function formatDate(date: string, format: string): string {
   const parsed = dayjs.utc(date);
-  return !isDateOnly && event.timezone
-    ? parsed.tz(event.timezone).format(format)
-    : parsed.format(format);
+  const displayDate =
+    !isDateOnly && event.timezone ? parsed.tz(event.timezone) : parsed;
+  return displayDate.format(format);
 }
 
 // Human-readable date range with locale-aware deduplication
@@ -61,10 +61,13 @@ const machineStart = formatDate(event.dateStart, machineFormat);
 const machineEnd = event.dateEnd
   ? formatDate(event.dateEnd, machineFormat)
   : undefined;
-const timezoneAbbreviation =
-  !isDateOnly && event.timezone
-    ? dayjs.utc(event.dateStart).tz(event.timezone).format('z')
-    : 'UTC';
+let timezoneAbbreviation: string | undefined;
+if (!isInternational) {
+  timezoneAbbreviation =
+    !isDateOnly && event.timezone
+      ? dayjs.utc(event.dateStart).tz(event.timezone).format('z')
+      : 'UTC';
+}
 
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
@@ -82,7 +85,7 @@ const showBadges = callForSpeakersOpen || showFreeBadge;
       machineStart={machineStart}
       machineEnd={machineEnd}
       formattedRange={formattedRange}
-      timezone={isInternational ? undefined : 'UTC'}
+      timezone={timezoneAbbreviation}
       isDeadline
     />
     <span class="event__title">
@@ -104,7 +107,7 @@ const showBadges = callForSpeakersOpen || showFreeBadge;
         machineStart={machineStart}
         machineEnd={machineEnd}
         formattedRange={formattedRange}
-        timezone={isInternational ? undefined : timezoneAbbreviation}
+        timezone={timezoneAbbreviation}
       />
     )}
 

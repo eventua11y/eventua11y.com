@@ -138,7 +138,7 @@ function getFullTimezoneName(abbreviation: string): string | null {
 function formatDate(date: string | Date, format: string): string {
   return formatEventDate(date, format, {
     timezone: displayTimezone.value,
-    useLocalTimezone: isDateOnly.value && userStore.useLocalTimezone,
+    useLocalTimezone: useLocalTimezone.value,
     userTimezone: userStore.timezone || undefined,
     locale: userStore.locale || 'en',
   });
@@ -150,7 +150,7 @@ const formattedRange = computed(() =>
     dateStart: props.dateStart,
     dateEnd: props.dateEnd,
     timezone: displayTimezone.value,
-    useLocalTimezone: isDateOnly.value && userStore.useLocalTimezone,
+    useLocalTimezone: useLocalTimezone.value,
     userTimezone: userStore.timezone || undefined,
     locale: userStore.locale || 'en',
     day: props.day,
@@ -164,7 +164,7 @@ const currentTimezone = computed(() => {
   const date = dayjs.utc(props.dateStart);
   const tz = resolveTimezone({
     timezone: displayTimezone.value,
-    useLocalTimezone: isDateOnly.value && userStore.useLocalTimezone,
+    useLocalTimezone: useLocalTimezone.value,
     userTimezone: userStore.timezone || undefined,
   });
   return date.tz(tz).format('z');
@@ -175,6 +175,9 @@ const displayTimezone = computed(
 );
 
 const showTimezone = computed(() => !!displayTimezone.value);
+const useLocalTimezone = computed(
+  () => isDateOnly.value && userStore.useLocalTimezone
+);
 
 /** Whether the event uses date-only display (no times shown) */
 const isDateOnly = computed(

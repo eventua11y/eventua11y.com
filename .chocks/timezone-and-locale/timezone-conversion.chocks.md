@@ -8,4 +8,4 @@ sort: a1
 uid: b1af3ac2de
 ---
 
-Timed events show their own local time. A timezone control shows and copies the event time and the visitor's device time, including dates for ranges that cross midnight.
+Timed events with a timezone show the event's local time. Open the timezone popover to see the time on your device, with dates when the two timezones show different calendar dates or the event crosses midnight.
