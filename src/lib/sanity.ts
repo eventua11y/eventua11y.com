@@ -11,11 +11,11 @@
  */
 
 import { createClient } from '@sanity/client';
-import dayjs from './dayjs';
 
 import type { PortableTextBlock } from '@portabletext/types';
 import type { Event, Book, Topic } from '../types/event';
-import { compareByDateAsc, compareByDateDesc } from '../utils/eventUtils';
+import { compareByDateAsc } from '../../netlify/edge-functions/lib/dateUtils';
+import { classifyEvents } from '../../netlify/edge-functions/lib/classifyEvents';
 import {
   PARENT_EVENTS_QUERY,
   CHILD_EVENTS_QUERY,
@@ -64,48 +64,8 @@ export async function getEvents(): Promise<{
 
   const allEvents = assembleEvents(parentEvents, childEvents) as Event[];
 
-  // Classify using UTC
-  // The edge function splits events into today / future / past, then the
-  // client merges today + future into "upcoming". We replicate that here by
-  // including any event whose end-date (or start-date when no end-date)
-  // has NOT yet passed — i.e. it is today or in the future.
-  const now = dayjs.utc();
-  const todayStart = now.startOf('day');
-  const twelveMonthsAgo = todayStart.subtract(12, 'month');
-
-  /**
-   * Convert an event date to UTC for comparison.
-   * - Events with a timezone: parse in the event's timezone, convert to UTC.
-   * - International events (no timezone): treat the stored date as UTC.
-   */
-  const toUtc = (dateStr: string, eventTz?: string) => {
-    if (!eventTz) return dayjs.utc(dateStr);
-    return dayjs.tz(dateStr, eventTz).utc();
-  };
-
-  const future = allEvents
-    .filter((event) => {
-      if (event.parent) return false;
-      if (!event.dateStart) return false;
-      // An event is "upcoming" if it hasn't ended yet.
-      // Use dateEnd when available (multi-day events), otherwise dateStart.
-      const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
-      return end.isSameOrAfter(todayStart);
-    })
-    .sort(compareByDateAsc);
-
-  const past = allEvents
-    .filter((event) => {
-      if (event.parent) return false;
-      if (!event.dateStart) return false;
-      // Exclude deadline events from past events
-      if (event.type === 'deadline') return false;
-      const end = toUtc(event.dateEnd || event.dateStart, event.timezone);
-      return end.isBefore(todayStart) && end.isAfter(twelveMonthsAgo);
-    })
-    .sort(compareByDateDesc);
-
-  return { future, past };
+  const { today, future, past } = classifyEvents(allEvents, 'UTC');
+  return { future: [...today, ...future].sort(compareByDateAsc), past };
 }
 
 // ── Single event query ─────────────────────────────────────────────────

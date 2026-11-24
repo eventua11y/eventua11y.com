@@ -1,10 +1,7 @@
 <template>
   <!-- Countdown: event hasn't started yet (Today section only) -->
   <div v-if="isStartingSoon" class="event__progress">
-    <span
-      class="event__progress-label text-muted"
-      v-html="countdownLabel"
-    ></span>
+    <span class="event__progress-label text-muted">{{ countdownLabel }}</span>
   </div>
   <!-- Progress: event is in progress -->
   <div v-else-if="isHappeningNow" class="event__progress">
@@ -30,12 +27,14 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import dayjs from '../lib/dayjs';
+import { storedCalendarDate } from '../../netlify/edge-functions/lib/dateUtils';
 import userStore from '../store/userStore';
 import {
   isHappeningNow as _isHappeningNow,
   isStartingSoon as _isStartingSoon,
   hasEnded as _hasEnded,
   getProgress,
+  getAllDayEventEnd,
   getTimeRemaining,
   getCountdownLabel,
   getTimeSinceEnded,
@@ -47,6 +46,8 @@ const props = withDefaults(
     dateStart: string;
     dateEnd?: string;
     timezone?: string;
+    useLocalTimezone?: boolean;
+    preserveCalendarDate?: boolean;
     day?: boolean;
     type?: string;
     showCountdown?: boolean;
@@ -62,9 +63,11 @@ const props = withDefaults(
 );
 
 const now = ref(dayjs());
+const viewerTimezone = ref<string>();
 let timer: ReturnType<typeof setInterval> | null = null;
 
 onMounted(() => {
+  viewerTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
   // Update "now" every minute so the bar advances in real time
   timer = setInterval(() => {
     now.value = dayjs();
@@ -75,16 +78,42 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 
-/** Builds the ProgressOptions from component props and user store. */
+function allDayProgressDates(
+  start: string,
+  end: string | undefined,
+  timezone: string
+) {
+  const dateStart = dayjs.tz(storedCalendarDate(start), timezone).toISOString();
+  // The stored end date is inclusive, including when its timestamp is midnight.
+  const dateEnd = end
+    ? getAllDayEventEnd(end, timezone).toISOString()
+    : undefined;
+  return { dateStart, dateEnd, timezone };
+}
+
+const progressDates = computed(() => {
+  if (!props.preserveCalendarDate) {
+    return {
+      dateStart: props.dateStart,
+      dateEnd: props.dateEnd,
+      timezone: props.timezone || undefined,
+    };
+  }
+
+  return allDayProgressDates(
+    props.dateStart,
+    props.dateEnd,
+    viewerTimezone.value || 'UTC'
+  );
+});
+
 const options = computed<ProgressOptions>(() => ({
-  dateStart: props.dateStart,
-  dateEnd: props.dateEnd,
-  timezone: props.timezone || undefined,
+  ...progressDates.value,
   day: props.day,
   type: props.type,
   showCountdown: props.showCountdown,
   showEnded: props.showEnded,
-  useLocalTimezone: userStore.useLocalTimezone,
+  useLocalTimezone: !props.preserveCalendarDate && props.useLocalTimezone,
   userTimezone: userStore.timezone,
 }));
 
@@ -99,7 +128,12 @@ const timeRemaining = computed(() =>
   getTimeRemaining(now.value, options.value)
 );
 const countdownLabel = computed(() =>
-  getCountdownLabel(now.value, options.value)
+  getCountdownLabel(
+    now.value,
+    options.value,
+    viewerTimezone.value,
+    userStore.locale || 'en'
+  )
 );
 const hasEnded = computed(() => _hasEnded(now.value, options.value));
 const timeSinceEnded = computed(() =>

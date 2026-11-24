@@ -6,16 +6,10 @@
  */
 
 import type { SanityClient } from 'https://esm.sh/@sanity/client';
-import dayjs from 'https://esm.sh/dayjs';
-import utc from 'https://esm.sh/dayjs/plugin/utc';
-import timezone from 'https://esm.sh/dayjs/plugin/timezone';
 import { PARENT_EVENTS_QUERY, CHILD_EVENTS_QUERY } from './lib/queries.ts';
 import { assembleEvents, type AssemblableEvent } from './lib/assembleEvents.ts';
-import { compareByDateAsc } from './lib/dateUtils.ts';
+import { classifyEvents } from './lib/classifyEvents.ts';
 import { createSanityClient } from './lib/sanity-client.ts';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 interface Event {
   _id: string;
@@ -27,6 +21,7 @@ interface Event {
   children?: Event[];
   callForSpeakersClosingDate?: string;
   timezone?: string;
+  day?: boolean;
   website?: string;
   attendanceMode?: string;
   callForSpeakers?: boolean;
@@ -63,155 +58,6 @@ const cache: RawEventsCache = {
   timestamp: 0,
   ttl: 300000, // 5 minutes in milliseconds
 };
-
-/**
- * Processes raw events for a specific user timezone
- * - Converts dates to user's timezone
- * - Categorizes events as today/future/past
- * @param {Event[]} events - Raw events from cache or Sanity
- * @param {string} userTimezone - User's timezone
- * @returns {EventsResponse} Processed events categorized by time
- */
-function processEventsForTimezone(
-  events: Event[],
-  userTimezone: string
-): EventsResponse {
-  try {
-    // Use user's timezone for base calculations
-    const now = dayjs().tz(userTimezone);
-    const todayStart = now.startOf('day');
-    const todayEnd = now.endOf('day');
-
-    // The user's current calendar day, used to classify local (timezoned)
-    // events by the day they are displayed on rather than by absolute-instant
-    // overlap. This prevents an event that has already ended in its own
-    // timezone from leaking into an adjacent day in the user's timezone.
-    const userTodayDay = now.format('YYYY-MM-DD');
-
-    /**
-     * Returns the calendar day (YYYY-MM-DD) an event date falls on in the
-     * timezone it is displayed in. Local events (with a timezone) are shown
-     * in their own timezone by default, so their day is computed there.
-     */
-    const eventDay = (dateStr: string, eventTz: string) =>
-      dayjs(dateStr).tz(eventTz).format('YYYY-MM-DD');
-
-    /**
-     * Converts an international event date to the user's timezone while
-     * preserving its calendar date.
-     */
-    const getEventTimeInUserTz = (dateStr: string) =>
-      dayjs.utc(dateStr).tz(userTimezone, true);
-
-    /**
-     * Determines if event is happening today
-     * Deadlines follow the same rules, so they land in exactly one of
-     * today / future / past:
-     * 1. International events (no timezone):
-     *    - Single day: Must match user's today
-     *    - Multi-day: Must overlap with user's today
-     * 2. Local events (with timezone):
-     *    - Must overlap with user's today considering timezone
-     */
-    const isEventToday = (event: Event): boolean => {
-      const userToday = dayjs().tz(userTimezone).startOf('day');
-
-      if (!event.timezone) {
-        // For international events, use user's timezone but only compare dates
-        const eventStart = dayjs
-          .tz(event.dateStart, userTimezone)
-          .startOf('day');
-        const isSingleDayEvent = !event.dateEnd;
-        const eventEnd = isSingleDayEvent
-          ? eventStart
-          : dayjs.tz(event.dateEnd, userTimezone).startOf('day');
-
-        // Simplified logic for single day events
-        const isToday = isSingleDayEvent
-          ? eventStart.isSame(userToday, 'day')
-          : eventStart.isSame(userToday, 'day') ||
-            eventEnd.isSame(userToday, 'day') ||
-            (eventStart.isBefore(userToday, 'day') &&
-              eventEnd.isAfter(userToday, 'day'));
-
-        return isToday;
-      }
-
-      // For local events (with a timezone), compare calendar days in the
-      // event's own timezone — which is how the dates are displayed by default
-      // (useLocalTimezone is off) — against the user's current calendar day.
-      //
-      // Using absolute-instant overlap here misclassifies events that have
-      // already ended in their own timezone but spill a few minutes past
-      // midnight in the user's timezone. For example, an event ending
-      // 2026-06-25T23:59Z (16:59 PT on June 25) lands at 00:59 BST on June 26,
-      // wrongly appearing in a London user's "Today" the day after it ended.
-      const eventStartDay = eventDay(event.dateStart, event.timezone);
-      const eventEndDay = event.dateEnd
-        ? eventDay(event.dateEnd, event.timezone)
-        : eventStartDay; // Single-day event when no end date
-
-      const isToday =
-        userTodayDay >= eventStartDay && userTodayDay <= eventEndDay;
-
-      return isToday;
-    };
-
-    const today = events
-      .filter((event) => !event.parent && isEventToday(event))
-      .sort(compareByDateAsc);
-
-    const future = events
-      .filter((event) => {
-        if (!event.parent) {
-          // Local events: classify by their displayed calendar day so the
-          // future/today/past buckets stay consistent with the today logic.
-          if (event.timezone) {
-            return eventDay(event.dateStart, event.timezone) > userTodayDay;
-          }
-          const eventStart = getEventTimeInUserTz(event.dateStart);
-          return eventStart.isAfter(todayEnd);
-        }
-        return false;
-      })
-      .sort(compareByDateAsc);
-
-    // Calculate the date 12 months ago from today
-    const twelveMonthsAgo = todayStart.subtract(12, 'month');
-    const twelveMonthsAgoDay = twelveMonthsAgo.format('YYYY-MM-DD');
-
-    const past = events.filter((event) => {
-      if (!event.parent && event.dateStart) {
-        // Local events: classify by their displayed calendar day (see above).
-        if (event.timezone) {
-          const endDay = eventDay(
-            event.dateEnd || event.dateStart,
-            event.timezone
-          );
-          return endDay < userTodayDay && endDay >= twelveMonthsAgoDay;
-        }
-        const eventEnd = getEventTimeInUserTz(event.dateEnd || event.dateStart);
-        // Only include events from the last 12 months
-        return (
-          eventEnd.isBefore(todayStart) && eventEnd.isAfter(twelveMonthsAgo)
-        );
-      }
-      return false;
-    });
-
-    return {
-      future,
-      past,
-      today,
-    };
-  } catch (error) {
-    console.error(
-      '[processEventsForTimezone] Failed:',
-      (error as unknown as { message?: string })?.message || error
-    );
-    throw new Error('Failed to process events for timezone', { cause: error });
-  }
-}
 
 /**
  * Fetches raw events from Sanity with caching
@@ -265,24 +111,40 @@ async function getEvents(userTimezone: string): Promise<EventsResponse> {
 
   // Process events for user's timezone (always done per-request)
   console.log('[getEvents] Processing events for timezone:', userTimezone);
-  return processEventsForTimezone(rawEvents, userTimezone);
+  return classifyEvents(rawEvents, userTimezone);
+}
+
+function getViewerTimezone(request: Request, fallback: string): string {
+  const timezone = request.headers.get('X-Event-Timezone');
+  if (!timezone || timezone.length > 100) return fallback;
+
+  try {
+    return new Intl.DateTimeFormat('en', {
+      timeZone: timezone,
+    }).resolvedOptions().timeZone;
+  } catch {
+    // Ignore invalid client input and use the geolocation fallback.
+    return fallback;
+  }
 }
 
 /**
  * Edge function handler
- * - Gets user timezone from Netlify geo context
+ * - Uses the browser timezone, falling back to Netlify geolocation or UTC
  * - Fetches and processes events
  * - Sets caching headers
- * @param {Request} _request - HTTP request object (unused)
+ * @param {Request} request - HTTP request object
  * @returns {Response} JSON response with today, future, and past events
  */
 export default async function handler(
-  _request: Request,
+  request: Request,
   context: Context
 ): Promise<Response> {
   try {
-    // Use the context directly instead of making another request
-    const userTimezone = context.geo?.timezone || 'UTC';
+    const userTimezone = getViewerTimezone(
+      request,
+      context.geo?.timezone || 'UTC'
+    );
 
     console.log('[handler] Fetching events...');
     const events = await getEvents(userTimezone);
@@ -292,7 +154,7 @@ export default async function handler(
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'private, max-age=300, stale-while-revalidate=60',
-        Vary: 'Accept-Encoding',
+        Vary: 'Accept-Encoding, X-Event-Timezone',
       },
     });
   } catch (error) {

@@ -1,0 +1,345 @@
+<script lang="ts">
+let nextPopoverId = 0;
+</script>
+
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import dayjs from '../lib/dayjs';
+import userStore from '../store/userStore';
+import TimezoneConversionTimes from './TimezoneConversionTimes.vue';
+
+const props = withDefaults(
+  defineProps<{
+    dateStart: string;
+    dateEnd?: string;
+    timezone: string;
+    abbreviation: string;
+    abbreviationTitle?: string;
+    placement?: 'top' | 'bottom';
+  }>(),
+  { placement: 'top' }
+);
+
+const popoverId = ref('');
+const deviceTimezone = ref('');
+const expanded = ref(false);
+const trigger = ref<HTMLButtonElement | null>(null);
+const popover = ref<HTMLDivElement | null>(null);
+const arrowSide = ref<'top' | 'bottom' | null>(null);
+const arrowOffset = ref(0);
+
+onMounted(() => {
+  deviceTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if ('showPopover' in HTMLElement.prototype) {
+    popoverId.value = `timezone-conversion-${++nextPopoverId}`;
+  }
+});
+
+function timezoneName(date: Date, timezone: string, locale: string) {
+  return (
+    new Intl.DateTimeFormat(locale, {
+      timeZone: timezone,
+      timeZoneName: 'long',
+    })
+      .formatToParts(date)
+      .find((part) => part.type === 'timeZoneName')?.value || timezone
+  );
+}
+
+function formatTimeRange(timezone: string, includeDate: boolean) {
+  const locale = userStore.locale || 'en';
+  const inTimezone = (date: string) =>
+    dayjs.utc(date).tz(timezone).locale(locale);
+
+  function formatEndpoint(date: string, local: dayjs.Dayjs, showDate: boolean) {
+    const instant = new Date(date);
+    const name = timezoneName(instant, timezone, locale);
+    return {
+      date: showDate
+        ? new Intl.DateTimeFormat(locale, {
+            timeZone: timezone,
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          }).format(instant)
+        : local.format('LT'),
+      zone: `${local.format('z')} (${name})`,
+      datetime: local.format('YYYY-MM-DDTHH:mm:ssZ'),
+    };
+  }
+
+  const localStart = inTimezone(props.dateStart);
+  const start = formatEndpoint(props.dateStart, localStart, includeDate);
+  if (!props.dateEnd) return [start];
+
+  const localEnd = inTimezone(props.dateEnd);
+  const end = formatEndpoint(
+    props.dateEnd,
+    localEnd,
+    includeDate && !localStart.isSame(localEnd, 'day')
+  );
+  if (start.zone === end.zone) start.zone = '';
+  return [start, end];
+}
+
+function canonicalTimezone(timeZone: string) {
+  return new Intl.DateTimeFormat('en', { timeZone }).resolvedOptions().timeZone;
+}
+
+const sameTimezone = computed(
+  () =>
+    !!deviceTimezone.value &&
+    canonicalTimezone(props.timezone) ===
+      canonicalTimezone(deviceTimezone.value)
+);
+
+const showPopover = computed(
+  () => !!popoverId.value && !!deviceTimezone.value && !sameTimezone.value
+);
+
+// The event's own time is already shown in-page, so only the conversion is listed.
+const localTimeParts = computed(() => {
+  if (!showPopover.value) return [];
+
+  // Include dates when the event and device dates differ or the range crosses midnight.
+  const endpoints = [props.dateStart, props.dateEnd ?? props.dateStart];
+  const localDates = [props.timezone, deviceTimezone.value].flatMap(
+    (timezone) =>
+      endpoints.map((date) => dayjs.utc(date).tz(timezone).format('YYYY-MM-DD'))
+  );
+  return formatTimeRange(deviceTimezone.value, new Set(localDates).size > 1);
+});
+
+const timeDescriptionId = computed(() => `${popoverId.value}-time`);
+
+function onToggle(event: Event) {
+  expanded.value = (event as ToggleEvent).newState === 'open';
+  if (expanded.value) {
+    requestAnimationFrame(updateArrow);
+    window.addEventListener('resize', updateArrow);
+    window.addEventListener('scroll', updateArrow, true);
+  } else {
+    removeArrowListeners();
+  }
+}
+
+function getArrowSide(anchor: DOMRect, panel: DOMRect) {
+  const gap = 16;
+  if (Math.abs(panel.top - anchor.bottom) <= gap) return 'top';
+  if (Math.abs(panel.bottom - anchor.top) <= gap) return 'bottom';
+  return null;
+}
+
+function updateArrow() {
+  if (!trigger.value || !popover.value) return;
+  const anchor = trigger.value.getBoundingClientRect();
+  const panel = popover.value.getBoundingClientRect();
+  arrowSide.value = getArrowSide(anchor, panel);
+  arrowOffset.value = Math.max(
+    16,
+    Math.min(panel.width - 16, anchor.left + anchor.width / 2 - panel.left)
+  );
+}
+
+function removeArrowListeners() {
+  window.removeEventListener('resize', updateArrow);
+  window.removeEventListener('scroll', updateArrow, true);
+}
+
+onUnmounted(removeArrowListeners);
+</script>
+
+<template>
+  <button
+    v-if="showPopover"
+    type="button"
+    ref="trigger"
+    class="timezone-trigger"
+    :popovertarget="popoverId"
+    :aria-expanded="expanded"
+  >
+    <abbr class="timezone-trigger__label" :title="abbreviationTitle">{{
+      abbreviation
+    }}</abbr
+    ><span class="sr-only">: Show in your timezone</span>
+    <wa-icon
+      name="square-question"
+      class="text-muted"
+      variant="regular"
+      canvas="auto"
+      aria-hidden="true"
+    ></wa-icon>
+  </button>
+  <abbr v-else :title="abbreviationTitle">{{ abbreviation }}</abbr>
+  <div
+    v-if="showPopover"
+    :id="popoverId"
+    ref="popover"
+    class="timezone-popover"
+    :class="{
+      'timezone-popover--arrow-top': arrowSide === 'top',
+      'timezone-popover--arrow-bottom': arrowSide === 'bottom',
+      'timezone-popover--below': placement === 'bottom',
+    }"
+    :style="{ '--arrow-offset': `${arrowOffset}px` }"
+    popover
+    @toggle="onToggle"
+  >
+    <div
+      class="timezone-popover__content flow flow-xs"
+      tabindex="-1"
+      autofocus
+      role="group"
+      :aria-labelledby="`${popoverId}-label`"
+      :aria-describedby="timeDescriptionId"
+    >
+      <TimezoneConversionTimes
+        :parts="localTimeParts"
+        :labelId="`${popoverId}-label`"
+        :timeId="timeDescriptionId"
+      />
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.timezone-trigger {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: var(--p-space-3xs);
+  min-height: 24px;
+  min-width: 24px;
+  padding: 0;
+}
+
+.timezone-trigger__label {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.2em;
+}
+
+.timezone-trigger:hover,
+.timezone-trigger:hover wa-icon {
+  color: var(--c-color-link-hover);
+}
+
+.timezone-trigger:focus-visible {
+  outline: 2px solid var(--c-focus-ring-color);
+  outline-offset: 2px;
+}
+
+.timezone-popover {
+  background: var(--c-panel-color-bg);
+  border: 1px solid var(--wa-color-surface-border);
+  border-radius: var(--wa-border-radius-m);
+  color: var(--c-body-color-fg);
+  filter: drop-shadow(
+    var(--wa-shadow-offset-x-l) var(--wa-shadow-offset-y-l)
+      var(--wa-shadow-blur-l) var(--wa-color-shadow)
+  );
+  font-size: var(--p-step--1);
+  inset: 0;
+  margin: auto;
+  max-width: min(24rem, calc(100vw - 2rem));
+  overflow: visible;
+  white-space: normal;
+}
+
+.timezone-popover__content {
+  border-radius: inherit;
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: var(--p-space-xs);
+}
+
+.timezone-popover__content:focus {
+  outline: none;
+}
+
+/* The panel's own edge, arrow included, is the keyboard focus indicator for its content. */
+.timezone-popover:has(> .timezone-popover__content:focus-visible) {
+  outline: 2px solid var(--c-focus-ring-color);
+  outline-offset: -1px;
+}
+
+.timezone-popover:has(> .timezone-popover__content:focus-visible)::before {
+  border-color: var(--c-focus-ring-color);
+  border-width: 2px;
+}
+
+.timezone-popover--arrow-top::before,
+.timezone-popover--arrow-bottom::before {
+  background: var(--c-panel-color-bg);
+  border: 1px solid var(--wa-color-surface-border);
+  content: '';
+  height: 12px;
+  left: var(--arrow-offset);
+  position: absolute;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+}
+
+.timezone-popover--arrow-top::before {
+  border-bottom: 0;
+  border-right: 0;
+  top: -7px;
+}
+
+.timezone-popover--arrow-bottom::before {
+  border-left: 0;
+  border-top: 0;
+  bottom: -7px;
+}
+
+@supports (position-area: top) {
+  @position-try --timezone-center {
+    inset: 1rem;
+    margin: auto;
+    position-area: none;
+  }
+
+  .timezone-popover {
+    inset: auto;
+    margin: 0;
+    margin-block-end: 10px;
+    position-area: top;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline,
+      --timezone-center;
+  }
+
+  .timezone-popover--below {
+    margin-block-end: 0;
+    margin-block-start: 10px;
+    position-area: bottom;
+  }
+}
+
+@media (forced-colors: active) {
+  .timezone-popover:has(> .timezone-popover__content:focus-visible) {
+    outline-color: Highlight;
+  }
+
+  .timezone-popover:has(> .timezone-popover__content:focus-visible)::before {
+    border-color: Highlight;
+  }
+
+  .timezone-popover {
+    filter: none;
+  }
+
+  .timezone-popover,
+  .timezone-popover::before {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+}
+</style>

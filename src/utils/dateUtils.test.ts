@@ -24,6 +24,7 @@ import {
   getYearMonth,
   isFullMonth,
   resolveTimezone,
+  formatRelativeStart,
 } from './dateUtils';
 
 describe('getStartDateFormat', () => {
@@ -1466,5 +1467,67 @@ describe('resolveTimezone', () => {
         useLocalTimezone: true,
       })
     ).toBe('UTC');
+  });
+});
+
+describe('formatRelativeStart', () => {
+  const now = '2026-03-09T12:00:00Z';
+  const cases: [string, string][] = [
+    ['2026-03-09T12:00:20Z', 'Now'],
+    ['2026-03-09T12:25:00Z', 'In 25 minutes'],
+    ['2026-03-09T13:00:00Z', 'In an hour'],
+    ['2026-03-09T15:00:00Z', 'In 3 hours'],
+    ['2026-03-10T09:00:00Z', 'Tomorrow'],
+    ['2026-03-12T09:00:00Z', '3 days from now'],
+    ['2026-03-30T09:00:00Z', '3 weeks from now'],
+    ['2026-04-05T09:00:00Z', 'About a month from now'],
+    ['2026-06-09T09:00:00Z', '3 months from now'],
+    ['2027-03-09T09:00:00Z', 'A year from now'],
+    ['2026-03-09T10:00:00Z', '2 hours ago'],
+    ['2026-03-08T09:00:00Z', 'Yesterday'],
+    ['2026-02-16T09:00:00Z', '3 weeks ago'],
+  ];
+  it.each(cases)('describes %s as "%s"', (start, expected) => {
+    expect(formatRelativeStart(start, now, 'UTC')).toBe(expected);
+  });
+
+  it('uses the viewer calendar day rather than elapsed hours', () => {
+    // 10 PM to 7 AM next day in London: 9 hours away, but tomorrow.
+    expect(
+      formatRelativeStart(
+        '2026-03-10T07:00:00Z',
+        '2026-03-09T22:00:00Z',
+        'Europe/London'
+      )
+    ).toBe('Tomorrow');
+    // Imminent starts across midnight keep hour precision.
+    expect(
+      formatRelativeStart(
+        '2026-03-10T01:00:00Z',
+        '2026-03-09T22:00:00Z',
+        'Europe/London'
+      )
+    ).toBe('In 3 hours');
+  });
+
+  it('counts calendar days across a DST change', () => {
+    // New York springs forward on 8 March 2026, so that day is 23 hours long.
+    // 12:30 AM on 8 March to 12:15 AM on 9 March is under 23 hours.
+    expect(
+      formatRelativeStart(
+        '2026-03-09T04:15:00Z',
+        '2026-03-08T05:30:00Z',
+        'America/New_York'
+      )
+    ).toBe('Tomorrow');
+  });
+
+  it('uses Intl wording for other locales', () => {
+    expect(formatRelativeStart('2026-03-10T09:00:00Z', now, 'UTC', 'es')).toBe(
+      'Mañana'
+    );
+    expect(formatRelativeStart('2026-03-30T09:00:00Z', now, 'UTC', 'de')).toBe(
+      'In 3 Wochen'
+    );
   });
 });

@@ -4,12 +4,17 @@
  *
  * This is a simplified Astro version of Event.vue that renders
  * HTML without any client-side interactivity.
- * It uses UTC dates since user timezone is unknown during SSR.
+ * Timed events use their own timezone.
  */
 import dayjs from '../lib/dayjs';
+import {
+  storedCalendarDate,
+  usesStoredCalendarDate,
+} from '../../netlify/edge-functions/lib/dateUtils';
 import type { Event } from '../types/event';
 import { getEventUrl } from '../utils/eventUtils';
 import { formatDateRange } from '../utils/dateUtils';
+import StaticEventDate from './StaticEventDate.astro';
 
 interface Props {
   event: Event;
@@ -22,6 +27,14 @@ const isDeadline = event.type === 'deadline';
 const isTheme = event.type === 'theme';
 const headingId = `event-title-${event._id}`;
 const isAllDay = event.day === true;
+const preserveCalendarDate = usesStoredCalendarDate(event);
+const dateStart = preserveCalendarDate
+  ? storedCalendarDate(event.dateStart)
+  : event.dateStart;
+const dateEnd =
+  preserveCalendarDate && event.dateEnd
+    ? storedCalendarDate(event.dateEnd)
+    : event.dateEnd;
 const isInternational = !event.timezone;
 
 // CFS open check
@@ -30,17 +43,19 @@ const callForSpeakersOpen =
   (!event.callForSpeakersClosingDate ||
     new Date() < new Date(event.callForSpeakersClosingDate));
 
-// Machine-readable datetime formatting (UTC)
+// Machine-readable datetime formatting
 function formatDate(date: string, format: string): string {
-  return dayjs.utc(date).format(format);
+  const parsed = dayjs.utc(date);
+  const displayDate =
+    !isDateOnly && event.timezone ? parsed.tz(event.timezone) : parsed;
+  return displayDate.format(format);
 }
 
 // Human-readable date range with locale-aware deduplication
-// SSR uses UTC since user timezone is unknown
 const formattedRange = formatDateRange({
-  dateStart: event.dateStart,
-  dateEnd: event.dateEnd,
-  timezone: event.timezone,
+  dateStart,
+  dateEnd,
+  timezone: preserveCalendarDate ? undefined : event.timezone,
   day: isAllDay,
   type: event.type,
   isDeadline,
@@ -54,32 +69,35 @@ const eventUrl = getEventUrl(event);
 // Machine-readable datetime values for <time> elements
 const isDateOnly = isAllDay || isTheme || isDeadline;
 const machineFormat = isDateOnly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZ';
-const machineStart = formatDate(event.dateStart, machineFormat);
-const machineEnd = event.dateEnd
-  ? formatDate(event.dateEnd, machineFormat)
-  : undefined;
+const machineStart = formatDate(dateStart, machineFormat);
+const machineEnd = dateEnd ? formatDate(dateEnd, machineFormat) : undefined;
+let timezoneAbbreviation: string | undefined;
+if (!isInternational && !preserveCalendarDate) {
+  timezoneAbbreviation =
+    !isDateOnly && event.timezone
+      ? dayjs.utc(event.dateStart).tz(event.timezone).format('z')
+      : 'UTC';
+}
 
 // Attendance mode display
 const attendanceMode = event.attendanceMode || 'none';
 const displayLocation = event.location || 'International';
+const showLocation = ['offline', 'none'].includes(attendanceMode);
+const showWebsiteLink = event.website && !isTheme;
+const showDescription = event.description && !isTheme;
+const showFreeBadge = event.isFree && !isTheme;
+const showBadges = callForSpeakersOpen || showFreeBadge;
 ---
 
 {isDeadline ? (
   <div class="event event--deadline">
-    <div class="event__dates">
-      <span class="event__dateRange">
-        <time datetime={machineStart}>{formattedRange[0]}</time>
-        {formattedRange[1] && machineEnd && (
-          <>
-            <span aria-hidden="true"> &ndash; </span>
-            <span class="sr-only">until</span>
-            <time datetime={machineEnd}>{formattedRange[1]}</time>
-          </>
-        )}
-        {!isInternational && ' UTC'}{' '}
-        <span class="badge badge--danger">Deadline</span>
-      </span>
-    </div>
+    <StaticEventDate
+      machineStart={machineStart}
+      machineEnd={machineEnd}
+      formattedRange={formattedRange}
+      timezone={timezoneAbbreviation}
+      isDeadline
+    />
     <span class="event__title">
       Submit proposals for <a href={eventUrl || event.website}>{event.title}</a>
     </span>
@@ -95,27 +113,20 @@ const displayLocation = event.location || 'International';
     </h3>
 
     {event.dateStart && (
-      <div class="event__dates">
-        <span class="event__dateRange">
-          <time datetime={machineStart}>{formattedRange[0]}</time>
-          {formattedRange[1] && machineEnd && (
-            <>
-              <span aria-hidden="true"> &ndash; </span>
-              <span class="sr-only">until</span>
-              <time datetime={machineEnd}>{formattedRange[1]}</time>
-            </>
-          )}
-          {!isInternational && ' UTC'}
-        </span>
-      </div>
+      <StaticEventDate
+        machineStart={machineStart}
+        machineEnd={machineEnd}
+        formattedRange={formattedRange}
+        timezone={timezoneAbbreviation}
+      />
     )}
 
-    {attendanceMode !== 'none' && event.type !== 'deadline' && (
+    {event.type !== 'deadline' && (
       <div class="event__delivery text-small">
         {attendanceMode === 'online' && (
           <span class="event__online">Online</span>
         )}
-        {attendanceMode === 'offline' && (
+        {showLocation && (
           <span class="event__location">
             <span>{displayLocation}</span>
           </span>
@@ -129,7 +140,7 @@ const displayLocation = event.location || 'International';
             <span class="event__online">Online</span>
           </div>
         )}
-        {event.website && !isTheme && (
+        {showWebsiteLink && (
           <Fragment>
             <span aria-hidden="true" class="event__delivery-separator">
               ·
@@ -147,42 +158,19 @@ const displayLocation = event.location || 'International';
       </div>
     )}
 
-    {attendanceMode === 'none' && event.type !== 'deadline' && (
-      <div class="event__delivery text-small">
-        <span class="event__location">
-          <span>{displayLocation}</span>
-        </span>
-        {event.website && !isTheme && (
-          <Fragment>
-            <span aria-hidden="true" class="event__delivery-separator">
-              ·
-            </span>
-            <a
-              href={event.website}
-              rel="external noopener noreferrer"
-              class="event__website-link"
-              aria-describedby={headingId}
-            >
-              Event website<span class="sr-only"> (opens external site)</span>
-            </a>
-          </Fragment>
-        )}
-      </div>
-    )}
-
-    {event.description && !isTheme && (
+    {showDescription && (
       <details class="event__children flow">
         <summary>Description</summary>
         <p class="event__description">{event.description}</p>
       </details>
     )}
 
-    {(callForSpeakersOpen || (event.isFree && !isTheme)) && (
+    {showBadges && (
       <div class="event__badges">
         {callForSpeakersOpen && (
           <span class="badge badge--success">Call for speakers</span>
         )}
-        {event.isFree && !isTheme && <span class="badge">Free</span>}
+        {showFreeBadge && <span class="badge">Free</span>}
       </div>
     )}
   </article>

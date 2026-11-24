@@ -142,7 +142,11 @@ const filtersStore = reactive({
     this.eventsStatus = 'loading';
     void this.fetchBooks();
     try {
-      const eventsResponse = await fetch('/api/get-events');
+      const eventsResponse = await fetch('/api/get-events', {
+        headers: {
+          'X-Event-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      });
       if (!eventsResponse.ok) throw new Error('Failed to fetch events');
       const events = await eventsResponse.json();
       this.setEvents(events.future, events.today, events.past);

@@ -7,7 +7,7 @@ import { test } from 'vitest';
 import dayjs from '../src/lib/dayjs';
 import { getYearMonth } from '../src/utils/dateUtils';
 import {
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
   getEventMetaDescription,
   groupByMonth,
@@ -47,8 +47,8 @@ test('eventUtils - grouping', async ({ bench }) => {
     groupByMonth(items, 'past', getKey);
   }).run();
 
-  await bench('filterPastMonths', () => {
-    filterPastMonths(upcomingGroups, 2026, 3);
+  await bench('filterPastBooks', () => {
+    filterPastBooks(upcomingGroups, 2026, 3);
   }).run();
 
   await bench('formatMonthHeading over every month group', () => {
