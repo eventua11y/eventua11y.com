@@ -177,10 +177,10 @@ onUnmounted(removeArrowListeners);
           <div>
             <strong>Your local time</strong>
             <div>
-              <template v-for="(part, index) in localTimeParts" :key="index">
+              <div v-for="(part, index) in localTimeParts" :key="index">
                 <template v-if="index"
-                  ><span aria-hidden="true"> – </span
-                  ><span class="sr-only">until</span></template
+                  ><span aria-hidden="true">–&nbsp;</span
+                  ><span class="sr-only">until </span></template
                 ><time :datetime="part.datetime">{{ part.date }}</time
                 >{{ ' ' }}
                 <span
@@ -188,7 +188,7 @@ onUnmounted(removeArrowListeners);
                   class="timezone-popover__zone text-muted"
                   >{{ part.zone }}</span
                 >
-              </template>
+              </div>
             </div>
           </div>
         </div>

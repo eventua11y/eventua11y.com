@@ -258,6 +258,53 @@ test.describe('Event timezone conversion', () => {
     );
   });
 
+  test('puts each multi-day range endpoint on its own line and allows reflow', async ({
+    page,
+  }) => {
+    const event = eventCard(page, 'Multi-day event');
+    await event.getByRole('button', { name: /show in your timezone/i }).click();
+    const popover = event.locator('[popover]:popover-open');
+    const rows = popover.locator('.timezone-popover__row');
+    await expect(rows).toHaveCount(1);
+    await expect(rows).toContainText(/February 9.*6:00\s*AM/i);
+    await expect(rows).toContainText(/February 11.*6:00\s*AM/i);
+
+    for (const width of [375, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const row of await rows.all()) {
+        const times = row.locator('time');
+        const start = await times.first().boundingBox();
+        const end = await times.last().boundingBox();
+        const separator = await row
+          .locator('[aria-hidden="true"]')
+          .boundingBox();
+        expect(start).not.toBeNull();
+        expect(end).not.toBeNull();
+        expect(separator).not.toBeNull();
+        expect(end!.y).toBeGreaterThanOrEqual(start!.y + start!.height - 1);
+        expect(Math.abs(separator!.y - end!.y)).toBeLessThan(2);
+        expect(separator!.x).toBeLessThan(end!.x);
+        expect(
+          await times.last().evaluate((time) => time.getClientRects().length)
+        ).toBe(1);
+      }
+    }
+
+    await popover.evaluate((element) => {
+      element.style.width = '130px';
+    });
+    const end = rows.first().locator('time').last();
+    await expect
+      .poll(() => end.evaluate((time) => time.getClientRects().length))
+      .toBeGreaterThan(1);
+    const content = popover.locator('.timezone-popover__content');
+    expect(
+      await content.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth
+      )
+    ).toBe(true);
+  });
+
   test('exposes range endpoints and until in reading order', async ({
     page,
   }) => {
