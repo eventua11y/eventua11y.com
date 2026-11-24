@@ -68,7 +68,6 @@
 }
 
 .skip:focus {
-  color: var(--c-masthead-color-fg);
   display: block;
   outline-offset: -0.2em;
   text-decoration: none;
