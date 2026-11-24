@@ -93,9 +93,13 @@ const sameTimezone = computed(
       canonicalTimezone(deviceTimezone.value)
 );
 
+const showPopover = computed(
+  () => !!popoverId.value && !!deviceTimezone.value && !sameTimezone.value
+);
+
 // The event's own time is already shown in-page, so only the conversion is listed.
 const localTimeParts = computed(() => {
-  if (sameTimezone.value || !deviceTimezone.value) return [];
+  if (!showPopover.value) return [];
 
   // Include dates when the event and device dates differ or the range crosses midnight.
   const endpoints = [props.dateStart, props.dateEnd ?? props.dateStart];
@@ -106,9 +110,7 @@ const localTimeParts = computed(() => {
   return formatTimeRange(deviceTimezone.value, new Set(localDates).size > 1);
 });
 
-const timeDescriptionId = computed(() =>
-  localTimeParts.value.length ? `${popoverId.value}-time` : undefined
-);
+const timeDescriptionId = computed(() => `${popoverId.value}-time`);
 
 function onToggle(event: Event) {
   expanded.value = (event as ToggleEvent).newState === 'open';
@@ -149,7 +151,7 @@ onUnmounted(removeArrowListeners);
 
 <template>
   <button
-    v-if="popoverId"
+    v-if="showPopover"
     type="button"
     ref="trigger"
     class="timezone-trigger"
@@ -170,7 +172,7 @@ onUnmounted(removeArrowListeners);
   </button>
   <abbr v-else>{{ abbreviation }}</abbr>
   <div
-    v-if="popoverId"
+    v-if="showPopover"
     :id="popoverId"
     ref="popover"
     class="timezone-popover"
@@ -192,18 +194,10 @@ onUnmounted(removeArrowListeners);
       :aria-describedby="timeDescriptionId"
     >
       <TimezoneConversionTimes
-        v-if="localTimeParts.length"
         :parts="localTimeParts"
         :labelId="`${popoverId}-label`"
         :timeId="timeDescriptionId"
       />
-      <p
-        v-if="sameTimezone"
-        :id="`${popoverId}-label`"
-        class="timezone-popover__hint"
-      >
-        Your device uses the event timezone.
-      </p>
     </div>
   </div>
 </template>
