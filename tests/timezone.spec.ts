@@ -89,6 +89,21 @@ test.describe('Event timezone conversion', () => {
     await expect(eventCard(page, 'New York event')).toBeVisible();
   });
 
+  test('shows the friendly countdown on Today cards', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2030-12-31T02:00:00Z'));
+    await page.route('**/api/get-events', (route) =>
+      route.fulfill({ json: { today: [events[2]], future: [], past: [] } })
+    );
+    await page.reload();
+
+    const event = page.locator('#today .event').filter({
+      hasText: 'London event',
+    });
+    await expect(event.locator('.event__progress-label')).toHaveText(
+      'In 10 hours'
+    );
+  });
+
   test('shows each event in its own timezone and converts the correct event across midnight', async ({
     page,
   }) => {
