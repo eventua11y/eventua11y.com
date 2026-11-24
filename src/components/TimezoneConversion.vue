@@ -17,7 +17,6 @@ const props = defineProps<{
 const popoverId = ref('');
 const deviceTimezone = ref('');
 const expanded = ref(false);
-const now = ref(Date.now());
 const trigger = ref<HTMLButtonElement | null>(null);
 const popover = ref<HTMLDivElement | null>(null);
 const arrowSide = ref<'top' | 'bottom' | null>(null);
@@ -85,18 +84,6 @@ const sameTimezone = computed(
       }).resolvedOptions().timeZone
 );
 
-const relativeTime = computed(() => {
-  const difference = dayjs.utc(props.dateStart).valueOf() - now.value;
-  const minutes = Math.round(difference / 60_000);
-  const relative = new Intl.RelativeTimeFormat(userStore.locale || 'en', {
-    numeric: 'auto',
-  });
-  if (Math.abs(minutes) < 60) return relative.format(minutes, 'minute');
-  const hours = Math.round(minutes / 60);
-  if (Math.abs(hours) < 24) return relative.format(hours, 'hour');
-  return relative.format(Math.round(hours / 24), 'day');
-});
-
 const displayedTimezones = computed(() =>
   sameTimezone.value || !deviceTimezone.value
     ? [props.timezone]
@@ -112,27 +99,16 @@ const includeDates = computed(() => {
   return new Set(localDates).size > 1;
 });
 
-const rows = computed(() => {
-  const eventRow = {
-    label: 'Event local time',
-    displayParts: formattedTime(props.timezone, includeDates.value),
-  };
-  if (sameTimezone.value) return [eventRow];
-  return [
-    eventRow,
-    {
-      label: 'Your local time',
-      displayParts: deviceTimezone.value
-        ? formattedTime(deviceTimezone.value, includeDates.value)
-        : [],
-    },
-  ];
-});
+// The event's own time is already shown in-page, so only the conversion is listed.
+const localTimeParts = computed(() =>
+  sameTimezone.value || !deviceTimezone.value
+    ? []
+    : formattedTime(deviceTimezone.value, includeDates.value)
+);
 
 function onToggle(event: Event) {
   expanded.value = (event as ToggleEvent).newState === 'open';
   if (expanded.value) {
-    now.value = Date.now();
     requestAnimationFrame(updateArrow);
     window.addEventListener('resize', updateArrow);
     window.addEventListener('scroll', updateArrow, true);
@@ -197,15 +173,11 @@ onUnmounted(removeArrowListeners);
       @toggle="onToggle"
     >
       <div class="timezone-popover__content flow flow-xs">
-        <p class="timezone-popover__relative">
-          {{ dayjs.utc(dateStart).valueOf() < now ? 'Started' : 'Starts' }}
-          {{ relativeTime }}
-        </p>
-        <div v-for="row in rows" :key="row.label" class="timezone-popover__row">
+        <div v-if="localTimeParts.length" class="timezone-popover__row">
           <div>
-            <strong>{{ row.label }}</strong>
+            <strong>Your local time</strong>
             <div>
-              <template v-for="(part, index) in row.displayParts" :key="index">
+              <template v-for="(part, index) in localTimeParts" :key="index">
                 <template v-if="index"
                   ><span aria-hidden="true"> – </span
                   ><span class="sr-only">until</span></template

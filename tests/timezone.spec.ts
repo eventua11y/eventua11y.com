@@ -150,13 +150,14 @@ test.describe('Event timezone conversion', () => {
     expect(popoverId).toBeTruthy();
     await expect(newYorkButton).toHaveAttribute('popovertarget', popoverId!);
     await expect(newYorkPopover).toBeVisible();
-    await expect(newYorkPopover).toContainText('Event local time');
+    await expect(newYorkPopover).not.toContainText('Event local time');
     await expect(newYorkPopover).toContainText('Your local time');
     await expect(newYorkPopover).toContainText(/January 1/);
-    await expect(newYorkPopover).not.toContainText(/2030|2031/);
+    await expect(newYorkPopover).not.toContainText(/December 31|2030|2031/);
     await expect(newYorkPopover).toContainText(/8:30\s*AM/i);
     await expect(newYorkPopover).toContainText(/9:30\s*AM/i);
-    await expect(newYorkPopover).toContainText(/Eastern Standard Time/i);
+    await expect(newYorkPopover).not.toContainText(/6:30\s*PM/i);
+    await expect(newYorkPopover).not.toContainText(/Eastern Standard Time/i);
     await expect(newYorkPopover).toContainText(/Japan Standard Time/i);
     await expect(newYorkPopover).not.toContainText(
       /next day in your timezone/i
@@ -173,6 +174,7 @@ test.describe('Event timezone conversion', () => {
     await expect(londonPopover).toBeVisible();
     await expect(londonPopover).toContainText('Your local time');
     await expect(londonPopover).not.toContainText(/December|January/);
+    await expect(londonPopover).not.toContainText(/12:00\s*PM/i);
     await expect(londonPopover).toContainText(/9:00\s*PM/i);
     await expect(londonPopover).not.toContainText(/8:30\s*AM/i);
   });
@@ -203,33 +205,21 @@ test.describe('Event timezone conversion', () => {
     await expect(popover).toBeVisible();
   });
 
-  test('shows both local times without copy controls', async ({ page }) => {
+  test('shows only the converted time, without relative labels or copy controls', async ({
+    page,
+  }) => {
     const event = eventCard(page, 'New York event');
     await event.getByRole('button', { name: /show in your timezone/i }).click();
     const popover = event.locator('[popover]:not([popover="manual"])');
     await expect(popover).toBeVisible();
-    const eventRow = popover
-      .getByText('Event local time', { exact: true })
-      .locator('..');
-    const viewerRow = popover
-      .getByText('Your local time', { exact: true })
-      .locator('..');
-    await expect(eventRow).toContainText(/December 31.*6:30\s*PM.*EST/i);
-    await expect(viewerRow).toContainText(
-      /January 1.*8:30\s*AM.*(?:JST|GMT\+9)/i
+    await expect(popover.locator('.timezone-popover__row')).toHaveCount(1);
+    await expect(popover.locator('.timezone-popover__row')).toContainText(
+      /Your local time.*January 1.*8:30\s*AM.*(?:JST|GMT\+9)/i
     );
-
+    await expect(popover).not.toContainText(
+      /Event local time|from now|\bago\b|Tomorrow|Yesterday|\bIn \d/i
+    );
     await expect(popover.locator('wa-copy-button')).toHaveCount(0);
-  });
-
-  test('shows relative time for the event', async ({ page }) => {
-    const event = eventCard(page, 'New York event');
-    await event.getByRole('button', { name: /show in your timezone/i }).click();
-    await expect(
-      event.locator('[popover]:not([popover="manual"])')
-    ).toContainText(
-      /(?:in\s+(?:[\d,]+|an?)\s+(?:minutes?|hours?|days?|weeks?|months?|years?)|(?:[\d,]+|an?)\s+(?:minutes?|hours?|days?|weeks?|months?|years?)\s+(?:ago|from now))/i
-    );
   });
 
   test('shows dates only when the event crosses midnight in a shown timezone', async ({
@@ -245,10 +235,10 @@ test.describe('Event timezone conversion', () => {
 
     // Same calendar date in New York and Tokyo: times only.
     const sameDay = await openRows('Offset change event');
-    await expect(sameDay).toHaveCount(2);
-    await expect(sameDay.last()).toContainText(/3:30\s*PM.*4:30\s*PM/i);
-    await expect(sameDay.last()).not.toContainText(/March/);
-    await expect(sameDay.last().locator('time').first()).toHaveAttribute(
+    await expect(sameDay).toHaveCount(1);
+    await expect(sameDay).toContainText(/3:30\s*PM.*4:30\s*PM/i);
+    await expect(sameDay).not.toContainText(/March/);
+    await expect(sameDay.locator('time').first()).toHaveAttribute(
       'datetime',
       '2031-03-09T15:30:00+09:00'
     );
@@ -256,16 +246,14 @@ test.describe('Event timezone conversion', () => {
 
     // One Tokyo date, but the event's own date differs: keep the date.
     const shifted = await openRows('New York event');
-    await expect(shifted).toHaveCount(2);
-    await expect(shifted.last()).toContainText(
-      /January 1.*8:30\s*AM.*9:30\s*AM/i
-    );
+    await expect(shifted).toHaveCount(1);
+    await expect(shifted).toContainText(/January 1.*8:30\s*AM.*9:30\s*AM/i);
     await page.keyboard.press('Escape');
 
     // Range that crosses midnight in the viewer's timezone.
     const overnight = await openRows('Multi-day event');
-    await expect(overnight).toHaveCount(2);
-    await expect(overnight.last()).toContainText(
+    await expect(overnight).toHaveCount(1);
+    await expect(overnight).toContainText(
       /February 9.*6:00\s*AM.*February 11.*6:00\s*AM/i
     );
   });
@@ -294,18 +282,16 @@ test.describe('Event timezone conversion', () => {
         expect(snapshot).not.toContain('–');
       }
       if (title === 'Offset change event') {
-        const eventRow = popover.locator('.timezone-popover__row').first();
-        await expect(eventRow.locator('time').first()).toHaveAttribute(
+        const row = popover.locator('.timezone-popover__row');
+        await expect(row.locator('time').first()).toHaveAttribute(
           'datetime',
-          '2031-03-09T01:30:00-05:00'
+          '2031-03-09T15:30:00+09:00'
         );
-        await expect(eventRow.locator('time').last()).toHaveAttribute(
+        await expect(row.locator('time').last()).toHaveAttribute(
           'datetime',
-          '2031-03-09T03:30:00-04:00'
+          '2031-03-09T16:30:00+09:00'
         );
-        await expect(eventRow.locator('.timezone-popover__zone')).toHaveCount(
-          2
-        );
+        await expect(row.locator('.timezone-popover__zone')).toHaveCount(1);
       }
       await page.keyboard.press('Escape');
     }
@@ -315,7 +301,7 @@ test.describe('Event timezone conversion', () => {
       .getByRole('button', { name: /show in your timezone/i })
       .click();
     const singlePopover = single.locator('[popover]:popover-open');
-    await expect(singlePopover.locator('time')).toHaveCount(2);
+    await expect(singlePopover.locator('time')).toHaveCount(1);
     await expect(singlePopover.locator('.sr-only')).toHaveCount(0);
     await expect(singlePopover.locator('[aria-hidden="true"]')).toHaveCount(0);
   });
@@ -374,7 +360,11 @@ test.describe('Event timezone conversion', () => {
     await expect(popover).toContainText(
       /same (?:time ?zone|local time)|device uses the event time ?zone/i
     );
-    await expect(popover.locator('.timezone-popover__row')).toHaveCount(1);
+    await expect(popover.locator('.timezone-popover__row')).toHaveCount(0);
+    await expect(popover.locator('time')).toHaveCount(0);
+    await expect(popover).not.toContainText(
+      /from now|\bago\b|Tomorrow|Yesterday|\bIn \d/i
+    );
     await context.close();
   });
 
@@ -391,8 +381,8 @@ test.describe('Event timezone conversion', () => {
     const event = eventCard(page, 'Tokyo event');
     await event.getByRole('button', { name: /show in your timezone/i }).click();
     const popover = event.locator('[popover]:not([popover="manual"])');
-    await expect(popover).toContainText(/January 1/);
-    await expect(popover).toContainText(/December 31/);
+    await expect(popover).not.toContainText(/January 1/);
+    await expect(popover).toContainText(/December 31.*8:00\s*AM/i);
     await expect(popover).not.toContainText(/previous day in your timezone/i);
     await context.close();
   });
