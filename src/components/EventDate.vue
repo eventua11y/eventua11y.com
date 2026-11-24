@@ -32,7 +32,8 @@
     <EventProgress
       :dateStart="dateStart"
       :dateEnd="dateEnd"
-      :timezone="preserveCalendarDate ? timezone : displayTimezone"
+      :timezone="displayTimezone"
+      :preserveCalendarDate="preserveCalendarDate"
       :useLocalTimezone="useLocalTimezone"
       :day="day"
       :type="type"
@@ -161,6 +162,9 @@ const formattedRange = computed(() =>
     type: props.type,
     isDeadline: props.isDeadline,
     isPast: props.isPast,
+    relativeDayTimezone: preserveCalendarDate.value
+      ? deviceTimezone.value
+      : undefined,
   })
 );
 

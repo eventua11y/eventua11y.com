@@ -357,6 +357,17 @@ export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
  */
 type DateRangeParts = [string] | [string, string];
 
+function relativeLabelDay(
+  now: dayjs.Dayjs | undefined,
+  timezone: string,
+  relativeDayTimezone?: string
+): dayjs.Dayjs {
+  const instant = now || dayjs();
+  if (!relativeDayTimezone) return instant.tz(timezone);
+  // Compare the viewer's calendar day with date-only values parsed as UTC.
+  return dayjs.utc(instant.tz(relativeDayTimezone).format('YYYY-MM-DD'));
+}
+
 /**
  * Formats a date range using dayjs with locale-aware deduplication
  * of shared date components (month, year).
@@ -395,6 +406,8 @@ export function formatDateRange(options: {
    * omitted from display to reduce visual noise. Defaults to false.
    */
   isPast?: boolean;
+  /** Viewer timezone for relative labels on dates formatted as UTC calendar dates. */
+  relativeDayTimezone?: string;
   /** Injected "now" for testability; defaults to the real current time. */
   now?: dayjs.Dayjs;
 }): DateRangeParts {
@@ -404,7 +417,11 @@ export function formatDateRange(options: {
 
   const isInternational = !options.timezone;
   const tz = isInternational ? 'UTC' : resolveTimezone(options);
-  const nowInTz = (options.now || dayjs()).tz(tz);
+  const nowInTz = relativeLabelDay(
+    options.now,
+    tz,
+    options.relativeDayTimezone
+  );
   const tomorrowInTz = nowInTz.add(1, 'day');
 
   /**
