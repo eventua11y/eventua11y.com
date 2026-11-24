@@ -10,7 +10,11 @@ afterEach(() => {
 describe('userStore.setUserInfo', () => {
   it('preserves an event-local selection when user information arrives later', () => {
     userStore.setTimezone('event', false);
+    const setItem = vi.fn();
+    vi.stubGlobal('window', { localStorage: { setItem } });
     userStore.setUserInfo('Asia/Tokyo', 'en', { timezone: 'Asia/Tokyo' });
+
+    expect(setItem).toHaveBeenCalledWith('userTimezone', 'event');
 
     expect(userStore.timezone).toBe('event');
     expect(userStore.useLocalTimezone).toBe(false);
@@ -78,6 +82,101 @@ describe('userStore restored locale', () => {
 
       expect(restoredUserStore.locale).toBe(expected);
       expect(storedValues.userLocale).toBe(expected ?? undefined);
+    }
+  );
+});
+
+describe('userStore storage failures', () => {
+  it('ignores malformed geo without losing other saved preferences', async () => {
+    const storedValues: Record<string, string> = {
+      userTimezone: 'Europe/Paris',
+      userLocale: 'fr,en;q=0.5',
+      userGeo: '{',
+      useLocalTimezone: 'true',
+    };
+    const storage = {
+      getItem: vi.fn((key: string) => storedValues[key] ?? null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    };
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.stubGlobal('window', { localStorage: storage });
+    vi.resetModules();
+
+    const { default: store } = await import('./userStore');
+    expect(store.geo).toBeNull();
+    expect(store.timezone).toBe('Europe/Paris');
+    expect(store.locale).toBe('fr');
+    expect(store.useLocalTimezone).toBe(true);
+    expect(console.warn).toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it('restores valid geo and preserves preferences if locale normalization fails', async () => {
+    const storedValues: Record<string, string> = {
+      userTimezone: 'Europe/Paris',
+      userLocale: 'fr-FR,fr;q=0.9',
+      userGeo: JSON.stringify({ city: 'Paris' }),
+      useLocalTimezone: 'true',
+    };
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.stubGlobal('window', {
+      localStorage: {
+        getItem: vi.fn((key: string) => storedValues[key] ?? null),
+        setItem: vi.fn(() => {
+          throw new Error('Storage blocked');
+        }),
+      },
+    });
+    vi.resetModules();
+
+    const { default: store } = await import('./userStore');
+    expect(store.geo).toEqual({ city: 'Paris' });
+    expect(store.locale).toBe('fr');
+    expect(store.useLocalTimezone).toBe(true);
+    expect(console.warn).toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it.each(['getter', 'read', 'write'])(
+    'keeps user preferences available in memory when storage %s fails',
+    async (failure) => {
+      const storage = {
+        getItem: vi.fn(() => {
+          if (failure === 'read') throw new Error('Storage blocked');
+          return null;
+        }),
+        setItem: vi.fn(() => {
+          throw new Error('Storage blocked');
+        }),
+        removeItem: vi.fn(() => {
+          throw new Error('Storage blocked');
+        }),
+      };
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      if (failure === 'getter') {
+        vi.stubGlobal('window', {
+          get localStorage() {
+            throw new Error('Storage blocked');
+          },
+        });
+      } else {
+        vi.stubGlobal('window', { localStorage: storage });
+      }
+      vi.resetModules();
+
+      const { default: store } = await import('./userStore');
+      store.setUserInfo('Europe/Paris', 'fr-FR', { city: 'Paris' });
+      expect(store.geo).toEqual({ city: 'Paris' });
+      expect(store.locale).toBe('fr');
+      expect(store.userInfoFetched).toBe(true);
+      store.setUserInfo('Europe/Paris', null, { city: 'Paris' });
+      store.setTimezone('Europe/London', true);
+      expect(store.locale).toBeNull();
+      expect(store.timezone).toBe('Europe/London');
+      expect(store.useLocalTimezone).toBe(true);
+      expect(console.warn).toHaveBeenCalled();
+      vi.restoreAllMocks();
     }
   );
 });

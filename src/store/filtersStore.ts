@@ -63,12 +63,64 @@ const defaultFilters: Filters = { ...DEFAULT_FILTER_VALUES };
  * @returns The stored filters or the default filters if none are stored.
  */
 const getStoredFilters = (): Filters => {
-  if (typeof window === 'undefined' || !localStorage)
-    return { ...defaultFilters };
+  const filters = { ...defaultFilters };
+  if (typeof window === 'undefined') return filters;
 
-  const saved = localStorage.getItem('filters');
-  return saved ? JSON.parse(saved) : { ...defaultFilters };
+  try {
+    const saved = window.localStorage.getItem('filters');
+    if (!saved) return filters;
+    const stored: unknown = JSON.parse(saved);
+    if (!stored || typeof stored !== 'object' || Array.isArray(stored)) {
+      console.warn('Saved filters are invalid; using defaults.');
+      return filters;
+    }
+
+    const values = stored as Record<string, unknown>;
+    if (
+      values.cfs === 'any' ||
+      values.cfs === 'open' ||
+      values.cfs === 'closed'
+    )
+      filters.cfs = values.cfs;
+    if (
+      values.attendance === 'any' ||
+      values.attendance === 'online' ||
+      values.attendance === 'offline'
+    )
+      filters.attendance = values.attendance;
+    if (
+      values.cost === 'any' ||
+      values.cost === 'free' ||
+      values.cost === 'paid'
+    )
+      filters.cost = values.cost;
+    if (typeof values.showAwarenessDays === 'boolean')
+      filters.showAwarenessDays = values.showAwarenessDays;
+    if (typeof values.showBooks === 'boolean')
+      filters.showBooks = values.showBooks;
+    if (typeof values.showDeadlines === 'boolean')
+      filters.showDeadlines = values.showDeadlines;
+    if (
+      (Object.keys(filters) as (keyof Filters)[]).some(
+        (key) => key in values && values[key] !== filters[key]
+      )
+    ) {
+      console.warn('Some saved filters are invalid; using defaults for them.');
+    }
+  } catch {
+    console.warn('Could not restore saved filters; using defaults.');
+  }
+  return filters;
 };
+
+function saveFilters(filters: Filters) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem('filters', JSON.stringify(filters));
+  } catch {
+    console.warn('Could not save filters for future visits.');
+  }
+}
 
 // Type assertion is needed because computed() returns ComputedRef<T>,
 // but reactive() unwraps it to T at runtime. TypeScript cannot express
@@ -140,7 +192,7 @@ const filtersStore = reactive({
    */
   resetFilters() {
     this.filters = { ...defaultFilters };
-    localStorage.setItem('filters', JSON.stringify(this.filters));
+    saveFilters(this.filters);
     this.updateFilteredEvents();
   },
 
@@ -238,11 +290,11 @@ const filtersStore = reactive({
 }) as unknown as FiltersStore;
 
 // Watch filters for changes and update localStorage and filtered events
-if (typeof window !== 'undefined' && localStorage) {
+if (typeof window !== 'undefined') {
   watch(
     () => filtersStore.filters,
     (newFilters) => {
-      localStorage.setItem('filters', JSON.stringify(newFilters));
+      saveFilters(newFilters);
       filtersStore.updateFilteredEvents();
     },
     { deep: true }
