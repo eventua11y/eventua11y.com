@@ -44,6 +44,7 @@ const props = withDefaults(
     dateStart: string;
     dateEnd?: string;
     timezone?: string;
+    useLocalTimezone?: boolean;
     day?: boolean;
     type?: string;
     showCountdown?: boolean;
@@ -83,7 +84,7 @@ const options = computed<ProgressOptions>(() => ({
   type: props.type,
   showCountdown: props.showCountdown,
   showEnded: props.showEnded,
-  useLocalTimezone: userStore.useLocalTimezone,
+  useLocalTimezone: props.useLocalTimezone,
   userTimezone: userStore.timezone,
 }));
 

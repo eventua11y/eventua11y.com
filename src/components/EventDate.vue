@@ -32,7 +32,8 @@
     <EventProgress
       :dateStart="dateStart"
       :dateEnd="dateEnd"
-      :timezone="timezone"
+      :timezone="displayTimezone"
+      :useLocalTimezone="useLocalTimezone"
       :day="day"
       :type="type"
       :showCountdown="showCountdown"

@@ -123,6 +123,40 @@ test.describe('Event timezone conversion', () => {
     );
   });
 
+  test('uses the device timezone for progress on timed events without a timezone', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date('2030-12-31T14:30:00Z'));
+    await page.addInitScript(() => {
+      localStorage.setItem('useLocalTimezone', 'true');
+      localStorage.setItem('userTimezone', 'UTC');
+    });
+    await page.route('**/api/get-events', (route) =>
+      route.fulfill({
+        json: {
+          today: [
+            {
+              _id: 'no-timezone-progress',
+              type: 'conference',
+              title: 'Event without timezone in progress',
+              dateStart: '2030-12-31T14:00:00Z',
+              dateEnd: '2030-12-31T16:30:00Z',
+            },
+          ],
+          future: [],
+          past: [],
+        },
+      })
+    );
+    await page.reload();
+    const event = page.locator('#today .event').filter({
+      hasText: 'Event without timezone in progress',
+    });
+    await expect(event.locator('.event__progress-label')).toHaveText(
+      'Ends tomorrow'
+    );
+  });
+
   test('shows each event in its own timezone and converts the correct event across midnight', async ({
     page,
   }) => {
