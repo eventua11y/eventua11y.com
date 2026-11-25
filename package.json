@@ -51,7 +51,7 @@
     "@mattobee/chocks": "^0.8.0",
     "@playwright/test": "^1.63.0",
     "@portabletext/types": "^4.0.2",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@vitest/coverage-v8": "^5.1.0",
     "astro": "^7.4.12",
     "autoprefixer": "^10.6.0",
