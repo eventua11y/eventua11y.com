@@ -495,6 +495,38 @@ for (const colorScheme of ['light', 'dark'] as const) {
       });
     }
 
+    test(`skip link is readable on keyboard focus in ${colorScheme} mode`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto('/');
+      await expect(page.locator('html')).toHaveAttribute(
+        'data-theme',
+        colorScheme
+      );
+
+      const link = page.getByRole('link', { name: 'Skip to main content' });
+      await page.keyboard.press('Tab');
+      await expect(link).toBeFocused();
+      await expect(link).toBeInViewport();
+      const { color, outlineColor, background } = await link.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          color: style.color,
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(document.body).backgroundColor,
+        };
+      });
+      expect(contrastRatio(color, background)).toBeGreaterThanOrEqual(4.5);
+      await expect(link).not.toHaveCSS('outline-style', 'none');
+      await expect(link).not.toHaveCSS('outline-width', '0px');
+      expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
+
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(/#main$/);
+      await expect(link).not.toBeInViewport();
+    });
+
     // Axe cannot check contrast on SVG icons inside Web Awesome shadow DOM,
     // so we manually verify the theme selector icon meets WCAG 2.x
     // non-text contrast (3:1 minimum for UI components).
