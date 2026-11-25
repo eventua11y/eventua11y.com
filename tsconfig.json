@@ -3,6 +3,6 @@
   "extends": "astro/tsconfigs/base",
   "compilerOptions": {
     "strict": true,
-    "types": ["@awesome.me/webawesome/dist/types/vue/index.d.ts"]
+    "types": []
   }
 }

@@ -88,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import type WaRadioGroup from '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
 import { ref, onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
 
@@ -127,12 +128,14 @@ function toggleDeadlines(event) {
   filtersStore.filters.showDeadlines = event.target.checked;
 }
 
-// Add update handler for radio groups
-function updateFilter(
-  filterName: 'cfs' | 'attendance' | 'cost',
-  event: CustomEvent
+function updateFilter<Key extends 'cfs' | 'attendance' | 'cost'>(
+  filterName: Key,
+  event: Event
 ) {
-  filtersStore.filters[filterName] = event.target.value;
+  const group = event.currentTarget as WaRadioGroup;
+  // The options above define the allowed values for each filter.
+  filtersStore.filters[filterName] =
+    group.value as (typeof filtersStore.filters)[Key];
 }
 </script>
 
