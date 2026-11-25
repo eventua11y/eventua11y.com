@@ -55,10 +55,6 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 - [Netlify](https://www.netlify.com/) -- hosting with automatic deploys from the `main` branch. Feature branches are deployed to preview URLs.
 - [Sentry](https://sentry.io/) -- error tracking and performance monitoring
 
-### Feature flags
-
-Feature flags use server-side defaults. Topics stays off until PostHog takes over. See [Feature Flags](AGENTS.md#feature-flags) for details.
-
 ### Testing
 
 - [Playwright](https://playwright.dev/) -- end-to-end and accessibility tests

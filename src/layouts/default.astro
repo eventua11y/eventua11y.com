@@ -11,11 +11,7 @@ const { title, description, ogType } = Astro.props.frontmatter || Astro.props;
 ---
 
 <!doctype html>
-<html
-  lang="en-GB-oxendict"
-  class="wa-brand-purple"
-  data-flags-source={Astro.locals.flagsSource}
->
+<html lang="en-GB-oxendict" class="wa-brand-purple">
   <head>
     <TheHead {title} {description} {ogType} />
   </head>

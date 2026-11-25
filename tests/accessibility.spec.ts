@@ -453,6 +453,16 @@ const pages = [
   { name: 'Past Events', path: '/past-events', waitSelector: '#past-events' },
   { name: 'Accessibility Statement', path: '/accessibility' },
   { name: 'Curation Policy', path: '/curation-policy' },
+  {
+    name: 'Topics',
+    path: '/topics',
+    waitSelector: 'a[href="/topics"][aria-current="page"]',
+  },
+  {
+    name: 'Topic detail',
+    path: '/topics/open-source',
+    waitSelector: 'a[href="/topics"][aria-current="page"]',
+  },
   { name: '404', path: '/404' },
   {
     name: 'Event detail (with hashtags)',

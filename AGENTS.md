@@ -143,21 +143,6 @@ This project uses a two-layer accessibility testing strategy in `tests/accessibi
 
 When adding new pages or interactive components, add both layers. For detailed testing patterns including shadow DOM caveats, dark mode scanning, and helper functions, see the `writing-a11y-tests` OpenCode skill in `.opencode/skills/writing-a11y-tests/SKILL.md`.
 
-## Feature Flags
-
-Server middleware copies `FLAG_DEFAULTS` into `Astro.locals.flags` on each request. There is no remote flag evaluation. Keep Topics off until PostHog takes over.
-
-### Diagnostic
-
-Server-rendered pages carry `data-flags-source="default"` on the `<html>` element. Prerendered pages do not run middleware and have no flag-source diagnostic.
-
-### Constraints
-
-- **Server-side only.** Keep flag assignment in middleware; do not evaluate flags in client-side code.
-- **Prerendered pages cannot read flags.** Flag-gated UI must not appear on prerendered pages (currently only 404).
-- **Pages rendering the primary nav must be SSR.** Because `TheHeader.astro` reads `Astro.locals.flags` to gate nav links, any page using the default layout must have `prerender = false`. The 404 page uses a stripped-down `error.astro` layout (logo only, no nav) so it can stay prerendered.
-- **Vue islands receive flags as props.** Pass values from `Astro.locals.flags` as component props at render time.
-
 ## GROQ Query Projections
 
 Event listing queries in `src/lib/sanity.ts` and `netlify/edge-functions/get-events.ts` use **explicit field projections** — not the `...` spread operator. This is intentional to reduce payload sizes by excluding fields only needed on detail pages (e.g. `description`, `organizer`, `topics`, `geopoint`, `keywords`).

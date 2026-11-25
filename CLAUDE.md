@@ -44,7 +44,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Deployment**: Netlify with Deno-based edge functions
 - **Testing**: Playwright (E2E) + axe-core (accessibility) + Vitest (unit)
 - **Monitoring**: Sentry for error tracking and performance
-- **Feature flags**: Defaults-only server middleware; Topics stays off until PostHog replaces the bridge (see Feature Flags section in `AGENTS.md`)
 - **Auth**: Supabase for user accounts (in progress)
 
 ### Key Files
@@ -55,7 +54,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `src/store/userStore.ts` — Vue reactive store for user preferences (theme, timezone)
 - `netlify/edge-functions/` — Three API endpoints (events, books, user-info)
 - `tests/accessibility.spec.ts` — Two-layer accessibility test suite
-- `src/middleware/flags.ts`, `src/types/flags.ts` — Defaults-only server flag bridge
 
 ### Content Types
 
