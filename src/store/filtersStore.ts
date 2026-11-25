@@ -270,11 +270,11 @@ const filtersStore = reactive({
   }),
 
   /**
-   * Count of non-deadline and non-book future events.
+   * Count of non-deadline future events (books are stored separately).
    */
   nonDeadlineFutureCount: computed(() => {
     return filtersStore.futureEvents.filter(
-      (event: Event) => event.type !== 'deadline' && event._type !== 'book'
+      (event: Event) => event.type !== 'deadline'
     ).length;
   }),
 

@@ -46,6 +46,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import dayjs from '../lib/dayjs';
 import Event from './Event.vue';
+import type { Event as EventType } from '../types/event';
 import filtersStore from '../store/filtersStore';
 import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
@@ -73,7 +74,7 @@ let timer: ReturnType<typeof setInterval> | null = null;
 const localNow = computed(() => now.value.tz(deviceTimezone.value));
 const today = computed(() => localNow.value.startOf('day'));
 
-const todaysEvents = ref([]);
+const todaysEvents = ref<EventType[]>([]);
 
 const updateTodaysEvents = () => {
   const events = filtersStore.todayEvents;
@@ -88,7 +89,7 @@ const updateTodaysEvents = () => {
  * Determines if date should be shown for an event
  * Hides date for single-day international theme events
  */
-const shouldShowDate = (event) => {
+const shouldShowDate = (event: EventType) => {
   return !(event.type === 'theme' && !event.dateEnd);
 };
 

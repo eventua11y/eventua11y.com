@@ -114,7 +114,7 @@ const options = computed<ProgressOptions>(() => ({
   showCountdown: props.showCountdown,
   showEnded: props.showEnded,
   useLocalTimezone: !props.preserveCalendarDate && props.useLocalTimezone,
-  userTimezone: userStore.timezone,
+  userTimezone: userStore.timezone || undefined,
 }));
 
 const isHappeningNow = computed(() =>
