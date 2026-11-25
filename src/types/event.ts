@@ -36,7 +36,7 @@ interface TopicSummary {
 
 export interface Event {
   _id: string;
-  _type?: string;
+  _type?: 'event';
   type: string;
   title: string;
   slug?: { current: string };
@@ -48,7 +48,7 @@ export interface Event {
   day?: boolean;
   callForSpeakers?: boolean;
   callForSpeakersClosingDate?: string;
-  attendanceMode?: string;
+  attendanceMode?: 'online' | 'offline' | 'mixed' | 'none';
   location?: string;
   isFree?: boolean;
   website?: string;

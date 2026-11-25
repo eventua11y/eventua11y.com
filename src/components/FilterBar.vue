@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
 import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
@@ -94,7 +95,7 @@ watch(
  * Reference to awareness days switch component
  * Used to ensure proper initialization of checked state
  */
-const awarenessDaysSwitch = ref(null);
+const awarenessDaysSwitch = ref<WaSwitch | null>(null);
 
 /**
  * Tracks whether the viewport is narrow (≤699.98px)
@@ -119,8 +120,8 @@ function resetFilters() {
  * Toggles awareness days filter
  * Updates store when switch changes
  */
-function toggleAwarenessDays(event) {
-  filtersStore.filters.showAwarenessDays = event.target.checked;
+function toggleAwarenessDays(event: Event) {
+  filtersStore.filters.showAwarenessDays = (event.target as WaSwitch).checked;
 }
 
 /**

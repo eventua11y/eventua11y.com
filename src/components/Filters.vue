@@ -89,12 +89,13 @@
 
 <script setup lang="ts">
 import type WaRadioGroup from '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
+import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
 import { ref, onMounted } from 'vue';
 import filtersStore from '../store/filtersStore';
 
-const awarenessDaysSwitch = ref(null);
-const booksSwitch = ref(null);
-const deadlinesSwitch = ref(null);
+const awarenessDaysSwitch = ref<WaSwitch | null>(null);
+const booksSwitch = ref<WaSwitch | null>(null);
+const deadlinesSwitch = ref<WaSwitch | null>(null);
 
 onMounted(() => {
   // Only handle switch initialization
@@ -116,16 +117,16 @@ function resetFilters() {
   filtersStore.resetFilters();
 }
 
-function toggleAwarenessDays(event) {
-  filtersStore.filters.showAwarenessDays = event.target.checked;
+function toggleAwarenessDays(event: Event) {
+  filtersStore.filters.showAwarenessDays = (event.target as WaSwitch).checked;
 }
 
-function toggleBooks(event) {
-  filtersStore.filters.showBooks = event.target.checked;
+function toggleBooks(event: Event) {
+  filtersStore.filters.showBooks = (event.target as WaSwitch).checked;
 }
 
-function toggleDeadlines(event) {
-  filtersStore.filters.showDeadlines = event.target.checked;
+function toggleDeadlines(event: Event) {
+  filtersStore.filters.showDeadlines = (event.target as WaSwitch).checked;
 }
 
 function updateFilter<Key extends 'cfs' | 'attendance' | 'cost'>(
