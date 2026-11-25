@@ -274,7 +274,7 @@ const filtersStore = reactive({
    */
   nonDeadlineFutureCount: computed(() => {
     return filtersStore.futureEvents.filter(
-      (event: Event) => event.type !== 'deadline'
+      (event) => event.type !== 'deadline'
     ).length;
   }),
 

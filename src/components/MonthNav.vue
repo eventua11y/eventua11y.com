@@ -39,7 +39,7 @@ watch(
  * Scrolls smoothly to the target section and sets focus
  * @param {HTMLElement} target - The target element to scroll to
  */
-function scrollToSection(target: HTMLElement | null | undefined) {
+function scrollToSection(target?: HTMLElement | null) {
   if (target) {
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
