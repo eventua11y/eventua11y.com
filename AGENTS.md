@@ -145,32 +145,20 @@ When adding new pages or interactive components, add both layers. For detailed t
 
 ## Feature Flags
 
-This project uses OpenFeature with the Flagsmith provider for server-side feature flag evaluation. See `src/lib/flags.ts`, `src/middleware/flags.ts`, and `src/types/flags.ts`.
+Feature flags currently use a defaults-only server middleware bridge. `src/middleware/flags.ts` copies `FLAG_DEFAULTS` from `src/types/flags.ts` into `Astro.locals.flags` for each request. There is no provider SDK, network evaluation, or feature-flag environment variable.
 
-### Adding a new flag
-
-1. Add the flag name and JSDoc to the `Flags` interface in `src/types/flags.ts`.
-2. Add a default value (almost always `false`) to `FLAG_DEFAULTS`.
-3. Add a `client.getBooleanValue(...)` call in `resolveFlags()` in `src/lib/flags.ts`.
-4. Create the flag in both Flagsmith environments (production and non-prod, where non-prod is shared by deploy-preview and local dev) with default value `false`. Set "server-side only" to true on the flag — this codebase exclusively uses server-side evaluation, and enforcing it at the platform level prevents accidental leakage to any future client-side code.
-5. Read in SSR pages/components via `Astro.locals.flags.your_flag_name`.
-
-### Key type
-
-The `FLAGSMITH_ENVIRONMENT_KEY` env var holds a **Server-side SDK Token**, not an Environment API key. Local evaluation mode requires this key type. Generated per-environment in the Flagsmith UI under Environment settings → SDK keys. Each Netlify environment scope (production, deploy-preview) gets its own token.
+Keep `topic_pages_enabled` defaulted to `false` until PostHog replaces this bridge. Topics pages, navigation, sitemap entries and event topic links retain their existing consumers but remain off. Do not add PostHog as part of this cleanup or change hosted settings.
 
 ### Diagnostic
 
-The `<html>` element carries `data-flags-source="remote"` when the Flagsmith provider was reachable on a given request, or `data-flags-source="default"` when the middleware fell back to defaults. Use this to verify the provider is wired up in any environment.
+Server-rendered pages carry `data-flags-source="default"` on the `<html>` element. Prerendered pages do not run middleware and have no flag-source diagnostic.
 
 ### Constraints
 
-- **Server-side only.** Do not import from `src/lib/flags.ts` in any client-side code or Vue island.
-- **Prerendered pages cannot read flags.** `Astro.locals.flags` is populated by middleware, which does not run for prerendered routes (currently only 404). Flag-gated UI must not appear on prerendered pages.
-- **Pages rendering the primary nav must be SSR.** Because `TheHeader.astro` reads `Astro.locals.flags` to gate nav links, any page using the default layout must have `prerender = false`. The 404 page is an exception: it uses a stripped-down `error.astro` layout (logo only, no nav) so it can stay prerendered.
+- **Server-side only.** Keep flag assignment in middleware; do not evaluate flags in client-side code.
+- **Prerendered pages cannot read flags.** Flag-gated UI must not appear on prerendered pages (currently only 404).
+- **Pages rendering the primary nav must be SSR.** Because `TheHeader.astro` reads `Astro.locals.flags` to gate nav links, any page using the default layout must have `prerender = false`. The 404 page uses a stripped-down `error.astro` layout (logo only, no nav) so it can stay prerendered.
 - **Vue islands receive flags as props.** Pass values from `Astro.locals.flags` as component props at render time.
-- **Propagation lag.** Flagsmith changes propagate to each warm Lambda instance within ~60s (local evaluation polling interval). Cold-started Lambdas fetch fresh data on init. Anonymous evaluation only — no user identity is passed to Flagsmith.
-- **Empty evaluation context.** All `getBooleanValue` calls pass `{}` explicitly. Do not pass user data — this is a regression-prevention guard.
 
 ## GROQ Query Projections
 

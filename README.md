@@ -57,7 +57,7 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 
 ### Feature flags
 
-- [OpenFeature](https://openfeature.dev/) with the [Flagsmith](https://www.flagsmith.com/) provider -- server-side feature flag evaluation in local-evaluation mode (no per-request HTTP). See the Feature Flags section in [AGENTS.md](AGENTS.md) for the flag-authoring workflow and constraints.
+Feature flags use a defaults-only server middleware bridge with no provider SDK or environment key. Topics remains off until PostHog replaces the bridge; PostHog is not installed yet. See the Feature Flags section in [AGENTS.md](AGENTS.md) for the server-side constraints.
 
 ### Testing
 
@@ -81,14 +81,13 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 
 The edge functions require the following environment variables, configured in Netlify:
 
-| Variable                    | Description                                                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `SANITY_PROJECT`            | Sanity project ID                                                                                                                    |
-| `SANITY_DATASET`            | Sanity dataset name                                                                                                                  |
-| `SANITY_API_VERSION`        | Sanity API version                                                                                                                   |
-| `SANITY_CDN`                | Whether to use the Sanity CDN (`true`/`false`)                                                                                       |
-| `SENTRY_AUTH_TOKEN`         | Sentry auth token (used during build for source map uploads)                                                                         |
-| `FLAGSMITH_ENVIRONMENT_KEY` | Flagsmith **Server-side SDK Token** for OpenFeature (one per Netlify scope; optional locally — flags fall back to defaults if unset) |
+| Variable             | Description                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| `SANITY_PROJECT`     | Sanity project ID                                            |
+| `SANITY_DATASET`     | Sanity dataset name                                          |
+| `SANITY_API_VERSION` | Sanity API version                                           |
+| `SANITY_CDN`         | Whether to use the Sanity CDN (`true`/`false`)               |
+| `SENTRY_AUTH_TOKEN`  | Sentry auth token (used during build for source map uploads) |
 
 ### Getting started
 
