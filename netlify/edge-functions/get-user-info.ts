@@ -3,21 +3,12 @@
  * Returns language preference, timezone and geo data
  */
 
-interface Geo {
-  country?: string;
-  region?: string;
-  city?: string;
-  timezone?: string;
-}
-
-interface Context {
-  geo?: Geo;
-}
+import type { Config, Context } from 'https://edge.netlify.com/v1/index.ts';
 
 interface UserInfo {
   acceptLanguage: string | null;
   timezone: string | undefined;
-  geo: Geo;
+  geo: Context['geo'];
 }
 
 /**
@@ -64,4 +55,4 @@ export default async (
  * Edge function configuration
  * Defines API endpoint path
  */
-export const config = { path: '/api/get-user-info' };
+export const config: Config = { path: '/api/get-user-info' };

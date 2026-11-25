@@ -5,11 +5,13 @@
  * - Implements caching to reduce API calls
  */
 
-import type { SanityClient } from 'https://esm.sh/@sanity/client';
+import type { Config, Context } from 'https://edge.netlify.com/v1/index.ts';
 import { PARENT_EVENTS_QUERY, CHILD_EVENTS_QUERY } from './lib/queries.ts';
 import { assembleEvents, type AssemblableEvent } from './lib/assembleEvents.ts';
 import { classifyEvents } from './lib/classifyEvents.ts';
 import { createSanityClient } from './lib/sanity-client.ts';
+
+type SanityClient = ReturnType<typeof createSanityClient>;
 
 interface Event {
   _id: string;
@@ -170,4 +172,4 @@ export default async function handler(
  * Edge function configuration
  * Defines API endpoint path
  */
-export const config = { path: '/api/get-events' };
+export const config: Config = { path: '/api/get-events' };

@@ -19,3 +19,18 @@ Ready to get your hands dirty? Scan through the [existing issues](https://github
 ## Development setup
 
 See the [Development section of the README](README.md#development) for instructions on setting up a local development environment, running tests, and building the project.
+
+### Type checking
+
+Check Astro pages and Vue templates from the repo root:
+
+```sh
+npx --yes --package @astrojs/check@0.9.12 -c 'astro-check'
+npx --yes --package vue-tsc@3.3.14 -c 'vue-tsc --noEmit'
+```
+
+Netlify Edge Functions run in Deno, not Node. Check them separately with [Deno](https://deno.com/) installed:
+
+```sh
+deno task --config netlify/edge-functions/deno.json check
+```
