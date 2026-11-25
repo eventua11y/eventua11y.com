@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// fallow-ignore-file unused-file -- vue-tsc loads this fixture through tests/types/tsconfig.json.
 import { useTemplateRef } from 'vue';
 
 const toggle = useTemplateRef('toggle');
