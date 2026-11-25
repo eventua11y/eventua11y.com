@@ -57,7 +57,7 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 
 ### Feature flags
 
-Feature flags use a defaults-only server middleware bridge with no provider SDK or environment key. Topics remains off until PostHog replaces the bridge; PostHog is not installed yet. See the Feature Flags section in [AGENTS.md](AGENTS.md) for the server-side constraints.
+Feature flags use server-side defaults. Topics stays off until PostHog takes over. See [Feature Flags](AGENTS.md#feature-flags) for details.
 
 ### Testing
 

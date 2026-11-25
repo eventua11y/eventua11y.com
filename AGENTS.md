@@ -145,9 +145,7 @@ When adding new pages or interactive components, add both layers. For detailed t
 
 ## Feature Flags
 
-Feature flags currently use a defaults-only server middleware bridge. `src/middleware/flags.ts` copies `FLAG_DEFAULTS` from `src/types/flags.ts` into `Astro.locals.flags` for each request. There is no provider SDK, network evaluation, or feature-flag environment variable.
-
-Keep `topic_pages_enabled` defaulted to `false` until PostHog replaces this bridge. Topics pages, navigation, sitemap entries and event topic links retain their existing consumers but remain off. Do not add PostHog as part of this cleanup or change hosted settings.
+Server middleware copies `FLAG_DEFAULTS` into `Astro.locals.flags` on each request. There is no remote flag evaluation. Keep Topics off until PostHog takes over.
 
 ### Diagnostic
 
