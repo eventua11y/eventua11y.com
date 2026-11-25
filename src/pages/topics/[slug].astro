@@ -17,10 +17,6 @@ export const prerender = false;
 
 const { slug } = Astro.params;
 
-if (!Astro.locals.flags.topic_pages_enabled) {
-  return Astro.rewrite('/not-found');
-}
-
 if (!slug) {
   return Astro.rewrite('/not-found');
 }

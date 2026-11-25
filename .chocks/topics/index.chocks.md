@@ -1,6 +1,6 @@
 ---
 title: Topics
-status: pre-release
+status: released
 tags:
   - sanity
   - javascript
@@ -8,4 +8,4 @@ sort: a8
 uid: f63d9ede25
 ---
 
-Browsing events by topic. Gated behind the `topic_pages_enabled` feature flag; the index and detail pages 404 when the flag is off.
+Browse accessibility and inclusive design events by topic.

@@ -12,10 +12,6 @@ import { getTopics } from '../../lib/sanity';
 
 export const prerender = false;
 
-if (!Astro.locals.flags.topic_pages_enabled) {
-  return Astro.rewrite('/not-found');
-}
-
 const topics = await getTopics();
 
 Astro.response.headers.set(

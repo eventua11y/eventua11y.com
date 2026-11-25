@@ -66,24 +66,15 @@ function toW3CDate(isoDate?: string): string {
   return date.toISOString().split('T')[0];
 }
 
-export const GET: APIRoute = async (context) => {
+export const GET: APIRoute = async () => {
   const site = 'https://eventua11y.com';
   const today = new Date().toISOString().split('T')[0];
-  const topicsEnabled = context.locals.flags.topic_pages_enabled;
 
-  // Fetch event and topic slugs from Sanity (topics only when flag is on)
-  let events: SitemapEvent[] = [];
-  let topics: SitemapTopic[] = [];
-  try {
-    if (topicsEnabled) {
-      [events, topics] = await Promise.all([getEventSlugs(), getTopicSlugs()]);
-    } else {
-      events = await getEventSlugs();
-    }
-  } catch {
-    // If Sanity is unreachable, generate sitemap with static pages only.
-    // This ensures crawlers still get a valid response.
-  }
+  // Keep static pages and any successful results if a Sanity query fails.
+  const [events, topics] = await Promise.all([
+    getEventSlugs().catch(() => []),
+    getTopicSlugs().catch(() => []),
+  ]);
 
   // Static pages with manually assigned priorities.
   // Priorities are relative hints to search engines about page importance
@@ -108,16 +99,12 @@ export const GET: APIRoute = async (context) => {
       priority: '0.5',
       lastmod: today,
     },
-    ...(topicsEnabled
-      ? [
-          {
-            loc: '/topics',
-            changefreq: 'weekly',
-            priority: '0.6',
-            lastmod: today,
-          },
-        ]
-      : []),
+    {
+      loc: '/topics',
+      changefreq: 'weekly',
+      priority: '0.6',
+      lastmod: today,
+    },
   ];
 
   const urlEntries = staticPages
