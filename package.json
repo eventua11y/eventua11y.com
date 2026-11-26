@@ -65,7 +65,7 @@
     "fallow": "^3.34.0",
     "globals": "^17.13.0",
     "knip": "^6.44.2",
-    "netlify-cli": "^27.16.3",
+    "netlify-cli": "^27.20.1",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^1.1.0",
     "typescript-eslint": "^8.65.0",
