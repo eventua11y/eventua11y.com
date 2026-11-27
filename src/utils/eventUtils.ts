@@ -1,28 +1,19 @@
 import dayjs from 'dayjs';
 import type { Event, ChildEvent, Book } from '../types/event';
+import { compareByDateAsc } from '../../netlify/edge-functions/lib/dateUtils';
+export { compareByDateAsc };
 
 // ── Date comparators ───────────────────────────────────────────────────
-
-/**
- * Comparator: sorts items with a `dateStart` field in ascending
- * chronological order (earliest first).
- */
-export function compareByDateAsc(
-  a: { dateStart: string },
-  b: { dateStart: string }
-): number {
-  return new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime();
-}
 
 /**
  * Comparator: sorts items with a `dateStart` field in descending
  * chronological order (latest first).
  */
 export function compareByDateDesc(
-  a: { dateStart: string },
-  b: { dateStart: string }
+  a: Parameters<typeof compareByDateAsc>[0],
+  b: Parameters<typeof compareByDateAsc>[0]
 ): number {
-  return new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime();
+  return compareByDateAsc(b, a);
 }
 
 // ── Grouping helpers ───────────────────────────────────────────────────
@@ -77,10 +68,10 @@ export function groupByMonth(
 }
 
 /**
- * Removes month groups that are before the current month.
- * Used by upcoming event lists to hide past months.
+ * Removes books before the current month without dropping events already
+ * classified as upcoming. An event's local month can differ from the viewer's.
  */
-export function filterPastMonths(
+export function filterPastBooks(
   groups: GroupedItems,
   currentYear: number,
   currentMonth: number
@@ -88,9 +79,12 @@ export function filterPastMonths(
   const filtered: GroupedItems = {};
   for (const [key, items] of Object.entries(groups)) {
     const [year, month] = key.split('-').map(Number);
-    if (year > currentYear || (year === currentYear && month >= currentMonth)) {
-      filtered[key] = items;
-    }
+    const isPast =
+      year < currentYear || (year === currentYear && month < currentMonth);
+    const visibleItems = isPast
+      ? items.filter((item) => item._type !== 'book')
+      : items;
+    if (visibleItems.length) filtered[key] = visibleItems;
   }
   return filtered;
 }

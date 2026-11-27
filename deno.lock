@@ -23,6 +23,12 @@
     "https://edge.netlify.com/bootstrap/cookie.ts": "8b0baae708989ca183c6f3b4ab3d029e6abcbc2e43f93edeb0ff447b3bbc3a05",
     "https://edge.netlify.com/bootstrap/edge_function.ts": "b8253e86aa83c67341f5cfedeba5049d77fbf84dcab7eceff7566b7728ae9b39",
     "https://edge.netlify.com/bootstrap/globals/types.ts": "eaa6148ded3121d8dee62dd91c86e7fe76601df0f3ca8d7962243a30f4c8935f",
+    "https://edge.netlify.com/v1/bootstrap/config.ts": "6a2ce0e544e15e8f8883a5c18da5948e37fd0f2619f68cb31f3af53c51817025",
+    "https://edge.netlify.com/v1/bootstrap/context.ts": "2260177df4a7d692f31177ccbf2de969cd8db1269c564a45517d6e47fd7d248f",
+    "https://edge.netlify.com/v1/bootstrap/cookie.ts": "8b0baae708989ca183c6f3b4ab3d029e6abcbc2e43f93edeb0ff447b3bbc3a05",
+    "https://edge.netlify.com/v1/bootstrap/edge_function.ts": "0c6c24959154a4ac64e24077adea5b4d23f01704a1dd1290df56fa9e4c6801f3",
+    "https://edge.netlify.com/v1/bootstrap/globals/types.ts": "eaa6148ded3121d8dee62dd91c86e7fe76601df0f3ca8d7962243a30f4c8935f",
+    "https://edge.netlify.com/v1/index.ts": "607baf43414ddf5d42a24cf0e0ac7d03cc02fbc96f21bc34f027935060e28793",
     "https://esm.sh/@sanity/client@7.13.1": "df14f8231ff9d9f29bc51456d32f1bc6f3b88b45f181f01bfddc24e52c558d55",
     "https://esm.sh/@sanity/client@7.13.1/denonext/client.mjs": "b3d6affbba731c7204b44f7565d8a76ecd64f1ea50f2e3c41574854b0b07ab92",
     "https://esm.sh/@sanity/client@7.13.1/denonext/csm.mjs": "b539029538fc52831009c4d9fb660a4c39898b9f601c351d3fb0dd3cce837a70",
@@ -240,55 +246,5 @@
     "https://esm.sh/rxjs@7.8.2?target=denonext": "c4954f7b66fadc20c3064ba6d80e57e4db8e5c6d173e019d6822ca7b1ab96d1f",
     "https://esm.sh/tslib@2.8.1/denonext/tslib.mjs": "ebce3cd5facb654623020337f867b426ba95f71596ba87acc9e6c6f4e55905ca",
     "https://esm.sh/tslib@2.8.1?target=denonext": "a89cbf082a0ad54e87ea85d75e6d5492b3e2ff0c5de9e3e478206a015b3f3992"
-  },
-  "workspace": {
-    "packageJson": {
-      "dependencies": [
-        "npm:@astrojs/netlify@^8.2.5",
-        "npm:@astrojs/vue@^7.0.2",
-        "npm:@awesome.me/webawesome@^3.13.0",
-        "npm:@axe-core/playwright@^4.13.0",
-        "npm:@codspeed/vitest-plugin@^5.7.1",
-        "npm:@eslint/js@^10.0.1",
-        "npm:@mattobee/chocks@0.8",
-        "npm:@openfeature/flagsmith-provider@~0.1.2",
-        "npm:@openfeature/server-sdk@^1.23.0",
-        "npm:@playwright/test@^1.60.0",
-        "npm:@portabletext/types@^4.0.2",
-        "npm:@sanity/client@^7.26.2",
-        "npm:@sentry/astro@^10.64.0",
-        "npm:@sentry/cli@^3.6.2",
-        "npm:@types/node@^26.4.1",
-        "npm:@vitest/coverage-v8@^4.1.11",
-        "npm:astro-portabletext@0.13",
-        "npm:astro@^7.3.2",
-        "npm:autoprefixer@^10.5.4",
-        "npm:concurrently@^10.0.5",
-        "npm:cssnano@^9.0.3",
-        "npm:dayjs@^1.11.23",
-        "npm:eslint-config-prettier@^10.1.8",
-        "npm:eslint-plugin-astro@^3.0.1",
-        "npm:eslint-plugin-playwright@^2.11.0",
-        "npm:eslint-plugin-vue@^10.10.0",
-        "npm:eslint@^10.8.1",
-        "npm:fallow@^3.17.0",
-        "npm:flagsmith-nodejs@^8.1.2",
-        "npm:globals@^17.11.0",
-        "npm:knip@^6.29.0",
-        "npm:netlify-cli@^27.1.1",
-        "npm:prettier-plugin-astro@~0.14.1",
-        "npm:prettier@^3.9.6",
-        "npm:typescript-eslint@^8.65.0",
-        "npm:vitest@^4.1.10",
-        "npm:vue@^3.5.25"
-      ],
-      "overrides": {
-        "vue": "^3.5.25",
-        "@vue/compiler-sfc": "^3.5.25",
-        "@vue/compiler-core": "^3.5.25",
-        "@vue/compiler-dom": "^3.5.25",
-        "@fastify/static": "^9.1.3"
-      }
-    }
   }
 }

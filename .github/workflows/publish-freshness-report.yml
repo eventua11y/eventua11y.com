@@ -1,0 +1,84 @@
+name: Publish freshness report
+
+on:
+  workflow_call:
+    inputs:
+      payload:
+        description: Serialized safe-output arguments.
+        type: string
+        required: false
+      analyses:
+        description: JSON array of objects with _id, changes, noChanges and notes. Include exactly one object per event with a prompt.
+        type: string
+        required: true
+    outputs:
+      status:
+        value: ${{ jobs.publish.outputs.status }}
+      url:
+        value: ${{ jobs.publish.outputs.url }}
+
+permissions: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      status: ${{ steps.publish.outputs.status }}
+      url: ${{ steps.publish.outputs.url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: freshness-snapshot
+          path: ${{ runner.temp }}/freshness
+      - uses: github/gh-aw/actions/setup@399a445fe2d8926c616b54b1b82a16b5b2be4445
+      - name: Validate and publish report
+        id: publish
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          FRESHNESS_ANALYSES: ${{ inputs.analyses }}
+          GH_AW_WORKFLOW_ID: event-freshness
+          GH_AW_WORKFLOW_NAME: Event Freshness Check
+          GH_AW_JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const { pathToFileURL } = require('node:url');
+            const actionsDir = `${process.env.RUNNER_TEMP}/gh-aw/actions`;
+            const { setupGlobals, createIssue } = require(`${actionsDir}/index.cjs`);
+            const { sanitizeContent } = require(`${actionsDir}/sanitize_content.cjs`);
+            const { buildAllowedDomains } = require(`${actionsDir}/sanitize_content_core.cjs`);
+            setupGlobals(core, github, context, exec, io, getOctokit);
+            const moduleUrl = pathToFileURL(`${process.env.GITHUB_WORKSPACE}/scripts/check-event-freshness.mjs`);
+            const {
+              buildValidatedReport,
+              confirmedPublication,
+              trustedWebsiteDomains,
+            } = await import(moduleUrl.href);
+            const snapshot = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/freshness/freshness-snapshot.json`, 'utf8'));
+            process.env.GH_AW_ALLOWED_DOMAINS = [
+              ...buildAllowedDomains(),
+              ...trustedWebsiteDomains(snapshot),
+            ].join(',');
+            const analyses = process.env.FRESHNESS_ANALYSES;
+            if (analyses.length > 60000) throw new Error('Freshness analyses exceed 60000 characters.');
+            const output = { items: [{ type: 'publish_freshness_report', analyses }] };
+            const report = buildValidatedReport(snapshot, output, sanitizeContent);
+            const result = confirmedPublication(await createIssue({
+              ...report,
+              labels: ['content'],
+              assignees: ['mattobee'],
+            }));
+            core.setOutput('status', result.status);
+            core.setOutput('url', result.url);

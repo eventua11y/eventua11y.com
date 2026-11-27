@@ -1,5 +1,10 @@
 <template>
-  <div id="filters" ref="filterToolbar" class="py-xs-s">
+  <div
+    v-show="filtersStore.eventsStatus !== 'error'"
+    id="filters"
+    ref="filterToolbar"
+    class="py-xs-s"
+  >
     <div class="container">
       <div class="filters__status">
         <p
@@ -49,7 +54,6 @@
             ></wa-icon>
             <span v-if="!isNarrow">Filter</span>
           </wa-button>
-          <TimezoneSelector />
         </div>
       </div>
     </div>
@@ -57,10 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { capture } from '../lib/analytics';
 import filtersStore from '../store/filtersStore';
-import TimezoneSelector from './TimezoneSelector.vue';
-import posthog from 'posthog-js';
+import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
 /**
  * FilterBar component
@@ -72,13 +77,26 @@ import posthog from 'posthog-js';
  * Reference to filter toolbar element for intersection observer
  * Used to add sticky positioning when scrolled
  */
-const filterToolbar = ref(null);
+const filterToolbar = ref<HTMLElement | null>(null);
+
+watch(
+  () => filtersStore.eventsStatus,
+  (status) => {
+    if (status === 'error') {
+      focusEventRegionIfNeeded(
+        [filterToolbar.value, document.getElementById('filter-drawer')],
+        '#upcoming-events'
+      );
+    }
+  },
+  { flush: 'sync' }
+);
 
 /**
  * Reference to awareness days switch component
  * Used to ensure proper initialization of checked state
  */
-const awarenessDaysSwitch = ref(null);
+const awarenessDaysSwitch = ref<WaSwitch | null>(null);
 
 /**
  * Tracks whether the viewport is narrow (≤699.98px)
@@ -97,29 +115,20 @@ function updateIsNarrow(e: MediaQueryListEvent | MediaQueryList) {
  */
 function resetFilters() {
   filtersStore.resetFilters();
-  if (
-    import.meta.env.PUBLIC_POSTHOG_KEY &&
-    import.meta.env.PUBLIC_POSTHOG_HOST
-  ) {
-    posthog.capture('filters_reset');
-  }
+  capture('filters_reset');
 }
 
 /**
  * Toggles awareness days filter
  * Updates store when switch changes
  */
-function toggleAwarenessDays(event) {
-  filtersStore.filters.showAwarenessDays = event.target.checked;
-  if (
-    import.meta.env.PUBLIC_POSTHOG_KEY &&
-    import.meta.env.PUBLIC_POSTHOG_HOST
-  ) {
-    posthog.capture('filters_changed', {
-      filter_name: 'show_awareness_days',
-      filter_value: event.target.checked,
-    });
-  }
+function toggleAwarenessDays(event: Event) {
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showAwarenessDays = checked;
+  capture('filters_changed', {
+    filter_name: 'show_awareness_days',
+    filter_value: checked,
+  });
 }
 
 /**

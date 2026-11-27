@@ -2,25 +2,20 @@
  * Event Freshness Checker
  *
  * Fetches upcoming events from Sanity, visits each event's official website,
- * and uses Claude to analyse the page content for discrepancies (date changes,
- * cancellations, CFS updates, etc.). Outputs a GitHub issue with findings.
+ * and prepares comparison prompts for the Copilot agentic workflow. Validates
+ * the agent's structured analysis before building the report in a safe-output job.
  *
  * Usage:
- *   SANITY_PROJECT=<id> ANTHROPIC_API_KEY=<key> node scripts/check-event-freshness.mjs
- *
- * Options:
- *   --dry-run   Print the report to stdout instead of creating a GitHub issue
+ *   SANITY_PROJECT=<id> node scripts/check-event-freshness.mjs --prepare snapshot.json
+ *   node scripts/check-event-freshness.mjs --report snapshot.json agent-output.json
  *
  * Environment:
  *   SANITY_PROJECT     Sanity project ID (required)
  *   SANITY_DATASET     Sanity dataset name (defaults to "production")
- *   ANTHROPIC_API_KEY  Anthropic API key for Claude analysis (required)
- *   FRESHNESS_MODEL    Override the Claude model ID (defaults to
- *                      claude-sonnet-4-5-20250929; set to e.g.
- *                      claude-haiku-4-5-20251001 for cheaper runs)
- *   GH_TOKEN           GitHub token for creating issues (required unless --dry-run)
  */
 
+import { readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { createClient } from '@sanity/client';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -31,33 +26,11 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
 
-const projectId = process.env.SANITY_PROJECT;
-const dataset = process.env.SANITY_DATASET || 'production';
-const anthropicKey = process.env.ANTHROPIC_API_KEY;
-const dryRun = process.argv.includes('--dry-run');
-
-if (!projectId) {
-  console.error('Missing required environment variable: SANITY_PROJECT');
-  process.exit(1);
-}
-
-if (!anthropicKey) {
-  console.error('Missing required environment variable: ANTHROPIC_API_KEY');
-  process.exit(1);
-}
-
-const sanity = createClient({
-  projectId,
-  dataset,
-  apiVersion: '2024-01-01',
-  useCdn: true,
-});
-
 // ---------------------------------------------------------------------------
 // Schema constraints
 //
 // Mirrors the Sanity event schema (eventua11y-sanity/schemas/event.js).
-// Used to validate Claude's suggestions deterministically before they are
+// Used to validate the agent's suggestions deterministically before they are
 // surfaced to humans, so we never recommend values the schema can't store
 // or changes to fields that are hidden for the event's type.
 //
@@ -126,164 +99,122 @@ const SELF_CANCELLING_PHRASES = [
   'already correct',
 ];
 
-/**
- * Decide whether a single suggested change should be kept.
- * Returns { keep: boolean, drop?: string } where `drop` explains why.
- *
- * Rules:
- *  1. Drop if the field is hidden for this event's type.
- *  2. Drop if the suggested value isn't representable in the schema.
- *  3. Drop if current and suggested are equivalent (datetime instants
- *     match, booleans/enums match literally).
- *  4. Drop if the reason text contradicts the suggestion.
- *  5. Drop datetime suggestions that resolve to a past date.
- *  6. Drop callForSpeakers toggles once the closing date has passed
- *     (no visible/behavioural effect).
- */
-function validateChange(change, event) {
-  const { field, current, suggested, reason } = change;
-
-  if (!field) return { keep: false, drop: 'missing field name' };
-
-  // Rule 1: hidden for theme events
-  if (event.type === 'theme' && HIDDEN_FOR_THEME.has(field)) {
-    return {
-      keep: false,
-      drop: `${field} is hidden for theme-type events`,
-    };
-  }
-
-  const type = FIELD_TYPES[field];
-
-  // Rule 2: representability
-  if (type === 'boolean') {
-    const s = String(suggested).toLowerCase().trim();
-    if (s !== 'true' && s !== 'false') {
-      return {
-        keep: false,
-        drop: `${field} is boolean; suggested "${suggested}" is not true/false`,
-      };
-    }
-  }
-
-  if (type === 'enum') {
-    const allowed = FIELD_ENUMS[field] || [];
-    const s = String(suggested).toLowerCase().trim();
-    if (!allowed.includes(s)) {
-      return {
-        keep: false,
-        drop: `${field} must be one of ${allowed.join('|')}; suggested "${suggested}"`,
-      };
-    }
-  }
-
-  if (type === 'datetime') {
-    // The suggested value is allowed to be a date string the model
-    // extracted from the website (e.g. "31 May 2026"). Reject only if
-    // it's literally "unknown" or "time unknown" — these can't be stored.
-    const s = String(suggested).toLowerCase().trim();
-    if (s === 'unknown' || s.includes('time unknown') || s === 'not set') {
-      return {
-        keep: false,
-        drop: `${field} is datetime; cannot store "${suggested}"`,
-      };
-    }
-  }
-
-  // Rule 3: equivalence
-  if (type === 'datetime' && current && suggested) {
-    // Parse the suggested string against a small set of human-readable
-    // date formats the prompt encourages. We compare calendar days in
-    // the event's timezone, not instants, because the model rarely
-    // includes a time component for date-only sources.
-    const tz = event.timezone || 'UTC';
-    const suggestedDay = parseSuggestedDate(suggested);
-    const currentDay = event[field] ? dayjs.utc(event[field]).tz(tz) : null;
-    if (
-      suggestedDay.isValid() &&
-      currentDay &&
-      suggestedDay.format('YYYY-MM-DD') === currentDay.format('YYYY-MM-DD')
-    ) {
-      // Same calendar day -- treat as equivalent unless the suggestion
-      // explicitly carries a different time component.
-      const reasonHasTimeChange = /\b\d{1,2}:\d{2}\b/.test(String(suggested));
-      if (!reasonHasTimeChange) {
-        return {
-          keep: false,
-          drop: `${field} suggested value resolves to same date as current`,
-        };
+function representabilityIssue({ field, suggested }) {
+  const value = String(suggested).toLowerCase().trim();
+  switch (FIELD_TYPES[field]) {
+    case 'boolean':
+      if (!['true', 'false'].includes(value)) {
+        return `${field} is boolean; suggested "${suggested}" is not true/false`;
       }
-    }
+      break;
+    case 'enum':
+      if (!FIELD_ENUMS[field].includes(value)) {
+        return `${field} must be one of ${FIELD_ENUMS[field].join('|')}; suggested "${suggested}"`;
+      }
+      break;
+    case 'datetime':
+      if (
+        value === 'unknown' ||
+        value.includes('time unknown') ||
+        value === 'not set'
+      ) {
+        return `${field} is datetime; cannot store "${suggested}"`;
+      }
+      break;
   }
+  return null;
+}
 
-  if (type === 'boolean' || type === 'enum') {
-    const c = String(current).toLowerCase().trim();
-    const s = String(suggested).toLowerCase().trim();
-    // Map the prompt's "yes"/"no"/"not set" prose for booleans so we
-    // can detect equivalence with the canonical true/false value.
-    const norm = (v) => {
-      if (v === 'yes') return 'true';
-      if (v === 'no') return 'false';
-      if (v === 'not set' || v === 'null' || v === '') return '';
-      return v;
-    };
-    if (norm(c) === norm(s)) {
-      return {
-        keep: false,
-        drop: `${field} current and suggested are equivalent (${suggested})`,
-      };
-    }
+function normalizeComparableValue(value) {
+  const normalized = String(value).toLowerCase().trim();
+  if (normalized === 'yes') return 'true';
+  if (normalized === 'no') return 'false';
+  if (['not set', 'null', ''].includes(normalized)) return '';
+  return normalized;
+}
+
+function equivalentDateIssue({ field, suggested }, event) {
+  // Compare calendar days in the event's timezone unless the source
+  // explicitly supplies a time.
+  const suggestedDay = parseSuggestedDate(suggested);
+  const currentDay = event[field]
+    ? dayjs.utc(event[field]).tz(event.timezone || 'UTC')
+    : null;
+  if (
+    suggestedDay.isValid() &&
+    currentDay &&
+    suggestedDay.format('YYYY-MM-DD') === currentDay.format('YYYY-MM-DD') &&
+    !/\b\d{1,2}:\d{2}\b/.test(String(suggested))
+  ) {
+    return `${field} suggested value resolves to same date as current`;
   }
+  return null;
+}
 
-  // Rule 4: self-cancelling reason text
-  const r = String(reason || '').toLowerCase();
-  for (const phrase of SELF_CANCELLING_PHRASES) {
-    if (r.includes(phrase)) {
-      return {
-        keep: false,
-        drop: `reason indicates no change needed ("${phrase}")`,
-      };
-    }
+function equivalenceIssue(change, event) {
+  const { field, current, suggested } = change;
+  const type = FIELD_TYPES[field];
+  if (type === 'datetime' && current && suggested) {
+    return equivalentDateIssue(change, event);
   }
+  if (
+    ['boolean', 'enum'].includes(type) &&
+    normalizeComparableValue(current) === normalizeComparableValue(suggested)
+  ) {
+    return `${field} current and suggested are equivalent (${suggested})`;
+  }
+  return null;
+}
 
-  // Rule 5: past-dated datetime suggestions for upcoming events
-  //
-  // The freshness check only runs against events whose dateEnd is in
-  // the future, so a suggestion that resolves to a past date is almost
-  // always a confused reading of a website that hasn't been updated for
-  // the new edition yet (e.g. DAW 2026 record vs. site still showing
-  // DAW 2025 wrap-up text). Those need a human eye, not a structured
-  // change. Surface as a note instead by dropping the change here.
-  if (type === 'datetime') {
+function contradictoryReasonIssue(reason) {
+  const text = String(reason || '').toLowerCase();
+  const phrase = SELF_CANCELLING_PHRASES.find((phrase) =>
+    text.includes(phrase)
+  );
+  return phrase ? `reason indicates no change needed ("${phrase}")` : null;
+}
+
+function staleChangeIssue({ field, suggested }, event) {
+  // Upcoming events may still link to a previous edition's website.
+  if (FIELD_TYPES[field] === 'datetime') {
     const suggestedDay = parseSuggestedDate(suggested);
     if (suggestedDay.isValid() && suggestedDay.isBefore(dayjs(), 'day')) {
-      return {
-        keep: false,
-        drop: `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`,
-      };
+      return `${field} suggested value (${suggested}) is in the past; likely website still shows previous edition`;
     }
   }
 
-  // Rule 6: no-op callForSpeakers toggles once the deadline has passed
-  //
-  // `callForSpeakers` only has a visible/behavioural effect while the
-  // call is open: the frontend derives openness via isCallForSpeakersOpen
-  // (callForSpeakers === true AND now < callForSpeakersClosingDate), and a
-  // CFS deadline event is only synthesised when the closing date is in the
-  // future. So once callForSpeakersClosingDate is in the past, flipping the
-  // boolean either way changes nothing users can see. Drop those to avoid
-  // surfacing purely cosmetic data-tidiness edits.
+  // Toggling an expired call no longer changes anything on the site.
   if (field === 'callForSpeakers' && event.callForSpeakersClosingDate) {
     const closingDay = dayjs(event.callForSpeakersClosingDate);
     if (closingDay.isValid() && closingDay.isBefore(dayjs())) {
-      return {
-        keep: false,
-        drop: `callForSpeakers closing date (${event.callForSpeakersClosingDate}) has passed; toggling the flag has no effect`,
-      };
+      return `callForSpeakers closing date (${event.callForSpeakersClosingDate}) has passed; toggling the flag has no effect`;
     }
   }
+  return null;
+}
 
-  return { keep: true };
+/**
+ * Validate a proposed change in rule order so the first rejection stays
+ * the reported reason.
+ *
+ * @returns {{ keep: boolean, drop?: string }}
+ */
+function validateChange(change, event) {
+  const { field } = change;
+  if (!field) return { keep: false, drop: 'missing field name' };
+  if (event.type === 'theme' && HIDDEN_FOR_THEME.has(field)) {
+    return { keep: false, drop: `${field} is hidden for theme-type events` };
+  }
+  if (!Object.hasOwn(FIELD_TYPES, field)) {
+    return { keep: false, drop: `unsupported field: ${field}` };
+  }
+
+  const issue =
+    representabilityIssue(change) ||
+    equivalenceIssue(change, event) ||
+    contradictoryReasonIssue(change.reason) ||
+    staleChangeIssue(change, event);
+  return issue ? { keep: false, drop: issue } : { keep: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -291,6 +222,16 @@ function validateChange(change, event) {
 // ---------------------------------------------------------------------------
 
 async function fetchUpcomingEvents() {
+  const projectId = process.env.SANITY_PROJECT;
+  if (!projectId) {
+    throw new Error('Missing required environment variable: SANITY_PROJECT');
+  }
+  const sanity = createClient({
+    projectId,
+    dataset: process.env.SANITY_DATASET || 'production',
+    apiVersion: '2024-01-01',
+    useCdn: true,
+  });
   const query = `*[_type == "event" && !defined(parent) && dateEnd >= now() && defined(website)] | order(dateStart asc) {
     _id,
     title,
@@ -402,18 +343,10 @@ function stripHtml(html, maxLength = 12000) {
 }
 
 // ---------------------------------------------------------------------------
-// Claude analysis
+// Agent analysis prompt
 // ---------------------------------------------------------------------------
 
-/**
- * Ask Claude to analyse the page text against the known event data.
- * Returns structured findings.
- *
- * @param {object} event - The Sanity event document
- * @param {string} pageText - Plain text extracted from the event website
- * @returns {Promise<{ findings: Array<{type: string, detail: string}>, eventDates: string|null, eventStatus: string|null, cfsStatus: string|null }>}
- */
-async function analyseWithClaude(event, pageText) {
+function eventTimingSummary(event) {
   // Convert UTC dates to the event's local timezone so comparisons with
   // the website are like-for-like.  International events (no timezone)
   // are presented in UTC.
@@ -432,37 +365,60 @@ async function analyseWithClaude(event, pageText) {
     ? ` (${event.timezone})`
     : ' (international event, no specific timezone)';
 
-  // Render values in their stored form so the model sees -- and the report
-  // surfaces -- literal database values, not English prose. This avoids the
-  // "yes -> false" confusion where the model thinks they differ.
-  const isTheme = event.type === 'theme';
+  return {
+    start: `${startStr}${tzNote}`,
+    end: `${endStr}${tzNote}`,
+    tz,
+    tzNote,
+  };
+}
+
+function attendanceSummary(event, { tz, tzNote }) {
+  // Keep literal stored values rather than translating booleans to yes/no.
+  const lines = [
+    `attendanceMode (enum): ${event.attendanceMode ?? 'null'}`,
+    `location (string): ${event.location ?? 'null'}`,
+    `callForSpeakers (boolean): ${event.callForSpeakers === true ? 'true' : event.callForSpeakers === false ? 'false' : 'null'}`,
+  ];
+  if (event.callForSpeakersClosingDate) {
+    lines.push(
+      `callForSpeakersClosingDate (datetime): ${dayjs.utc(event.callForSpeakersClosingDate).tz(tz).format('D MMMM YYYY [at] HH:mm')}${tzNote} (UTC: ${event.callForSpeakersClosingDate})`
+    );
+  }
+  return lines;
+}
+
+function buildEventSummary(event) {
+  const timing = eventTimingSummary(event);
   const summaryLines = [
     `Title: ${event.title}`,
     `Type: ${event.type}`,
-    `dateStart (datetime): ${startStr}${tzNote}`,
-    `dateEnd (datetime): ${endStr}${tzNote}`,
+    `dateStart (datetime): ${timing.start}`,
+    `dateEnd (datetime): ${timing.end}`,
     `eventStatus (enum): ${event.eventStatus || 'scheduled (default)'}`,
     `Is parent event (conference with sessions): ${event.isParent ? 'true' : 'false'}`,
   ];
-  if (!isTheme) {
-    summaryLines.push(
-      `attendanceMode (enum): ${event.attendanceMode ?? 'null'}`,
-      `location (string): ${event.location ?? 'null'}`,
-      `callForSpeakers (boolean): ${event.callForSpeakers === true ? 'true' : event.callForSpeakers === false ? 'false' : 'null'}`
-    );
-    if (event.callForSpeakersClosingDate) {
-      summaryLines.push(
-        `callForSpeakersClosingDate (datetime): ${dayjs.utc(event.callForSpeakersClosingDate).tz(tz).format('D MMMM YYYY [at] HH:mm')}${tzNote} (UTC: ${event.callForSpeakersClosingDate})`
-      );
-    }
+  if (event.type !== 'theme') {
+    summaryLines.push(...attendanceSummary(event, timing));
   }
-  const eventSummary = summaryLines.join('\n');
+  return summaryLines.join('\n');
+}
 
-  const themeFieldNote = isTheme
-    ? `\n\nIMPORTANT: This is a theme/awareness-day event (type === "theme"). The fields callForSpeakers, callForSpeakersClosingDate, and attendanceMode are HIDDEN in the CMS for theme events and must not appear in your "changes". Do not suggest values for them under any circumstances.`
-    : '';
+/**
+ * Prepare the same comparison instructions for each event.
+ *
+ * @param {object} event - The Sanity event document
+ * @param {string} pageText - Plain text extracted from the event website
+ * @returns {string}
+ */
+function buildAnalysisPrompt(event, pageText) {
+  const eventSummary = buildEventSummary(event);
+  const themeFieldNote =
+    event.type === 'theme'
+      ? `\n\nIMPORTANT: This is a theme/awareness-day event (type === "theme"). The fields callForSpeakers, callForSpeakersClosingDate, and attendanceMode are HIDDEN in the CMS for theme events and must not appear in your "changes". Do not suggest values for them under any circumstances.`
+      : '';
 
-  const prompt = `You are helping maintain a curated calendar of accessibility and inclusive design events. Compare the following event record from our database against the text extracted from the event's official website.
+  return `You are helping maintain a curated calendar of accessibility and inclusive design events. Compare the following event record from our database against the text extracted from the event's official website.
 
 ## Our database record
 
@@ -534,62 +490,39 @@ Rules:
 - "warning" severity = clear discrepancy needing a database update. "info" = ambiguous, worth a human glance.
 - Be conservative. When in doubt, use "notes" instead of "changes".
 - Never suggest changing isParent. This is an editorial decision about how we curate events, not something that can be inferred from a website. Events dedicated to accessibility (CSUN, AccessU, Inclusive Design 24) are standalone events. Only broad multi-topic conferences with embedded accessibility sessions (UX London, Figma Config) are marked as parent events.`;
-
-  const model = process.env.FRESHNESS_MODEL || 'claude-sonnet-4-5-20250929';
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': anthropicKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Claude API error (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '';
-
-  try {
-    // Strip markdown fences if the model adds them despite instructions
-    const cleaned = text
-      .replace(/^```(?:json)?\s*/m, '')
-      .replace(/\s*```\s*$/m, '')
-      .trim();
-    return JSON.parse(cleaned);
-  } catch {
-    console.warn(`  Warning: Could not parse Claude response as JSON`);
-    return {
-      findings: [
-        {
-          type: 'other',
-          severity: 'info',
-          detail: `AI analysis returned unparseable response: ${text.substring(0, 200)}`,
-        },
-      ],
-      eventDatesOnPage: null,
-      summary: 'Analysis inconclusive',
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------
 // Check a single event
 // ---------------------------------------------------------------------------
 
+function redirectFinding(originalUrl, finalUrl) {
+  if (finalUrl === originalUrl) return null;
+  const originalHost = new URL(originalUrl).hostname;
+  const finalHost = new URL(finalUrl).hostname;
+  if (
+    finalHost !== originalHost &&
+    !finalHost.endsWith('.' + originalHost) &&
+    !originalHost.endsWith('.' + finalHost)
+  ) {
+    return {
+      message: `Website redirected to a different domain: ${finalUrl}`,
+      severity: 'warning',
+    };
+  }
+  if (finalHost !== originalHost) {
+    return {
+      message: `Website redirected to subdomain: ${finalUrl}`,
+      severity: 'info',
+    };
+  }
+  return null;
+}
+
 /**
- * @returns {Promise<{ event, findings: string[], severity: 'ok'|'info'|'warning'|'error', analysis: object|null }>}
+ * @returns {Promise<{ event, findings: string[], severity: 'ok'|'info'|'warning'|'error', prompt?: string }>}
  */
-async function checkEvent(event) {
+async function prepareEvent(event) {
   const findings = [];
   let severity = 'ok';
 
@@ -603,38 +536,23 @@ async function checkEvent(event) {
   }
 
   const { status, finalUrl, text, error } = await fetchPage(event.website);
-
-  // --- Connection / HTTP errors ---
   if (error) {
     findings.push(`Could not reach website: ${error}`);
     return { event, findings, severity: 'error', analysis: null };
   }
-
   if (status >= 400) {
     findings.push(`Website returned HTTP ${status}`);
     severity = status === 404 ? 'error' : 'warning';
     return { event, findings, severity, analysis: null };
   }
 
-  // --- Redirect detection ---
-  if (finalUrl !== event.website) {
-    const originalHost = new URL(event.website).hostname;
-    const finalHost = new URL(finalUrl).hostname;
-
-    if (
-      finalHost !== originalHost &&
-      !finalHost.endsWith('.' + originalHost) &&
-      !originalHost.endsWith('.' + finalHost)
-    ) {
-      findings.push(`Website redirected to a different domain: ${finalUrl}`);
-      severity = 'warning';
-    } else if (finalHost !== originalHost) {
-      findings.push(`Website redirected to subdomain: ${finalUrl}`);
-      if (severity === 'ok') severity = 'info';
-    }
+  const redirect = redirectFinding(event.website, finalUrl);
+  if (redirect) {
+    findings.push(redirect.message);
+    severity = redirect.severity;
   }
 
-  // --- Page content analysis via Claude ---
+  // --- Prepare page content for the agent ---
   const plainText = stripHtml(text);
 
   if (plainText.length < 100) {
@@ -645,52 +563,64 @@ async function checkEvent(event) {
     return { event, findings, severity, analysis: null };
   }
 
-  const analysis = await analyseWithClaude(event, plainText);
+  return {
+    event,
+    findings,
+    severity,
+    prompt: buildAnalysisPrompt(event, plainText),
+  };
+}
 
-  // Validate every suggested change against the schema. The model's
-  // instructions cover this, but we double-check deterministically so a
-  // single bad model response can't introduce noisy or invalid suggestions.
+function validatedChanges(changes, event) {
+  const kept = [];
   const dropped = [];
-  if (analysis.changes && analysis.changes.length > 0) {
-    const kept = [];
-    for (const change of analysis.changes) {
-      const verdict = validateChange(change, event);
-      if (verdict.keep) {
-        kept.push(change);
-      } else {
-        dropped.push({ change, reason: verdict.drop });
-      }
-    }
-    analysis.changes = kept;
-    if (kept.length === 0 && (!analysis.notes || analysis.notes === null)) {
-      analysis.noChanges = true;
+  for (const change of changes) {
+    const candidate = { ...change, current: event[change.field] ?? null };
+    const verdict = validateChange(candidate, event);
+    if (verdict.keep) {
+      kept.push(candidate);
+    } else {
+      dropped.push({ change, reason: verdict.drop });
     }
   }
 
-  if (dropped.length > 0) {
-    // Surface drops at debug verbosity so failures are diagnosable without
-    // polluting the human-facing report.
-    for (const { change, reason } of dropped) {
-      console.warn(`  Dropped suggestion (${change.field || '?'}): ${reason}`);
-    }
+  for (const { change, reason } of dropped) {
+    console.warn(`  Dropped suggestion (${change.field || '?'}): ${reason}`);
+  }
+  return kept;
+}
+
+function analysisSeverity(current, changes, notes) {
+  if (current === 'error') return current;
+  if (changes.some((change) => change.severity === 'warning')) return 'warning';
+  if (current === 'ok' && (changes.length > 0 || notes)) return 'info';
+  return current;
+}
+
+function applyAnalysis(result, analysis) {
+  const { event } = result;
+  const findings = [...result.findings];
+  const hadChanges = analysis.changes.length > 0;
+  analysis.changes = validatedChanges(analysis.changes, event);
+  if (hadChanges && analysis.changes.length === 0 && !analysis.notes) {
+    analysis.noChanges = true;
   }
 
-  if (analysis.changes && analysis.changes.length > 0) {
-    for (const change of analysis.changes) {
-      findings.push(change);
-      if (change.severity === 'warning' && severity !== 'error') {
-        severity = 'warning';
-      } else if (change.severity === 'info' && severity === 'ok') {
-        severity = 'info';
-      }
-    }
-  }
-
+  findings.push(...analysis.changes);
   if (analysis.notes) {
     findings.push({ note: analysis.notes });
   }
 
-  return { event, findings, severity, analysis };
+  return {
+    event,
+    findings,
+    severity: analysisSeverity(
+      result.severity,
+      analysis.changes,
+      analysis.notes
+    ),
+    analysis,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -706,7 +636,11 @@ function formatDate(isoString) {
   });
 }
 
-function formatFindings(findings) {
+function formatFindings(findings, sanitize) {
+  const cell = (value) =>
+    sanitize(String(value ?? '-'))
+      .replace(/\|/g, '&#124;')
+      .replace(/[\r\n]+/g, ' ');
   const lines = [];
   const changes = findings.filter((f) => f.field);
   const notes = findings.filter((f) => f.note);
@@ -714,7 +648,7 @@ function formatFindings(findings) {
 
   // Plain string findings (from redirect/HTTP checks)
   for (const f of plain) {
-    lines.push(`- ${f}`);
+    lines.push(`- ${cell(f)}`);
   }
 
   // Structured changes as a table. GitHub Markdown requires a blank
@@ -728,7 +662,7 @@ function formatFindings(findings) {
     for (const c of changes) {
       const sev = c.severity === 'warning' ? '**' : '';
       lines.push(
-        `| ${sev}\`${c.field}\`${sev} | ${c.current || '-'} | ${c.suggested || '-'} | ${c.reason || '-'} |`
+        `| ${sev}\`${c.field}\`${sev} | ${cell(c.current)} | ${cell(c.suggested)} | ${cell(c.reason)} |`
       );
     }
   }
@@ -738,14 +672,30 @@ function formatFindings(findings) {
   if (notes.length > 0) {
     if (lines.length > 0) lines.push('');
     for (const n of notes) {
-      lines.push(`> ${n.note}`);
+      lines.push(`> ${cell(n.note)}`);
     }
   }
 
   return lines;
 }
 
-function buildReport(results) {
+function formatReportSection(title, results, sanitize) {
+  if (results.length === 0) return [];
+  const lines = [`## ${title} (${results.length})`, ''];
+  for (const { event, findings, severity } of results) {
+    const emphasis = severity === 'error' ? '**' : '';
+    lines.push(`### ${emphasis}${sanitize(event.title)}${emphasis}`);
+    lines.push(
+      `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
+    );
+    lines.push('');
+    lines.push(...formatFindings(findings, sanitize));
+    lines.push('');
+  }
+  return lines;
+}
+
+function buildReport(results, sanitize, checkedAt) {
   const warnings = results.filter(
     (r) => r.severity === 'warning' || r.severity === 'error'
   );
@@ -755,7 +705,7 @@ function buildReport(results) {
   const lines = [];
 
   lines.push(
-    `Checked ${results.length} upcoming events with websites on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+    `Checked ${results.length} upcoming events with websites on ${new Date(checkedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}.`
   );
   lines.push('');
 
@@ -767,36 +717,8 @@ function buildReport(results) {
     };
   }
 
-  // --- Issues needing attention ---
-  if (warnings.length > 0) {
-    lines.push(`## Needs attention (${warnings.length})`);
-    lines.push('');
-    for (const { event, findings, severity } of warnings) {
-      const icon = severity === 'error' ? '**' : '';
-      lines.push(`### ${icon}${event.title}${icon}`);
-      lines.push(
-        `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
-      );
-      lines.push('');
-      lines.push(...formatFindings(findings));
-      lines.push('');
-    }
-  }
-
-  // --- Informational ---
-  if (infos.length > 0) {
-    lines.push(`## For review (${infos.length})`);
-    lines.push('');
-    for (const { event, findings } of infos) {
-      lines.push(`### ${event.title}`);
-      lines.push(
-        `Sanity ID: \`${event._id}\` | ${formatDate(event.dateStart)} -- ${formatDate(event.dateEnd)} | ${event.website}`
-      );
-      lines.push('');
-      lines.push(...formatFindings(findings));
-      lines.push('');
-    }
-  }
+  lines.push(...formatReportSection('Needs attention', warnings, sanitize));
+  lines.push(...formatReportSection('For review', infos, sanitize));
 
   // --- Clean ---
   if (clean.length > 0) {
@@ -805,7 +727,7 @@ function buildReport(results) {
     );
     lines.push('');
     for (const { event } of clean) {
-      lines.push(`- ${event.title}`);
+      lines.push(`- ${sanitize(event.title)}`);
     }
     lines.push('');
     lines.push('</details>');
@@ -820,107 +742,154 @@ function buildReport(results) {
 }
 
 // ---------------------------------------------------------------------------
-// GitHub issue creation
+// Safe-output validation
 // ---------------------------------------------------------------------------
 
-async function createGitHubIssue(title, body) {
-  const { execFileSync } = await import('child_process');
-  const { writeFileSync, unlinkSync } = await import('fs');
-  const { tmpdir } = await import('os');
-  const { join } = await import('path');
-
-  // Write body to a temp file to avoid stdin piping issues in CI
-  const tmpFile = join(tmpdir(), `freshness-report-${Date.now()}.md`);
-  try {
-    writeFileSync(tmpFile, body, 'utf-8');
-
-    // Use execFileSync with an args array to avoid shell injection
-    const result = execFileSync(
-      'gh',
-      [
-        'issue',
-        'create',
-        '--repo',
-        'eventua11y/eventua11y.com',
-        '--title',
-        title,
-        '--label',
-        'content',
-        '--assignee',
-        'mattobee',
-        '--body-file',
-        tmpFile,
-      ],
-      { encoding: 'utf-8' }
-    );
-
-    return result.trim();
-  } finally {
-    try {
-      unlinkSync(tmpFile);
-    } catch {
-      // ignore cleanup errors
-    }
+function parseReportAnalyses(output) {
+  const requests = output.items.filter(
+    (item) => item.type === 'publish_freshness_report'
+  );
+  if (requests.length !== 1 || typeof requests[0].analyses !== 'string') {
+    throw new Error('Exactly one freshness report request is required');
   }
+  return JSON.parse(requests[0].analyses);
+}
+
+function isAnalysisShape(analysis) {
+  return (
+    Boolean(analysis) &&
+    Array.isArray(analysis.changes) &&
+    typeof analysis.noChanges === 'boolean' &&
+    (analysis.notes === null || typeof analysis.notes === 'string')
+  );
+}
+
+function isConsistentAnalysis(analysis) {
+  if (analysis.noChanges) return analysis.changes.length === 0;
+  return analysis.changes.length > 0 || Boolean(analysis.notes?.trim());
+}
+
+function isSuggestedChange(change) {
+  return (
+    Boolean(change) &&
+    typeof change.field === 'string' &&
+    ['warning', 'info'].includes(change.severity) &&
+    typeof change.suggested === 'string' &&
+    typeof change.reason === 'string' &&
+    Boolean(change.reason.trim())
+  );
+}
+
+function validateAnalyses(analyses, expected) {
+  const byId = new Map();
+  for (const analysis of analyses) {
+    if (
+      !isAnalysisShape(analysis) ||
+      !expected.has(analysis._id) ||
+      byId.has(analysis._id) ||
+      !isConsistentAnalysis(analysis)
+    ) {
+      throw new Error('Invalid, duplicate or unexpected event analysis');
+    }
+    for (const change of analysis.changes) {
+      if (!isSuggestedChange(change)) {
+        throw new Error('Invalid suggested change');
+      }
+    }
+    byId.set(analysis._id, analysis);
+  }
+  return byId;
+}
+
+export function trustedWebsiteDomains(snapshot) {
+  const domains = new Set();
+  for (const { event } of snapshot.results) {
+    const url = URL.parse(event.website);
+    if (
+      !url ||
+      url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
+      !/^[a-z0-9.-]+$/.test(url.hostname)
+    ) {
+      console.warn(`Not allowing unsafe report website for ${event._id}`);
+      continue;
+    }
+    domains.add(url.hostname);
+  }
+  return [...domains];
+}
+
+export function buildValidatedReport(snapshot, output, sanitize = String) {
+  const analyses = parseReportAnalyses(output);
+  const expected = new Set(
+    snapshot.results.filter((result) => result.prompt).map((r) => r.event._id)
+  );
+  if (!Array.isArray(analyses) || analyses.length !== expected.size) {
+    throw new Error('Analysis must cover every event with a comparison prompt');
+  }
+  const byId = validateAnalyses(analyses, expected);
+
+  const results = snapshot.results.map((result) =>
+    result.prompt ? applyAnalysis(result, byId.get(result.event._id)) : result
+  );
+  return buildReport(results, sanitize, snapshot.checkedAt);
+}
+
+export function confirmedPublication(result) {
+  const url = result?.issue?.html_url;
+  if (
+    result?.staged !== false ||
+    typeof url !== 'string' ||
+    url.trim() === ''
+  ) {
+    throw new Error('No validated freshness report was published.');
+  }
+  return { status: 'success', url };
 }
 
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
-async function main() {
-  console.log(dryRun ? 'DRY RUN: report will be printed, not filed\n' : '');
-
-  console.log('Fetching upcoming events from Sanity...');
+export async function prepareSnapshot() {
   const events = await fetchUpcomingEvents();
-  console.log(`Found ${events.length} upcoming events with websites.\n`);
-
-  if (events.length === 0) {
-    console.log('No upcoming events with websites to check.');
-    return;
-  }
-
-  // Check events sequentially to be polite to external servers and rate limits
+  console.log(`Found ${events.length} upcoming events with websites.`);
   const results = [];
   for (const event of events) {
-    process.stdout.write(`Checking: ${event.title}... `);
-    const result = await checkEvent(event);
-    const changeCount = result.analysis?.changes?.length || 0;
-    const note = result.analysis?.notes || '';
-    const summary =
-      changeCount > 0
-        ? `${changeCount} change${changeCount === 1 ? '' : 's'} suggested`
-        : note || 'no changes';
-    console.log(`${result.severity} - ${summary}`);
+    console.log(`Fetching: ${event.title}`);
+    const result = await prepareEvent(event);
     results.push(result);
-
-    // Small delay between requests
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-
-  const { title, body } = buildReport(results);
-
-  console.log('\n' + '='.repeat(60));
-  console.log(title);
-  console.log('='.repeat(60));
-  console.log(body);
-
-  if (!dryRun) {
-    console.log('\nCreating GitHub issue...');
-    try {
-      const issueUrl = await createGitHubIssue(title, body);
-      console.log(`Issue created: ${issueUrl}`);
-    } catch (err) {
-      console.error('Failed to create GitHub issue:', err.message);
-      console.error(
-        'Make sure GH_TOKEN is set or `gh auth login` has been run.'
-      );
-      process.exit(1);
-    }
-  }
+  return { checkedAt: new Date().toISOString(), results };
 }
 
-main().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+async function main() {
+  const [mode, snapshotPath, outputPath] = process.argv.slice(2);
+  if (mode === '--report' && snapshotPath && outputPath) {
+    const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'));
+    const output = JSON.parse(await readFile(outputPath, 'utf8'));
+    console.log(
+      JSON.stringify(buildValidatedReport(snapshot, output), null, 2)
+    );
+    return;
+  }
+  if (mode !== '--prepare' || !snapshotPath) {
+    throw new Error(
+      'Usage: --prepare snapshot.json | --report snapshot.json agent-output.json'
+    );
+  }
+  const snapshot = await prepareSnapshot();
+  await writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
+}
+
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main().catch((err) => {
+    console.error('Fatal error:', err);
+    process.exitCode = 1;
+  });
+}

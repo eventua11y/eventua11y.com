@@ -4,7 +4,7 @@ import codspeedPlugin from '@codspeed/vitest-plugin';
 export default defineConfig({
   plugins: [codspeedPlugin()],
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
     passWithNoTests: true,
     benchmark: {
       include: ['bench/**/*.bench.ts'],

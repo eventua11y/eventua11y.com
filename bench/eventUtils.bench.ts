@@ -3,11 +3,11 @@
  * on every render of the home page and the past events page.
  */
 
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import dayjs from '../src/lib/dayjs';
 import { getYearMonth } from '../src/utils/dateUtils';
 import {
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
   getEventMetaDescription,
   groupByMonth,
@@ -38,40 +38,40 @@ const getKey = (item: Event | Book) =>
 const upcomingGroups = groupByMonth(items, 'upcoming', getKey);
 const richDescription = makeRichDescription(8);
 
-describe('eventUtils - grouping', () => {
-  bench('groupByMonth (upcoming, 270 items)', () => {
+test('eventUtils - grouping', async ({ bench }) => {
+  await bench('groupByMonth (upcoming, 270 items)', () => {
     groupByMonth(items, 'upcoming', getKey);
-  });
+  }).run();
 
-  bench('groupByMonth (past, 270 items)', () => {
+  await bench('groupByMonth (past, 270 items)', () => {
     groupByMonth(items, 'past', getKey);
-  });
+  }).run();
 
-  bench('filterPastMonths', () => {
-    filterPastMonths(upcomingGroups, 2026, 3);
-  });
+  await bench('filterPastBooks', () => {
+    filterPastBooks(upcomingGroups, 2026, 3);
+  }).run();
 
-  bench('formatMonthHeading over every month group', () => {
+  await bench('formatMonthHeading over every month group', () => {
     for (const key of Object.keys(upcomingGroups)) {
       formatMonthHeading(key, now, 'en');
     }
-  });
+  }).run();
 });
 
-describe('eventUtils - event content', () => {
-  bench('portableTextToPlainText (8 blocks)', () => {
+test('eventUtils - event content', async ({ bench }) => {
+  await bench('portableTextToPlainText (8 blocks)', () => {
     portableTextToPlainText(richDescription);
-  });
+  }).run();
 
-  bench('getEventMetaDescription over 250 events', () => {
+  await bench('getEventMetaDescription over 250 events', () => {
     for (const event of events) {
       getEventMetaDescription(event);
     }
-  });
+  }).run();
 
-  bench('isCallForSpeakersOpen over 250 events', () => {
+  await bench('isCallForSpeakersOpen over 250 events', () => {
     for (const event of events) {
       isCallForSpeakersOpen(event);
     }
-  });
+  }).run();
 });

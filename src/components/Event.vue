@@ -178,7 +178,7 @@ const speakerDisplay = computed(() => {
       :dateStart="event.dateStart"
       :timezone="event.timezone"
       :isDeadline="true"
-      :isPast="isPast"
+      :showYear="isPast"
     />
     <span class="event__title"
       >Submit proposals for
@@ -202,13 +202,13 @@ const speakerDisplay = computed(() => {
       :timezone="event.timezone"
       :day="event.day"
       :type="event.type"
-      :isPast="isPast"
+      :showYear="isPast"
       :showCountdown="showCountdown"
       :showEnded="showEnded"
     />
 
     <div v-if="speakerDisplay" class="event__speakers text-small text-muted">
-      featuring <span v-html="speakerDisplay"></span>
+      featuring <span>{{ speakerDisplay }}</span>
     </div>
 
     <EventDelivery
@@ -248,7 +248,7 @@ const speakerDisplay = computed(() => {
             <EventChild
               :event="child"
               :showEnded="showEnded"
-              :isPast="isPast"
+              :showYear="isPast"
             />
           </li>
         </ol>

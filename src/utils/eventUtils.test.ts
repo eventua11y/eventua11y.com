@@ -3,7 +3,7 @@ import {
   isCallForSpeakersOpen,
   getEventUrl,
   groupByMonth,
-  filterPastMonths,
+  filterPastBooks,
   formatMonthHeading,
   compareByDateAsc,
   compareByDateDesc,
@@ -291,6 +291,17 @@ describe('compareByDateDesc', () => {
   });
 });
 
+it('sorts calendar events by their written dates without changing instant ordering', () => {
+  const july1 = { dateStart: '2030-07-01T23:00:00Z', day: true };
+  const july2 = { dateStart: '2030-07-02T00:00:00+11:00', type: 'theme' };
+  expect([july2, july1].sort(compareByDateAsc)).toEqual([july1, july2]);
+  expect([july1, july2].sort(compareByDateDesc)).toEqual([july2, july1]);
+
+  const timed = { dateStart: july1.dateStart };
+  const deadline = { dateStart: july2.dateStart, type: 'deadline' };
+  expect([timed, deadline].sort(compareByDateAsc)).toEqual([deadline, timed]);
+});
+
 // ── groupByMonth ───────────────────────────────────────────────────────
 
 describe('groupByMonth', () => {
@@ -409,62 +420,71 @@ describe('groupByMonth', () => {
   });
 });
 
-// ── filterPastMonths ───────────────────────────────────────────────────
+// ── filterPastBooks ───────────────────────────────────────────────────
 
-describe('filterPastMonths', () => {
-  it('removes months strictly before the current month', () => {
+describe('filterPastBooks', () => {
+  it('removes books strictly before the current month', () => {
     const groups = {
-      '2026-1': [makeEvent({ dateStart: '2026-01-15T10:00:00Z' })],
-      '2026-2': [makeEvent({ dateStart: '2026-02-15T10:00:00Z' })],
-      '2026-3': [makeEvent({ dateStart: '2026-03-15T10:00:00Z' })],
-      '2026-4': [makeEvent({ dateStart: '2026-04-15T10:00:00Z' })],
+      '2026-1': [makeBook('2026-01-15T10:00:00Z')],
+      '2026-2': [makeBook('2026-02-15T10:00:00Z')],
+      '2026-3': [makeBook('2026-03-15T10:00:00Z')],
+      '2026-4': [makeBook('2026-04-15T10:00:00Z')],
     };
 
-    const result = filterPastMonths(groups, 2026, 3);
+    const result = filterPastBooks(groups, 2026, 3);
 
     expect(Object.keys(result)).toEqual(['2026-3', '2026-4']);
   });
 
-  it('keeps the current month', () => {
+  it('keeps upcoming events grouped in an earlier month', () => {
+    const event = makeEvent({ dateStart: '2026-03-01T03:30:00Z' });
     const groups = {
-      '2026-3': [makeEvent({ dateStart: '2026-03-15T10:00:00Z' })],
+      '2026-2': [makeBook('2026-02-01T00:00:00Z'), event],
     };
 
-    const result = filterPastMonths(groups, 2026, 3);
+    expect(filterPastBooks(groups, 2026, 3)).toEqual({ '2026-2': [event] });
+  });
+
+  it('keeps the current month', () => {
+    const groups = {
+      '2026-3': [makeBook('2026-03-15T10:00:00Z')],
+    };
+
+    const result = filterPastBooks(groups, 2026, 3);
 
     expect(Object.keys(result)).toContain('2026-3');
   });
 
   it('keeps future months from a later year', () => {
     const groups = {
-      '2025-12': [makeEvent({ dateStart: '2025-12-01T10:00:00Z' })],
-      '2026-1': [makeEvent({ dateStart: '2026-01-01T10:00:00Z' })],
+      '2025-12': [makeBook('2025-12-01T10:00:00Z')],
+      '2026-1': [makeBook('2026-01-01T10:00:00Z')],
     };
 
     // Current: December 2025
-    const result = filterPastMonths(groups, 2025, 12);
+    const result = filterPastBooks(groups, 2025, 12);
 
     expect(Object.keys(result)).toEqual(['2025-12', '2026-1']);
   });
 
   it('removes months from a previous year', () => {
     const groups = {
-      '2025-11': [makeEvent({ dateStart: '2025-11-01T10:00:00Z' })],
-      '2026-3': [makeEvent({ dateStart: '2026-03-01T10:00:00Z' })],
+      '2025-11': [makeBook('2025-11-01T10:00:00Z')],
+      '2026-3': [makeBook('2026-03-01T10:00:00Z')],
     };
 
-    const result = filterPastMonths(groups, 2026, 3);
+    const result = filterPastBooks(groups, 2026, 3);
 
     expect(Object.keys(result)).toEqual(['2026-3']);
   });
 
-  it('returns empty object when all months are in the past', () => {
+  it('returns an empty object when all books are in past months', () => {
     const groups = {
-      '2026-1': [makeEvent({ dateStart: '2026-01-01T10:00:00Z' })],
-      '2026-2': [makeEvent({ dateStart: '2026-02-01T10:00:00Z' })],
+      '2026-1': [makeBook('2026-01-01T10:00:00Z')],
+      '2026-2': [makeBook('2026-02-01T10:00:00Z')],
     };
 
-    const result = filterPastMonths(groups, 2026, 3);
+    const result = filterPastBooks(groups, 2026, 3);
 
     expect(result).toEqual({});
   });

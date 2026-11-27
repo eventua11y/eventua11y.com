@@ -13,8 +13,6 @@ const ATTENDANCE_MODES = {
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import posthog from 'posthog-js';
-
 type AttendanceMode = (typeof ATTENDANCE_MODES)[keyof typeof ATTENDANCE_MODES];
 
 const props = withDefaults(
@@ -50,17 +48,6 @@ const displayLocation = computed(() => props.location || 'International');
 const locationIcon = computed(() =>
   displayLocation.value === 'International' ? 'globe' : 'location-dot'
 );
-
-function captureWebsiteClick() {
-  if (
-    import.meta.env.PUBLIC_POSTHOG_KEY &&
-    import.meta.env.PUBLIC_POSTHOG_HOST
-  ) {
-    posthog.capture('event_website_clicked', {
-      event_type: props.eventType || 'unknown',
-    });
-  }
-}
 </script>
 
 <template>
@@ -117,7 +104,7 @@ function captureWebsiteClick() {
         rel="external noopener noreferrer"
         class="event__website-link"
         :aria-describedby="headingId"
-        @click="captureWebsiteClick"
+        :data-analytics-event-type="eventType || 'unknown'"
         >Event website<span class="sr-only"> (opens external site)</span></a
       >
     </template>

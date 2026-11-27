@@ -55,10 +55,6 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 - [Netlify](https://www.netlify.com/) -- hosting with automatic deploys from the `main` branch. Feature branches are deployed to preview URLs.
 - [Sentry](https://sentry.io/) -- error tracking and performance monitoring
 
-### Feature flags
-
-- [OpenFeature](https://openfeature.dev/) with the [Flagsmith](https://www.flagsmith.com/) provider -- server-side feature flag evaluation in local-evaluation mode (no per-request HTTP). See the Feature Flags section in [AGENTS.md](AGENTS.md) for the flag-authoring workflow and constraints.
-
 ### Testing
 
 - [Playwright](https://playwright.dev/) -- end-to-end and accessibility tests
@@ -81,14 +77,23 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 
 The edge functions require the following environment variables, configured in Netlify:
 
-| Variable                    | Description                                                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `SANITY_PROJECT`            | Sanity project ID                                                                                                                    |
-| `SANITY_DATASET`            | Sanity dataset name                                                                                                                  |
-| `SANITY_API_VERSION`        | Sanity API version                                                                                                                   |
-| `SANITY_CDN`                | Whether to use the Sanity CDN (`true`/`false`)                                                                                       |
-| `SENTRY_AUTH_TOKEN`         | Sentry auth token (used during build for source map uploads)                                                                         |
-| `FLAGSMITH_ENVIRONMENT_KEY` | Flagsmith **Server-side SDK Token** for OpenFeature (one per Netlify scope; optional locally — flags fall back to defaults if unset) |
+| Variable             | Description                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| `SANITY_PROJECT`     | Sanity project ID                                            |
+| `SANITY_DATASET`     | Sanity dataset name                                          |
+| `SANITY_API_VERSION` | Sanity API version                                           |
+| `SANITY_CDN`         | Whether to use the Sanity CDN (`true`/`false`)               |
+| `SENTRY_AUTH_TOKEN`  | Sentry auth token (used during build for source map uploads) |
+
+PostHog is optional. Set `PUBLIC_POSTHOG_KEY` (the public project token) and
+`PUBLIC_POSTHOG_HOST` (the ingestion URL, e.g. `https://eu.i.posthog.com`) in
+the Netlify **Builds** scope for the deploy contexts you want to track. Use a
+separate PostHog project for deploy previews so test traffic doesn't appear in
+production analytics. Rebuild after changing either value.
+
+PostHog captures selected interactions, unhandled browser exceptions, and two
+startup logs. It doesn't record sessions, capture console output, or store a
+visitor ID across pages. Fathom still handles page analytics.
 
 ### Getting started
 
@@ -136,6 +141,10 @@ and assembly utilities. They run with Vitest and are tracked continuously by
 ```sh
 npm run bench
 ```
+
+Use Vitest 5's `bench` fixture inside `test()` and await each `bench(...).run()`.
+Keep test and benchmark names stable. CodSpeed includes both in the benchmark
+identity, so renaming either starts a new performance history.
 
 ### Building
 

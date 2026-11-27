@@ -1,5 +1,9 @@
 <template>
-  <wa-drawer id="filter-drawer" label="Filters">
+  <wa-drawer
+    v-if="filtersStore.eventsStatus !== 'error'"
+    id="filter-drawer"
+    label="Filters"
+  >
     <div class="flow flow-l">
       <div class="flow flow-xs">
         <wa-radio-group
@@ -84,13 +88,15 @@
 </template>
 
 <script setup lang="ts">
+import type WaRadioGroup from '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
+import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
 import { ref, onMounted } from 'vue';
+import { capture } from '../lib/analytics';
 import filtersStore from '../store/filtersStore';
-import posthog from 'posthog-js';
 
-const awarenessDaysSwitch = ref(null);
-const booksSwitch = ref(null);
-const deadlinesSwitch = ref(null);
+const awarenessDaysSwitch = ref<WaSwitch | null>(null);
+const booksSwitch = ref<WaSwitch | null>(null);
+const deadlinesSwitch = ref<WaSwitch | null>(null);
 
 onMounted(() => {
   // Only handle switch initialization
@@ -109,49 +115,41 @@ onMounted(() => {
 });
 
 function captureFilterChange(filterName: string, value: string | boolean) {
-  if (
-    import.meta.env.PUBLIC_POSTHOG_KEY &&
-    import.meta.env.PUBLIC_POSTHOG_HOST
-  ) {
-    posthog.capture('filters_changed', {
-      filter_name: filterName,
-      filter_value: value,
-    });
-  }
+  capture('filters_changed', { filter_name: filterName, filter_value: value });
 }
 
 function resetFilters() {
   filtersStore.resetFilters();
-  if (
-    import.meta.env.PUBLIC_POSTHOG_KEY &&
-    import.meta.env.PUBLIC_POSTHOG_HOST
-  ) {
-    posthog.capture('filters_reset');
-  }
+  capture('filters_reset');
 }
 
-function toggleAwarenessDays(event) {
-  filtersStore.filters.showAwarenessDays = event.target.checked;
-  captureFilterChange('show_awareness_days', event.target.checked);
+function toggleAwarenessDays(event: Event) {
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showAwarenessDays = checked;
+  captureFilterChange('show_awareness_days', checked);
 }
 
-function toggleBooks(event) {
-  filtersStore.filters.showBooks = event.target.checked;
-  captureFilterChange('show_books', event.target.checked);
+function toggleBooks(event: Event) {
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showBooks = checked;
+  captureFilterChange('show_books', checked);
 }
 
-function toggleDeadlines(event) {
-  filtersStore.filters.showDeadlines = event.target.checked;
-  captureFilterChange('show_deadlines', event.target.checked);
+function toggleDeadlines(event: Event) {
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showDeadlines = checked;
+  captureFilterChange('show_deadlines', checked);
 }
 
-// Add update handler for radio groups
-function updateFilter(
-  filterName: 'cfs' | 'attendance' | 'cost',
-  event: CustomEvent
+function updateFilter<Key extends 'cfs' | 'attendance' | 'cost'>(
+  filterName: Key,
+  event: Event
 ) {
-  filtersStore.filters[filterName] = event.target.value;
-  captureFilterChange(filterName, event.target.value);
+  const group = event.currentTarget as WaRadioGroup;
+  // The options above define the allowed values for each filter.
+  filtersStore.filters[filterName] =
+    group.value as (typeof filtersStore.filters)[Key];
+  captureFilterChange(filterName, filtersStore.filters[filterName]);
 }
 </script>
 

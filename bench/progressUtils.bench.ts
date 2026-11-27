@@ -3,7 +3,7 @@
  * event currently on screen, so they run repeatedly while the page is open.
  */
 
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import dayjs from '../src/lib/dayjs';
 import {
   getCountdownLabel,
@@ -46,40 +46,40 @@ const multiDay: ProgressOptions = {
   showEnded: true,
 };
 
-describe('progressUtils - single event', () => {
-  bench('isHappeningNow', () => {
+test('progressUtils - single event', async ({ bench }) => {
+  await bench('isHappeningNow', () => {
     isHappeningNow(now, inProgress);
-  });
+  }).run();
 
-  bench('getProgress (timed event in progress)', () => {
+  await bench('getProgress (timed event in progress)', () => {
     getProgress(now, inProgress);
-  });
+  }).run();
 
-  bench('getTimeRemaining (timed event in progress)', () => {
+  await bench('getTimeRemaining (timed event in progress)', () => {
     getTimeRemaining(now, inProgress);
-  });
+  }).run();
 
-  bench('getTimeRemaining (multi-day all-day event)', () => {
+  await bench('getTimeRemaining (multi-day all-day event)', () => {
     getTimeRemaining(now, multiDay);
-  });
+  }).run();
 
-  bench('getCountdownLabel (upcoming event)', () => {
+  await bench('getCountdownLabel (upcoming event)', () => {
     getCountdownLabel(now, {
       dateStart: '2026-09-01T09:00:00Z',
       dateEnd: '2026-09-02T17:00:00Z',
       timezone: 'Europe/London',
       showCountdown: true,
     });
-  });
+  }).run();
 });
 
-describe('progressUtils - full event list', () => {
-  bench('progress + labels over 250 events', () => {
+test('progressUtils - full event list', async ({ bench }) => {
+  await bench('progress + labels over 250 events', () => {
     for (const option of options) {
       getProgress(now, option);
       getTimeRemaining(now, option);
       getCountdownLabel(now, option);
       getTimeSinceEnded(now, option);
     }
-  });
+  }).run();
 });

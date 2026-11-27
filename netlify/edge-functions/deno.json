@@ -1,0 +1,10 @@
+{
+  "nodeModulesDir": "none",
+  "lock": {
+    "path": "../../deno.lock",
+    "frozen": true
+  },
+  "tasks": {
+    "check": "deno check --allow-import=esm.sh,edge.netlify.com **/*.ts"
+  }
+}

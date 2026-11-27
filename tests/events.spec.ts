@@ -2,13 +2,13 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test.beforeEach(async ({ page, baseURL }) => {
-  await page.goto(baseURL);
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
   // await page.waitForLoadState('networkidle');
-  const filterDrawer = page.locator('#filter-drawer');
-  if ((await filterDrawer.getAttribute('open')) !== null) {
+  const openFilterDrawer = page.locator('#filter-drawer[open]');
+  if ((await openFilterDrawer.count()) > 0) {
     await page.keyboard.press('Escape');
-    await expect(filterDrawer).not.toHaveAttribute('open');
+    await expect(openFilterDrawer).toHaveCount(0);
   }
   await page.waitForSelector('#upcoming-events');
 });
@@ -43,5 +43,5 @@ test('has at least one upcoming event', async ({ page }) => {
 
   const upcomingEvents = page.locator('.event');
   const countOfEvents = await upcomingEvents.count();
-  await expect(countOfEvents).toBeGreaterThan(0);
+  expect(countOfEvents).toBeGreaterThan(0);
 });
