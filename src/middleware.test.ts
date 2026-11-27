@@ -21,24 +21,35 @@ beforeEach(() => {
 
 afterEach(() => vi.unstubAllEnvs());
 
-describe('Homepage CDN cache eligibility', () => {
+describe('Event listing CDN cache eligibility', () => {
   it.each([
     { scenario: 'a successful GET', expected: 'public, s-maxage=60' },
     { scenario: 'a Set-Cookie header', setCookie: true },
     { scenario: 'an Astro cookie queued during rendering', queueCookie: true },
     { scenario: 'a HEAD request', method: 'HEAD' },
+    { scenario: 'the events API', path: '/api/get-events' },
+    { scenario: 'an event detail page', path: '/events/example' },
+    { scenario: 'the topics index', path: '/topics' },
+    { scenario: 'a topic detail page', path: '/topics/example' },
     { scenario: 'a non-200 response', status: 503 },
   ])(
     'handles $scenario',
-    async ({ expected, setCookie, queueCookie, method, status }) => {
+    async ({
+      expected,
+      setCookie,
+      queueCookie,
+      method,
+      status,
+      path = '/',
+    }) => {
       const { onRequest } = await import('./middleware');
-      const request = new Request('https://example.test/', { method });
+      const request = new Request(`https://example.test${path}`, { method });
       const context = createContext({ request, defaultLocale: '' });
       const headers = new Headers({ 'Content-Type': 'text/html' });
       if (setCookie) headers.set('Set-Cookie', 'test=value');
 
       const response = await onRequest(context, async () => {
-        context.locals.homepageEventsLoaded = true;
+        context.locals.staticEventListLoaded = true;
         if (queueCookie) context.cookies.set('test', 'value');
         return new Response(null, { status, headers });
       });

@@ -130,15 +130,48 @@ describe('Homepage CDN caching', () => {
       );
     }
   );
+});
 
-  it('keeps the past listing on its existing cache policy', async () => {
-    const response = await renderPage('/past-events');
+describe('Past Events CDN caching', () => {
+  const event = {
+    _id: 'past-event',
+    title: 'Fixture past accessibility conference',
+    type: 'conference',
+    dateStart: '2025-01-10',
+  } satisfies Event;
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get(netlifyCache)).toBeNull();
-    expect(response.headers.get('Cache-Control')).toBe(browserCache);
-    expect(await response.text()).toContain(
-      'There are no past events to display.'
-    );
-  });
+  it.each([
+    { path: '/past-events', past: [event], expectedText: event.title },
+    {
+      path: '/past-events/',
+      past: [],
+      expectedText: 'There are no past events to display.',
+    },
+  ])(
+    'caches $path at the edge but keeps browser caching private',
+    async ({ path, past, expectedText }) => {
+      events.mockResolvedValue({ future: [], past });
+
+      const response = await renderPage(path);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get(netlifyCache)).toBe('public, s-maxage=60');
+      expect(response.headers.get('Cache-Control')).toBe(browserCache);
+      expect(await response.text()).toContain(expectedText);
+    }
+  );
+
+  it.each(Object.entries({ events, books }))(
+    'does not cache the 200 fallback when the Sanity %s read fails',
+    async (_, read) => {
+      read.mockRejectedValue(new Error('Sanity unavailable'));
+
+      const response = await renderPage('/past-events');
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get(netlifyCache)).toBeNull();
+      expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+      expect(await response.text()).toContain('Unable to load past events.');
+    }
+  );
 });

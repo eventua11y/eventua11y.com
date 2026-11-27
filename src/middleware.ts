@@ -56,8 +56,8 @@ export const onRequest = (async (context, next) => {
   const renderWithCacheHeaders = async () => {
     const response = await next();
     if (
-      context.locals?.homepageEventsLoaded &&
-      context.url.pathname === '/' &&
+      context.locals?.staticEventListLoaded &&
+      ['/', '/past-events', '/past-events/'].includes(context.url.pathname) &&
       context.request.method === 'GET' &&
       response.status === 200 &&
       response.headers.get('Content-Type')?.split(';')[0] === 'text/html' &&

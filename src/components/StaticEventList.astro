@@ -11,19 +11,16 @@
  */
 import StaticEvent from './StaticEvent.astro';
 import StaticEventBook from './StaticEventBook.astro';
-import {
-  loadStaticEvents,
-  type StaticEventListResult,
-} from '../lib/staticEventList';
+import type { StaticEventListResult } from '../lib/staticEventList';
 import { formatMonthHeading } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
 
-type Props =
-  { type: 'upcoming'; result: StaticEventListResult } | { type: 'past' };
+interface Props {
+  type: 'upcoming' | 'past';
+  result: StaticEventListResult;
+}
 
-const props = Astro.props;
-const { type } = props;
-const result = type === 'past' ? await loadStaticEvents(type) : props.result;
+const { type, result } = Astro.props;
 ---
 
 {!result.success ? (
