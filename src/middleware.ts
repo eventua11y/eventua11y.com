@@ -56,7 +56,7 @@ export const onRequest = (async (context, next) => {
   const renderWithCacheHeaders = async () => {
     const response = await next();
     if (
-      context.locals?.staticEventsLoaded &&
+      context.locals?.staticEventListLoaded &&
       ['/', '/past-events', '/past-events/'].includes(context.url.pathname) &&
       context.request.method === 'GET' &&
       response.status === 200 &&

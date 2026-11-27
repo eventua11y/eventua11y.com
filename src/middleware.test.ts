@@ -49,7 +49,7 @@ describe('Event listing CDN cache eligibility', () => {
       if (setCookie) headers.set('Set-Cookie', 'test=value');
 
       const response = await onRequest(context, async () => {
-        context.locals.staticEventsLoaded = true;
+        context.locals.staticEventListLoaded = true;
         if (queueCookie) context.cookies.set('test', 'value');
         return new Response(null, { status, headers });
       });

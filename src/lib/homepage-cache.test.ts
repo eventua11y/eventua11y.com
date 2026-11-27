@@ -148,7 +148,7 @@ describe('Past Events CDN caching', () => {
       expectedText: 'There are no past events to display.',
     },
   ])(
-    'opts a successful $path listing into shared caching without making the browser cache public',
+    'caches $path at the edge but keeps browser caching private',
     async ({ path, past, expectedText }) => {
       events.mockResolvedValue({ future: [], past });
 
@@ -161,11 +161,8 @@ describe('Past Events CDN caching', () => {
     }
   );
 
-  it.each([
-    ['events', events],
-    ['books', books],
-  ] as const)(
-    'renders an uncacheable 200 fallback when Sanity %s fail',
+  it.each(Object.entries({ events, books }))(
+    'does not cache the 200 fallback when the Sanity %s read fails',
     async (_, read) => {
       read.mockRejectedValue(new Error('Sanity unavailable'));
 

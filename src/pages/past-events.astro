@@ -10,7 +10,7 @@ export const prerender = false;
 
 // Resolve the fallback before streaming so a load failure cannot be cached.
 const staticEvents = await loadStaticEvents('past');
-Astro.locals.staticEventsLoaded = staticEvents.success;
+Astro.locals.staticEventListLoaded = staticEvents.success;
 Astro.response.headers.set(
   'Cache-Control',
   staticEvents.success
