@@ -7,11 +7,24 @@ const host = import.meta.env.PUBLIC_POSTHOG_HOST;
 const ignoredException =
   /Failed to execute '(hide|show)Popover' on 'HTMLElement'|^Load failed\b|^error loading dynamically imported module|Object Not Found Matching Id:|The object can not be found here\./;
 
+function redactWebVitalsUrls(properties: Properties) {
+  // PostHog needs the page URL for its breakdown, but not the query or fragment.
+  const pageUrl = location.origin + location.pathname;
+  properties.$current_url = pageUrl;
+  for (const name of ['CLS', 'FCP', 'INP', 'LCP']) {
+    const metric = properties[`$web_vitals_${name}_event`];
+    if (!metric) continue;
+    metric.$current_url = pageUrl;
+    delete metric.navigationURL;
+  }
+}
+
 const client =
   !import.meta.env.SSR && key && host
     ? Promise.all([
         import('posthog-js'),
         import('posthog-js/dist/exception-autocapture'),
+        import('posthog-js/dist/web-vitals'),
       ])
         .then(([{ default: posthog }]) => {
           posthog.init(key, {
@@ -22,6 +35,11 @@ const client =
             capture_pageview: false,
             capture_pageleave: false,
             disable_session_recording: true,
+            capture_performance: {
+              web_vitals: true,
+              web_vitals_attribution: false,
+              network_timing: false,
+            },
             disable_surveys: true,
             persistence: 'memory',
             person_profiles: 'never',
@@ -45,6 +63,10 @@ const client =
                 exceptions.some(({ value }) => ignoredException.test(value))
               ) {
                 return null;
+              }
+
+              if (event.event === '$web_vitals') {
+                redactWebVitalsUrls(event.properties);
               }
 
               // Session attribution can include arbitrary campaign parameters.
