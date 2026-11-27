@@ -47,7 +47,7 @@
     "minimatch": "^11.0.1"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.13.0",
+    "@axe-core/playwright": "^4.14.0",
     "@codspeed/vitest-plugin": "^6.1.1",
     "@eslint/js": "^10.0.1",
     "@mattobee/chocks": "^0.8.0",
