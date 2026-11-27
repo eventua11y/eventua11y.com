@@ -183,7 +183,11 @@ const eventHasEnded = dayjs().isAfter(eventEnd);
 const supplementaryLinks = eventHasEnded
   ? []
   : ([
-      event.registration && { href: event.registration, label: 'Registration' },
+      event.registration && {
+        href: event.registration,
+        label: 'Registration',
+        analyticsEventName: 'event_registration_clicked',
+      },
       event.codeOfConduct && {
         href: event.codeOfConduct,
         label: 'Code of conduct',
@@ -197,8 +201,13 @@ const supplementaryLinks = eventHasEnded
         event.callForSpeakersLink && {
           href: event.callForSpeakersLink,
           label: 'Call for speakers',
+          analyticsEventName: 'event_call_for_speakers_clicked',
         },
-    ].filter(Boolean) as Array<{ href: string; label: string }>);
+    ].filter(Boolean) as Array<{
+      href: string;
+      label: string;
+      analyticsEventName?: string;
+    }>);
 
 const hasSidebarLinks = supplementaryLinks.length > 0;
 
@@ -512,7 +521,14 @@ const jsonLd = {
                     <ul role="list" class="event-detail-sidebar__links">
                       {supplementaryLinks.map((link) => (
                         <li>
-                          <a href={link.href} rel="external">
+                          <a
+                            href={link.href}
+                            rel="external"
+                            data-analytics-event={link.analyticsEventName}
+                            data-analytics-event-type={
+                              link.analyticsEventName ? event.type : undefined
+                            }
+                          >
                             {link.label}
                             <span class="sr-only"> (opens external site)</span>
                             <wa-icon name="arrow-up-right-from-square" />
