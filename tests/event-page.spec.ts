@@ -94,22 +94,24 @@ test.describe('Event detail page', () => {
   });
 });
 
-test('shows the year in the date on an event detail page', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2020-01-01T00:00:00Z'));
-  await page.goto('/events/test-fixture-event-tutorial');
-
-  const startDate = page.locator(
-    '.event-detail__header .event__dateRange > time'
-  );
-  await expect(startDate).toHaveText(/\b\d{4}\b/);
-});
-
 // Slug stable in both production and test datasets; hashtags: ["AllThingsOpen", "ATO2026"]
-const HASHTAG_SLUG = 'all-things-open-2026';
+const ALL_THINGS_OPEN_SLUG = 'all-things-open-2026';
+
+test('shows the year on event and session dates', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2020-01-01T00:00:00Z'));
+  await page.goto(`/events/${ALL_THINGS_OPEN_SLUG}`);
+
+  const eventDates = page.locator('.event-detail__header .event__dateRange');
+  const childStart = page
+    .locator('.event-detail__children .event__dateRange > time')
+    .first();
+  await expect(eventDates).toContainText(/\b2026\b/);
+  await expect(childStart).toContainText(/\b2026\b/);
+});
 
 test.describe('Event detail page - sidebar hashtags', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`/events/${HASHTAG_SLUG}`);
+    await page.goto(`/events/${ALL_THINGS_OPEN_SLUG}`);
   });
 
   test('sidebar hashtags list is present', async ({ page }) => {
