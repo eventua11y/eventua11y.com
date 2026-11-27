@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Building and Deployment
 
-- `npm run build` - Run checks and build the site; the Sentry Astro integration uploads source maps when configured
+- `npm run build` - Run checks and build the site; browser source maps are uploaded to PostHog when configured
 - `npm run preview` - Preview the built site locally
 - `astro build` - Build the site without additional steps
 
@@ -43,7 +43,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Content Management**: Sanity CMS with GROQ queries
 - **Deployment**: Netlify with Deno-based edge functions
 - **Testing**: Playwright (E2E) + axe-core (accessibility) + Vitest (unit)
-- **Monitoring**: Sentry for error tracking and performance
+- **Monitoring**: PostHog for interaction analytics and error tracking
 - **Auth**: Supabase for user accounts (in progress)
 
 ### Key Files
@@ -72,7 +72,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Environment Variables
 
-- `SENTRY_AUTH_TOKEN`: Used by the Sentry Astro integration to upload source maps during a production build
+- `POSTHOG_CLI_API_KEY` and `POSTHOG_CLI_PROJECT_ID`: Optional Netlify build variables for PostHog browser source-map uploads
 - `PLAYWRIGHT_TEST_BASE_URL`: Override test target URL (set by CI for deploy previews)
 - `PUBLIC_SUPABASE_URL`: Supabase project URL (client-safe)
 - `PUBLIC_SUPABASE_ANON_KEY`: Supabase publishable key (client-safe)

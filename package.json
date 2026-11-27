@@ -12,6 +12,7 @@
     "dev": "concurrently \"astro dev\" \"npm run check:watch\"",
     "start": "astro dev",
     "build": "npm run check && astro build",
+    "posthog:sourcemaps": "posthog-cli --host https://eu.posthog.com sourcemap process --release-name eventua11y-web --delete-after",
     "preview": "astro preview",
     "check": "prettier --check .",
     "check:watch": "concurrently \"prettier --watch . --write\" \"eslint . --fix --watch\"",
@@ -53,6 +54,7 @@
     "@mattobee/chocks": "^0.8.0",
     "@playwright/test": "^1.65.1",
     "@portabletext/types": "^4.0.2",
+    "@posthog/cli": "^0.20.1",
     "@types/node": "^26.6.6",
     "@vitest/coverage-v8": "^5.1.0",
     "astro": "^7.4.12",
@@ -78,10 +80,10 @@
     "@astrojs/vue": "^7.0.2",
     "@awesome.me/webawesome": "^3.15.0",
     "@sanity/client": "^8.9.0",
-    "@sentry/astro": "^11.17.0",
     "astro-portabletext": "^1.0.1",
     "dayjs": "^1.11.23",
     "posthog-js": "^1.455.4",
+    "posthog-node": "^6.2.0",
     "vue": "^3.5.45"
   }
 }

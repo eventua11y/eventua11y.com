@@ -3,11 +3,28 @@ import type { CaptureOptions, Properties } from 'posthog-js';
 const key = import.meta.env.PUBLIC_POSTHOG_KEY;
 const host = import.meta.env.PUBLIC_POSTHOG_HOST;
 
+// Known noise from Web Awesome popovers, prefetching, and extensions.
+const ignoredException =
+  /Failed to execute '(hide|show)Popover' on 'HTMLElement'|^Load failed\b|^error loading dynamically imported module|Object Not Found Matching Id:|The object can not be found here\./;
+
+function redactWebVitalsUrls(properties: Properties) {
+  // PostHog needs the page URL for its breakdown, but not the query or fragment.
+  const pageUrl = location.origin + location.pathname;
+  properties.$current_url = pageUrl;
+  for (const name of ['CLS', 'FCP', 'INP', 'LCP']) {
+    const metric = properties[`$web_vitals_${name}_event`];
+    if (!metric) continue;
+    metric.$current_url = pageUrl;
+    delete metric.navigationURL;
+  }
+}
+
 const client =
   !import.meta.env.SSR && key && host
     ? Promise.all([
         import('posthog-js'),
         import('posthog-js/dist/exception-autocapture'),
+        import('posthog-js/dist/web-vitals'),
       ])
         .then(([{ default: posthog }]) => {
           posthog.init(key, {
@@ -18,6 +35,11 @@ const client =
             capture_pageview: false,
             capture_pageleave: false,
             disable_session_recording: true,
+            capture_performance: {
+              web_vitals: true,
+              web_vitals_attribution: false,
+              network_timing: false,
+            },
             disable_surveys: true,
             persistence: 'memory',
             person_profiles: 'never',
@@ -33,8 +55,21 @@ const client =
               '$search_keyword',
             ],
             before_send: (event) => {
-              // Session attribution can include arbitrary campaign parameters.
               if (!event?.properties) return event;
+              const exceptions = event.properties.$exception_list;
+              if (
+                event.event === '$exception' &&
+                Array.isArray(exceptions) &&
+                exceptions.some(({ value }) => ignoredException.test(value))
+              ) {
+                return null;
+              }
+
+              if (event.event === '$web_vitals') {
+                redactWebVitalsUrls(event.properties);
+              }
+
+              // Session attribution can include arbitrary campaign parameters.
               for (const name in event.properties) {
                 if (name.startsWith('$session_entry_')) {
                   delete event.properties[name];

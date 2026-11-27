@@ -21,8 +21,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        # --ignore-scripts skips native postinstall scripts (esbuild, sharp,
-        # sentry-cli, etc.) that can hang on the CI runner. This job only runs
+        # --ignore-scripts skips postinstall downloads that can hang on the CI
+        # runner. This job only runs
         # unit tests and knip, so none of those binaries are needed.
         run: npm ci --ignore-scripts
 

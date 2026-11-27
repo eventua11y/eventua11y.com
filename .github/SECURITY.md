@@ -8,4 +8,4 @@ We will acknowledge your report within 48 hours and aim to provide a fix or miti
 
 ## Scope
 
-This policy covers the code in this repository and the website at [eventua11y.com](https://eventua11y.com). It does not cover third-party services such as Sanity, Netlify, or Sentry.
+This policy covers the code in this repository and the website at [eventua11y.com](https://eventua11y.com). It does not cover third-party services such as Sanity, Netlify, or PostHog.

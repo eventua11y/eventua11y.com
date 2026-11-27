@@ -8,6 +8,7 @@ const posthog = vi.hoisted(() => ({
 
 vi.mock('posthog-js', () => ({ default: posthog }));
 vi.mock('posthog-js/dist/exception-autocapture', () => ({}));
+vi.mock('posthog-js/dist/web-vitals', () => ({}));
 
 beforeEach(() => {
   vi.resetModules();
@@ -17,7 +18,10 @@ beforeEach(() => {
   vi.stubEnv('PUBLIC_POSTHOG_HOST', 'https://posthog.test');
 });
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 describe('PostHog analytics', () => {
   it.each(['missing key', 'missing host', 'SSR'])(
@@ -38,6 +42,49 @@ describe('PostHog analytics', () => {
     }
   );
 
+  it('suppresses known browser noise without dropping other exceptions', async () => {
+    await import('./analytics');
+    await vi.dynamicImportSettled();
+
+    const [, config] = posthog.init.mock.calls[0];
+    const exception = (value: string) => ({
+      event: '$exception',
+      properties: { $exception_list: [{ value }] },
+    });
+    const error = exception('An unexpected error');
+
+    expect(
+      config.before_send(
+        exception("Failed to execute 'showPopover' on 'HTMLElement'")
+      )
+    ).toBeNull();
+    expect(config.before_send(error)).toBe(error);
+  });
+
+  it('keeps only the origin and path in Web Vitals URLs', async () => {
+    const pageUrl = 'https://eventua11y.com/events/example';
+    vi.stubGlobal('location', new URL(`${pageUrl}?private=value#fragment`));
+    await import('./analytics');
+    await vi.dynamicImportSettled();
+
+    const [, config] = posthog.init.mock.calls[0];
+    const event = {
+      event: '$web_vitals',
+      properties: {
+        $web_vitals_LCP_event: {
+          value: 100,
+          $current_url: location.href,
+          navigationURL: location.href,
+        },
+      },
+    };
+
+    expect(config.before_send(event).properties).toEqual({
+      $current_url: pageUrl,
+      $web_vitals_LCP_event: { value: 100, $current_url: pageUrl },
+    });
+  });
+
   it('initializes once and sends queued interactions and lifecycle logs', async () => {
     const { capture, logBrowserReady } = await import('./analytics');
     capture('filters_reset');
@@ -55,6 +102,11 @@ describe('PostHog analytics', () => {
         api_host: 'https://posthog.test',
         autocapture: false,
         disable_session_recording: true,
+        capture_performance: {
+          web_vitals: true,
+          web_vitals_attribution: false,
+          network_timing: false,
+        },
         persistence: 'memory',
         person_profiles: 'never',
       })

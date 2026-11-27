@@ -25,7 +25,7 @@ Mid-tier (Claude Sonnet). Security review is well-scoped when guided by clear ch
 - Hosting: Netlify with HTTPS. Edge functions in Deno isolates.
 - CMS: Sanity (read-only, no write token in this repo).
 - Auth: Supabase Auth with `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`.
-- Monitoring: Sentry with DSN via env var.
+- Monitoring: PostHog for browser and Astro error tracking.
 - Edge functions: Three Deno-based functions proxying Sanity data.
 
 ### Scope
