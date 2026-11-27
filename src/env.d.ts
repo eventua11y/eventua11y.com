@@ -5,5 +5,6 @@
 declare namespace App {
   interface Locals {
     staticEventListLoaded?: boolean;
+    eventDetailLoaded?: boolean;
   }
 }

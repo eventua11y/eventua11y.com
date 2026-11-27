@@ -54,17 +54,30 @@ function watchResponseBody(
 
 export const onRequest = (async (context, next) => {
   const renderWithCacheHeaders = async () => {
-    const response = await next();
+    let response = await next();
+    const hasOutgoingCookies = () =>
+      response.headers.has('Set-Cookie') ||
+      // Astro appends these cookies after middleware returns.
+      !context.cookies.headers().next().done;
+    const isLoadedDetail =
+      context.locals?.eventDetailLoaded &&
+      /^\/events\/[^/]+\/?$/.test(context.url.pathname);
     if (
-      context.locals?.staticEventListLoaded &&
-      ['/', '/past-events', '/past-events/'].includes(context.url.pathname) &&
+      (isLoadedDetail ||
+        (context.locals?.staticEventListLoaded &&
+          ['/', '/past-events', '/past-events/'].includes(
+            context.url.pathname
+          ))) &&
       context.request.method === 'GET' &&
       response.status === 200 &&
       response.headers.get('Content-Type')?.split(';')[0] === 'text/html' &&
-      !response.headers.has('Set-Cookie') &&
-      // Astro appends these cookies after middleware returns.
-      context.cookies.headers().next().done
+      !hasOutgoingCookies()
     ) {
+      if (isLoadedDetail) {
+        // Netlify can cache truncated HTML if the SSR stream fails after headers are sent.
+        response = new Response(await response.arrayBuffer(), response);
+        if (hasOutgoingCookies()) return response;
+      }
       response.headers.set('Netlify-CDN-Cache-Control', 'public, s-maxage=60');
     }
     return response;

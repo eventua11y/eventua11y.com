@@ -43,6 +43,8 @@ if (!event) {
   return Astro.rewrite('/not-found');
 }
 
+Astro.locals.eventDetailLoaded = true;
+
 // Defensive: GROQ `field[]->{...}` returns null entries when a referenced
 // document is unpublished or deleted. Strip those before any consumer maps over them.
 if (Array.isArray(event.topics)) {
@@ -63,8 +65,7 @@ const hashtags = Array.isArray(event.hashtags)
   : [];
 const hasHashtags = hashtags.length > 0;
 
-// Cache the response to reduce Sanity API calls, matching the
-// strategy used by the get-events edge function.
+// Browser caching is separate from the edge policy set in middleware.
 Astro.response.headers.set(
   'Cache-Control',
   'private, max-age=300, stale-while-revalidate=60'
