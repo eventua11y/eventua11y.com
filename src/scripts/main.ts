@@ -11,11 +11,9 @@ document.addEventListener('click', (event) => {
   const options = { transport: 'sendBeacon', send_instantly: true } as const;
   const eventType = link.getAttribute('data-analytics-event-type');
   if (eventType !== null) {
-    capture(
-      link.getAttribute('data-analytics-event') ?? 'event_website_clicked',
-      { event_type: eventType },
-      options
-    );
+    const eventName =
+      link.getAttribute('data-analytics-event') ?? 'event_website_clicked';
+    capture(eventName, { event_type: eventType }, options);
   } else {
     capture('book_link_clicked', undefined, options);
   }

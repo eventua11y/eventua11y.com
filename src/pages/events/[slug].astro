@@ -186,7 +186,7 @@ const supplementaryLinks = eventHasEnded
       event.registration && {
         href: event.registration,
         label: 'Registration',
-        analyticsEvent: 'event_registration_clicked',
+        analyticsEventName: 'event_registration_clicked',
       },
       event.codeOfConduct && {
         href: event.codeOfConduct,
@@ -201,12 +201,12 @@ const supplementaryLinks = eventHasEnded
         event.callForSpeakersLink && {
           href: event.callForSpeakersLink,
           label: 'Call for speakers',
-          analyticsEvent: 'event_call_for_speakers_clicked',
+          analyticsEventName: 'event_call_for_speakers_clicked',
         },
     ].filter(Boolean) as Array<{
       href: string;
       label: string;
-      analyticsEvent?: string;
+      analyticsEventName?: string;
     }>);
 
 const hasSidebarLinks = supplementaryLinks.length > 0;
@@ -524,9 +524,9 @@ const jsonLd = {
                           <a
                             href={link.href}
                             rel="external"
-                            data-analytics-event={link.analyticsEvent}
+                            data-analytics-event={link.analyticsEventName}
                             data-analytics-event-type={
-                              link.analyticsEvent ? event.type : undefined
+                              link.analyticsEventName ? event.type : undefined
                             }
                           >
                             {link.label}
