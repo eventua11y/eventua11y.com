@@ -82,7 +82,7 @@ test('dateUtils - full event list', { timeout: 180_000 }, async ({ bench }) => {
         day: event.day,
         type: event.type,
         locale: 'fr',
-        isPast: true,
+        showYear: true,
         now,
       });
     }

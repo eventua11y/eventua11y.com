@@ -17,11 +17,11 @@ const props = withDefaults(
   defineProps<{
     event: ChildEvent;
     showEnded?: boolean;
-    isPast?: boolean;
+    showYear?: boolean;
   }>(),
   {
     showEnded: false,
-    isPast: false,
+    showYear: false,
   }
 );
 
@@ -106,7 +106,7 @@ const childEventUrl = computed(() => getEventUrl(props.event));
           :timezone="event.timezone"
           :day="event.day"
           :type="event.type"
-          :isPast="isPast"
+          :showYear="showYear"
           :showEnded="showEnded"
         />
         <template

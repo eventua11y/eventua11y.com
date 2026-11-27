@@ -401,11 +401,8 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
-  /**
-   * Whether the event is in the past. When false (upcoming), the year is
-   * omitted from display to reduce visual noise. Defaults to false.
-   */
-  isPast?: boolean;
+  /** Include the year on single dates and same-year ranges. */
+  showYear?: boolean;
   /** Viewer timezone for relative labels on dates formatted as UTC calendar dates. */
   relativeDayTimezone?: string;
   /** Injected "now" for testability; defaults to the real current time. */
@@ -476,10 +473,7 @@ export function formatDateRange(options: {
     return formatted;
   }
 
-  // Whether the year should be shown. For upcoming events (isPast = false/undefined),
-  // the year is omitted to reduce visual noise. Year is always shown for past events
-  // and for ranges that span a year boundary (which need the year for clarity).
-  const showYear = !!options.isPast;
+  const { showYear } = options;
 
   // Year-free date-only format for the current locale
   const noYearDateOnly = NO_YEAR_DATE_ONLY[locale] || NO_YEAR_DATE_ONLY.en;
@@ -523,7 +517,7 @@ export function formatDateRange(options: {
     ? dayjs.utc(options.dateEnd).locale(locale)
     : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
 
-  // For year-spanning ranges, always show the year regardless of isPast
+  // Cross-year ranges always include the year.
   const sameYear = start.isSame(end, 'year');
   const dateFmt = showYear || !sameYear ? `${dp}LL` : `${dp}${noYearDateOnly}`;
 
@@ -550,7 +544,6 @@ export function formatDateRange(options: {
   // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
     if (sameYear) {
-      // End format: LLLL (with year) for past, year-free timed for upcoming
       const timedEndFmt = showYear ? formats.timedSameYear.end : noYearTimed;
       return [
         relativeDay(
@@ -575,7 +568,7 @@ export function formatDateRange(options: {
     ];
   }
 
-  // Full-month events: display as "October 2026" for past, "October" for upcoming
+  // Full-month events: display as "October 2026" or just "October".
   if (isFullMonth(start, end)) {
     const fullMonthFmt = showYear
       ? FULL_MONTH_FORMATS[locale] || FULL_MONTH_FORMATS.en
@@ -588,7 +581,7 @@ export function formatDateRange(options: {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
-    // For upcoming events, strip the year but keep the month. diffMonth.start
+    // When omitting the year, keep the month. diffMonth.start
     // always includes the month without year, so it serves as the year-free
     // end format for both sameMonth and diffMonth cases.
     const endFmt = showYear ? fmt.end : formats.diffMonth.start;
