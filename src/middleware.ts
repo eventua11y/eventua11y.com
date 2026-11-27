@@ -8,19 +8,67 @@ const posthog =
     ? new PostHog(key, { host, requestTimeout: 1000, fetchRetryCount: 0 })
     : undefined;
 
-export const onRequest: MiddlewareHandler = async (context, next) => {
-  try {
-    return await next();
-  } catch (error) {
-    if (posthog && !context.isPrerendered) {
-      try {
-        await posthog.captureExceptionImmediate(error, {
-          properties: { runtime: 'astro', route: context.routePattern },
-        });
-      } catch {
-        // Telemetry must not replace the error Astro handles.
-      }
+function watchResponseBody(
+  response: Response,
+  reportError: (error: unknown) => Promise<void>
+) {
+  if (!response.body) return response;
+
+  const reader = response.body.getReader();
+  let cancelled = false;
+  const body = new ReadableStream<Uint8Array>(
+    {
+      async pull(controller) {
+        try {
+          const chunk = await reader.read();
+          if (cancelled) return;
+          if (chunk.done) {
+            reader.releaseLock();
+            controller.close();
+          } else {
+            controller.enqueue(chunk.value);
+          }
+        } catch (error) {
+          if (cancelled) return;
+          await reportError(error);
+          if (!cancelled) {
+            reader.releaseLock();
+            controller.error(error);
+          }
+        }
+      },
+      async cancel(reason) {
+        cancelled = true;
+        try {
+          await reader.cancel(reason);
+        } finally {
+          reader.releaseLock();
+        }
+      },
+    },
+    { highWaterMark: 0 }
+  );
+
+  return new Response(body, response);
+}
+
+export const onRequest = (async (context, next) => {
+  if (!posthog || context.isPrerendered) return next();
+
+  const reportError = async (error: unknown) => {
+    try {
+      await posthog.captureExceptionImmediate(error, {
+        properties: { runtime: 'astro', route: context.routePattern },
+      });
+    } catch {
+      // Telemetry must not replace the error Astro handles.
     }
+  };
+
+  try {
+    return watchResponseBody(await next(), reportError);
+  } catch (error) {
+    await reportError(error);
     throw error;
   }
-};
+}) satisfies MiddlewareHandler;
