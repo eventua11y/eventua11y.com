@@ -22,6 +22,7 @@ const props = withDefaults(
     website?: string;
     headingId?: string;
     showWebsiteLink?: boolean;
+    eventType?: string;
   }>(),
   {
     attendanceMode: 'none',
@@ -29,6 +30,7 @@ const props = withDefaults(
     website: undefined,
     headingId: undefined,
     showWebsiteLink: true,
+    eventType: undefined,
   }
 );
 
@@ -102,6 +104,7 @@ const locationIcon = computed(() =>
         rel="external noopener noreferrer"
         class="event__website-link"
         :aria-describedby="headingId"
+        :data-analytics-event-type="eventType || 'unknown'"
         >Event website<span class="sr-only"> (opens external site)</span></a
       >
     </template>

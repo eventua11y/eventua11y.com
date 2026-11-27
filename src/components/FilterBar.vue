@@ -63,6 +63,7 @@
 <script setup lang="ts">
 import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { capture } from '../lib/analytics';
 import filtersStore from '../store/filtersStore';
 import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
@@ -114,6 +115,7 @@ function updateIsNarrow(e: MediaQueryListEvent | MediaQueryList) {
  */
 function resetFilters() {
   filtersStore.resetFilters();
+  capture('filters_reset');
 }
 
 /**
@@ -121,7 +123,12 @@ function resetFilters() {
  * Updates store when switch changes
  */
 function toggleAwarenessDays(event: Event) {
-  filtersStore.filters.showAwarenessDays = (event.target as WaSwitch).checked;
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showAwarenessDays = checked;
+  capture('filters_changed', {
+    filter_name: 'show_awareness_days',
+    filter_value: checked,
+  });
 }
 
 /**

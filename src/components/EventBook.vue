@@ -3,7 +3,9 @@
     <span class="text-small text-muted"
       >Accessibility Book Club is reading</span
     >
-    <a class="book__title" :href="book.link">{{ book.title }}</a>
+    <a class="book__title" :href="book.link" data-analytics-book-link>
+      {{ book.title }}
+    </a>
   </div>
 </template>
 

@@ -91,6 +91,7 @@
 import type WaRadioGroup from '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
 import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
 import { ref, onMounted } from 'vue';
+import { capture } from '../lib/analytics';
 import filtersStore from '../store/filtersStore';
 
 const awarenessDaysSwitch = ref<WaSwitch | null>(null);
@@ -113,20 +114,31 @@ onMounted(() => {
   });
 });
 
+function captureFilterChange(filterName: string, value: string | boolean) {
+  capture('filters_changed', { filter_name: filterName, filter_value: value });
+}
+
 function resetFilters() {
   filtersStore.resetFilters();
+  capture('filters_reset');
 }
 
 function toggleAwarenessDays(event: Event) {
-  filtersStore.filters.showAwarenessDays = (event.target as WaSwitch).checked;
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showAwarenessDays = checked;
+  captureFilterChange('show_awareness_days', checked);
 }
 
 function toggleBooks(event: Event) {
-  filtersStore.filters.showBooks = (event.target as WaSwitch).checked;
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showBooks = checked;
+  captureFilterChange('show_books', checked);
 }
 
 function toggleDeadlines(event: Event) {
-  filtersStore.filters.showDeadlines = (event.target as WaSwitch).checked;
+  const { checked } = event.target as WaSwitch;
+  filtersStore.filters.showDeadlines = checked;
+  captureFilterChange('show_deadlines', checked);
 }
 
 function updateFilter<Key extends 'cfs' | 'attendance' | 'cost'>(
@@ -137,6 +149,7 @@ function updateFilter<Key extends 'cfs' | 'attendance' | 'cost'>(
   // The options above define the allowed values for each filter.
   filtersStore.filters[filterName] =
     group.value as (typeof filtersStore.filters)[Key];
+  captureFilterChange(filterName, filtersStore.filters[filterName]);
 }
 </script>
 

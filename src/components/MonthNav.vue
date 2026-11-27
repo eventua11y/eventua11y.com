@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+import { capture } from '../lib/analytics';
 import filtersStore from '../store/filtersStore';
 import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
@@ -99,6 +100,9 @@ function updateMonthNav() {
  */
 function handleLinkClick(e: MouseEvent, link: MonthLink) {
   e.preventDefault();
+  capture('month_navigation_clicked', {
+    destination: link.identifier === 'today' ? 'today' : 'month',
+  });
   if (link.identifier === 'today') {
     const todaySection = document.getElementById('today');
     scrollToSection(todaySection);

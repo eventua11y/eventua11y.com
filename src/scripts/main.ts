@@ -1,3 +1,22 @@
+import { capture, logBrowserReady } from '../lib/analytics';
+
+document.addEventListener('click', (event) => {
+  if (!(event.target instanceof Element)) return;
+  const link = event.target.closest(
+    '[data-analytics-book-link], [data-analytics-event-type]'
+  );
+  if (!link) return;
+
+  // Send before navigation without waiting for asynchronous compression.
+  const options = { transport: 'sendBeacon', send_instantly: true } as const;
+  const eventType = link.getAttribute('data-analytics-event-type');
+  if (eventType !== null) {
+    capture('event_website_clicked', { event_type: eventType }, options);
+  } else {
+    capture('book_link_clicked', undefined, options);
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   // Theme switching. Three states are stored - "light", "dark", or nothing at
   // all, meaning follow the device - but only two are offered, because the
@@ -73,6 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   applyTheme(resolvedTheme());
+
+  logBrowserReady();
 
   toggleButton?.addEventListener('click', toggleTheme);
 
