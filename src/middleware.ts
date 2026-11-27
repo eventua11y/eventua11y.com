@@ -53,7 +53,24 @@ function watchResponseBody(
 }
 
 export const onRequest = (async (context, next) => {
-  if (!posthog || context.isPrerendered) return next();
+  const renderWithCacheHeaders = async () => {
+    const response = await next();
+    if (
+      context.locals?.homepageEventsLoaded &&
+      context.url.pathname === '/' &&
+      context.request.method === 'GET' &&
+      response.status === 200 &&
+      response.headers.get('Content-Type')?.split(';')[0] === 'text/html' &&
+      !response.headers.has('Set-Cookie') &&
+      // Astro appends these cookies after middleware returns.
+      context.cookies.headers().next().done
+    ) {
+      response.headers.set('Netlify-CDN-Cache-Control', 'public, s-maxage=60');
+    }
+    return response;
+  };
+
+  if (!posthog || context.isPrerendered) return renderWithCacheHeaders();
 
   const reportError = async (error: unknown) => {
     try {
@@ -66,7 +83,7 @@ export const onRequest = (async (context, next) => {
   };
 
   try {
-    return watchResponseBody(await next(), reportError);
+    return watchResponseBody(await renderWithCacheHeaders(), reportError);
   } catch (error) {
     await reportError(error);
     throw error;

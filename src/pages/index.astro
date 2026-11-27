@@ -7,15 +7,19 @@ import Filters from '../components/Filters.vue';
 import MonthNav from '../components/MonthNav.vue';
 import StaticEventList from '../components/StaticEventList.astro';
 import FilterBarPlaceholder from '../components/FilterBarPlaceholder.astro';
+import { loadStaticEvents } from '../lib/staticEventList';
 
 // Disable prerendering to enable SSR
 export const prerender = false;
 
-// Cache the response to reduce origin hits, matching the
-// strategy used by the get-events edge function.
+// Resolve the fallback before streaming so a load failure cannot be cached.
+const staticEvents = await loadStaticEvents('upcoming');
+Astro.locals.homepageEventsLoaded = staticEvents.success;
 Astro.response.headers.set(
   'Cache-Control',
-  'private, max-age=300, stale-while-revalidate=60'
+  staticEvents.success
+    ? 'private, max-age=300, stale-while-revalidate=60'
+    : 'private, no-store'
 );
 ---
 
@@ -36,7 +40,7 @@ Astro.response.headers.set(
       </h1>
       <EventList type="upcoming" client:load />
       <noscript>
-        <StaticEventList type="upcoming" />
+        <StaticEventList type="upcoming" result={staticEvents} />
       </noscript>
     </div>
     <MonthNav
