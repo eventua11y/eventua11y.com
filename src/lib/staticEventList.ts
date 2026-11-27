@@ -23,9 +23,7 @@ export async function loadStaticEvents(
       getBooks(),
     ]);
 
-    const events = type === 'upcoming' ? future : past;
-    const items: (Event | Book)[] =
-      type === 'past' ? [...events] : [...events, ...books];
+    const items = type === 'past' ? past : [...future, ...books];
 
     const monthKey = (item: Event | Book) => {
       if (item._type === 'book')

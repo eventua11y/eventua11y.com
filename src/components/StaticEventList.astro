@@ -23,8 +23,7 @@ type Props =
 
 const props = Astro.props;
 const { type } = props;
-const result =
-  props.type === 'upcoming' ? props.result : await loadStaticEvents('past');
+const result = type === 'past' ? await loadStaticEvents(type) : props.result;
 ---
 
 {!result.success ? (

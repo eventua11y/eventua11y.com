@@ -53,7 +53,7 @@ function watchResponseBody(
 }
 
 export const onRequest = (async (context, next) => {
-  const render = async () => {
+  const renderWithCacheHeaders = async () => {
     const response = await next();
     if (
       context.locals?.homepageEventsLoaded &&
@@ -70,7 +70,7 @@ export const onRequest = (async (context, next) => {
     return response;
   };
 
-  if (!posthog || context.isPrerendered) return render();
+  if (!posthog || context.isPrerendered) return renderWithCacheHeaders();
 
   const reportError = async (error: unknown) => {
     try {
@@ -83,7 +83,7 @@ export const onRequest = (async (context, next) => {
   };
 
   try {
-    return watchResponseBody(await render(), reportError);
+    return watchResponseBody(await renderWithCacheHeaders(), reportError);
   } catch (error) {
     await reportError(error);
     throw error;

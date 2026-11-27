@@ -84,28 +84,31 @@ async function renderPage(path = '/'): Promise<Response> {
 }
 
 describe('Homepage CDN caching', () => {
-  it.each(['populated', 'empty'])(
-    'opts %s successful listings into shared caching without making the browser cache public',
-    async (listing) => {
-      const event = {
-        _id: 'upcoming-event',
-        title: 'Fixture accessibility conference',
-        type: 'conference',
-        dateStart: '2099-01-10',
-      } satisfies Event;
-      if (listing === 'populated')
-        events.mockResolvedValue({ future: [event], past: [] });
+  const event = {
+    _id: 'upcoming-event',
+    title: 'Fixture accessibility conference',
+    type: 'conference',
+    dateStart: '2099-01-10',
+  } satisfies Event;
+
+  it.each([
+    { listing: 'populated', future: [event], expectedText: event.title },
+    {
+      listing: 'empty',
+      future: [],
+      expectedText: 'There are no upcoming events to display.',
+    },
+  ])(
+    'opts $listing successful listings into shared caching without making the browser cache public',
+    async ({ future, expectedText }) => {
+      events.mockResolvedValue({ future, past: [] });
 
       const response = await renderPage();
 
       expect(response.status).toBe(200);
       expect(response.headers.get(netlifyCache)).toBe('public, s-maxage=60');
       expect(response.headers.get('Cache-Control')).toBe(browserCache);
-      expect(await response.text()).toContain(
-        listing === 'populated'
-          ? event.title
-          : 'There are no upcoming events to display.'
-      );
+      expect(await response.text()).toContain(expectedText);
     }
   );
 
