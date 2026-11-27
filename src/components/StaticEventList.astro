@@ -2,8 +2,7 @@
 /**
  * Server-rendered event list for the <noscript> fallback.
  *
- * This component fetches events and books from Sanity during Astro SSR,
- * groups them by the event's calendar month, and renders them as static HTML.
+ * This component renders events and books grouped by calendar month.
  * It is only visible when JavaScript is disabled (wrapped in <noscript>
  * by the consuming page).
  *
@@ -12,67 +11,25 @@
  */
 import StaticEvent from './StaticEvent.astro';
 import StaticEventBook from './StaticEventBook.astro';
-import { getEvents, getBooks } from '../lib/sanity';
 import {
-  groupByMonth,
-  filterPastBooks,
-  formatMonthHeading,
-} from '../utils/eventUtils';
+  loadStaticEvents,
+  type StaticEventListResult,
+} from '../lib/staticEventList';
+import { formatMonthHeading } from '../utils/eventUtils';
 import type { Event, Book } from '../types/event';
-import dayjs from '../lib/dayjs';
-import {
-  storedCalendarDate,
-  usesStoredCalendarDate,
-} from '../../netlify/edge-functions/lib/dateUtils';
-import { getYearMonth } from '../utils/dateUtils';
 
-interface Props {
-  type: 'upcoming' | 'past';
-}
+type Props =
+  { type: 'upcoming'; result: StaticEventListResult } | { type: 'past' };
 
-const { type } = Astro.props;
-
-let groupedItems: Record<string, (Event | Book)[]> = {};
-let error: string | null = null;
-
-try {
-  const [{ future, past }, books] = await Promise.all([
-    getEvents(),
-    getBooks(),
-  ]);
-
-  const events = type === 'upcoming' ? future : past;
-  const items: (Event | Book)[] =
-    type === 'past' ? [...events] : [...events, ...books];
-
-  const monthKey = (item: Event | Book) => {
-    if (item._type === 'book')
-      return getYearMonth(item.dateStart, { isBook: true });
-    if (usesStoredCalendarDate(item)) {
-      return getYearMonth(storedCalendarDate(item.dateStart), {});
-    }
-    return getYearMonth(item.dateStart, {
-      timezone: item.type === 'deadline' ? undefined : item.timezone,
-    });
-  };
-
-  let grouped = groupByMonth(items, type, monthKey);
-
-  if (type !== 'past') {
-    const now = dayjs.utc();
-    grouped = filterPastBooks(grouped, now.year(), now.month() + 1);
-  }
-
-  groupedItems = grouped;
-} catch (e) {
-  error = `Unable to load ${type} events.`;
-  console.error('StaticEventList SSR error:', e);
-}
+const props = Astro.props;
+const { type } = props;
+const result =
+  props.type === 'upcoming' ? props.result : await loadStaticEvents('past');
 ---
 
-{error ? (
-  <p>{error}</p>
-) : Object.keys(groupedItems).length === 0 ? (
+{!result.success ? (
+  <p>Unable to load {type} events.</p>
+) : Object.keys(result.groupedItems).length === 0 ? (
   <p>
     {type === 'past'
       ? 'There are no past events to display.'
@@ -80,7 +37,7 @@ try {
   </p>
 ) : (
   <div id={`${type}-events-static`} class="flow flow-2xl">
-    {Object.entries(groupedItems).map(([yearMonth, items]) => (
+    {Object.entries(result.groupedItems).map(([yearMonth, items]) => (
       <section class="month flow flow-m">
         <h2 class="month__heading">{formatMonthHeading(yearMonth)}</h2>
         <ol role="list" class="flow flow-l">

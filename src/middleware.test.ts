@@ -1,4 +1,5 @@
 import type { APIContext } from 'astro';
+import { createContext } from 'astro/middleware';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const capture = vi.hoisted(() => vi.fn());
@@ -19,6 +20,35 @@ beforeEach(() => {
 });
 
 afterEach(() => vi.unstubAllEnvs());
+
+describe('Homepage CDN cache eligibility', () => {
+  it.each([
+    { scenario: 'a successful GET', expected: 'public, s-maxage=60' },
+    { scenario: 'a Set-Cookie header', setCookie: true },
+    { scenario: 'an Astro cookie queued during rendering', queueCookie: true },
+    { scenario: 'a HEAD request', method: 'HEAD' },
+    { scenario: 'a non-200 response', status: 503 },
+  ])(
+    'handles $scenario',
+    async ({ expected, setCookie, queueCookie, method, status }) => {
+      const { onRequest } = await import('./middleware');
+      const request = new Request('https://example.test/', { method });
+      const context = createContext({ request, defaultLocale: '' });
+      const headers = new Headers({ 'Content-Type': 'text/html' });
+      if (setCookie) headers.set('Set-Cookie', 'test=value');
+
+      const response = await onRequest(context, async () => {
+        context.locals.homepageEventsLoaded = true;
+        if (queueCookie) context.cookies.set('test', 'value');
+        return new Response(null, { status, headers });
+      });
+
+      expect(response.headers.get('Netlify-CDN-Cache-Control')).toBe(
+        expected ?? null
+      );
+    }
+  );
+});
 
 describe('Astro error tracking', () => {
   it('passes through the response without reporting an error', async () => {
