@@ -401,7 +401,7 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
-  /** Include the year even when the range does not span a year boundary. */
+  /** Include the year on single dates and same-year ranges. */
   showYear?: boolean;
   /** Viewer timezone for relative labels on dates formatted as UTC calendar dates. */
   relativeDayTimezone?: string;
@@ -473,7 +473,7 @@ export function formatDateRange(options: {
     return formatted;
   }
 
-  const { showYear = false } = options;
+  const { showYear } = options;
 
   // Year-free date-only format for the current locale
   const noYearDateOnly = NO_YEAR_DATE_ONLY[locale] || NO_YEAR_DATE_ONLY.en;
@@ -517,7 +517,7 @@ export function formatDateRange(options: {
     ? dayjs.utc(options.dateEnd).locale(locale)
     : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
 
-  // For year-spanning ranges, always show the year regardless of showYear
+  // Cross-year ranges always include the year.
   const sameYear = start.isSame(end, 'year');
   const dateFmt = showYear || !sameYear ? `${dp}LL` : `${dp}${noYearDateOnly}`;
 
@@ -544,7 +544,6 @@ export function formatDateRange(options: {
   // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
     if (sameYear) {
-      // Show the year only on the end date.
       const timedEndFmt = showYear ? formats.timedSameYear.end : noYearTimed;
       return [
         relativeDay(

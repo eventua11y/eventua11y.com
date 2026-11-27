@@ -508,7 +508,7 @@ describe('formatDateRange', () => {
       expect(result).toEqual(['Sunday, March 8']);
     });
 
-    it('shows year on same-day events when showYear is true', () => {
+    it('includes the year on same-day ranges when requested', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
         dateEnd: '2026-03-08T17:00:00Z',
