@@ -94,6 +94,16 @@ test.describe('Event detail page', () => {
   });
 });
 
+test('shows the year in the date on an event detail page', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2020-01-01T00:00:00Z'));
+  await page.goto('/events/test-fixture-event-tutorial');
+
+  const start = page
+    .locator('.event-detail__header .event__dateRange > time')
+    .first();
+  await expect(start).toHaveText(/\b\d{4}\b/);
+});
+
 // Slug stable in both production and test datasets; hashtags: ["AllThingsOpen", "ATO2026"]
 const HASHTAG_SLUG = 'all-things-open-2026';
 

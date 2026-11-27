@@ -368,7 +368,7 @@ const jsonLd = {
                 timezone={event.timezone}
                 day={event.day}
                 type={event.type}
-                isPast={eventHasEnded}
+                showYear
                 showCountdown={false}
                 showEnded={true}
                 timezonePlacement="bottom"
@@ -386,7 +386,7 @@ const jsonLd = {
               timezone={event.timezone}
               day={event.day}
               type={event.type}
-              isPast={eventHasEnded}
+              showYear
               showCountdown={true}
               showEnded={true}
               timezonePlacement="bottom"
@@ -605,6 +605,7 @@ const jsonLd = {
                       <EventChild
                         client:visible
                         event={child}
+                        showYear
                         showEnded={true}
                       />
                     </wa-card>

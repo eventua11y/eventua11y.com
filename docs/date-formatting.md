@@ -2,6 +2,8 @@
 
 Event dates are formatted by `formatDateRange()` in `src/utils/dateUtils.ts`. The function deduplicates shared date components (month, year, AM/PM) so ranges read naturally, includes day-of-week names on all dates, and supports four locales with correct date component ordering.
 
+Event detail pages and past event listings request the year with `showYear`. Upcoming listings omit it unless the range spans two years. Dates labelled “Today” or “Tomorrow” still use those labels.
+
 ## Day-of-week names
 
 All formatted dates include the day-of-week name. The comma convention varies by locale:

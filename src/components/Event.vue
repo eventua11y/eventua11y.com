@@ -178,7 +178,7 @@ const speakerDisplay = computed(() => {
       :dateStart="event.dateStart"
       :timezone="event.timezone"
       :isDeadline="true"
-      :isPast="isPast"
+      :showYear="isPast"
     />
     <span class="event__title"
       >Submit proposals for
@@ -202,7 +202,7 @@ const speakerDisplay = computed(() => {
       :timezone="event.timezone"
       :day="event.day"
       :type="event.type"
-      :isPast="isPast"
+      :showYear="isPast"
       :showCountdown="showCountdown"
       :showEnded="showEnded"
     />
@@ -247,7 +247,7 @@ const speakerDisplay = computed(() => {
             <EventChild
               :event="child"
               :showEnded="showEnded"
-              :isPast="isPast"
+              :showYear="isPast"
             />
           </li>
         </ol>

@@ -400,7 +400,7 @@ describe('formatDateRange', () => {
         dateStart: '2026-03-08T14:00:00Z',
         timezone: 'UTC',
         locale: 'en',
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual([`Sunday, March 8, 2026 2:00${nbsp}PM`]);
     });
@@ -421,7 +421,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['Sunday, March 8, 2026']);
     });
@@ -442,7 +442,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         type: 'theme',
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['Sunday, March 8, 2026']);
     });
@@ -508,13 +508,13 @@ describe('formatDateRange', () => {
       expect(result).toEqual(['Sunday, March 8']);
     });
 
-    it('shows year on same-day events when isPast is true', () => {
+    it('shows year on same-day events when showYear is true', () => {
       const result = formatDateRange({
         dateStart: '2026-03-08T14:00:00Z',
         dateEnd: '2026-03-08T17:00:00Z',
         timezone: 'UTC',
         locale: 'en',
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['Sunday, March 8, 2026 2:00', `5:00${nbsp}PM`]);
     });
@@ -539,7 +539,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['Sunday, March 8', 'Friday, March 13, 2026']);
     });
@@ -564,7 +564,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['Saturday, March 28', 'Thursday, April 2, 2026']);
     });
@@ -607,7 +607,7 @@ describe('formatDateRange', () => {
         dateEnd: '2026-02-25T21:00:00Z',
         timezone: 'UTC',
         locale: 'en',
-        isPast: true,
+        showYear: true,
       });
       // Start omits year (deduplication), end keeps it
       expect(result).toEqual([
@@ -635,7 +635,7 @@ describe('formatDateRange', () => {
         dateEnd: '2026-04-10T17:00:00Z',
         timezone: 'UTC',
         locale: 'en',
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual([
         `Sunday, March 8 2:00${nbsp}PM`,
@@ -718,7 +718,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'de',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       // "Sonntag, 8." / "Freitag, 13. März 2026"
       expect(result).toEqual(['Sonntag, 8.', 'Freitag, 13. März 2026']);
@@ -743,7 +743,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'de',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       // "Samstag, 28. März" / "Donnerstag, 2. April 2026"
       expect(result).toEqual([
@@ -771,7 +771,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'fr',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       // "dimanche 8" / "vendredi 13 mars 2026"
       expect(result).toEqual(['dimanche 8', 'vendredi 13 mars 2026']);
@@ -796,7 +796,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'fr',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       // "samedi 28 mars" / "jeudi 2 avril 2026"
       expect(result).toEqual(['samedi 28 mars', 'jeudi 2 avril 2026']);
@@ -821,7 +821,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'es',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       // "domingo, 8" / "viernes, 13 de marzo de 2026"
       expect(result).toEqual(['domingo, 8', 'viernes, 13 de marzo de 2026']);
@@ -846,7 +846,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'es',
         day: true,
-        isPast: true,
+        showYear: true,
       });
       // "sábado, 28 de marzo" / "jueves, 2 de abril de 2026"
       expect(result).toEqual([
@@ -875,7 +875,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         type: 'theme',
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['October 2026']);
     });
@@ -900,7 +900,7 @@ describe('formatDateRange', () => {
         timezone: 'UTC',
         locale: 'en',
         type: 'theme',
-        isPast: true,
+        showYear: true,
       });
       expect(result).toEqual(['February 2028']);
     });

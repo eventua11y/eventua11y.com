@@ -74,7 +74,7 @@ const props = withDefaults(
     day?: boolean;
     isDeadline?: boolean;
     type?: string;
-    isPast?: boolean;
+    showYear?: boolean;
     showCountdown?: boolean;
     showEnded?: boolean;
     timezonePlacement?: 'top' | 'bottom';
@@ -84,7 +84,7 @@ const props = withDefaults(
     day: false,
     isDeadline: false,
     type: 'event',
-    isPast: false,
+    showYear: false,
     showCountdown: false,
     showEnded: false,
     timezonePlacement: 'top',
@@ -161,7 +161,7 @@ const formattedRange = computed(() =>
     day: props.day,
     type: props.type,
     isDeadline: props.isDeadline,
-    isPast: props.isPast,
+    showYear: props.showYear,
     relativeDayTimezone: preserveCalendarDate.value
       ? deviceTimezone.value
       : undefined,
