@@ -108,7 +108,7 @@ In both cases, when a task genuinely crosses boundaries, the lead should coordin
 - If the tool has an MCP server, include it in the agent's tool configuration and instruct the agent to use it for API lookups, schema queries, and platform operations.
 - If the tool has official documentation, instruct the agent to consult it (via web fetch or a bundled reference) before generating platform-specific code.
 - The agent's system prompt should explicitly state: use the official docs/MCP as the source of truth; do not guess at API signatures, configuration options, or platform behaviour.
-- Check for available MCP servers at the tool's documentation site or the MCP registry. Common examples: Supabase, Stripe, Netlify, Sentry, Linear, GitHub, Notion.
+- Check for available MCP servers at the tool's documentation site or the MCP registry. Common examples: Supabase, Stripe, Netlify, Linear, GitHub, Notion.
 
 **8. Design for escalation.** Build concrete escalation paths: test failures, error counts, or complexity markers trigger handoff from cheaper to more capable agents.
 

@@ -94,7 +94,6 @@ When creating or updating GitHub issues or pull requests, you **must** apply app
 | `dates`          | The change relates to setting or displaying datetimes/timezones      |
 | `filtering`      | The change relates to event filtering functionality                  |
 | `Sanity`         | The change involves Sanity CMS schema, queries, or integration       |
-| `Sentry`         | The change involves Sentry error tracking configuration              |
 | `astro`          | The change is primarily about Astro framework configuration or pages |
 | `content`        | The change relates to site content (not CMS schema)                  |
 | `javascript`     | The PR updates JavaScript/TypeScript code (general-purpose)          |
