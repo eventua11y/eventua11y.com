@@ -7,7 +7,23 @@ const host = import.meta.env.PUBLIC_POSTHOG_HOST;
 const ignoredException =
   /Failed to execute '(hide|show)Popover' on 'HTMLElement'|^Load failed\b|^error loading dynamically imported module|Object Not Found Matching Id:|The object can not be found here\./;
 
-function redactWebVitalsUrls(properties: Properties) {
+function visitorOptedOut() {
+  const browser = globalThis as typeof globalThis & {
+    doNotTrack?: string;
+    navigator: Navigator & {
+      msDoNotTrack?: string;
+      globalPrivacyControl?: boolean;
+    };
+  };
+  return [
+    browser.doNotTrack,
+    browser.navigator.doNotTrack,
+    browser.navigator.msDoNotTrack,
+    browser.navigator.globalPrivacyControl,
+  ].some((value) => [true, 'true', 1, '1', 'yes'].includes(value ?? false));
+}
+
+function redactPageUrls(properties: Properties) {
   // PostHog needs the page URL for its breakdown, but not the query or fragment.
   const pageUrl = location.origin + location.pathname;
   properties.$current_url = pageUrl;
@@ -20,7 +36,7 @@ function redactWebVitalsUrls(properties: Properties) {
 }
 
 const client =
-  !import.meta.env.SSR && key && host
+  !import.meta.env.SSR && key && host && !visitorOptedOut()
     ? Promise.all([
         import('posthog-js'),
         import('posthog-js/dist/exception-autocapture'),
@@ -32,8 +48,8 @@ const client =
             advanced_disable_flags: true,
             disable_external_dependency_loading: true,
             autocapture: false,
-            capture_pageview: false,
-            capture_pageleave: false,
+            capture_pageview: true,
+            capture_pageleave: true,
             disable_session_recording: true,
             capture_performance: {
               web_vitals: true,
@@ -41,9 +57,9 @@ const client =
               network_timing: false,
             },
             disable_surveys: true,
-            persistence: 'memory',
+            // Cookieless mode skips the SDK's opt-out check, so check before init.
+            cookieless_mode: 'always',
             person_profiles: 'never',
-            respect_dnt: true,
             ip: false,
             save_referrer: false,
             save_campaign_params: false,
@@ -65,8 +81,10 @@ const client =
                 return null;
               }
 
-              if (event.event === '$web_vitals') {
-                redactWebVitalsUrls(event.properties);
+              if (
+                ['$pageview', '$pageleave', '$web_vitals'].includes(event.event)
+              ) {
+                redactPageUrls(event.properties);
               }
 
               // Session attribution can include arbitrary campaign parameters.
