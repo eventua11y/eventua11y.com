@@ -3,6 +3,10 @@ import type { CaptureOptions, Properties } from 'posthog-js';
 const key = import.meta.env.PUBLIC_POSTHOG_KEY;
 const host = import.meta.env.PUBLIC_POSTHOG_HOST;
 
+// Known noise from Web Awesome popovers, prefetching, and extensions.
+const ignoredException =
+  /Failed to execute '(hide|show)Popover' on 'HTMLElement'|^Load failed\b|^error loading dynamically imported module|Object Not Found Matching Id:|The object can not be found here\./;
+
 const client =
   !import.meta.env.SSR && key && host
     ? Promise.all([
@@ -33,8 +37,17 @@ const client =
               '$search_keyword',
             ],
             before_send: (event) => {
-              // Session attribution can include arbitrary campaign parameters.
               if (!event?.properties) return event;
+              const exceptions = event.properties.$exception_list;
+              if (
+                event.event === '$exception' &&
+                Array.isArray(exceptions) &&
+                exceptions.some(({ value }) => ignoredException.test(value))
+              ) {
+                return null;
+              }
+
+              // Session attribution can include arbitrary campaign parameters.
               for (const name in event.properties) {
                 if (name.startsWith('$session_entry_')) {
                   delete event.properties[name];

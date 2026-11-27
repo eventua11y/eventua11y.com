@@ -53,7 +53,7 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 ### Hosting and monitoring
 
 - [Netlify](https://www.netlify.com/) -- hosting with automatic deploys from the `main` branch. Feature branches are deployed to preview URLs.
-- [Sentry](https://sentry.io/) -- error tracking and performance monitoring
+- [PostHog](https://posthog.com/) -- interaction analytics and browser and server error tracking
 
 ### Testing
 
@@ -77,13 +77,12 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 
 The edge functions require the following environment variables, configured in Netlify:
 
-| Variable             | Description                                                  |
-| -------------------- | ------------------------------------------------------------ |
-| `SANITY_PROJECT`     | Sanity project ID                                            |
-| `SANITY_DATASET`     | Sanity dataset name                                          |
-| `SANITY_API_VERSION` | Sanity API version                                           |
-| `SANITY_CDN`         | Whether to use the Sanity CDN (`true`/`false`)               |
-| `SENTRY_AUTH_TOKEN`  | Sentry auth token (used during build for source map uploads) |
+| Variable             | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `SANITY_PROJECT`     | Sanity project ID                              |
+| `SANITY_DATASET`     | Sanity dataset name                            |
+| `SANITY_API_VERSION` | Sanity API version                             |
+| `SANITY_CDN`         | Whether to use the Sanity CDN (`true`/`false`) |
 
 ### Getting started
 
@@ -142,7 +141,7 @@ identity, so renaming either starts a new performance history.
 npm run build
 ```
 
-This runs Prettier/ESLint checks, builds the Astro site, and uploads source maps to Sentry.
+This checks formatting and builds the Astro site. Set the PostHog CLI variables in [`.env.example`](.env.example) in Netlify to upload browser source maps.
 
 ## CI/CD
 

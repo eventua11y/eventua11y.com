@@ -38,6 +38,25 @@ describe('PostHog analytics', () => {
     }
   );
 
+  it('suppresses known browser noise without dropping other exceptions', async () => {
+    await import('./analytics');
+    await vi.dynamicImportSettled();
+
+    const [, config] = posthog.init.mock.calls[0];
+    const exception = (value: string) => ({
+      event: '$exception',
+      properties: { $exception_list: [{ value }] },
+    });
+    const error = exception('An unexpected error');
+
+    expect(
+      config.before_send(
+        exception("Failed to execute 'showPopover' on 'HTMLElement'")
+      )
+    ).toBeNull();
+    expect(config.before_send(error)).toBe(error);
+  });
+
   it('initializes once and sends queued interactions and lifecycle logs', async () => {
     const { capture, logBrowserReady } = await import('./analytics');
     capture('filters_reset');
