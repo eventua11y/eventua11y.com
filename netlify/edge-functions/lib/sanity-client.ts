@@ -5,7 +5,10 @@
  * This module centralises it to avoid duplication.
  */
 
-import { createClient, type SanityClient } from 'https://esm.sh/@sanity/client';
+import {
+  createClient,
+  type SanityClient,
+} from 'https://esm.sh/@sanity/client@7.13.1';
 
 /** Creates a configured Sanity client for use in edge functions. */
 export function createSanityClient(): SanityClient {

@@ -3,6 +3,7 @@ import dayjs from '../lib/dayjs';
 import {
   getEventStart,
   getEventEnd,
+  getAllDayEventEnd,
   isMultiDayAllDay,
   isHappeningNow,
   isStartingSoon,
@@ -23,6 +24,16 @@ import {
 
 /** Shorthand for a fixed UTC instant. */
 const now = (iso: string) => dayjs.utc(iso);
+
+describe('getAllDayEventEnd', () => {
+  it.each([
+    ['UTC', '2030-07-03T23:59:59.999Z'],
+    ['Asia/Tokyo', '2030-07-03T14:59:59.999Z'],
+  ])('keeps the written final day inclusive in %s', (timezone, expected) => {
+    const end = getAllDayEventEnd('2030-07-03T00:00:00+11:00', timezone);
+    expect(end.toISOString()).toBe(expected);
+  });
+});
 
 /** <abbr> helpers matching the module constants. */
 const HR = ' <abbr title="hours">hr</abbr>';
@@ -660,25 +671,22 @@ describe('getCountdownLabel', () => {
     );
   });
 
-  it('returns countdown with hours and minutes', () => {
-    // 3 hours and 15 minutes before start
-    const result = getCountdownLabel(now('2026-06-15T10:45:00Z'), futureEvent);
-    expect(result).toBe(`Starts in 3${HR} 15${M}`);
+  it('rounds imminent starts to minutes or hours', () => {
+    expect(getCountdownLabel(now('2026-06-15T13:30:00Z'), futureEvent)).toBe(
+      'In 30 minutes'
+    );
+    expect(getCountdownLabel(now('2026-06-15T13:00:00Z'), futureEvent)).toBe(
+      'In an hour'
+    );
+    expect(getCountdownLabel(now('2026-06-15T10:45:00Z'), futureEvent)).toBe(
+      'In 3 hours'
+    );
   });
 
-  it('returns countdown with only minutes when under an hour', () => {
-    const result = getCountdownLabel(now('2026-06-15T13:30:00Z'), futureEvent);
-    expect(result).toBe(`Starts in 30${M}`);
-  });
-
-  it('returns countdown with only hours when minutes are zero', () => {
-    const result = getCountdownLabel(now('2026-06-15T12:00:00Z'), futureEvent);
-    expect(result).toBe(`Starts in 2${HR}`);
-  });
-
-  it('returns "less than 1m" when under a minute away', () => {
-    const result = getCountdownLabel(now('2026-06-15T13:59:30Z'), futureEvent);
-    expect(result).toBe(`Starts in less than 1${M}`);
+  it('returns "Now" when under a minute away', () => {
+    expect(getCountdownLabel(now('2026-06-15T13:59:45Z'), futureEvent)).toBe(
+      'Now'
+    );
   });
 
   it('excludes themes even with showCountdown', () => {
@@ -708,59 +716,37 @@ describe('getCountdownLabel', () => {
     ).toBe('');
   });
 
-  it('includes <abbr> elements in countdown output', () => {
-    const result = getCountdownLabel(now('2026-06-15T10:45:00Z'), futureEvent);
-    expect(result).toContain('<abbr title="hours">hr</abbr>');
-    expect(result).toContain('<abbr title="minutes">m</abbr>');
+  it.each([
+    ['2026-06-14T12:00:00Z', 'Tomorrow'],
+    ['2026-06-10T12:00:00Z', '5 days from now'],
+    ['2026-05-25T12:00:00Z', '3 weeks from now'],
+    ['2026-05-19T12:00:00Z', 'About a month from now'],
+    ['2026-03-10T12:00:00Z', '3 months from now'],
+    ['2025-05-10T12:00:00Z', 'A year from now'],
+    ['2024-06-10T12:00:00Z', '2 years from now'],
+  ])('describes the start from %s as "%s"', (from, expected) => {
+    expect(getCountdownLabel(now(from), futureEvent)).toBe(expected);
   });
 
-  it('returns "Starts tomorrow" when 1 day away', () => {
-    // Event starts June 15 14:00; now is June 14 12:00 → ~26 hours away
-    expect(getCountdownLabel(now('2026-06-14T12:00:00Z'), futureEvent)).toBe(
-      'Starts tomorrow'
-    );
-  });
-
-  it('returns days when between 2 and 29 days away', () => {
-    // Event starts June 15 14:00; now is June 10 12:00 → 5 days away
-    expect(getCountdownLabel(now('2026-06-10T12:00:00Z'), futureEvent)).toBe(
-      'Starts in 5 days'
-    );
-  });
-
-  it('returns "1 month" singular when roughly 1 month away', () => {
-    // Event starts June 15 14:00; now is May 10 12:00 → ~1 month
-    expect(getCountdownLabel(now('2026-05-10T12:00:00Z'), futureEvent)).toBe(
-      'Starts in 1 month'
-    );
-  });
-
-  it('returns months when a few months away', () => {
-    // Event starts June 15 14:00; now is March 10 12:00 → ~3 months
-    expect(getCountdownLabel(now('2026-03-10T12:00:00Z'), futureEvent)).toBe(
-      'Starts in 3 months'
-    );
-  });
-
-  it('stays in months beyond 12 months for precision', () => {
-    // Event starts June 15 14:00; now is May 10 of prior year → ~13 months
-    expect(getCountdownLabel(now('2025-05-10T12:00:00Z'), futureEvent)).toBe(
-      'Starts in 13 months'
-    );
-  });
-
-  it('switches to years at 24 months', () => {
-    // Event starts June 15 14:00; now is ~2 years prior
-    expect(getCountdownLabel(now('2024-06-10T12:00:00Z'), futureEvent)).toBe(
-      'Starts in 2 years'
-    );
-  });
-
-  it('returns higher year counts for far-future events', () => {
-    // Event starts June 15 14:00; now is ~3 years prior
-    expect(getCountdownLabel(now('2023-05-10T12:00:00Z'), futureEvent)).toBe(
-      'Starts in 3 years'
-    );
+  it('uses the viewer calendar day and locale when given', () => {
+    // 12 hours before the start: the same day in London, the day before in LA.
+    expect(
+      getCountdownLabel(
+        now('2026-06-15T02:00:00Z'),
+        futureEvent,
+        'Europe/London'
+      )
+    ).toBe('In 12 hours');
+    expect(
+      getCountdownLabel(
+        now('2026-06-15T02:00:00Z'),
+        futureEvent,
+        'America/Los_Angeles'
+      )
+    ).toBe('Tomorrow');
+    expect(
+      getCountdownLabel(now('2026-06-10T12:00:00Z'), futureEvent, 'UTC', 'es')
+    ).toBe('Dentro de 5 días');
   });
 });
 

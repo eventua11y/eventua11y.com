@@ -1,0 +1,9 @@
+---
+import NotFound from './404.astro';
+
+// Astro cannot rewrite an SSR page directly to a prerendered page.
+export const prerender = false;
+Astro.response.status = 404;
+---
+
+<NotFound />

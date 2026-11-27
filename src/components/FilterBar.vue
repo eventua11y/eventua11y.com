@@ -1,5 +1,10 @@
 <template>
-  <div id="filters" ref="filterToolbar" class="py-xs-s">
+  <div
+    v-show="filtersStore.eventsStatus !== 'error'"
+    id="filters"
+    ref="filterToolbar"
+    class="py-xs-s"
+  >
     <div class="container">
       <div class="filters__status">
         <p
@@ -49,7 +54,6 @@
             ></wa-icon>
             <span v-if="!isNarrow">Filter</span>
           </wa-button>
-          <TimezoneSelector />
         </div>
       </div>
     </div>
@@ -57,9 +61,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import type WaSwitch from '@awesome.me/webawesome/dist/components/switch/switch.js';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import filtersStore from '../store/filtersStore';
-import TimezoneSelector from './TimezoneSelector.vue';
+import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
 /**
  * FilterBar component
@@ -71,13 +76,26 @@ import TimezoneSelector from './TimezoneSelector.vue';
  * Reference to filter toolbar element for intersection observer
  * Used to add sticky positioning when scrolled
  */
-const filterToolbar = ref(null);
+const filterToolbar = ref<HTMLElement | null>(null);
+
+watch(
+  () => filtersStore.eventsStatus,
+  (status) => {
+    if (status === 'error') {
+      focusEventRegionIfNeeded(
+        [filterToolbar.value, document.getElementById('filter-drawer')],
+        '#upcoming-events'
+      );
+    }
+  },
+  { flush: 'sync' }
+);
 
 /**
  * Reference to awareness days switch component
  * Used to ensure proper initialization of checked state
  */
-const awarenessDaysSwitch = ref(null);
+const awarenessDaysSwitch = ref<WaSwitch | null>(null);
 
 /**
  * Tracks whether the viewport is narrow (≤699.98px)
@@ -102,8 +120,8 @@ function resetFilters() {
  * Toggles awareness days filter
  * Updates store when switch changes
  */
-function toggleAwarenessDays(event) {
-  filtersStore.filters.showAwarenessDays = event.target.checked;
+function toggleAwarenessDays(event: Event) {
+  filtersStore.filters.showAwarenessDays = (event.target as WaSwitch).checked;
 }
 
 /**

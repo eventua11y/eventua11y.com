@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import filtersStore from '../store/filtersStore';
+import { focusEventRegionIfNeeded } from '../utils/focusEventRegion';
 
 interface MonthLink {
   text: string;
   identifier: string;
   href: string;
-  sectionEl?: Element;
+  sectionEl?: HTMLElement;
 }
 
 const props = withDefaults(
@@ -19,14 +21,25 @@ const props = withDefaults(
 );
 
 const monthLinks = ref<MonthLink[]>([]);
-const activeLink = ref('today');
+const activeLink = ref<string | null>('today');
+const monthNav = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
+
+watch(
+  () => filtersStore.eventsStatus,
+  (status) => {
+    if (status === 'error') {
+      focusEventRegionIfNeeded([monthNav.value], props.contentRegion);
+    }
+  },
+  { flush: 'sync' }
+);
 
 /**
  * Scrolls smoothly to the target section and sets focus
  * @param {HTMLElement} target - The target element to scroll to
  */
-function scrollToSection(target: Element | null) {
+function scrollToSection(target?: HTMLElement | null) {
   if (target) {
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
@@ -58,7 +71,7 @@ function updateMonthNav() {
       href: '#today',
     });
   }
-  const monthSections = document.querySelectorAll('[data-month]');
+  const monthSections = document.querySelectorAll<HTMLElement>('[data-month]');
   monthSections.forEach((section) => {
     const yearMonth = section.getAttribute('data-month');
     if (!yearMonth) return;
@@ -103,7 +116,7 @@ function setupIntersectionObserver() {
   if (observer) observer.disconnect();
 
   const monthSections = document.querySelectorAll('[data-month]');
-  const visibleSections = new Map();
+  const visibleSections = new Map<Element, number>();
 
   observer = new IntersectionObserver(
     (entries) => {
@@ -132,7 +145,7 @@ function setupIntersectionObserver() {
     }
   );
 
-  monthSections.forEach((section) => observer.observe(section));
+  for (const section of monthSections) observer.observe(section);
 }
 
 onMounted(() => {
@@ -167,13 +180,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav aria-label="Months" class="month-nav pr-xl">
+  <nav
+    v-show="filtersStore.eventsStatus !== 'error'"
+    ref="monthNav"
+    aria-label="Months"
+    class="month-nav pr-xl"
+  >
     <ul role="list" class="month-list">
       <li v-for="link in monthLinks" :key="link.identifier" class="mb-xs">
         <a
           :href="link.href"
           :data-month-link="link.identifier"
-          :aria-current="activeLink === link.identifier ? 'location' : null"
+          :aria-current="
+            activeLink === link.identifier ? 'location' : undefined
+          "
           @click="(e) => handleLinkClick(e, link)"
         >
           {{ link.text }}

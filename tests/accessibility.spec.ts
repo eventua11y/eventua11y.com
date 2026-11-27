@@ -59,10 +59,10 @@ test.describe('Homepage accessibility', () => {
     // wa-drawer uses <dialog showModal()> which renders in the top layer;
     // the host element has height: 0 so isVisible() is unreliable.
     // Check the open attribute instead.
-    const filterDrawer = page.locator('#filter-drawer');
-    if ((await filterDrawer.getAttribute('open')) !== null) {
+    const openFilterDrawer = page.locator('#filter-drawer[open]');
+    if ((await openFilterDrawer.count()) > 0) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toHaveAttribute('open');
+      await expect(openFilterDrawer).toHaveCount(0);
     }
   });
 
@@ -386,10 +386,10 @@ test.describe('Shared component accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('#upcoming-events');
-    const filterDrawer = page.locator('#filter-drawer');
-    if ((await filterDrawer.getAttribute('open')) !== null) {
+    const openFilterDrawer = page.locator('#filter-drawer[open]');
+    if ((await openFilterDrawer.count()) > 0) {
       await page.keyboard.press('Escape');
-      await expect(filterDrawer).not.toHaveAttribute('open');
+      await expect(openFilterDrawer).toHaveCount(0);
     }
   });
 
@@ -453,6 +453,16 @@ const pages = [
   { name: 'Past Events', path: '/past-events', waitSelector: '#past-events' },
   { name: 'Accessibility Statement', path: '/accessibility' },
   { name: 'Curation Policy', path: '/curation-policy' },
+  {
+    name: 'Topics',
+    path: '/topics',
+    waitSelector: 'a[href="/topics"][aria-current="page"]',
+  },
+  {
+    name: 'Topic detail',
+    path: '/topics/open-source',
+    waitSelector: 'a[href="/topics"][aria-current="page"]',
+  },
   { name: '404', path: '/404' },
   {
     name: 'Event detail (with hashtags)',
@@ -479,13 +489,10 @@ for (const colorScheme of ['light', 'dark'] as const) {
         }
 
         // Close filter drawer if open (homepage only)
-        const filterDrawer = page.locator('#filter-drawer');
-        if (
-          (await filterDrawer.count()) > 0 &&
-          (await filterDrawer.getAttribute('open')) !== null
-        ) {
+        const openFilterDrawer = page.locator('#filter-drawer[open]');
+        if ((await openFilterDrawer.count()) > 0) {
           await page.keyboard.press('Escape');
-          await expect(filterDrawer).not.toHaveAttribute('open');
+          await expect(openFilterDrawer).toHaveCount(0);
         }
 
         await expect(page.locator('html')).toHaveAttribute(
@@ -497,6 +504,38 @@ for (const colorScheme of ['light', 'dark'] as const) {
         expect(results.violations).toEqual([]);
       });
     }
+
+    test(`skip link is readable on keyboard focus in ${colorScheme} mode`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto('/');
+      await expect(page.locator('html')).toHaveAttribute(
+        'data-theme',
+        colorScheme
+      );
+
+      const link = page.getByRole('link', { name: 'Skip to main content' });
+      await page.keyboard.press('Tab');
+      await expect(link).toBeFocused();
+      await expect(link).toBeInViewport();
+      const { color, outlineColor, background } = await link.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          color: style.color,
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(document.body).backgroundColor,
+        };
+      });
+      expect(contrastRatio(color, background)).toBeGreaterThanOrEqual(4.5);
+      await expect(link).not.toHaveCSS('outline-style', 'none');
+      await expect(link).not.toHaveCSS('outline-width', '0px');
+      expect(contrastRatio(outlineColor, background)).toBeGreaterThanOrEqual(3);
+
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(/#main$/);
+      await expect(link).not.toBeInViewport();
+    });
 
     // Axe cannot check contrast on SVG icons inside Web Awesome shadow DOM,
     // so we manually verify the theme selector icon meets WCAG 2.x

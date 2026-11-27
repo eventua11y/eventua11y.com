@@ -6,6 +6,7 @@
  * - Returns minimal data structure for display
  */
 
+import type { Config } from 'https://edge.netlify.com/v1/index.ts';
 import { BOOKS_QUERY } from './lib/queries.ts';
 import { createSanityClient } from './lib/sanity-client.ts';
 
@@ -100,4 +101,4 @@ export default async function handler(): Promise<Response> {
  * Edge function configuration
  * Defines API endpoint path for book data
  */
-export const config = { path: '/api/get-books' };
+export const config: Config = { path: '/api/get-books' };

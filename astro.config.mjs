@@ -1,4 +1,4 @@
-import { defineConfig, envField } from 'astro/config';
+import { defineConfig } from 'astro/config';
 import { loadEnv } from 'vite';
 import netlify from '@astrojs/netlify';
 import vue from '@astrojs/vue';
@@ -12,15 +12,6 @@ const { SENTRY_AUTH_TOKEN } = loadEnv(process.env.NODE_ENV, process.cwd(), '');
 export default defineConfig({
   site: 'https://eventua11y.com',
   adapter: netlify(),
-  env: {
-    schema: {
-      FLAGSMITH_ENVIRONMENT_KEY: envField.string({
-        context: 'server',
-        access: 'secret',
-        optional: true,
-      }),
-    },
-  },
   server: {
     allowedHosts: ['.ts.net'],
   },
@@ -43,10 +34,9 @@ export default defineConfig({
       devtools: false,
     }),
     sentry({
-      sourceMapsUploadOptions: {
-        project: 'eventua11y',
-        authToken: SENTRY_AUTH_TOKEN,
-      },
+      org: 'matt-obee',
+      project: 'eventua11y',
+      authToken: SENTRY_AUTH_TOKEN,
     }),
   ],
 });

@@ -357,6 +357,17 @@ export function isFullMonth(start: dayjs.Dayjs, end: dayjs.Dayjs): boolean {
  */
 type DateRangeParts = [string] | [string, string];
 
+function relativeLabelDay(
+  now: dayjs.Dayjs | undefined,
+  timezone: string,
+  relativeDayTimezone?: string
+): dayjs.Dayjs {
+  const instant = now || dayjs();
+  if (!relativeDayTimezone) return instant.tz(timezone);
+  // Compare the viewer's calendar day with date-only values parsed as UTC.
+  return dayjs.utc(instant.tz(relativeDayTimezone).format('YYYY-MM-DD'));
+}
+
 /**
  * Formats a date range using dayjs with locale-aware deduplication
  * of shared date components (month, year).
@@ -390,11 +401,10 @@ export function formatDateRange(options: {
   day?: boolean;
   type?: string;
   isDeadline?: boolean;
-  /**
-   * Whether the event is in the past. When false (upcoming), the year is
-   * omitted from display to reduce visual noise. Defaults to false.
-   */
-  isPast?: boolean;
+  /** Include the year on single dates and same-year ranges. */
+  showYear?: boolean;
+  /** Viewer timezone for relative labels on dates formatted as UTC calendar dates. */
+  relativeDayTimezone?: string;
   /** Injected "now" for testability; defaults to the real current time. */
   now?: dayjs.Dayjs;
 }): DateRangeParts {
@@ -404,7 +414,11 @@ export function formatDateRange(options: {
 
   const isInternational = !options.timezone;
   const tz = isInternational ? 'UTC' : resolveTimezone(options);
-  const nowInTz = (options.now || dayjs()).tz(tz);
+  const nowInTz = relativeLabelDay(
+    options.now,
+    tz,
+    options.relativeDayTimezone
+  );
   const tomorrowInTz = nowInTz.add(1, 'day');
 
   /**
@@ -459,10 +473,7 @@ export function formatDateRange(options: {
     return formatted;
   }
 
-  // Whether the year should be shown. For upcoming events (isPast = false/undefined),
-  // the year is omitted to reduce visual noise. Year is always shown for past events
-  // and for ranges that span a year boundary (which need the year for clarity).
-  const showYear = !!options.isPast;
+  const { showYear } = options;
 
   // Year-free date-only format for the current locale
   const noYearDateOnly = NO_YEAR_DATE_ONLY[locale] || NO_YEAR_DATE_ONLY.en;
@@ -506,7 +517,7 @@ export function formatDateRange(options: {
     ? dayjs.utc(options.dateEnd).locale(locale)
     : dayjs.utc(options.dateEnd).tz(tz).locale(locale);
 
-  // For year-spanning ranges, always show the year regardless of isPast
+  // Cross-year ranges always include the year.
   const sameYear = start.isSame(end, 'year');
   const dateFmt = showYear || !sameYear ? `${dp}LL` : `${dp}${noYearDateOnly}`;
 
@@ -533,7 +544,6 @@ export function formatDateRange(options: {
   // Timed multi-day events: deduplicate year when same year
   if (!isDateOnly) {
     if (sameYear) {
-      // End format: LLLL (with year) for past, year-free timed for upcoming
       const timedEndFmt = showYear ? formats.timedSameYear.end : noYearTimed;
       return [
         relativeDay(
@@ -558,7 +568,7 @@ export function formatDateRange(options: {
     ];
   }
 
-  // Full-month events: display as "October 2026" for past, "October" for upcoming
+  // Full-month events: display as "October 2026" or just "October".
   if (isFullMonth(start, end)) {
     const fullMonthFmt = showYear
       ? FULL_MONTH_FORMATS[locale] || FULL_MONTH_FORMATS.en
@@ -571,7 +581,7 @@ export function formatDateRange(options: {
     const fmt = start.isSame(end, 'month')
       ? formats.sameMonth
       : formats.diffMonth;
-    // For upcoming events, strip the year but keep the month. diffMonth.start
+    // When omitting the year, keep the month. diffMonth.start
     // always includes the month without year, so it serves as the year-free
     // end format for both sameMonth and diffMonth cases.
     const endFmt = showYear ? fmt.end : formats.diffMonth.start;
@@ -643,4 +653,80 @@ export function resolveTimezone(options: {
     return options.userTimezone || 'UTC';
   }
   return options.timezone || 'UTC';
+}
+
+type RelativeUnit = 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+
+function englishRelative(
+  value: number,
+  unit: RelativeUnit,
+  approximate: boolean
+): string {
+  const amount = Math.abs(value);
+  const article = unit === 'hour' ? 'an' : 'a';
+  const count = amount === 1 ? `${article} ${unit}` : `${amount} ${unit}s`;
+  const quantity = approximate ? `about ${count}` : count;
+  let phrase = `${quantity} from now`;
+  if (value < 0) phrase = `${quantity} ago`;
+  else if (unit === 'minute' || unit === 'hour') phrase = `in ${quantity}`;
+  return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+}
+
+/**
+ * Describes when an event starts relative to now, as a standalone phrase
+ * such as "In 3 hours", "Tomorrow" or "3 weeks from now".
+ *
+ * "Today", "Tomorrow" and "Yesterday" use calendar days in the given timezone,
+ * so they stay accurate around midnight and DST changes. Longer spans are
+ * rounded, and a month is described as "about a month" rather than "next
+ * month" because the rounded span rarely matches the calendar month.
+ */
+export function formatRelativeStart(
+  start: string | Date,
+  now: string | number | Date,
+  timezone: string,
+  locale = 'en'
+): string {
+  const startTime = dayjs.utc(start);
+  const nowTime = dayjs.utc(now);
+  const minutes = Math.round(startTime.diff(nowTime, 'minute', true));
+  const hours = Math.round(minutes / 60);
+  // Compare local calendar dates as UTC midnights so DST never shortens a day.
+  const calendarDays = dayjs
+    .utc(startTime.tz(timezone).format('YYYY-MM-DD'))
+    .diff(dayjs.utc(nowTime.tz(timezone).format('YYYY-MM-DD')), 'day');
+  const english = locale.toLowerCase().startsWith('en');
+  const intl = new Intl.RelativeTimeFormat(locale, { numeric: 'always' });
+  const capitalize = (text: string) =>
+    text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
+  const relative = (value: number, unit: RelativeUnit, approximate = false) =>
+    english
+      ? englishRelative(value, unit, approximate)
+      : capitalize(intl.format(value, unit));
+
+  const minutesAway = Math.abs(minutes);
+  if (minutesAway < 1) {
+    return english ? 'Now' : capitalize(intl.format(0, 'minute'));
+  }
+  if (minutesAway < 60) return relative(minutes, 'minute');
+  // Within a few hours, or later today, the hour count is more useful.
+  if (calendarDays === 0 || minutesAway < 6 * 60) {
+    return relative(hours, 'hour');
+  }
+  const days = Math.abs(calendarDays);
+  if (days === 1) {
+    return capitalize(
+      new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(
+        calendarDays,
+        'day'
+      )
+    );
+  }
+  if (days < 7) return relative(calendarDays, 'day');
+  const sign = Math.sign(calendarDays);
+  if (days < 25) return relative(sign * Math.round(days / 7), 'week');
+  const months = Math.round(days / 30.44);
+  if (months <= 1) return relative(sign, 'month', true);
+  if (months < 12) return relative(sign * months, 'month');
+  return relative(sign * Math.max(1, Math.round(days / 365.25)), 'year');
 }
