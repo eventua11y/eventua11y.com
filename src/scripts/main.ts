@@ -7,8 +7,8 @@ document.addEventListener('click', (event) => {
   );
   if (!link) return;
 
-  // Outbound links can unload the page before a batched request is sent.
-  const options = { transport: 'sendBeacon' } as const;
+  // Send before navigation without waiting for asynchronous compression.
+  const options = { transport: 'sendBeacon', send_instantly: true } as const;
   const eventType = link.getAttribute('data-analytics-event-type');
   if (eventType !== null) {
     capture('event_website_clicked', { event_type: eventType }, options);

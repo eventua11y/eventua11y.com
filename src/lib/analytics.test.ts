@@ -41,7 +41,11 @@ describe('PostHog analytics', () => {
   it('initializes once and sends queued interactions and lifecycle logs', async () => {
     const { capture, logBrowserReady } = await import('./analytics');
     capture('filters_reset');
-    capture('book_link_clicked', undefined, { transport: 'sendBeacon' });
+    const outboundOptions = {
+      transport: 'sendBeacon',
+      send_instantly: true,
+    } as const;
+    capture('book_link_clicked', undefined, outboundOptions);
     logBrowserReady();
     await vi.dynamicImportSettled();
 
@@ -57,7 +61,7 @@ describe('PostHog analytics', () => {
     );
     expect(posthog.capture.mock.calls).toEqual([
       ['filters_reset', undefined, undefined],
-      ['book_link_clicked', undefined, { transport: 'sendBeacon' }],
+      ['book_link_clicked', undefined, outboundOptions],
     ]);
     const [, config] = posthog.init.mock.calls[0];
     const event = {
