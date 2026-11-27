@@ -24,12 +24,18 @@ afterEach(() => {
 });
 
 describe('PostHog analytics', () => {
-  it.each(['missing key', 'missing host', 'SSR'])(
+  it.each(['missing key', 'missing host', 'SSR', 'Do Not Track', 'GPC'])(
     'does not initialize or capture with %s',
     async (scenario) => {
       if (scenario === 'missing key') vi.stubEnv('PUBLIC_POSTHOG_KEY', '');
       if (scenario === 'missing host') vi.stubEnv('PUBLIC_POSTHOG_HOST', '');
       if (scenario === 'SSR') vi.stubEnv('SSR', true);
+      if (scenario === 'Do Not Track') {
+        vi.stubGlobal('navigator', { doNotTrack: '1' });
+      }
+      if (scenario === 'GPC') {
+        vi.stubGlobal('navigator', { globalPrivacyControl: true });
+      }
 
       const { capture, logBrowserReady } = await import('./analytics');
       capture('filters_reset');
@@ -85,6 +91,26 @@ describe('PostHog analytics', () => {
     });
   });
 
+  it.each(['$pageview', '$pageleave'])(
+    'redacts the URL on %s',
+    async (name) => {
+      const pageUrl = 'https://eventua11y.com/events/example';
+      vi.stubGlobal('location', new URL(`${pageUrl}?private=value#fragment`));
+      await import('./analytics');
+      await vi.dynamicImportSettled();
+
+      const [, config] = posthog.init.mock.calls[0];
+      const event = {
+        event: name,
+        properties: { $session_entry_utm_source: 'private' },
+      };
+
+      expect(config.before_send(event).properties).toEqual({
+        $current_url: pageUrl,
+      });
+    }
+  );
+
   it('initializes once and sends queued interactions and lifecycle logs', async () => {
     const { capture, logBrowserReady } = await import('./analytics');
     capture('filters_reset');
@@ -101,13 +127,15 @@ describe('PostHog analytics', () => {
       expect.objectContaining({
         api_host: 'https://posthog.test',
         autocapture: false,
+        capture_pageview: true,
+        capture_pageleave: true,
         disable_session_recording: true,
         capture_performance: {
           web_vitals: true,
           web_vitals_attribution: false,
           network_timing: false,
         },
-        persistence: 'memory',
+        cookieless_mode: 'always',
         person_profiles: 'never',
       })
     );

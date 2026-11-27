@@ -53,7 +53,7 @@ Coding agents should run `npx chocks context` at the start of a session to load 
 ### Hosting and monitoring
 
 - [Netlify](https://www.netlify.com/) -- hosting with automatic deploys from the `main` branch. Feature branches are deployed to preview URLs.
-- [PostHog](https://posthog.com/) -- interaction analytics and browser and server error tracking
+- [PostHog](https://posthog.com/) -- cookieless web analytics and browser and server error tracking
 
 ### Testing
 
