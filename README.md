@@ -85,16 +85,6 @@ The edge functions require the following environment variables, configured in Ne
 | `SANITY_CDN`         | Whether to use the Sanity CDN (`true`/`false`)               |
 | `SENTRY_AUTH_TOKEN`  | Sentry auth token (used during build for source map uploads) |
 
-PostHog is optional. Set `PUBLIC_POSTHOG_KEY` (the public project token) and
-`PUBLIC_POSTHOG_HOST` (the ingestion URL, e.g. `https://eu.i.posthog.com`) in
-the Netlify **Builds** scope for the deploy contexts you want to track. Use a
-separate PostHog project for deploy previews so test traffic doesn't appear in
-production analytics. Rebuild after changing either value.
-
-PostHog captures selected interactions, unhandled browser exceptions, and two
-startup logs. It doesn't record sessions, capture console output, or store a
-visitor ID across pages. Fathom still handles page analytics.
-
 ### Getting started
 
 ```sh
