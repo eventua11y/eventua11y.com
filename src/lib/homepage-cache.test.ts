@@ -61,12 +61,9 @@ beforeEach(() => {
 
 async function renderPage(path = '/'): Promise<Response> {
   const slug = path.match(/^\/events\/([^/]+)\/?$/)?.[1];
+  const listingPage = path === '/' ? 'index' : 'past-events';
   const page = await server.ssrLoadModule(
-    slug
-      ? '/src/pages/events/[slug].astro'
-      : path === '/'
-        ? '/src/pages/index.astro'
-        : '/src/pages/past-events.astro'
+    slug ? '/src/pages/events/[slug].astro' : `/src/pages/${listingPage}.astro`
   );
   const { onRequest } = await server.ssrLoadModule('/src/middleware.ts');
   const container = await AstroContainer.create({

@@ -62,12 +62,11 @@ export const onRequest = (async (context, next) => {
     const isLoadedDetail =
       context.locals?.eventDetailLoaded &&
       /^\/events\/[^/]+\/?$/.test(context.url.pathname);
+    const isLoadedList =
+      context.locals?.staticEventListLoaded &&
+      ['/', '/past-events', '/past-events/'].includes(context.url.pathname);
     if (
-      (isLoadedDetail ||
-        (context.locals?.staticEventListLoaded &&
-          ['/', '/past-events', '/past-events/'].includes(
-            context.url.pathname
-          ))) &&
+      (isLoadedDetail || isLoadedList) &&
       context.request.method === 'GET' &&
       response.status === 200 &&
       response.headers.get('Content-Type')?.split(';')[0] === 'text/html' &&
