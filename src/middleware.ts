@@ -72,11 +72,9 @@ export const onRequest = (async (context, next) => {
       response.headers.get('Content-Type')?.split(';')[0] === 'text/html' &&
       !hasOutgoingCookies()
     ) {
-      if (isLoadedDetail) {
-        // Netlify can cache truncated HTML if the SSR stream fails after headers are sent.
-        response = new Response(await response.arrayBuffer(), response);
-        if (hasOutgoingCookies()) return response;
-      }
+      // Netlify can cache truncated HTML if the SSR stream fails after headers are sent.
+      response = new Response(await response.arrayBuffer(), response);
+      if (hasOutgoingCookies()) return response;
       response.headers.set('Netlify-CDN-Cache-Control', 'public, s-maxage=60');
     }
     return response;

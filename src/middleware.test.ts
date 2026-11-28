@@ -11,6 +11,19 @@ vi.mock('posthog-node', () => ({
 }));
 
 const context = { routePattern: '/events/[slug]' } as APIContext;
+const cacheableRoutes = [
+  { path: '/', route: '/', locals: { staticEventListLoaded: true } },
+  {
+    path: '/past-events',
+    route: '/past-events',
+    locals: { staticEventListLoaded: true },
+  },
+  {
+    path: '/events/example',
+    route: '/events/[slug]',
+    locals: { eventDetailLoaded: true },
+  },
+];
 
 beforeEach(() => {
   vi.resetModules();
@@ -24,6 +37,11 @@ afterEach(() => vi.unstubAllEnvs());
 describe('Event listing CDN cache eligibility', () => {
   it.each([
     { scenario: 'a successful GET', expected: 'public, s-maxage=60' },
+    {
+      scenario: 'the past listing with a trailing slash',
+      path: '/past-events/',
+      expected: 'public, s-maxage=60',
+    },
     { scenario: 'a Set-Cookie header', setCookie: true },
     { scenario: 'an Astro cookie queued during rendering', queueCookie: true },
     { scenario: 'a HEAD request', method: 'HEAD' },
@@ -108,14 +126,23 @@ describe('Event detail CDN cache eligibility', () => {
       );
     }
   );
+});
 
-  it.each(['no cookie', 'Astro cookie', 'Set-Cookie'])(
-    'checks CDN eligibility after the last detail chunk (%s)',
-    async (cookie) => {
+describe('CDN cache eligibility after rendering', () => {
+  it.each(
+    cacheableRoutes.flatMap(({ path, locals }) =>
+      ['no cookie', 'Astro cookie', 'Set-Cookie'].map((cookie) => ({
+        path,
+        locals,
+        cookie,
+      }))
+    )
+  )(
+    'checks CDN eligibility after the last chunk on $path ($cookie)',
+    async ({ path, locals, cookie }) => {
       const { onRequest } = await import('./middleware');
-      const request = new Request('https://example.test/events/example');
-      const context = createContext({ request, defaultLocale: '' });
-      context.locals.eventDetailLoaded = true;
+      const request = new Request(`https://example.test${path}`);
+      const context = createContext({ request, defaultLocale: '', locals });
       const encoder = new TextEncoder();
       const headers = new Headers({ 'Content-Type': 'text/html' });
       const pull = vi
@@ -169,27 +196,17 @@ describe('Astro error tracking', () => {
     });
   });
 
-  it.each([
-    {
-      scenario: 'listing',
-      path: '/',
-      route: '/',
-      expected: 'public, s-maxage=60',
-    },
-    {
-      scenario: 'ineligible detail',
-      path: '/events/example',
-      route: '/events/[slug]',
-    },
-  ])(
-    'keeps $scenario streams lazy and reports late errors',
-    async ({ path, route, expected }) => {
+  it.each(cacheableRoutes)(
+    'keeps the $path stream lazy with Set-Cookie and reports late errors',
+    async ({ path, route, locals }) => {
       const { onRequest } = await import('./middleware');
       const request = new Request(`https://example.test${path}`);
-      const renderContext = createContext({ request, defaultLocale: '' });
+      const renderContext = createContext({
+        request,
+        defaultLocale: '',
+        locals,
+      });
       renderContext.routePattern = route;
-      renderContext.locals.staticEventListLoaded = path === '/';
-      renderContext.locals.eventDetailLoaded = path !== '/';
       const error = new Error('render failed after headers');
       capture.mockRejectedValue(new Error('telemetry failure'));
       const chunk = new TextEncoder().encode('first chunk');
@@ -198,8 +215,10 @@ describe('Astro error tracking', () => {
         .mockImplementationOnce((controller) => controller.enqueue(chunk))
         .mockImplementationOnce((controller) => controller.error(error));
       const stream = new ReadableStream({ pull }, { highWaterMark: 0 });
-      const headers = new Headers({ 'Content-Type': 'text/html' });
-      if (!expected) headers.set('Set-Cookie', 'test=value');
+      const headers = {
+        'Content-Type': 'text/html',
+        'Set-Cookie': 'test=value',
+      };
       const response = await onRequest(
         renderContext,
         async () => new Response(stream, { headers })
@@ -208,9 +227,7 @@ describe('Astro error tracking', () => {
       expect(pull).not.toHaveBeenCalled();
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toBe('text/html');
-      expect(response.headers.get('Netlify-CDN-Cache-Control')).toBe(
-        expected ?? null
-      );
+      expect(response.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
       const reader = response.body!.getReader();
       await expect(reader.read()).resolves.toEqual({
         done: false,
@@ -227,15 +244,22 @@ describe('Astro error tracking', () => {
     }
   );
 
-  it.each(['configured', 'disabled'])(
-    'rejects before returning a cacheable detail response with PostHog %s',
-    async (telemetry) => {
+  it.each(
+    cacheableRoutes.flatMap((entry) =>
+      ['configured', 'disabled'].map((telemetry) => ({ ...entry, telemetry }))
+    )
+  )(
+    'rejects before returning a cacheable response on $path with PostHog $telemetry',
+    async ({ path, route, locals, telemetry }) => {
       if (telemetry === 'disabled') vi.stubEnv('PUBLIC_POSTHOG_KEY', '');
       const { onRequest } = await import('./middleware');
-      const request = new Request('https://example.test/events/example');
-      const renderContext = createContext({ request, defaultLocale: '' });
-      renderContext.routePattern = '/events/[slug]';
-      renderContext.locals.eventDetailLoaded = true;
+      const request = new Request(`https://example.test${path}`);
+      const renderContext = createContext({
+        request,
+        defaultLocale: '',
+        locals,
+      });
+      renderContext.routePattern = route;
       const error = new Error('render failed after first chunk');
       const pull = vi
         .fn<(controller: ReadableStreamDefaultController<Uint8Array>) => void>()
@@ -257,7 +281,7 @@ describe('Astro error tracking', () => {
       expect(pull).toHaveBeenCalledTimes(2);
       if (telemetry === 'configured') {
         expect(capture).toHaveBeenCalledExactlyOnceWith(error, {
-          properties: { runtime: 'astro', route: '/events/[slug]' },
+          properties: { runtime: 'astro', route },
         });
       } else {
         expect(capture).not.toHaveBeenCalled();
